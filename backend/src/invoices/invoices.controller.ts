@@ -70,6 +70,17 @@ export class InvoicesController {
     return await this.invoicesService.findAll(filters);
   }
 
+  @Get('my-invoices')
+  async getMyInvoices(@Request() req) {
+    const userTenantId = req.user.tenant?.id;
+    
+    if (!userTenantId) {
+      throw new Error('Solo usuarios de tenant pueden ver facturas');
+    }
+
+    return await this.invoicesService.findByTenant(userTenantId);
+  }
+
   @Get('overdue')
   @Roles(RoleType.SUPER_ADMIN)
   async findOverdue() {

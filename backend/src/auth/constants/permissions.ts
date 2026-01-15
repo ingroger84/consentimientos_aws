@@ -52,6 +52,10 @@ export const PERMISSIONS = {
   EDIT_SETTINGS: 'edit_settings',
   CONFIGURE_EMAIL: 'configure_email',
 
+  // Facturación (para usuarios de tenant)
+  VIEW_INVOICES: 'view_invoices',
+  PAY_INVOICES: 'pay_invoices',
+
   // Tenants (Solo Super Admin)
   MANAGE_TENANTS: 'manage_tenants',
 } as const;
@@ -127,6 +131,8 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.VIEW_SETTINGS,
     PERMISSIONS.EDIT_SETTINGS,
     PERMISSIONS.CONFIGURE_EMAIL,
+    PERMISSIONS.VIEW_INVOICES,
+    PERMISSIONS.PAY_INVOICES,
   ],
 
   ADMIN_SEDE: [
@@ -198,6 +204,9 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   [PERMISSIONS.VIEW_SETTINGS]: 'Ver configuración',
   [PERMISSIONS.EDIT_SETTINGS]: 'Editar configuración',
   [PERMISSIONS.CONFIGURE_EMAIL]: 'Configurar correo electrónico',
+  
+  [PERMISSIONS.VIEW_INVOICES]: 'Ver facturas',
+  [PERMISSIONS.PAY_INVOICES]: 'Registrar pagos de facturas',
   
   [PERMISSIONS.MANAGE_TENANTS]: 'Gestionar tenants (Solo Super Admin)',
 };
@@ -274,6 +283,13 @@ export const PERMISSION_CATEGORIES = {
       PERMISSIONS.VIEW_SETTINGS,
       PERMISSIONS.EDIT_SETTINGS,
       PERMISSIONS.CONFIGURE_EMAIL,
+    ],
+  },
+  invoices: {
+    name: 'Facturación',
+    permissions: [
+      PERMISSIONS.VIEW_INVOICES,
+      PERMISSIONS.PAY_INVOICES,
     ],
   },
   tenants: {

@@ -19,6 +19,7 @@ import {
   CreditCard,
   DollarSign,
   Mail,
+  Receipt,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -91,6 +92,12 @@ export default function Layout() {
       href: '/my-plan',
       icon: CreditCard,
       permission: 'view_dashboard'
+    });
+    allNavigation.push({
+      name: 'Mis Facturas',
+      href: '/my-invoices',
+      icon: Receipt,
+      permission: 'view_invoices'
     });
   }
 
