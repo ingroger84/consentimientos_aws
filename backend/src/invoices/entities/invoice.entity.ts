@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 import { Payment } from '../../payments/entities/payment.entity';
+import { TaxConfig } from './tax-config.entity';
 
 export enum InvoiceStatus {
   DRAFT = 'draft',
@@ -31,6 +32,13 @@ export class Invoice {
 
   @Column()
   tenantId: string;
+
+  @ManyToOne(() => TaxConfig, { nullable: true, eager: false })
+  @JoinColumn({ name: 'taxConfigId' })
+  taxConfig: TaxConfig;
+
+  @Column({ nullable: true })
+  taxConfigId: string;
 
   @Column({ unique: true })
   invoiceNumber: string;

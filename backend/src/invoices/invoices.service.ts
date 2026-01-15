@@ -2,9 +2,11 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Invoice, InvoiceStatus } from './entities/invoice.entity';
+import { TaxConfig } from './entities/tax-config.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import { BillingHistory, BillingAction } from '../billing/entities/billing-history.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { TaxConfigService } from './tax-config.service';
 import { MailService } from '../mail/mail.service';
 import { getPlanConfig, calculatePrice } from '../tenants/plans.config';
 
@@ -13,15 +15,18 @@ export class InvoicesService {
   constructor(
     @InjectRepository(Invoice)
     private invoicesRepository: Repository<Invoice>,
+    @InjectRepository(TaxConfig)
+    private taxConfigRepository: Repository<TaxConfig>,
     @InjectRepository(Tenant)
     private tenantsRepository: Repository<Tenant>,
     @InjectRepository(BillingHistory)
     private billingHistoryRepository: Repository<BillingHistory>,
+    private taxConfigService: TaxConfigService,
     private mailService: MailService,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const { tenantId, ...invoiceData } = createInvoiceDto;
+    const { tenantId, taxConfigId, ...invoiceData } = createInvoiceDto;
 
     // Verificar que el tenant existe
     const tenant = await this.tenantsRepository.findOne({
@@ -32,10 +37,20 @@ export class InvoicesService {
       throw new NotFoundException('Tenant no encontrado');
     }
 
+    // Si no se proporciona taxConfigId, usar el por defecto
+    let finalTaxConfigId = taxConfigId;
+    if (!finalTaxConfigId) {
+      const defaultTaxConfig = await this.taxConfigService.findDefault();
+      if (defaultTaxConfig) {
+        finalTaxConfigId = defaultTaxConfig.id;
+      }
+    }
+
     // Crear la factura
     const invoice = this.invoicesRepository.create({
       ...invoiceData,
       tenantId,
+      taxConfigId: finalTaxConfigId,
       dueDate: new Date(invoiceData.dueDate),
       periodStart: new Date(invoiceData.periodStart),
       periodEnd: new Date(invoiceData.periodEnd),
@@ -75,9 +90,24 @@ export class InvoicesService {
 
     // Calcular precio según ciclo de facturación
     const amount = calculatePrice(tenant.plan, tenant.billingCycle);
-    const taxRate = parseFloat(process.env.BILLING_TAX_RATE || '0.19');
-    const tax = amount * taxRate;
-    const total = amount + tax;
+
+    // Obtener configuración de impuesto por defecto
+    const taxConfig = await this.taxConfigService.findDefault();
+    let tax = 0;
+    let total = amount;
+    let taxConfigId: string | undefined;
+
+    if (taxConfig) {
+      const taxCalculation = this.taxConfigService.calculateTax(amount, taxConfig);
+      tax = taxCalculation.tax;
+      total = taxCalculation.total;
+      taxConfigId = taxConfig.id;
+    } else {
+      // Fallback al método anterior si no hay configuración de impuesto
+      const taxRate = parseFloat(process.env.BILLING_TAX_RATE || '0.19');
+      tax = amount * taxRate;
+      total = amount + tax;
+    }
 
     // Calcular período de facturación
     const now = new Date();
@@ -107,6 +137,7 @@ export class InvoicesService {
     // Crear factura
     const createInvoiceDto: CreateInvoiceDto = {
       tenantId: tenant.id,
+      taxConfigId,
       amount,
       tax,
       total,
@@ -157,6 +188,7 @@ export class InvoicesService {
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.tenant', 'tenant')
       .leftJoinAndSelect('invoice.payments', 'payments')
+      .leftJoinAndSelect('invoice.taxConfig', 'taxConfig')
       .where('invoice.id = :id', { id })
       .getOne();
 

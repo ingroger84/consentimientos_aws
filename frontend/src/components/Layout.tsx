@@ -20,6 +20,7 @@ import {
   DollarSign,
   Mail,
   Receipt,
+  Percent,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -119,6 +120,12 @@ export default function Layout() {
       name: 'Facturación',
       href: '/billing',
       icon: DollarSign,
+      permission: 'manage_tenants'
+    });
+    allNavigation.push({
+      name: 'Impuestos',
+      href: '/tax-config',
+      icon: Percent,
       permission: 'manage_tenants'
     });
   }

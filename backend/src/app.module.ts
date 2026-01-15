@@ -31,6 +31,7 @@ import { AppSettings } from './settings/entities/app-settings.entity';
 import { Tenant } from './tenants/entities/tenant.entity';
 import { Payment } from './payments/entities/payment.entity';
 import { Invoice } from './invoices/entities/invoice.entity';
+import { TaxConfig } from './invoices/entities/tax-config.entity';
 import { PaymentReminder } from './billing/entities/payment-reminder.entity';
 import { BillingHistory } from './billing/entities/billing-history.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
@@ -66,6 +67,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
           Tenant,
           Payment,
           Invoice,
+          TaxConfig,
           PaymentReminder,
           BillingHistory,
         ],

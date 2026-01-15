@@ -23,6 +23,10 @@ export class CreateInvoiceDto {
   @IsUUID()
   tenantId: string;
 
+  @IsUUID()
+  @IsOptional()
+  taxConfigId?: string;
+
   @IsNumber()
   @Min(0)
   amount: number;

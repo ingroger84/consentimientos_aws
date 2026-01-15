@@ -32,6 +32,7 @@ const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const BillingDashboardPage = lazy(() => import('./pages/BillingDashboardPage'));
 const TenantInvoicesPage = lazy(() => import('./pages/TenantInvoicesPage'));
+const TaxConfigPage = lazy(() => import('./pages/TaxConfigPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -68,6 +69,7 @@ function App() {
               <Route path="/my-invoices" element={<TenantInvoicesPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/invoices" element={<InvoicesPage />} />
+              <Route path="/tax-config" element={<TaxConfigPage />} />
               <Route path="/billing" element={<BillingDashboardPage />} />
             </Route>
           </Routes>
