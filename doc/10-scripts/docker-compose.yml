@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: consentimientos-db
+    environment:
+      POSTGRES_DB: consentimientos
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - consentimientos-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: consentimientos-storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - consentimientos-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: consentimientos-mail
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - consentimientos-network
+
+volumes:
+  postgres_data:
+  minio_data:
+
+networks:
+  consentimientos-network:
+    driver: bridge

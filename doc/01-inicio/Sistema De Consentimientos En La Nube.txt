@@ -1,0 +1,371 @@
+Documento de Requerimientos Técnicos
+Sistema de Gestión de Consentimientos Digitales en la Nube
+________________________________________
+1. Introducción
+1.1 Propósito del documento
+Este documento tiene como objetivo definir de manera clara, técnica y estructurada los requerimientos funcionales y no funcionales de un software en la nube para la gestión de consentimientos digitales, el cual será entregado a un desarrollador o equipo de desarrollo para su implementación.
+1.2 Alcance del sistema
+El sistema permitirá a organizaciones con múltiples sedes o sucursales: - Gestionar usuarios y roles - Crear y administrar servicios que requieren consentimientos - Definir restricciones y preguntas previas (alergias / contraindicaciones) - Capturar firmas digitales desde dispositivos táctiles - Generar documentos de consentimiento personalizados por sede - Enviar automáticamente los consentimientos firmados al cliente por correo electrónico
+1.3 Definiciones clave
+•	Consentimiento: Documento legal/digital que el cliente acepta mediante firma digital.
+•	Servicio: Procedimiento o actividad que requiere consentimiento previo.
+•	Sede: Ubicación física desde donde se presta el servicio.
+________________________________________
+2. Arquitectura General (Alto Nivel)
+•	Tipo de sistema: Aplicación Web en la Nube (SaaS)
+•	Acceso: Navegador web (PC, tablet, celular)
+•	Backend: API REST
+•	Frontend: Web responsive
+•	Almacenamiento:
+o	Base de datos relacional
+o	Almacenamiento de archivos (PDF)
+•	Integraciones:
+o	Servicio de correo electrónico
+o	Módulo de firma digital táctil
+________________________________________
+3. Módulos del Sistema y Requerimientos Funcionales
+3.1 Módulo de Usuarios, Perfiles y Roles
+Funcionalidades:
+•	Crear, editar, eliminar y consultar usuarios
+•	Asignar roles a usuarios
+•	Autenticación por usuario y contraseña
+•	Control de acceso según rol
+Roles mínimos requeridos:
+•	Administrador General
+•	Administrador de Sede
+•	Operador / Usuario de Sede
+Reglas:
+•	Un usuario puede pertenecer a una o varias sedes
+•	Los permisos dependen del rol asignado
+________________________________________
+3.2 Módulo de Sedes o Sucursales
+Funcionalidades:
+•	Crear, editar, eliminar y consultar sedes
+•	Asociar usuarios a una sede
+•	Configurar datos de la sede:
+o	Nombre de la sede
+o	Dirección
+o	Teléfono
+o	Correo electrónico
+Reglas:
+•	Al iniciar sesión, el sistema debe identificar la sede del usuario
+•	La sede debe quedar registrada en cada consentimiento generado
+________________________________________
+3.3 Módulo de Servicios
+Funcionalidades:
+•	Crear y administrar servicios
+•	Asociar uno o varios documentos de consentimiento por servicio
+•	Adjuntar archivos base en formato PDF
+Campos mínimos del servicio:
+•	Nombre del servicio
+•	Descripción
+•	Estado (activo/inactivo)
+•	Documentos de consentimiento asociados
+________________________________________
+3.4 Módulo de Restricciones y Preguntas Previas
+Funcionalidades:
+•	Definir preguntas predeterminadas por servicio
+•	Preguntas orientadas a:
+o	Alergias
+o	Contraindicaciones
+o	Condiciones médicas relevantes
+Características:
+•	Preguntas tipo:
+o	Sí / No
+o	Texto libre
+•	Respuestas obligatorias antes de permitir la firma
+Reglas:
+•	Si una respuesta crítica es afirmativa, el sistema debe advertir al operador
+•	Las respuestas deben quedar almacenadas junto al consentimiento
+________________________________________
+3.5 Módulo CRUD General
+Aplica para:
+•	Usuarios
+•	Servicios
+•	Consentimientos
+Operaciones:
+•	Crear
+•	Consultar
+•	Editar
+•	Eliminar (lógico, no físico)
+________________________________________
+3.6 Módulo de Consentimientos y Firma Digital
+Flujo funcional:
+1.	Usuario inicia sesión en una sede
+2.	Selecciona un servicio
+3.	El sistema presenta las preguntas de restricciones
+4.	Se capturan los datos del cliente
+5.	El cliente firma digitalmente
+6.	El sistema genera el documento final
+7.	El documento se envía por correo al cliente
+Datos del cliente a capturar:
+•	Nombre completo
+•	Identificación
+•	Correo electrónico
+•	Teléfono
+•	Firma digital (táctil)
+Firma digital:
+•	Captura desde celular o tablet
+•	Uso de pantalla táctil (finger touch)
+•	Firma incrustada en el documento PDF
+________________________________________
+3.7 Generación de Documentos de Consentimiento
+El sistema debe:
+•	Tomar el PDF base del servicio
+•	Inyectar dinámicamente:
+o	Nombre completo del cliente
+o	Identificación
+o	Teléfono
+o	Correo electrónico
+o	Nombre de la sede
+o	Fecha y hora de la firma
+o	Firma digital
+Resultado:
+•	Documento PDF final
+•	Documento inalterable (solo lectura)
+•	Almacenado en el sistema
+________________________________________
+3.8 Envío de Consentimientos por Correo
+Funcionalidades:
+•	Envío automático al correo del cliente
+•	Adjuntar el PDF firmado
+•	Copia opcional al correo de la sede
+Reglas:
+•	El envío debe confirmarse como exitoso
+•	Registrar historial de envíos
+________________________________________
+4. Requerimientos No Funcionales
+4.1 Seguridad
+•	Autenticación segura
+•	Control de accesos por rol
+•	Cifrado de datos sensibles
+•	Firma no editable
+4.2 Usabilidad
+•	Interfaz responsive
+•	Optimizado para tablets y celulares
+•	Flujo simple para el cliente
+4.3 Rendimiento
+•	Generación de PDF en menos de 3 segundos
+•	Envío de correo asincrónico
+4.4 Disponibilidad
+•	Plataforma en la nube
+•	Acceso 24/7
+________________________________________
+5. Consideraciones Técnicas Abiertas (para el desarrollador)
+•	Lenguaje y framework a definir
+•	Servicio de firma digital (canvas / SVG)
+•	Servicio de correo (SMTP / API)
+•	Almacenamiento de PDFs (local vs cloud)
+________________________________________
+6. Entregables Esperados
+•	Aplicación web funcional
+•	Base de datos estructurada
+•	Documentación técnica
+•	Manual de usuario básico
+________________________________________
+________________________________________
+7. Diagramas Funcionales
+7.1 Diagrama de Flujo – Proceso de Consentimiento Digital
+[Inicio]
+   |
+   v
+[Usuario inicia sesión]
+   |
+   v
+[Sistema identifica sede]
+   |
+   v
+[Seleccionar servicio]
+   |
+   v
+[Mostrar preguntas de restricciones]
+   |
+   v
+[¿Respuestas válidas?] -- No --> [Mostrar advertencia / detener]
+   |
+  Sí
+   v
+[Capturar datos del cliente]
+   |
+   v
+[Capturar firma digital]
+   |
+   v
+[Generar PDF de consentimiento]
+   |
+   v
+[Guardar consentimiento]
+   |
+   v
+[Enviar correo con PDF adjunto]
+   |
+   v
+[Fin]
+________________________________________
+7.2 Diagrama de Casos de Uso – General
+           +---------------------+
+           |   Administrador     |
+           +---------------------+
+              |        |        |
+              |        |        |
+              v        v        v
+     [Gestionar Usuarios] [Gestionar Sedes] [Gestionar Servicios]
+              |
+              v
+     [Configurar Restricciones]
+
+
+           +---------------------+
+           | Usuario de Sede     |
+           +---------------------+
+              |
+              v
+     [Crear Consentimiento]
+              |
+              v
+     [Enviar Consentimiento]
+
+
+           +---------------------+
+           |     Cliente         |
+           +---------------------+
+              |
+              v
+     [Responder Preguntas]
+              |
+              v
+     [Firmar Consentimiento]
+________________________________________
+7.3 Diagrama de Casos de Uso – Módulo de Consentimientos
++--------------------------------------------------+
+| Sistema de Gestión de Consentimientos             |
++--------------------------------------------------+
+|                                                  |
+|  (Usuario de Sede)                               |
+|       |                                          |
+|       v                                          |
+|  [Iniciar consentimiento]                        |
+|       |                                          |
+|       v                                          |
+|  [Registrar datos del cliente]                   |
+|       |                                          |
+|       v                                          |
+|  [Validar restricciones]                         |
+|       |                                          |
+|       v                                          |
+|  [Capturar firma digital]                        |
+|       |                                          |
+|       v                                          |
+|  [Generar y almacenar PDF]                       |
+|       |                                          |
+|       v                                          |
+|  [Enviar consentimiento por correo]              |
+|                                                  |
++--------------------------------------------------+
+________________________________________
+7.4 Diagrama de Flujo – Gestión de Servicios y Documentos
+[Administrador]
+     |
+     v
+[Crear / Editar Servicio]
+     |
+     v
+[Adjuntar PDF base de consentimiento]
+     |
+     v
+[Definir preguntas y restricciones]
+     |
+     v
+[Activar servicio]
+     |
+     v
+[Servicio disponible para sedes]
+________________________________________
+7.5 Notas para el Desarrollo de Diagramas Formales
+•	Estos diagramas pueden transformarse fácilmente a:
+o	UML (Use Case Diagram)
+o	BPMN
+•	Se recomienda al desarrollador:
+o	Validar flujos con el cliente final
+o	Usar estos diagramas como base para historias de usuario
+________________________________________
+________________________________________
+8. Diagramas UML Formales
+8.1 Diagrama UML de Casos de Uso
+Actores: - Administrador General - Administrador de Sede - Usuario de Sede - Cliente
+Casos de uso principales: - Gestionar usuarios - Gestionar roles - Gestionar sedes - Gestionar servicios - Configurar restricciones - Iniciar consentimiento - Responder preguntas - Firmar consentimiento - Generar PDF - Enviar consentimiento por correo
+(Relación include): - Iniciar consentimiento <> Responder preguntas - Iniciar consentimiento <> Firmar consentimiento - Firmar consentimiento <> Generar PDF - Generar PDF <> Enviar consentimiento
+________________________________________
+8.2 Diagrama UML de Actividades (Consentimiento)
+Inicio → Autenticación → Identificar sede → Seleccionar servicio → Validar restricciones → Capturar datos cliente → Capturar firma → Generar PDF → Guardar → Enviar correo → Fin
+________________________________________
+9. Historias de Usuario (User Stories)
+US-01 Gestión de Usuarios
+Como Administrador Quiero crear y gestionar usuarios Para controlar el acceso al sistema
+Criterios de aceptación: - Puedo crear, editar y desactivar usuarios - Puedo asignar roles y sedes - El sistema valida credenciales
+________________________________________
+US-02 Gestión de Servicios
+Como Administrador Quiero crear servicios con documentos PDF Para definir los consentimientos requeridos
+Criterios de aceptación: - Puedo adjuntar uno o más PDFs - Puedo activar o desactivar servicios
+________________________________________
+US-03 Flujo de Consentimiento
+Como Usuario de Sede Quiero registrar un consentimiento Para que el cliente acepte el servicio
+Criterios de aceptación: - El sistema muestra preguntas obligatorias - No permite firmar sin responder - La firma se captura en pantalla táctil
+________________________________________
+US-04 Envío de Consentimiento
+Como Cliente Quiero recibir el consentimiento firmado por correo Para tener constancia del acuerdo
+Criterios de aceptación: - El correo se envía automáticamente - El PDF está adjunto y legible
+________________________________________
+10. Definición de API (REST)
+Autenticación
+•	POST /api/auth/login
+•	POST /api/auth/logout
+Usuarios
+•	GET /api/users
+•	POST /api/users
+•	PUT /api/users/{id}
+•	DELETE /api/users/{id}
+Sedes
+•	GET /api/branches
+•	POST /api/branches
+•	PUT /api/branches/{id}
+•	DELETE /api/branches/{id}
+Servicios
+•	GET /api/services
+•	POST /api/services
+•	PUT /api/services/{id}
+•	DELETE /api/services/{id}
+Consentimientos
+•	POST /api/consents/start
+•	POST /api/consents/answers
+•	POST /api/consents/sign
+•	GET /api/consents/{id}
+________________________________________
+11. Modelo de Datos (Entidad-Relación)
+Entidades principales:
+User - id - name - email - password - role_id
+Role - id - name
+Branch (Sede) - id - name - address - email
+Service - id - name - description - status
+Consent - id - service_id - branch_id - client_name - client_id - client_email - client_phone - signed_at - pdf_path
+Question - id - service_id - question_text - type
+Answer - id - consent_id - question_id - value
+(Relaciones): - User –1 Role - User –* Branch - Service 1–* Question - Service 1–* Consent - Consent 1–* Answer
+________________________________________
+12. Alcance MVP vs Versión Final
+MVP (Primera versión)
+•	Autenticación básica
+•	Gestión de sedes
+•	Gestión de servicios con 1 PDF
+•	Flujo de consentimiento básico
+•	Firma digital
+•	Envío de correo
+Versión Final
+•	Multi-idioma
+•	Auditoría y logs
+•	Historial de consentimientos
+•	Reportes
+•	Integraciones externas
+•	Firma avanzada
+________________________________________
+Fin del Documento
