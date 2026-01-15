@@ -31,7 +31,6 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const BillingDashboardPage = lazy(() => import('./pages/BillingDashboardPage'));
-const EmailConfigPage = lazy(() => import('./pages/EmailConfigPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -61,7 +60,6 @@ function App() {
               <Route path="/questions" element={<QuestionsPage />} />
               <Route path="/roles" element={<RolesPage />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/email-config" element={<EmailConfigPage />} />
               <Route path="/tenants" element={<TenantsPage />} />
               <Route path="/plans" element={<PlansManagementPage />} />
               <Route path="/pricing" element={<PricingPage />} />
