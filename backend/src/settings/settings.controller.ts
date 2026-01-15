@@ -189,4 +189,28 @@ export class SettingsController {
     const tenantId = user.tenant?.id;
     return this.settingsService.uploadWatermarkLogo(file, tenantId);
   }
+
+  @Get('email-config')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_SETTINGS)
+  getEmailConfig(@CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.getEmailConfig(tenantId);
+  }
+
+  @Post('email-config')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  updateEmailConfig(@Body() emailConfig: any, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.updateEmailConfig(emailConfig, tenantId);
+  }
+
+  @Post('test-email')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  testEmail(@Body() body: { email: string }, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.testEmail(body.email, tenantId);
+  }
 }

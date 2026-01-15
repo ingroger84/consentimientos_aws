@@ -18,6 +18,7 @@ import {
   Building,
   CreditCard,
   DollarSign,
+  Mail,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -79,6 +80,12 @@ export default function Layout() {
       name: 'Configuración', 
       href: '/settings', 
       icon: Settings,
+      permission: 'view_settings'
+    },
+    { 
+      name: 'Correo Electrónico', 
+      href: '/email-config', 
+      icon: Mail,
       permission: 'view_settings'
     },
   ];

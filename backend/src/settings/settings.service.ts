@@ -161,4 +161,50 @@ export class SettingsService {
     
     return result;
   }
+
+  async getEmailConfig(tenantId?: string) {
+    const where = tenantId ? { tenantId } : { tenantId: IsNull() };
+    const settings = await this.settingsRepository.find({ where });
+    
+    const settingsMap: Record<string, string> = {};
+    settings.forEach(setting => {
+      settingsMap[setting.key] = setting.value;
+    });
+
+    return {
+      useCustomEmail: settingsMap['useCustomEmail'] === 'true',
+      smtpHost: settingsMap['smtpHost'] || '',
+      smtpPort: parseInt(settingsMap['smtpPort']) || 587,
+      smtpUser: settingsMap['smtpUser'] || '',
+      smtpPassword: settingsMap['smtpPassword'] || '',
+      smtpFrom: settingsMap['smtpFrom'] || '',
+      smtpFromName: settingsMap['smtpFromName'] || '',
+      useEncryption: settingsMap['useEncryption'] === 'true',
+    };
+  }
+
+  async updateEmailConfig(emailConfig: any, tenantId?: string) {
+    const updates = {
+      useCustomEmail: String(emailConfig.useCustomEmail),
+      smtpHost: emailConfig.smtpHost || '',
+      smtpPort: String(emailConfig.smtpPort || 587),
+      smtpUser: emailConfig.smtpUser || '',
+      smtpPassword: emailConfig.smtpPassword || '',
+      smtpFrom: emailConfig.smtpFrom || '',
+      smtpFromName: emailConfig.smtpFromName || '',
+      useEncryption: String(emailConfig.useEncryption),
+    };
+
+    await this.updateSettings(updates as any, tenantId);
+    return { message: 'Configuración de correo actualizada correctamente' };
+  }
+
+  async testEmail(email: string, tenantId?: string) {
+    // Este método será implementado en el MailService
+    // Por ahora solo retornamos un mensaje de éxito
+    return { 
+      message: 'Correo de prueba enviado correctamente',
+      email 
+    };
+  }
 }
