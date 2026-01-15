@@ -50,6 +50,7 @@ export const PERMISSIONS = {
   // Configuración
   VIEW_SETTINGS: 'view_settings',
   EDIT_SETTINGS: 'edit_settings',
+  CONFIGURE_EMAIL: 'configure_email',
 
   // Tenants (Solo Super Admin)
   MANAGE_TENANTS: 'manage_tenants',
@@ -125,6 +126,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.DELETE_QUESTIONS,
     PERMISSIONS.VIEW_SETTINGS,
     PERMISSIONS.EDIT_SETTINGS,
+    PERMISSIONS.CONFIGURE_EMAIL,
   ],
 
   ADMIN_SEDE: [
@@ -195,6 +197,7 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   
   [PERMISSIONS.VIEW_SETTINGS]: 'Ver configuración',
   [PERMISSIONS.EDIT_SETTINGS]: 'Editar configuración',
+  [PERMISSIONS.CONFIGURE_EMAIL]: 'Configurar correo electrónico',
   
   [PERMISSIONS.MANAGE_TENANTS]: 'Gestionar tenants (Solo Super Admin)',
 };
@@ -270,6 +273,7 @@ export const PERMISSION_CATEGORIES = {
     permissions: [
       PERMISSIONS.VIEW_SETTINGS,
       PERMISSIONS.EDIT_SETTINGS,
+      PERMISSIONS.CONFIGURE_EMAIL,
     ],
   },
   tenants: {

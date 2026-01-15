@@ -82,13 +82,17 @@ export default function Layout() {
       icon: Settings,
       permission: 'view_settings'
     },
-    { 
+  ];
+
+  // Agregar configuración de correo solo para usuarios de tenant
+  if (user?.tenant) {
+    allNavigation.push({
       name: 'Correo Electrónico', 
       href: '/email-config', 
       icon: Mail,
-      permission: 'view_settings'
-    },
-  ];
+      permission: 'configure_email'
+    });
+  }
 
   // Agregar opciones de facturación para usuarios de tenant (no super_admin)
   if (user?.tenant) {

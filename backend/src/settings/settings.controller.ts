@@ -9,6 +9,7 @@ import {
   UseGuards,
   Optional,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -192,25 +193,37 @@ export class SettingsController {
 
   @Get('email-config')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_SETTINGS)
+  @RequirePermissions(PERMISSIONS.CONFIGURE_EMAIL)
   getEmailConfig(@CurrentUser() user: User) {
-    const tenantId = user.tenant?.id;
+    // Solo para usuarios de tenant
+    if (!user.tenant) {
+      throw new BadRequestException('Esta funcionalidad solo está disponible para usuarios de tenant');
+    }
+    const tenantId = user.tenant.id;
     return this.settingsService.getEmailConfig(tenantId);
   }
 
   @Post('email-config')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @RequirePermissions(PERMISSIONS.CONFIGURE_EMAIL)
   updateEmailConfig(@Body() emailConfig: any, @CurrentUser() user: User) {
-    const tenantId = user.tenant?.id;
+    // Solo para usuarios de tenant
+    if (!user.tenant) {
+      throw new BadRequestException('Esta funcionalidad solo está disponible para usuarios de tenant');
+    }
+    const tenantId = user.tenant.id;
     return this.settingsService.updateEmailConfig(emailConfig, tenantId);
   }
 
   @Post('test-email')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @RequirePermissions(PERMISSIONS.CONFIGURE_EMAIL)
   testEmail(@Body() body: { email: string }, @CurrentUser() user: User) {
-    const tenantId = user.tenant?.id;
+    // Solo para usuarios de tenant
+    if (!user.tenant) {
+      throw new BadRequestException('Esta funcionalidad solo está disponible para usuarios de tenant');
+    }
+    const tenantId = user.tenant.id;
     return this.settingsService.testEmail(body.email, tenantId);
   }
 }

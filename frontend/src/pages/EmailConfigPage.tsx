@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Mail, Save, RefreshCw, AlertCircle, CheckCircle, Send } from 'lucide-react';
+import { Mail, Save, RefreshCw, AlertCircle, CheckCircle, Send, ShieldAlert } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 import api from '../services/api';
 
 interface EmailConfigForm {
@@ -15,6 +16,7 @@ interface EmailConfigForm {
 }
 
 export default function EmailConfigPage() {
+  const { user } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [testing, setTesting] = useState(false);
   const [message, setMessage] = useState('');
@@ -45,6 +47,35 @@ export default function EmailConfigPage() {
   useEffect(() => {
     loadConfig();
   }, []);
+
+  // Verificar si el usuario es de un tenant
+  if (!user?.tenant) {
+    return (
+      <div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+            <Mail className="w-8 h-8 mr-3 text-blue-600" />
+            Configuración de Correo Electrónico
+          </h1>
+        </div>
+
+        <div className="card bg-yellow-50 border-yellow-200">
+          <div className="flex items-start">
+            <ShieldAlert className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-yellow-900 mb-2">
+                Funcionalidad no disponible
+              </h3>
+              <p className="text-yellow-800">
+                Esta funcionalidad solo está disponible para usuarios de cuentas tenant. 
+                Los super administradores gestionan la configuración de correo a nivel de sistema.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const loadConfig = async () => {
     try {
