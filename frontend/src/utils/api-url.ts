@@ -4,6 +4,7 @@
  * - cliente-demo.localhost:5173 -> http://cliente-demo.localhost:3000
  * - admin.localhost:5173 -> http://admin.localhost:3000
  * - localhost:5173 -> http://localhost:3000
+ * - admin.datagree.net -> https://admin.datagree.net
  */
 export function getApiBaseUrl(): string {
   // Si hay variable de entorno, usarla (sin /api)
@@ -13,9 +14,11 @@ export function getApiBaseUrl(): string {
     return envUrl.replace('/api', '');
   }
 
-  // Obtener el hostname actual (incluye subdominio)
+  // Obtener el hostname y protocolo actual
   const currentHost = window.location.hostname;
+  const protocol = window.location.protocol; // 'http:' o 'https:'
   console.log('[API-URL] Hostname detectado:', currentHost);
+  console.log('[API-URL] Protocolo detectado:', protocol);
   
   // Si es EXACTAMENTE localhost o 127.0.0.1 (sin subdominio), usar localhost:3000
   if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
@@ -23,10 +26,16 @@ export function getApiBaseUrl(): string {
     return 'http://localhost:3000';
   }
   
-  // Para cualquier otro caso (incluyendo subdominios como demo.localhost),
-  // mantener el hostname completo
+  // Si es un dominio de producción (no localhost), usar el mismo protocolo sin puerto
+  if (!currentHost.includes('localhost') && !currentHost.includes('127.0.0.1')) {
+    const apiUrl = `${protocol}//${currentHost}`;
+    console.log('[API-URL] Producción detectada, usando:', apiUrl);
+    return apiUrl;
+  }
+  
+  // Para desarrollo con subdominios locales
   const apiUrl = `http://${currentHost}:3000`;
-  console.log('[API-URL] Usando hostname con subdominio:', apiUrl);
+  console.log('[API-URL] Desarrollo con subdominio, usando:', apiUrl);
   return apiUrl;
 }
 
