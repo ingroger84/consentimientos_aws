@@ -2,7 +2,7 @@
 
 > Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
 
-[![Version](https://img.shields.io/badge/version-1.1.14-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-1.1.15-blue.svg)](VERSION.md)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](#)
@@ -280,7 +280,7 @@ datagree/
 
 El sistema utiliza versionamiento automático mediante Git Hooks.
 
-**Versión Actual:** 1.1.14 - 2026-01-21
+**Versión Actual:** 1.1.15 - 2026-01-21
 
 Ver [VERSION.md](VERSION.md) para el historial completo de cambios.
 
