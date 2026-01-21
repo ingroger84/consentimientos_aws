@@ -64,7 +64,7 @@ export class BoldService {
       baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `x-api-key ${this.apiKey}`, // Bold usa Authorization: x-api-key
+        'x-api-key': this.apiKey, // Bold usa el header x-api-key directamente
       },
       timeout: 30000,
     });
