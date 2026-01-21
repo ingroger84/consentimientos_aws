@@ -75,6 +75,102 @@ Scripts de utilidad y mantenimiento.
 - Docker compose
 - Uso de terminales
 
+### 14-impuestos/
+Sistema de impuestos y configuración fiscal.
+- Configuración de IVA
+- Retención en la fuente
+- Impuestos adicionales
+- Exención de impuestos
+- Ejemplos de uso
+
+### 15-versionamiento/
+Sistema de versionamiento automático.
+- Versionamiento automático en commits
+- Configuración de hooks
+- Ejemplos de uso
+
+### 16-nombres-planes/
+Corrección de nombres de planes de suscripción.
+- Corrección de dashboard
+- Actualización de nombres
+
+### 17-facturacion-manual/
+Sistema de facturación manual.
+- Creación de facturas manuales
+- Impuestos dinámicos
+- Correcciones y mejoras
+- Ejemplos de uso
+
+### 18-pago-facturas-tenant/
+Sistema de pago de facturas para tenants.
+- Integración con Bold
+- Botón "Pagar Ahora"
+- Flujo de pagos
+
+### 19-aws-s3-storage/
+Migración a AWS S3 para almacenamiento.
+- Configuración de S3
+- Migración de archivos
+- Corrección de ACL
+- Verificación completa
+
+### 20-favicon-personalizado/
+Favicon personalizado por tenant.
+- Implementación de favicon dinámico
+- Carga desde S3
+- Guía de pruebas
+
+### 21-correccion-email-s3/
+Corrección de URLs S3 en emails.
+- URLs correctas en correos
+- Visualización de archivos adjuntos
+
+### 22-integracion-bold/
+Integración técnica con Bold Payment Gateway.
+- Configuración de Bold
+- Webhooks
+- Guía de pruebas
+- Configuración localhost
+
+### 23-despliegue-aws/
+Despliegue completo en AWS Lightsail.
+- Guía de despliegue paso a paso
+- Configuración de servidor
+- Certificado SSL wildcard
+- CRON jobs habilitados
+- Verificación del sistema
+
+### 24-integracion-bold-completa/
+Integración completa con Bold (resúmenes).
+- Estado final de Bold
+- Configuración completa
+- Integración con facturas de tenants
+
+### 25-facturacion-automatizada/
+Sistema completo de facturación automatizada.
+- Mejoras del módulo de facturación
+- Dashboard optimizado
+- Marquesina de recordatorio de pago
+- Fechas de facturación
+- Sistema de impuestos
+
+### 26-mejoras-ui/
+Mejoras de interfaz de usuario.
+- Favicon implementado
+- Branding en emails
+- Footer personalizado
+
+### 27-configuracion-sistema/
+Configuraciones técnicas del sistema.
+- Correcciones de S3
+- Configuración de correo
+- Versionamiento automático
+
+### 28-resumen-sesiones/
+Resúmenes de sesiones de trabajo.
+- Resumen de sesión 20260120
+- Estado del sistema
+
 ## 🚀 Inicio Rápido
 
 1. **Primera vez**: Lee `01-inicio/INICIO_RAPIDO.md`
@@ -96,6 +192,11 @@ Scripts de utilidad y mantenimiento.
 - **Problemas/Errores**: Busca en `08-correcciones/`
 - **Configuración de correos**: Busca en `07-correos/`
 - **Límites de recursos**: Busca en `05-limites/`
+- **Facturación**: Busca en `17-facturacion-manual/` y `25-facturacion-automatizada/`
+- **Pagos con Bold**: Busca en `22-integracion-bold/` y `24-integracion-bold-completa/`
+- **Despliegue AWS**: Busca en `23-despliegue-aws/`
+- **Impuestos**: Busca en `14-impuestos/`
+- **AWS S3**: Busca en `19-aws-s3-storage/` y `27-configuracion-sistema/`
 
 ## 📝 Notas
 
@@ -106,4 +207,30 @@ Scripts de utilidad y mantenimiento.
 
 ---
 
-**Última actualización**: Enero 2026
+**Última actualización**: Enero 2026 (21/01/2026)
+
+## 🎯 Documentación Reciente
+
+### Despliegue en Producción (21/01/2026)
+- ✅ Sistema desplegado en AWS Lightsail (datagree.net)
+- ✅ SSL wildcard configurado
+- ✅ CRON jobs habilitados para facturación automatizada
+- ✅ Integración completa con Bold
+- ✅ Sistema 100% operativo
+
+Ver: `23-despliegue-aws/VERIFICACION_SISTEMA_COMPLETA_20260121.md`
+
+### Facturación Automatizada (20/01/2026)
+- ✅ Marquesina de recordatorio de pago (5 días antes)
+- ✅ Botón "Pagar Ahora" integrado con Bold
+- ✅ Dashboard optimizado
+- ✅ Sistema de impuestos completo
+
+Ver: `25-facturacion-automatizada/`
+
+### Integración Bold (20/01/2026)
+- ✅ Links de pago automáticos
+- ✅ Webhooks configurados
+- ✅ Pagos desde facturas de tenants
+
+Ver: `24-integracion-bold-completa/`

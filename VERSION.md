@@ -1,7 +1,7 @@
 # Versión del Sistema
 
-## Versión Actual: 1.1.2
-**Fecha:** 2026-01-20
+## Versión Actual: 1.1.3
+**Fecha:** 2026-01-21
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## Historial de Versiones
 
-### 1.1.2 - 2026-01-20
+### 1.1.3 - 2026-01-21
 - Actualización automática del sistema
 - Mejoras y correcciones
 

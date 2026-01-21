@@ -27,7 +27,7 @@ function incrementVersion(version) {
 
 // Función para leer la versión actual
 function getCurrentVersion() {
-  const versionPath = path.join(__dirname, 'frontend', 'src', 'config', 'version.ts');
+  const versionPath = path.join(__dirname, '..', '..', 'frontend', 'src', 'config', 'version.ts');
   const content = fs.readFileSync(versionPath, 'utf8');
   const match = content.match(/version: '(\d+\.\d+\.\d+)'/);
   return match ? match[1] : '1.1.1';
@@ -122,7 +122,7 @@ O especificando la versión:
 .\\update-version.ps1 -Version "2.0.0"
 \`\`\`
 `;
-  fs.writeFileSync(path.join(__dirname, 'VERSION.md'), content, 'utf8');
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'VERSION.md'), content, 'utf8');
 }
 
 // Ejecutar actualización
@@ -144,7 +144,7 @@ try {
 
   // Frontend
   updateVersionFile(
-    path.join(__dirname, 'frontend', 'src', 'config', 'version.ts'),
+    path.join(__dirname, '..', '..', 'frontend', 'src', 'config', 'version.ts'),
     newVersion,
     newDate
   );
@@ -152,7 +152,7 @@ try {
 
   // Backend
   updateVersionFile(
-    path.join(__dirname, 'backend', 'src', 'config', 'version.ts'),
+    path.join(__dirname, '..', '..', 'backend', 'src', 'config', 'version.ts'),
     newVersion,
     newDate
   );
@@ -160,14 +160,14 @@ try {
 
   // Package.json Frontend
   updatePackageJson(
-    path.join(__dirname, 'frontend', 'package.json'),
+    path.join(__dirname, '..', '..', 'frontend', 'package.json'),
     newVersion
   );
   console.log('✓ frontend/package.json');
 
   // Package.json Backend
   updatePackageJson(
-    path.join(__dirname, 'backend', 'package.json'),
+    path.join(__dirname, '..', '..', 'backend', 'package.json'),
     newVersion
   );
   console.log('✓ backend/package.json');

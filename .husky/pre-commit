@@ -1,9 +1,6 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Auto-incrementar versión antes de cada commit
 echo "Actualizando versión del sistema..."
-node update-version-auto.js
+node scripts/utils/update-version-auto.js
 
 # Agregar archivos de versión al commit
 git add frontend/src/config/version.ts

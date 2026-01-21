@@ -33,6 +33,12 @@ Thumbs.db
 uploads/
 temp/
 
+# Keys (SSH, certificates, etc.)
+keys/
+*.pem
+*.key
+*.crt
+
 # Database
 *.sqlite
 *.db

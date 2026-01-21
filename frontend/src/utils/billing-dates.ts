@@ -3,28 +3,60 @@
  */
 
 /**
- * Calcula la fecha de la próxima factura basándose en la fecha de creación
- * La próxima factura es al mes siguiente de la fecha de creación
+ * Calcula la fecha de la próxima factura basándose en la fecha de creación y el día de facturación
+ * @param createdAt Fecha de creación del tenant
+ * @param billingDay Día del mes para facturación (1-28). Si no se proporciona, usa la fecha de creación + 1 mes
  */
-export function getNextInvoiceDate(createdAt: string | Date): Date {
+export function getNextInvoiceDate(createdAt: string | Date, billingDay?: number): Date {
   const created = new Date(createdAt);
-  const nextInvoice = new Date(created);
+  const today = new Date();
   
-  // Agregar un mes
-  nextInvoice.setMonth(nextInvoice.getMonth() + 1);
+  // Si no hay billingDay, usar el comportamiento anterior (fecha de creación + 1 mes)
+  if (!billingDay) {
+    const nextInvoice = new Date(created);
+    nextInvoice.setMonth(nextInvoice.getMonth() + 1);
+    return nextInvoice;
+  }
+  
+  // Calcular la próxima fecha de facturación basada en billingDay
+  const nextInvoice = new Date(today.getFullYear(), today.getMonth(), billingDay);
+  
+  // Si el día de facturación ya pasó este mes, usar el próximo mes
+  if (nextInvoice <= today) {
+    nextInvoice.setMonth(nextInvoice.getMonth() + 1);
+  }
+  
+  // Si el tenant fue creado después del día de facturación de este mes,
+  // la primera factura será el próximo mes
+  const createdDay = created.getDate();
+  const createdMonth = created.getMonth();
+  const createdYear = created.getFullYear();
+  
+  if (createdYear === today.getFullYear() && createdMonth === today.getMonth() && createdDay > billingDay) {
+    // Si fue creado este mes después del día de facturación, la próxima es el mes siguiente
+    if (nextInvoice.getMonth() === today.getMonth()) {
+      nextInvoice.setMonth(nextInvoice.getMonth() + 1);
+    }
+  }
   
   return nextInvoice;
 }
 
 /**
  * Calcula cuántos días faltan para la próxima factura
+ * @param createdAt Fecha de creación del tenant
+ * @param billingDay Día del mes para facturación (1-28)
  */
-export function getDaysUntilNextInvoice(createdAt: string | Date): number {
-  const nextInvoice = getNextInvoiceDate(createdAt);
+export function getDaysUntilNextInvoice(createdAt: string | Date, billingDay?: number): number {
+  const nextInvoice = getNextInvoiceDate(createdAt, billingDay);
   const today = new Date();
   
+  // Normalizar las fechas a medianoche para comparación precisa
+  const nextInvoiceMidnight = new Date(nextInvoice.getFullYear(), nextInvoice.getMonth(), nextInvoice.getDate());
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  
   // Calcular diferencia en milisegundos y convertir a días
-  const diffTime = nextInvoice.getTime() - today.getTime();
+  const diffTime = nextInvoiceMidnight.getTime() - todayMidnight.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   return diffDays;

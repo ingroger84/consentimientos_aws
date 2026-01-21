@@ -180,12 +180,12 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
           <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-xs text-gray-500 mb-1">URL de Acceso:</p>
             <a
-              href={`http://${tenant.slug}.localhost:5173`}
+              href={`https://${tenant.slug}.${import.meta.env.VITE_BASE_DOMAIN}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium break-all"
             >
-              http://{tenant.slug}.localhost:5173
+              https://{tenant.slug}.{import.meta.env.VITE_BASE_DOMAIN}
             </a>
           </div>
         </div>
@@ -312,10 +312,10 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
           </div>
           <div className="text-right">
             <div className="text-xs font-medium text-gray-900">
-              {formatDate(getNextInvoiceDate(tenant.createdAt))}
+              {formatDate(getNextInvoiceDate(tenant.createdAt, tenant.billingDay))}
             </div>
-            <div className={`text-xs font-semibold ${getInvoiceDaysColor(getDaysUntilNextInvoice(tenant.createdAt))}`}>
-              {getInvoiceDaysText(getDaysUntilNextInvoice(tenant.createdAt))}
+            <div className={`text-xs font-semibold ${getInvoiceDaysColor(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay))}`}>
+              {getInvoiceDaysText(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay))}
             </div>
           </div>
         </div>
