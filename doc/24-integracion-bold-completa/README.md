@@ -1,48 +1,67 @@
-# 24. Integración Completa con Bold
+# Integración Bold - Documentación Completa
 
-Documentación de la integración del sistema de pagos Bold para procesamiento de facturas.
+## Índice de Documentos
 
-## 📁 Archivos en esta carpeta
+1. **CONFIGURACION_WEBHOOK_COMPLETADA_20260121.md** - Configuración del webhook de Bold
+2. **CORRECCION_URL_API_BOLD_20260121.md** - Primera corrección de URL (incompleta)
+3. **CORRECCION_URL_API_BOLD_FINAL_20260121.md** - Corrección final y definitiva de URL
 
-### Documentación Principal
-- **[INTEGRACION_BOLD_COMPLETADA_20260120.md](./INTEGRACION_BOLD_COMPLETADA_20260120.md)** - Resumen completo de la integración
-- **[ESTADO_BOLD_FINAL_20260120.md](./ESTADO_BOLD_FINAL_20260120.md)** - Estado final y verificación
+## Estado Actual
 
-### Configuración
-- **[BOLD_CONFIGURADO_20260120.md](./BOLD_CONFIGURADO_20260120.md)** - Configuración inicial de Bold
-- **[PASOS_CONFIGURAR_BOLD_LOCALHOST.md](./PASOS_CONFIGURAR_BOLD_LOCALHOST.md)** - Guía para configurar Bold en localhost
+✅ **Integración Completada y Funcional**
 
-### Implementaciones Específicas
-- **[INTEGRACION_BOLD_20260120.md](./INTEGRACION_BOLD_20260120.md)** - Detalles técnicos de la integración
-- **[INTEGRACION_BOLD_TENANT_INVOICES_20260120.md](./INTEGRACION_BOLD_TENANT_INVOICES_20260120.md)** - Integración con facturas de tenants
+### Configuración de Bold
 
-### Documentación Adicional
-Ver también: `doc/22-integracion-bold/` para documentación técnica detallada
+- **Modo:** Sandbox (pruebas)
+- **API URL:** `https://api-sandbox.bold.co/v1`
+- **Merchant ID:** `0fhPQYC`
+- **Webhook URL:** `https://datagree.net/api/webhooks/bold`
+- **Webhook Secret:** Configurado correctamente
 
-## 🎯 Resumen
+### URLs de Redirección
 
-Esta carpeta contiene la documentación de la integración completa con Bold Payment Gateway, incluyendo:
+- **Success:** `https://datagree.net/payment/success`
+- **Failure:** `https://datagree.net/payment/failure`
 
-- Configuración de credenciales (API Key, Secret Key, Merchant ID)
-- Implementación de creación de links de pago
-- Webhooks para notificaciones de pago
-- Integración con sistema de facturas
-- Pruebas y verificación
+## Problema Resuelto
 
-## ✨ Características Implementadas
+El error `getaddrinfo ENOTFOUND sandbox-api.bold.co` fue causado por:
 
-- ✅ Creación de links de pago desde facturas
-- ✅ Webhooks para actualización automática de estado
-- ✅ Botón "Pagar Ahora" en facturas
-- ✅ Integración con marquesina de recordatorio
-- ✅ Soporte para sandbox y producción
+1. URL incorrecta en `ecosystem.config.js`: `https://sandbox-api.bold.co/v1`
+2. URL correcta en `.env`: `https://api-sandbox.bold.co/v1`
+3. PM2 usaba las variables de `ecosystem.config.js` en lugar del `.env`
 
-## 🔗 Enlaces Importantes
+**Solución:** Actualizar `ecosystem.config.js` con la URL correcta y reiniciar PM2.
 
-- **API Bold:** https://sandbox-api.bold.co/v1
-- **Merchant ID:** 0fhPQYC
-- **Webhook URL:** https://datagree.net/api/webhooks/bold
+## Próximos Pasos
+
+1. Probar crear un link de pago desde la interfaz
+2. Verificar que el link de Bold se abra correctamente
+3. Realizar una transacción de prueba en sandbox
+4. Verificar que el webhook reciba las notificaciones
+5. Cuando esté listo para producción, cambiar a las credenciales de producción
+
+## Archivos Relacionados
+
+### Backend
+- `backend/src/payments/bold.service.ts` - Servicio de integración con Bold
+- `backend/src/webhooks/webhooks.controller.ts` - Controlador de webhooks
+- `backend/src/invoices/invoices.controller.ts` - Endpoint para crear links de pago
+- `backend/.env` - Variables de entorno (local)
+- `/home/ubuntu/consentimientos_aws/backend/.env` - Variables de entorno (servidor)
+- `/home/ubuntu/consentimientos_aws/ecosystem.config.js` - Configuración de PM2
+
+### Frontend
+- `frontend/src/components/billing/PaymentReminderBanner.tsx` - Banner de recordatorio de pago
+- `frontend/src/components/invoices/PayNowModal.tsx` - Modal para pagar facturas
+
+## Documentación de Bold
+
+- [Documentación oficial de Bold](https://bold.co/docs)
+- [API Reference](https://bold.co/docs/api)
+- [Webhooks](https://bold.co/docs/webhooks)
 
 ---
 
-**Última actualización:** 2026-01-20
+**Última actualización:** 21 de Enero de 2026
+**Estado:** ✅ Funcional en Sandbox

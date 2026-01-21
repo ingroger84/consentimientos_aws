@@ -56,59 +56,65 @@ export class BoldService {
     this.merchantId = this.configService.get<string>('BOLD_MERCHANT_ID');
     this.webhookSecret = this.configService.get<string>('BOLD_WEBHOOK_SECRET');
 
-    const apiUrl = this.configService.get<string>('BOLD_API_URL') || 'https://api.bold.co/v1';
+    // Bold Colombia usa Wompi como procesador de pagos
+    // Sandbox: https://sandbox.wompi.co/v1
+    // Production: https://production.wompi.co/v1
+    const apiUrl = this.configService.get<string>('BOLD_API_URL') || 'https://sandbox.wompi.co/v1';
 
     this.apiClient = axios.create({
       baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.apiKey}`,
-        'X-Merchant-Id': this.merchantId,
+        'Authorization': `Bearer ${this.secretKey}`, // Wompi usa la clave privada (SECRET_KEY)
       },
       timeout: 30000,
     });
 
-    this.logger.log(`✅ Bold Service inicializado`);
+    this.logger.log(`✅ Bold Service inicializado (Wompi API)`);
     this.logger.log(`   API URL: ${apiUrl}`);
-    this.logger.log(`   Merchant ID: ${this.merchantId}`);
+    this.logger.log(`   Public Key: ${this.apiKey?.substring(0, 20)}...`);
   }
 
   /**
-   * Crear un link de pago en Bold
+   * Crear un link de pago en Bold (usando Wompi API)
    */
   async createPaymentLink(data: BoldPaymentLinkData): Promise<BoldPaymentLink> {
     try {
-      this.logger.log(`Creando link de pago en Bold para: ${data.reference}`);
+      this.logger.log(`Creando link de pago en Wompi para: ${data.reference}`);
 
+      // Estructura de Wompi para crear payment links
       const payload = {
-        amount: Math.round(data.amount * 100), // Bold espera centavos
-        currency: data.currency || 'COP',
+        name: data.description,
         description: data.description,
-        reference: data.reference,
-        customer: {
-          email: data.customerEmail,
-          name: data.customerName,
-        },
-        redirectUrl: data.redirectUrl || this.configService.get('BOLD_SUCCESS_URL'),
-        expirationDate: data.expirationDate,
+        single_use: true, // Un solo uso por link
+        collect_shipping: false,
+        currency: data.currency || 'COP',
+        amount_in_cents: Math.round(data.amount * 100), // Wompi espera centavos
+        redirect_url: data.redirectUrl || this.configService.get('BOLD_SUCCESS_URL'),
+        expires_at: data.expirationDate ? data.expirationDate.toISOString() : null,
       };
 
-      const response = await this.apiClient.post('/payment-links', payload);
+      this.logger.log(`Payload para Wompi:`, JSON.stringify(payload, null, 2));
 
-      this.logger.log(`✅ Link de pago creado: ${response.data.url}`);
+      const response = await this.apiClient.post('/payment_links', payload);
+
+      const paymentLinkId = response.data.data.id;
+      const paymentUrl = `https://checkout.wompi.co/l/${paymentLinkId}`;
+
+      this.logger.log(`✅ Link de pago creado: ${paymentUrl}`);
 
       return {
-        id: response.data.id,
-        url: response.data.url,
-        reference: response.data.reference,
-        amount: response.data.amount / 100, // Convertir de centavos a pesos
-        status: response.data.status,
-        createdAt: new Date(response.data.createdAt),
+        id: paymentLinkId,
+        url: paymentUrl,
+        reference: data.reference,
+        amount: data.amount,
+        status: 'pending',
+        createdAt: new Date(response.data.data.created_at),
       };
     } catch (error) {
-      this.logger.error(`❌ Error al crear link de pago en Bold:`, error.response?.data || error.message);
+      this.logger.error(`❌ Error al crear link de pago en Wompi:`, error.response?.data || error.message);
       throw new BadRequestException(
-        `Error al crear link de pago: ${error.response?.data?.message || error.message}`
+        `Error al crear link de pago: ${error.response?.data?.error?.reason || error.message}`
       );
     }
   }
