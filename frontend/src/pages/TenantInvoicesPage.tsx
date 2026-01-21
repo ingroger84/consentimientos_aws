@@ -297,10 +297,10 @@ export default function TenantInvoicesPage() {
                               {invoice.taxConfig.name} ({invoice.taxConfig.rate}%):
                             </span>
                             <span className="text-gray-900">
-                              {invoicesService.formatCurrency(invoice.tax)}
+                              {invoicesService.formatCurrency(invoice.tax || 0)}
                             </span>
                           </div>
-                        ) : invoice.tax > 0 ? (
+                        ) : (invoice.tax || 0) > 0 ? (
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Impuesto:</span>
                             <span className="text-gray-400 text-xs">(Desactivado)</span>

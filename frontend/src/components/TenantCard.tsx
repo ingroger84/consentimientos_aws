@@ -1,6 +1,6 @@
 import { Building2, Users, MapPin, FileText, MoreVertical, Edit, TrendingUp, Ban, CheckCircle, Trash2, Mail, DollarSign, Calendar, Clock } from 'lucide-react';
 import { useState } from 'react';
-import { Tenant, TenantStatus, TenantPlan } from '../types/tenant';
+import { Tenant, TenantStatus } from '../types/tenant';
 import { getPlanName, getPlanColor } from '@/utils/plan-names';
 import { getNextInvoiceDate, getDaysUntilNextInvoice, formatDate, getInvoiceDaysColor, getInvoiceDaysText } from '@/utils/billing-dates';
 

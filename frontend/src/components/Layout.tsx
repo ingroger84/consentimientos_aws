@@ -19,7 +19,6 @@ import {
   Building,
   CreditCard,
   DollarSign,
-  Mail,
   Receipt,
   Percent,
 } from 'lucide-react';
