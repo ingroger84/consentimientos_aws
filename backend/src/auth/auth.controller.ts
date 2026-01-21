@@ -6,6 +6,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TenantSlug } from '../common/decorators/tenant-slug.decorator';
 import { AllowAnyTenant } from '../common/decorators/allow-any-tenant.decorator';
+import { getAppVersion, APP_VERSION } from '../config/version';
 
 @Controller('auth')
 export class AuthController {
@@ -77,5 +78,15 @@ export class AuthController {
     @TenantSlug() tenantSlug: string | null,
   ) {
     return this.authService.magicLogin(token, tenantSlug);
+  }
+
+  @Get('version')
+  @AllowAnyTenant()
+  async getVersion() {
+    return {
+      version: APP_VERSION.version,
+      date: APP_VERSION.date,
+      fullVersion: getAppVersion(),
+    };
   }
 }

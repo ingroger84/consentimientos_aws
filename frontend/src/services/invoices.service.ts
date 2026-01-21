@@ -10,6 +10,9 @@ export interface InvoiceItem {
 export interface Invoice {
   id: string;
   tenantId: string;
+  taxConfigId?: string;
+  taxExempt: boolean;
+  taxExemptReason?: string;
   invoiceNumber: string;
   amount: number;
   tax: number;
@@ -25,12 +28,16 @@ export interface Invoice {
   createdAt: string;
   tenant?: any;
   payments?: any[];
+  taxConfig?: any;
 }
 
 export interface CreateInvoiceDto {
   tenantId: string;
+  taxConfigId?: string;
+  taxExempt?: boolean;
+  taxExemptReason?: string;
   amount: number;
-  tax: number;
+  tax?: number;
   total: number;
   dueDate: string;
   periodStart: string;

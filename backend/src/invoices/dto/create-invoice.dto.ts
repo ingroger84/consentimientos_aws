@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum, IsOptional, IsUUID, IsDateString, IsArray, ValidateNested, Min } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsOptional, IsUUID, IsDateString, IsArray, ValidateNested, Min, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { InvoiceStatus, InvoiceItem } from '../entities/invoice.entity';
 
@@ -26,6 +26,10 @@ export class CreateInvoiceDto {
   @IsUUID()
   @IsOptional()
   taxConfigId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  taxExempt?: boolean; // Nueva propiedad para facturas exentas
 
   @IsNumber()
   @Min(0)
@@ -65,4 +69,8 @@ export class CreateInvoiceDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString()
+  @IsOptional()
+  taxExemptReason?: string; // Razón de la exención
 }

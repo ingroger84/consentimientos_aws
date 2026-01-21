@@ -1,6 +1,8 @@
-import { Building2, Users, MapPin, FileText, MoreVertical, Edit, TrendingUp, Ban, CheckCircle, Trash2, Mail, DollarSign } from 'lucide-react';
+import { Building2, Users, MapPin, FileText, MoreVertical, Edit, TrendingUp, Ban, CheckCircle, Trash2, Mail, DollarSign, Calendar, Clock } from 'lucide-react';
 import { useState } from 'react';
 import { Tenant, TenantStatus, TenantPlan } from '../types/tenant';
+import { getPlanName, getPlanColor } from '@/utils/plan-names';
+import { getNextInvoiceDate, getDaysUntilNextInvoice, formatDate, getInvoiceDaysColor, getInvoiceDaysText } from '@/utils/billing-dates';
 
 interface TenantCardProps {
   tenant: Tenant;
@@ -31,21 +33,6 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
     }
   };
 
-  const getPlanColor = (plan: TenantPlan) => {
-    switch (plan) {
-      case TenantPlan.FREE:
-        return 'bg-gray-100 text-gray-800';
-      case TenantPlan.BASIC:
-        return 'bg-blue-100 text-blue-800';
-      case TenantPlan.PROFESSIONAL:
-        return 'bg-purple-100 text-purple-800';
-      case TenantPlan.ENTERPRISE:
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const getStatusLabel = (status: TenantStatus) => {
     switch (status) {
       case TenantStatus.ACTIVE:
@@ -58,21 +45,6 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
         return 'Expirado';
       default:
         return status;
-    }
-  };
-
-  const getPlanLabel = (plan: TenantPlan) => {
-    switch (plan) {
-      case TenantPlan.FREE:
-        return 'Free';
-      case TenantPlan.BASIC:
-        return 'Basic';
-      case TenantPlan.PROFESSIONAL:
-        return 'Professional';
-      case TenantPlan.ENTERPRISE:
-        return 'Enterprise';
-      default:
-        return plan;
     }
   };
 
@@ -193,7 +165,7 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
           {getStatusLabel(tenant.status)}
         </span>
         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(tenant.plan)}`}>
-          {getPlanLabel(tenant.plan)}
+          {getPlanName(tenant.plan)}
         </span>
       </div>
 
@@ -319,11 +291,34 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
         </div>
       </div>
 
-      {/* Created Date */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <p className="text-xs text-gray-500">
-          Creado: {new Date(tenant.createdAt).toLocaleDateString('es-ES')}
-        </p>
+      {/* Billing Information */}
+      <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+        {/* Fecha de Creación */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Calendar className="w-4 h-4 text-gray-400" />
+            <span className="text-xs text-gray-600">Fecha de Creación</span>
+          </div>
+          <span className="text-xs font-medium text-gray-900">
+            {formatDate(tenant.createdAt)}
+          </span>
+        </div>
+
+        {/* Próxima Factura */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-gray-400" />
+            <span className="text-xs text-gray-600">Próxima Factura</span>
+          </div>
+          <div className="text-right">
+            <div className="text-xs font-medium text-gray-900">
+              {formatDate(getNextInvoiceDate(tenant.createdAt))}
+            </div>
+            <div className={`text-xs font-semibold ${getInvoiceDaysColor(getDaysUntilNextInvoice(tenant.createdAt))}`}>
+              {getInvoiceDaysText(getDaysUntilNextInvoice(tenant.createdAt))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

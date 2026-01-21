@@ -6,6 +6,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { authService } from '@/services/auth.service';
 import { LoginCredentials } from '@/types';
 import { getResourceUrl } from '@/utils/api-url';
+import { getAppVersion } from '@/config/version';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -225,6 +226,13 @@ export default function LoginPage() {
               {loading ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
+
+          {/* Version info */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              Versión {getAppVersion()}
+            </p>
+          </div>
         </div>
       </div>
     </div>

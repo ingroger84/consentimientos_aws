@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, AlertCircle } from 'lucide-react';
 import { tenantsService } from '../services/tenants';
 import { Tenant, TenantStatus, TenantPlan, GlobalStats } from '../types/tenant';
+import { getPlanName } from '@/utils/plan-names';
 import TenantCard from '../components/TenantCard';
 import TenantFormModal from '../components/TenantFormModal';
 import TenantStatsModal from '../components/TenantStatsModal';
@@ -217,10 +218,11 @@ export default function TenantsPage() {
             className="input"
           >
             <option value="all">Todos los planes</option>
-            <option value={TenantPlan.FREE}>Free</option>
-            <option value={TenantPlan.BASIC}>Basic</option>
-            <option value={TenantPlan.PROFESSIONAL}>Professional</option>
-            <option value={TenantPlan.ENTERPRISE}>Enterprise</option>
+            <option value={TenantPlan.FREE}>{getPlanName(TenantPlan.FREE)}</option>
+            <option value={TenantPlan.BASIC}>{getPlanName(TenantPlan.BASIC)}</option>
+            <option value={TenantPlan.PROFESSIONAL}>{getPlanName(TenantPlan.PROFESSIONAL)}</option>
+            <option value={TenantPlan.ENTERPRISE}>{getPlanName(TenantPlan.ENTERPRISE)}</option>
+            <option value={TenantPlan.CUSTOM}>{getPlanName(TenantPlan.CUSTOM)}</option>
           </select>
         </div>
       </div>

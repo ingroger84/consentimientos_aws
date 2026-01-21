@@ -1,5 +1,7 @@
 import { Building2, Users, MapPin, FileText, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { GlobalStats } from '../types/tenant';
+import { getPlanName } from '@/utils/plan-names';
+import { TenantPlan } from '@/types/tenant';
 
 interface GlobalStatsCardProps {
   stats: GlobalStats;
@@ -97,7 +99,7 @@ export default function GlobalStatsCard({ stats }: GlobalStatsCardProps) {
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Distribución de Planes</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Free</span>
+              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.FREE)}</span>
               <div className="flex items-center">
                 <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
                   <div
@@ -111,7 +113,7 @@ export default function GlobalStatsCard({ stats }: GlobalStatsCardProps) {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Basic</span>
+              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.BASIC)}</span>
               <div className="flex items-center">
                 <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
                   <div
@@ -125,7 +127,7 @@ export default function GlobalStatsCard({ stats }: GlobalStatsCardProps) {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Professional</span>
+              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.PROFESSIONAL)}</span>
               <div className="flex items-center">
                 <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
                   <div
@@ -139,7 +141,7 @@ export default function GlobalStatsCard({ stats }: GlobalStatsCardProps) {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Enterprise</span>
+              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.ENTERPRISE)}</span>
               <div className="flex items-center">
                 <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
                   <div

@@ -332,7 +332,7 @@ export default function PricingPage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">¿Necesitas un plan personalizado?</h3>
               <p className="text-gray-600 text-sm">
-                Contáctanos para planes Enterprise con características y límites personalizados para tu organización.
+                Contáctanos para planes Empresariales con características y límites personalizados para tu organización.
               </p>
             </div>
           </div>

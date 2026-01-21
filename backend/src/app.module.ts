@@ -19,6 +19,7 @@ import { PlansModule } from './plans/plans.module';
 import { PaymentsModule } from './payments/payments.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { BillingModule } from './billing/billing.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 import { CommonModule } from './common/common.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
@@ -107,6 +108,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     PaymentsModule,
     InvoicesModule,
     BillingModule,
+    WebhooksModule,
 
     // Serve static files
     ServeStaticModule.forRoot({

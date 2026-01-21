@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { tenantsService } from '@/services/tenants';
 import { useToast } from '@/hooks/useToast';
+import { getPlanName } from '@/utils/plan-names';
+import { TenantPlan } from '@/types/tenant';
 
 interface Tenant {
   id: string;
@@ -261,7 +263,7 @@ export default function TenantTableSection() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 uppercase">
-                        {tenant.plan}
+                        {getPlanName(tenant.plan as TenantPlan)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -451,10 +453,11 @@ export default function TenantTableSection() {
                   onChange={(e) => setEditingTenant({ ...editingTenant, plan: e.target.value })}
                   className="input w-full"
                 >
-                  <option value="free">Free</option>
-                  <option value="basic">Basic</option>
-                  <option value="premium">Premium</option>
-                  <option value="enterprise">Enterprise</option>
+                  <option value="free">{getPlanName(TenantPlan.FREE)}</option>
+                  <option value="basic">{getPlanName(TenantPlan.BASIC)}</option>
+                  <option value="professional">{getPlanName(TenantPlan.PROFESSIONAL)}</option>
+                  <option value="enterprise">{getPlanName(TenantPlan.ENTERPRISE)}</option>
+                  <option value="custom">{getPlanName(TenantPlan.CUSTOM)}</option>
                 </select>
               </div>
 

@@ -1,17 +1,20 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
 import { Invoice, InvoiceStatus } from './entities/invoice.entity';
 import { TaxConfig } from './entities/tax-config.entity';
-import { Tenant } from '../tenants/entities/tenant.entity';
+import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
 import { BillingHistory, BillingAction } from '../billing/entities/billing-history.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { TaxConfigService } from './tax-config.service';
 import { MailService } from '../mail/mail.service';
+import { BoldService } from '../payments/bold.service';
 import { getPlanConfig, calculatePrice } from '../tenants/plans.config';
 
 @Injectable()
 export class InvoicesService {
+  private readonly logger = new Logger(InvoicesService.name);
+
   constructor(
     @InjectRepository(Invoice)
     private invoicesRepository: Repository<Invoice>,
@@ -23,10 +26,11 @@ export class InvoicesService {
     private billingHistoryRepository: Repository<BillingHistory>,
     private taxConfigService: TaxConfigService,
     private mailService: MailService,
+    private boldService: BoldService,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const { tenantId, taxConfigId, ...invoiceData } = createInvoiceDto;
+    const { tenantId, taxConfigId, taxExempt, taxExemptReason, ...invoiceData } = createInvoiceDto;
 
     // Verificar que el tenant existe
     const tenant = await this.tenantsRepository.findOne({
@@ -37,13 +41,41 @@ export class InvoicesService {
       throw new NotFoundException('Tenant no encontrado');
     }
 
-    // Si no se proporciona taxConfigId, usar el por defecto
+    // Validar que si es exenta, se proporcione la razón
+    if (taxExempt && !taxExemptReason) {
+      throw new BadRequestException('Debe proporcionar una razón para la exención de impuestos');
+    }
+
     let finalTaxConfigId = taxConfigId;
-    if (!finalTaxConfigId) {
-      const defaultTaxConfig = await this.taxConfigService.findDefault();
-      if (defaultTaxConfig) {
-        finalTaxConfigId = defaultTaxConfig.id;
+    let calculatedTax = invoiceData.tax || 0;
+    let calculatedTotal = invoiceData.total;
+
+    // Si la factura NO es exenta de impuestos
+    if (!taxExempt) {
+      // Si no se proporciona taxConfigId, usar el por defecto
+      if (!finalTaxConfigId) {
+        const defaultTaxConfig = await this.taxConfigService.findDefault();
+        if (defaultTaxConfig) {
+          finalTaxConfigId = defaultTaxConfig.id;
+        }
       }
+
+      // Si hay un taxConfigId, calcular el impuesto
+      if (finalTaxConfigId) {
+        const taxConfig = await this.taxConfigService.findOne(finalTaxConfigId);
+        const taxCalculation = this.taxConfigService.calculateTax(invoiceData.amount, taxConfig);
+        calculatedTax = taxCalculation.tax;
+        calculatedTotal = taxCalculation.total;
+      } else {
+        // Si no hay taxConfigId y no hay impuesto por defecto, no aplicar impuesto
+        calculatedTax = 0;
+        calculatedTotal = invoiceData.amount;
+      }
+    } else {
+      // Si es exenta, no hay impuesto
+      calculatedTax = 0;
+      calculatedTotal = invoiceData.amount;
+      finalTaxConfigId = undefined; // No asociar ningún impuesto
     }
 
     // Crear la factura
@@ -51,6 +83,10 @@ export class InvoicesService {
       ...invoiceData,
       tenantId,
       taxConfigId: finalTaxConfigId,
+      taxExempt: taxExempt || false,
+      taxExemptReason: taxExemptReason || null,
+      tax: calculatedTax,
+      total: calculatedTotal,
       dueDate: new Date(invoiceData.dueDate),
       periodStart: new Date(invoiceData.periodStart),
       periodEnd: new Date(invoiceData.periodEnd),
@@ -97,7 +133,7 @@ export class InvoicesService {
     let total = amount;
     let taxConfigId: string | undefined;
 
-    if (taxConfig) {
+    if (taxConfig && taxConfig.isActive) {
       const taxCalculation = this.taxConfigService.calculateTax(amount, taxConfig);
       tax = taxCalculation.tax;
       total = taxCalculation.total;
@@ -342,6 +378,163 @@ export class InvoicesService {
       relations: ['tenant', 'payments'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  /**
+   * Buscar factura por referencia de pago Bold
+   */
+  async findByReference(reference: string): Promise<Invoice> {
+    const invoice = await this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.tenant', 'tenant')
+      .leftJoinAndSelect('invoice.payments', 'payments')
+      .where('invoice.boldPaymentReference = :reference', { reference })
+      .getOne();
+
+    if (!invoice) {
+      throw new NotFoundException(`Factura con referencia ${reference} no encontrada`);
+    }
+
+    return invoice;
+  }
+
+  /**
+   * Crear link de pago Bold para una factura
+   */
+  async createPaymentLink(invoiceId: string): Promise<string> {
+    const invoice = await this.findOne(invoiceId);
+
+    // Verificar que la factura esté pendiente
+    if (invoice.status !== InvoiceStatus.PENDING && invoice.status !== InvoiceStatus.OVERDUE) {
+      throw new BadRequestException('Solo se pueden crear links de pago para facturas pendientes o vencidas');
+    }
+
+    // Verificar que no tenga ya un link de pago
+    if (invoice.boldPaymentLink) {
+      this.logger.log(`Factura ${invoice.invoiceNumber} ya tiene un link de pago: ${invoice.boldPaymentLink}`);
+      return invoice.boldPaymentLink;
+    }
+
+    // Generar referencia única para Bold
+    const reference = `INV-${invoice.invoiceNumber}-${Date.now()}`;
+
+    // Crear link de pago en Bold
+    const paymentLink = await this.boldService.createPaymentLink({
+      amount: invoice.total,
+      currency: invoice.currency,
+      description: `Factura ${invoice.invoiceNumber} - ${invoice.tenant.name}`,
+      reference,
+      customerEmail: invoice.tenant.contactEmail,
+      customerName: invoice.tenant.name,
+      redirectUrl: `${process.env.FRONTEND_URL}/invoices/${invoice.id}/payment-success`,
+      expirationDate: invoice.dueDate,
+    });
+
+    // Guardar el link y la referencia en la factura
+    invoice.boldPaymentLink = paymentLink.url;
+    invoice.boldPaymentReference = reference;
+    await this.invoicesRepository.save(invoice);
+
+    this.logger.log(`✅ Link de pago creado para factura ${invoice.invoiceNumber}: ${paymentLink.url}`);
+
+    // Registrar en historial
+    await this.billingHistoryRepository.save({
+      tenantId: invoice.tenantId,
+      action: BillingAction.PAYMENT_LINK_CREATED,
+      description: `Link de pago creado para factura ${invoice.invoiceNumber}`,
+      metadata: {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        paymentLink: paymentLink.url,
+        reference,
+      },
+    });
+
+    return paymentLink.url;
+  }
+
+  /**
+   * Activar tenant después de recibir pago
+   */
+  async activateTenantAfterPayment(tenantId: string): Promise<void> {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant no encontrado');
+    }
+
+    // Si el tenant está suspendido, activarlo
+    if (tenant.status === TenantStatus.SUSPENDED) {
+      tenant.status = TenantStatus.ACTIVE;
+      await this.tenantsRepository.save(tenant);
+
+      this.logger.log(`✅ Tenant ${tenant.name} activado automáticamente después del pago`);
+
+      // Registrar en historial
+      await this.billingHistoryRepository.save({
+        tenantId,
+        action: BillingAction.TENANT_ACTIVATED,
+        description: `Tenant activado automáticamente después de recibir pago`,
+        metadata: {
+          previousStatus: TenantStatus.SUSPENDED,
+          newStatus: TenantStatus.ACTIVE,
+        },
+      });
+    }
+  }
+
+  /**
+   * Enviar email de confirmación de pago
+   */
+  async sendPaymentConfirmation(invoiceId: string): Promise<void> {
+    const invoice = await this.findOne(invoiceId);
+
+    // Get the latest payment for this invoice
+    const payment = invoice.payments && invoice.payments.length > 0 
+      ? invoice.payments[invoice.payments.length - 1] 
+      : null;
+
+    try {
+      await this.mailService.sendPaymentConfirmationEmail(invoice.tenant, payment, invoice);
+      this.logger.log(`✅ Email de confirmación de pago enviado para factura ${invoice.invoiceNumber}`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar email de confirmación de pago:`, error);
+      // No lanzar error para no interrumpir el flujo de pago
+    }
+  }
+
+  /**
+   * Marcar factura como pagada con ID de pago
+   */
+  async markAsPaidWithPayment(id: string, paymentId: string, paidAt?: Date): Promise<Invoice> {
+    const invoice = await this.findOne(id);
+
+    if (invoice.status === InvoiceStatus.PAID) {
+      throw new BadRequestException('La factura ya está marcada como pagada');
+    }
+
+    invoice.status = InvoiceStatus.PAID;
+    invoice.paidAt = paidAt || new Date();
+
+    const updatedInvoice = await this.invoicesRepository.save(invoice);
+
+    // Registrar en historial
+    await this.billingHistoryRepository.save({
+      tenantId: invoice.tenantId,
+      action: BillingAction.PAYMENT_RECEIVED,
+      description: `Factura ${invoice.invoiceNumber} marcada como pagada`,
+      metadata: {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: invoice.total,
+        paidAt: invoice.paidAt,
+        paymentId,
+      },
+    });
+
+    return updatedInvoice;
   }
 
   private formatCurrency(amount: number): string {

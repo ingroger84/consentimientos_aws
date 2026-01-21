@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Users, MapPin, Briefcase, FileText, TrendingUp, AlertCircle } from 'lucide-react';
 import { tenantsService } from '../services/tenants';
 import { Tenant, TenantStats } from '../types/tenant';
+import { getPlanName } from '@/utils/plan-names';
 
 interface TenantStatsModalProps {
   tenant: Tenant;
@@ -218,7 +219,7 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Plan:</span>
-                    <span className="ml-2 font-medium text-gray-900">{stats.plan}</span>
+                    <span className="ml-2 font-medium text-gray-900">{getPlanName(stats.plan)}</span>
                   </div>
                   <div>
                     <span className="text-gray-600">Estado:</span>

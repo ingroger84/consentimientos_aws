@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Eye, DollarSign, Calendar, AlertCircle, Filter, X, CreditCard } from 'lucide-react';
+import { FileText, Download, Eye, DollarSign, Calendar, AlertCircle, Filter, X, ExternalLink } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import { usePermissions } from '@/hooks/usePermissions';
 import { invoicesService } from '@/services/invoices.service';
-import RegisterPaymentModal from '../components/billing/RegisterPaymentModal';
+import api from '@/services/api';
 
 interface Invoice {
   id: string;
   invoiceNumber: string;
+  taxConfigId?: string;
+  taxExempt?: boolean;
+  taxExemptReason?: string;
   issueDate?: string;
   dueDate: string;
   amount: number;
@@ -18,6 +20,7 @@ interface Invoice {
   notes?: string;
   periodStart?: string;
   periodEnd?: string;
+  taxConfig?: any;
 }
 
 interface InvoiceItem {
@@ -30,14 +33,12 @@ interface InvoiceItem {
 
 export default function TenantInvoicesPage() {
   const { user } = useAuthStore();
-  const { hasPermission } = usePermissions();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [creatingPaymentLink, setCreatingPaymentLink] = useState<string | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -89,14 +90,26 @@ export default function TenantInvoicesPage() {
     }
   };
 
-  const handlePayInvoice = (invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setShowPaymentModal(true);
+  const handlePayInvoice = async (invoiceId: string) => {
+    try {
+      setCreatingPaymentLink(invoiceId);
+      const response = await api.post(`/invoices/${invoiceId}/create-payment-link`);
+      
+      if (response.data.success && response.data.paymentLink) {
+        window.open(response.data.paymentLink, '_blank');
+        setMessage('Link de pago creado. Se abrió en una nueva ventana.');
+        setTimeout(() => setMessage(''), 5000);
+      }
+    } catch (error: any) {
+      console.error('Error creating payment link:', error);
+      setMessage(error.response?.data?.message || 'Error al crear el link de pago');
+      setTimeout(() => setMessage(''), 5000);
+    } finally {
+      setCreatingPaymentLink(null);
+    }
   };
 
   const handlePaymentSuccess = () => {
-    setShowPaymentModal(false);
-    setSelectedInvoice(null);
     loadInvoices();
     setMessage('Pago registrado correctamente');
     setTimeout(() => setMessage(''), 3000);
@@ -273,11 +286,30 @@ export default function TenantInvoicesPage() {
                             {invoicesService.formatCurrency(invoice.amount)}
                           </span>
                         </div>
-                        {invoice.tax && (
+                        {invoice.taxExempt ? (
                           <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">IVA (19%):</span>
+                            <span className="text-gray-600">Impuesto:</span>
+                            <span className="text-green-600 font-medium">EXENTA</span>
+                          </div>
+                        ) : invoice.taxConfig && invoice.taxConfig.isActive ? (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">
+                              {invoice.taxConfig.name} ({invoice.taxConfig.rate}%):
+                            </span>
                             <span className="text-gray-900">
                               {invoicesService.formatCurrency(invoice.tax)}
+                            </span>
+                          </div>
+                        ) : invoice.tax > 0 ? (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Impuesto:</span>
+                            <span className="text-gray-400 text-xs">(Desactivado)</span>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Impuesto:</span>
+                            <span className="text-gray-900">
+                              {invoicesService.formatCurrency(0)}
                             </span>
                           </div>
                         )}
@@ -290,6 +322,15 @@ export default function TenantInvoicesPage() {
                       </div>
                     )}
 
+                    {invoice.taxExempt && invoice.taxExemptReason && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-xs font-medium text-green-800 mb-1">
+                          Factura Exenta de Impuestos
+                        </p>
+                        <p className="text-sm text-green-700">{invoice.taxExemptReason}</p>
+                      </div>
+                    )}
+
                     {invoice.notes && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
                         <p className="text-sm text-gray-600">{invoice.notes}</p>
@@ -298,9 +339,20 @@ export default function TenantInvoicesPage() {
                   </div>
 
                   <div className="flex flex-col gap-2 ml-4">
+                    {invoice.status === 'pending' && (
+                      <button
+                        onClick={() => handlePayInvoice(invoice.id)}
+                        disabled={creatingPaymentLink === invoice.id}
+                        className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transform hover:scale-105"
+                        title="Pagar ahora con Bold"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        {creatingPaymentLink === invoice.id ? 'Generando...' : 'Pagar Ahora'}
+                      </button>
+                    )}
                     <button
                       onClick={() => handlePreviewPdf(invoice)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
                       title="Vista previa"
                     >
                       <Eye className="w-4 h-4" />
@@ -308,22 +360,12 @@ export default function TenantInvoicesPage() {
                     </button>
                     <button
                       onClick={() => handleDownloadPDF(invoice)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                       title="Descargar PDF"
                     >
                       <Download className="w-4 h-4" />
                       Descargar PDF
                     </button>
-                    {invoice.status === 'pending' && hasPermission('pay_invoices') && (
-                      <button
-                        onClick={() => handlePayInvoice(invoice)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
-                        title="Registrar pago"
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        Pago Manual
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -364,19 +406,6 @@ export default function TenantInvoicesPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Modal de Registro de Pago */}
-      {showPaymentModal && selectedInvoice && (
-        <RegisterPaymentModal
-          tenantId={user.tenant.id}
-          tenantName={user.tenant.name}
-          onClose={() => {
-            setShowPaymentModal(false);
-            setSelectedInvoice(null);
-          }}
-          onSuccess={handlePaymentSuccess}
-        />
       )}
     </div>
   );

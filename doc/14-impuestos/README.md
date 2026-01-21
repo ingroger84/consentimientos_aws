@@ -223,3 +223,239 @@ Al crear una factura:
 - Solo puede haber un impuesto marcado como predeterminado
 - Al eliminar un impuesto, las facturas existentes mantienen su referencia (ON DELETE SET NULL)
 - Las facturas sin impuesto asignado usan el predeterminado al momento de creación
+
+
+---
+
+## 🆕 Actualización 2026-01-20 - Versión 1.1.1
+
+### Nuevas Funcionalidades Implementadas
+
+#### 1. Facturas Exentas de Impuestos
+
+Se agregó soporte completo para facturas exentas de impuestos con las siguientes características:
+
+**Backend:**
+- Nuevos campos en Invoice:
+  - `taxExempt`: boolean - Indica si la factura está exenta
+  - `taxExemptReason`: string - Razón obligatoria de la exención
+- Validación: Si `taxExempt = true`, `taxExemptReason` es obligatorio
+- Cálculo automático: Facturas exentas tienen `tax = 0` y `total = amount`
+- No se asocia `taxConfigId` a facturas exentas
+
+**Frontend:**
+- Visualización especial para facturas exentas
+- Badge verde con la razón de exención
+- Muestra "EXENTA" en lugar del monto de impuesto
+- Interfaces actualizadas en todos los componentes
+
+**Ejemplo de uso:**
+```typescript
+const invoice = await invoicesService.create({
+  tenantId: 'tenant-id',
+  taxExempt: true,
+  taxExemptReason: 'Organización sin fines de lucro - Resolución DIAN 12345',
+  amount: 100000,
+  total: 100000, // Sin impuesto
+  // ... otros campos
+});
+```
+
+#### 2. Mejoras en UI de Configuración de Impuestos
+
+**Antes:**
+- Select dropdown simple para tipo de aplicación
+- Campo de tasa sin contexto visual
+- Validaciones básicas
+
+**Ahora:**
+- Radio buttons con descripciones detalladas
+- Ejemplos visuales de cálculo:
+  - "Adicional: $100.000 + 19% = $119.000"
+  - "Incluido: $119.000 incluye 19% ($19.000)"
+- Símbolo "%" visible en el campo de tasa
+- Validaciones mejoradas con mensajes claros
+- Texto de ayuda contextual
+
+#### 3. Migración de Base de Datos
+
+Se crearon múltiples opciones para aplicar la migración:
+
+**Opción A - Script PowerShell (Recomendado):**
+```powershell
+cd backend
+.\apply-tax-exempt-migration.ps1
+```
+
+**Opción B - SQL Directo:**
+```bash
+cd backend
+psql -U postgres -d nombre_db -f add-tax-exempt-columns.sql
+```
+
+**Opción C - TypeORM:**
+```bash
+cd backend
+npm run migration:run
+```
+
+**Columnas agregadas:**
+```sql
+ALTER TABLE invoices 
+ADD COLUMN IF NOT EXISTS "taxExempt" boolean NOT NULL DEFAULT false;
+
+ALTER TABLE invoices 
+ADD COLUMN IF NOT EXISTS "taxExemptReason" text;
+```
+
+### Archivos Nuevos
+
+#### Backend
+1. `backend/add-tax-exempt-columns.sql` - Script SQL de migración
+2. `backend/src/migrations/1737417600000-AddTaxExemptToInvoices.ts` - Migración TypeORM
+3. `backend/apply-tax-exempt-migration.ps1` - Script automatizado de aplicación
+
+#### Documentación
+1. `doc/14-impuestos/MEJORAS_IMPLEMENTADAS.md` - Documentación técnica detallada
+2. `doc/14-impuestos/EJEMPLOS_USO.md` - Guía práctica con ejemplos
+3. `doc/14-impuestos/RESUMEN_COMPLETO.md` - Resumen ejecutivo
+4. `doc/14-impuestos/CHECKLIST_VERIFICACION.md` - Lista de verificación
+
+### Archivos Modificados
+
+#### Backend
+1. `backend/src/invoices/invoices.service.ts`
+   - Lógica de facturas exentas
+   - Validación de razón de exención
+   - Cálculo condicional de impuestos
+
+2. `backend/src/invoices/dto/create-invoice.dto.ts`
+   - Campos `taxExempt` y `taxExemptReason`
+
+3. `backend/src/invoices/entities/invoice.entity.ts`
+   - Columnas `taxExempt` y `taxExemptReason`
+
+#### Frontend
+1. `frontend/src/services/invoices.service.ts`
+   - Interfaces actualizadas con campos de exención
+
+2. `frontend/src/pages/TaxConfigPage.tsx`
+   - UI mejorada con radio buttons
+   - Validaciones adicionales
+
+3. `frontend/src/pages/InvoicesPage.tsx`
+   - Visualización de facturas exentas
+
+4. `frontend/src/pages/TenantInvoicesPage.tsx`
+   - Soporte para facturas exentas
+
+### Casos de Uso Nuevos
+
+#### Caso 1: Factura Exenta para ONG
+```typescript
+const invoice = await invoicesService.create({
+  tenantId: 'ong-tenant-id',
+  taxExempt: true,
+  taxExemptReason: 'Entidad sin ánimo de lucro - Resolución DIAN 12345',
+  amount: 50000,
+  total: 50000, // Sin impuesto
+  dueDate: '2026-02-20',
+  periodStart: '2026-01-01',
+  periodEnd: '2026-01-31',
+  items: [{
+    description: 'Donación mensual',
+    quantity: 1,
+    unitPrice: 50000,
+    total: 50000
+  }]
+});
+```
+
+#### Caso 2: Factura con Impuesto Específico
+```typescript
+const invoice = await invoicesService.create({
+  tenantId: 'tenant-id',
+  taxConfigId: 'tax-config-iva-5', // Impuesto específico
+  amount: 100000,
+  // tax y total se calculan automáticamente
+  dueDate: '2026-02-20',
+  periodStart: '2026-01-01',
+  periodEnd: '2026-01-31',
+  items: [{
+    description: 'Servicio especial',
+    quantity: 1,
+    unitPrice: 100000,
+    total: 100000
+  }]
+});
+```
+
+### Mejores Prácticas Adicionales
+
+1. **Validación en Múltiples Capas**:
+   - DTOs (class-validator)
+   - Servicios (lógica de negocio)
+   - Frontend (UX)
+
+2. **Mensajes Descriptivos**:
+   - Errores claros y accionables
+   - Ayudas contextuales
+   - Ejemplos visuales
+
+3. **Migración Segura**:
+   - `IF NOT EXISTS` en SQL
+   - Valores por defecto apropiados
+   - Método de rollback incluido
+
+4. **Documentación Completa**:
+   - Guías técnicas
+   - Ejemplos prácticos
+   - Checklist de verificación
+
+### Flujo de Trabajo Actualizado
+
+#### Crear Factura Normal
+```
+Usuario → Crea factura sin especificar impuesto
+    ↓
+Backend → Busca impuesto por defecto
+    ↓
+Backend → Calcula tax y total según configuración
+    ↓
+Backend → Guarda factura con taxConfigId
+    ↓
+Frontend → Muestra factura con nombre del impuesto
+```
+
+#### Crear Factura Exenta
+```
+Usuario → Crea factura con taxExempt=true y razón
+    ↓
+Backend → Valida que razón esté presente
+    ↓
+Backend → Establece tax=0, total=amount
+    ↓
+Backend → Guarda sin taxConfigId
+    ↓
+Frontend → Muestra "EXENTA" y badge verde con razón
+```
+
+### Verificación Post-Implementación
+
+Para verificar que todo funciona correctamente, consulta:
+- `doc/14-impuestos/CHECKLIST_VERIFICACION.md`
+
+### Recursos Adicionales
+
+- **Documentación Técnica**: `MEJORAS_IMPLEMENTADAS.md`
+- **Ejemplos de Uso**: `EJEMPLOS_USO.md`
+- **Resumen Ejecutivo**: `RESUMEN_COMPLETO.md`
+- **Verificación**: `CHECKLIST_VERIFICACION.md`
+
+### Estado de Implementación
+
+✅ **COMPLETADO** - Todas las funcionalidades implementadas y probadas
+
+**Fecha de Finalización:** 2026-01-20  
+**Versión:** 1.1.1  
+**Desarrollado siguiendo las mejores prácticas de desarrollo**

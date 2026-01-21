@@ -20,13 +20,17 @@ import { RequirePermissions } from '../auth/decorators/permissions.decorator';
 import { PERMISSIONS } from '../auth/constants/permissions';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { StorageService } from '../common/services/storage.service';
 import * as path from 'path';
 import * as fs from 'fs';
 
 @Controller('consents')
 @UseGuards(JwtAuthGuard)
 export class ConsentsController {
-  constructor(private readonly consentsService: ConsentsService) {}
+  constructor(
+    private readonly consentsService: ConsentsService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
@@ -103,17 +107,30 @@ export class ConsentsController {
         return res.status(404).json({ message: 'PDF no encontrado' });
       }
 
-      const filePath = path.join(process.cwd(), pdfUrl);
-      
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({ message: 'Archivo PDF no encontrado' });
-      }
+      // Si la URL es de S3 (empieza con http), descargar el archivo
+      if (pdfUrl.startsWith('http')) {
+        console.log(`Descargando PDF desde S3 para visualización: ${pdfUrl}`);
+        const pdfBuffer = await this.storageService.downloadFile(pdfUrl);
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuffer.length.toString());
+        
+        return res.send(pdfBuffer);
+      } else {
+        // Si es una ruta local, usar el método tradicional
+        const filePath = path.join(process.cwd(), pdfUrl);
+        
+        if (!fs.existsSync(filePath)) {
+          return res.status(404).json({ message: 'Archivo PDF no encontrado' });
+        }
 
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-      
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(res);
+      }
     } catch (error) {
       console.error('Error al servir PDF:', error);
       return res.status(500).json({ message: 'Error al cargar el PDF' });

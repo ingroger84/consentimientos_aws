@@ -75,6 +75,96 @@ export class InvoicesController {
     return await this.invoicesService.findAll(filters);
   }
 
+  // ==================== TAX CONFIG ENDPOINTS ====================
+
+  /**
+   * Crear configuración de impuesto
+   */
+  @Post('tax-configs')
+  @Roles(RoleType.SUPER_ADMIN)
+  async createTaxConfig(@Body() createTaxConfigDto: CreateTaxConfigDto) {
+    return await this.taxConfigService.create(createTaxConfigDto);
+  }
+
+  /**
+   * Obtener todas las configuraciones de impuestos
+   */
+  @Get('tax-configs')
+  @Roles(RoleType.SUPER_ADMIN)
+  async getAllTaxConfigs() {
+    return await this.taxConfigService.findAll();
+  }
+
+  /**
+   * Obtener configuraciones de impuestos activas
+   */
+  @Get('tax-configs/active')
+  async getActiveTaxConfigs() {
+    return await this.taxConfigService.findActive();
+  }
+
+  /**
+   * Obtener configuración de impuesto por defecto
+   */
+  @Get('tax-configs/default')
+  async getDefaultTaxConfig() {
+    return await this.taxConfigService.findDefault();
+  }
+
+  /**
+   * Obtener una configuración de impuesto
+   */
+  @Get('tax-configs/:id')
+  @Roles(RoleType.SUPER_ADMIN)
+  async getTaxConfig(@Param('id') id: string) {
+    return await this.taxConfigService.findOne(id);
+  }
+
+  /**
+   * Actualizar configuración de impuesto
+   */
+  @Patch('tax-configs/:id')
+  @Roles(RoleType.SUPER_ADMIN)
+  async updateTaxConfig(
+    @Param('id') id: string,
+    @Body() updateTaxConfigDto: UpdateTaxConfigDto,
+  ) {
+    return await this.taxConfigService.update(id, updateTaxConfigDto);
+  }
+
+  /**
+   * Eliminar configuración de impuesto
+   */
+  @Delete('tax-configs/:id')
+  @Roles(RoleType.SUPER_ADMIN)
+  async deleteTaxConfig(@Param('id') id: string) {
+    await this.taxConfigService.remove(id);
+    return { message: 'Configuración de impuesto eliminada correctamente' };
+  }
+
+  /**
+   * Establecer impuesto por defecto
+   */
+  @Patch('tax-configs/:id/set-default')
+  @Roles(RoleType.SUPER_ADMIN)
+  async setDefaultTaxConfig(@Param('id') id: string) {
+    return await this.taxConfigService.setDefault(id);
+  }
+
+  /**
+   * Calcular impuesto
+   */
+  @Post('tax-configs/:id/calculate')
+  async calculateTax(
+    @Param('id') id: string,
+    @Body('amount') amount: number,
+  ) {
+    const taxConfig = await this.taxConfigService.findOne(id);
+    return this.taxConfigService.calculateTax(amount, taxConfig);
+  }
+
+  // ==================== INVOICE ENDPOINTS ====================
+
   @Get('my-invoices')
   async getMyInvoices(@Request() req) {
     const userTenantId = req.user.tenant?.id;
@@ -145,6 +235,30 @@ export class InvoicesController {
 
     await this.invoicesService.resendEmail(id);
     return { message: 'Email enviado exitosamente' };
+  }
+
+  /**
+   * Crear link de pago Bold para una factura
+   */
+  @Post(':id/create-payment-link')
+  async createPaymentLink(@Request() req, @Param('id') id: string) {
+    const invoice = await this.invoicesService.findOne(id);
+
+    // Verificar permisos
+    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
+    const userTenantId = req.user.tenant?.id;
+
+    if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
+      throw new Error('No tienes permisos para crear un link de pago para esta factura');
+    }
+
+    const paymentLink = await this.invoicesService.createPaymentLink(id);
+
+    return {
+      success: true,
+      paymentLink,
+      message: 'Link de pago creado exitosamente',
+    };
   }
 
   @Get('tenant/:tenantId')
@@ -247,93 +361,5 @@ export class InvoicesController {
     res.setHeader('Content-Length', pdfBuffer.length);
 
     res.send(pdfBuffer);
-  }
-
-  // ==================== TAX CONFIG ENDPOINTS ====================
-
-  /**
-   * Crear configuración de impuesto
-   */
-  @Post('tax-configs')
-  @Roles(RoleType.SUPER_ADMIN)
-  async createTaxConfig(@Body() createTaxConfigDto: CreateTaxConfigDto) {
-    return await this.taxConfigService.create(createTaxConfigDto);
-  }
-
-  /**
-   * Obtener todas las configuraciones de impuestos
-   */
-  @Get('tax-configs')
-  @Roles(RoleType.SUPER_ADMIN)
-  async getAllTaxConfigs() {
-    return await this.taxConfigService.findAll();
-  }
-
-  /**
-   * Obtener configuraciones de impuestos activas
-   */
-  @Get('tax-configs/active')
-  async getActiveTaxConfigs() {
-    return await this.taxConfigService.findActive();
-  }
-
-  /**
-   * Obtener configuración de impuesto por defecto
-   */
-  @Get('tax-configs/default')
-  async getDefaultTaxConfig() {
-    return await this.taxConfigService.findDefault();
-  }
-
-  /**
-   * Obtener una configuración de impuesto
-   */
-  @Get('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
-  async getTaxConfig(@Param('id') id: string) {
-    return await this.taxConfigService.findOne(id);
-  }
-
-  /**
-   * Actualizar configuración de impuesto
-   */
-  @Patch('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
-  async updateTaxConfig(
-    @Param('id') id: string,
-    @Body() updateTaxConfigDto: UpdateTaxConfigDto,
-  ) {
-    return await this.taxConfigService.update(id, updateTaxConfigDto);
-  }
-
-  /**
-   * Eliminar configuración de impuesto
-   */
-  @Delete('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
-  async deleteTaxConfig(@Param('id') id: string) {
-    await this.taxConfigService.remove(id);
-    return { message: 'Configuración de impuesto eliminada correctamente' };
-  }
-
-  /**
-   * Establecer impuesto por defecto
-   */
-  @Patch('tax-configs/:id/set-default')
-  @Roles(RoleType.SUPER_ADMIN)
-  async setDefaultTaxConfig(@Param('id') id: string) {
-    return await this.taxConfigService.setDefault(id);
-  }
-
-  /**
-   * Calcular impuesto
-   */
-  @Post('tax-configs/:id/calculate')
-  async calculateTax(
-    @Param('id') id: string,
-    @Body('amount') amount: number,
-  ) {
-    const taxConfig = await this.taxConfigService.findOne(id);
-    return this.taxConfigService.calculateTax(amount, taxConfig);
   }
 }

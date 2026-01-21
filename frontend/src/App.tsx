@@ -31,6 +31,7 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const BillingDashboardPage = lazy(() => import('./pages/BillingDashboardPage'));
+const CreateManualInvoicePage = lazy(() => import('./pages/CreateManualInvoicePage'));
 const TenantInvoicesPage = lazy(() => import('./pages/TenantInvoicesPage'));
 const TaxConfigPage = lazy(() => import('./pages/TaxConfigPage'));
 
@@ -71,6 +72,7 @@ function App() {
               <Route path="/invoices" element={<InvoicesPage />} />
               <Route path="/tax-config" element={<TaxConfigPage />} />
               <Route path="/billing" element={<BillingDashboardPage />} />
+              <Route path="/billing/create-invoice" element={<CreateManualInvoicePage />} />
             </Route>
           </Routes>
         </Suspense>

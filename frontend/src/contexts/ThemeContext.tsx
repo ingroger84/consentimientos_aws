@@ -26,6 +26,7 @@ export interface ThemeSettings {
   logoUrl: string | null;
   footerLogoUrl: string | null;
   watermarkLogoUrl: string | null;
+  faviconUrl: string | null;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -56,6 +57,7 @@ const defaultSettings: ThemeSettings = {
   logoUrl: null,
   footerLogoUrl: null,
   watermarkLogoUrl: null,
+  faviconUrl: null,
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',
@@ -154,6 +156,36 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     
     // Actualizar el título de la página
     document.title = themeSettings.companyName;
+    
+    // Actualizar el favicon si existe
+    if (themeSettings.faviconUrl) {
+      updateFavicon(themeSettings.faviconUrl);
+    }
+  };
+
+  const updateFavicon = (faviconUrl: string) => {
+    // Construir URL completa
+    const fullUrl = faviconUrl.startsWith('http') 
+      ? faviconUrl 
+      : `${getApiBaseUrl()}${faviconUrl}`;
+    
+    // Buscar o crear el elemento link del favicon
+    let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+    
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    
+    // Actualizar el href
+    link.href = fullUrl;
+    
+    // También actualizar apple-touch-icon si existe
+    let appleLink: HTMLLinkElement | null = document.querySelector("link[rel~='apple-touch-icon']");
+    if (appleLink) {
+      appleLink.href = fullUrl;
+    }
   };
 
   useEffect(() => {

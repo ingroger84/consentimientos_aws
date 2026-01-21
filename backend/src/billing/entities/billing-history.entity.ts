@@ -12,6 +12,7 @@ export enum BillingAction {
   INVOICE_CREATED = 'invoice_created',
   PAYMENT_RECEIVED = 'payment_received',
   PAYMENT_FAILED = 'payment_failed',
+  PAYMENT_LINK_CREATED = 'payment_link_created',
   REMINDER_SENT = 'reminder_sent',
   TENANT_SUSPENDED = 'tenant_suspended',
   TENANT_ACTIVATED = 'tenant_activated',

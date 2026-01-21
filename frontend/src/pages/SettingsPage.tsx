@@ -49,6 +49,7 @@ export default function SettingsPage() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingFooterLogo, setUploadingFooterLogo] = useState(false);
   const [uploadingWatermark, setUploadingWatermark] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -56,6 +57,7 @@ export default function SettingsPage() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const footerLogoInputRef = useRef<HTMLInputElement>(null);
   const watermarkInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -141,33 +143,52 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'footer' | 'watermark') => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'footer' | 'watermark' | 'favicon') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      setMessage('Por favor selecciona una imagen válida');
-      return;
-    }
+    // Validación específica para favicon
+    if (type === 'favicon') {
+      const validExtensions = ['ico', 'png', 'svg'];
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      
+      if (!fileExtension || !validExtensions.includes(fileExtension)) {
+        setMessage('Por favor selecciona un archivo .ico, .png o .svg para el favicon');
+        return;
+      }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setMessage('La imagen no debe superar los 5MB');
-      return;
+      if (file.size > 1 * 1024 * 1024) {
+        setMessage('El favicon no debe superar 1MB');
+        return;
+      }
+    } else {
+      if (!file.type.startsWith('image/')) {
+        setMessage('Por favor selecciona una imagen válida');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage('La imagen no debe superar los 5MB');
+        return;
+      }
     }
 
     try {
       if (type === 'logo') setUploadingLogo(true);
       if (type === 'footer') setUploadingFooterLogo(true);
       if (type === 'watermark') setUploadingWatermark(true);
+      if (type === 'favicon') setUploadingFavicon(true);
       
       setMessage('');
 
       const formData = new FormData();
-      formData.append('logo', file);
+      const fieldName = type === 'favicon' ? 'favicon' : 'logo';
+      formData.append(fieldName, file);
 
       const endpoint = type === 'logo' ? '/settings/logo' : 
                       type === 'footer' ? '/settings/footer-logo' : 
-                      '/settings/watermark-logo';
+                      type === 'watermark' ? '/settings/watermark-logo' :
+                      '/settings/favicon';
 
       await api.post(endpoint, formData, {
         headers: {
@@ -176,13 +197,25 @@ export default function SettingsPage() {
       });
 
       await refreshSettings();
-      setMessage(`Logo actualizado correctamente`);
+      
+      const label = type === 'logo' ? 'Logo' :
+                   type === 'footer' ? 'Logo del footer' :
+                   type === 'watermark' ? 'Marca de agua' :
+                   'Favicon';
+      
+      setMessage(`${label} actualizado correctamente`);
+      
+      // Si es favicon, actualizar el favicon del navegador
+      if (type === 'favicon') {
+        await refreshSettings();
+      }
     } catch (error: any) {
       setMessage(error.response?.data?.message || 'Error al subir la imagen');
     } finally {
       if (type === 'logo') setUploadingLogo(false);
       if (type === 'footer') setUploadingFooterLogo(false);
       if (type === 'watermark') setUploadingWatermark(false);
+      if (type === 'favicon') setUploadingFavicon(false);
     }
   };
 
@@ -400,7 +433,7 @@ export default function SettingsPage() {
         )}
 
         {activeTab === 'logos' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo Principal</h2>
               
@@ -560,6 +593,60 @@ export default function SettingsPage() {
 
               <p className="text-sm text-gray-500 mt-2">
                 Aparece centrada en el fondo del PDF
+              </p>
+            </div>
+
+            <div className="card">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Favicon</h2>
+              
+              <div className="mb-4">
+                {settings.faviconUrl ? (
+                  <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                    <img
+                      src={getResourceUrl(settings.faviconUrl)}
+                      alt="Favicon"
+                      className="w-16 h-16 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                    <div className="text-center text-gray-500">
+                      <Upload className="w-12 h-12 mx-auto mb-2" />
+                      <p>No hay favicon</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={faviconInputRef}
+                type="file"
+                accept=".ico,.png,.svg"
+                onChange={(e) => handleLogoUpload(e, 'favicon')}
+                className="hidden"
+              />
+
+              <button
+                type="button"
+                onClick={() => faviconInputRef.current?.click()}
+                disabled={uploadingFavicon}
+                className="btn btn-primary w-full"
+              >
+                {uploadingFavicon ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Subiendo...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Subir Favicon
+                  </>
+                )}
+              </button>
+
+              <p className="text-sm text-gray-500 mt-2">
+                Aparece en la pestaña del navegador (.ico, .png, .svg)
               </p>
             </div>
           </div>

@@ -37,7 +37,7 @@ export class InvoicePdfService {
         // Tabla de items
         const itemsEndY = this.addItemsTable(doc, invoice);
 
-        // Totales
+        // Totales (ahora con verificación dinámica de impuesto)
         this.addTotals(doc, invoice, itemsEndY);
 
         // Notas
@@ -216,51 +216,97 @@ export class InvoicePdfService {
   private addTotals(doc: PDFKit.PDFDocument, invoice: Invoice, startY: number) {
     const labelX = 400;
     const valueX = 510;
+    let currentY = startY;
 
     // Subtotal
     doc
       .font('Helvetica')
       .fontSize(9)
       .fillColor('#6b7280')
-      .text('Subtotal:', labelX, startY, { width: 100, align: 'right' })
+      .text('Subtotal:', labelX, currentY, { width: 100, align: 'right' })
       .fillColor('#374151')
-      .text(this.formatCurrency(invoice.amount), valueX, startY, {
+      .text(this.formatCurrency(invoice.amount), valueX, currentY, {
         width: 62,
         align: 'right',
       });
 
-    // IVA
-    doc
-      .fillColor('#6b7280')
-      .text('IVA (19%):', labelX, startY + 18, { width: 100, align: 'right' })
-      .fillColor('#374151')
-      .text(this.formatCurrency(invoice.tax), valueX, startY + 18, {
-        width: 62,
-        align: 'right',
-      });
+    currentY += 18;
+
+    // Impuesto - Mostrar dinámicamente según configuración actual
+    if (invoice.taxExempt) {
+      // Factura exenta
+      doc
+        .fillColor('#6b7280')
+        .text('Impuesto:', labelX, currentY, { width: 100, align: 'right' })
+        .fillColor('#10b981')
+        .font('Helvetica-Bold')
+        .text('EXENTA', valueX, currentY, {
+          width: 62,
+          align: 'right',
+        });
+    } else if (invoice.taxConfig && invoice.taxConfig.isActive) {
+      // Impuesto activo - mostrar con nombre y tasa actual
+      const taxLabel = `${invoice.taxConfig.name} (${invoice.taxConfig.rate}%):`;
+      doc
+        .font('Helvetica')
+        .fillColor('#6b7280')
+        .text(taxLabel, labelX, currentY, { width: 100, align: 'right' })
+        .fillColor('#374151')
+        .text(this.formatCurrency(invoice.tax), valueX, currentY, {
+          width: 62,
+          align: 'right',
+        });
+    } else if (invoice.tax > 0) {
+      // Impuesto desactivado pero la factura tiene impuesto registrado
+      doc
+        .fillColor('#6b7280')
+        .text('Impuesto:', labelX, currentY, { width: 100, align: 'right' })
+        .fillColor('#9ca3af')
+        .font('Helvetica')
+        .fontSize(8)
+        .text('(Desactivado)', valueX - 10, currentY, {
+          width: 72,
+          align: 'right',
+        });
+      currentY -= 10; // Ajustar para no dejar espacio extra
+    } else {
+      // Sin impuesto
+      doc
+        .fillColor('#6b7280')
+        .text('Impuesto:', labelX, currentY, { width: 100, align: 'right' })
+        .fillColor('#374151')
+        .text(this.formatCurrency(0), valueX, currentY, {
+          width: 62,
+          align: 'right',
+        });
+    }
+
+    currentY += 20;
 
     // Línea separadora
     doc
-      .moveTo(400, startY + 38)
-      .lineTo(572, startY + 38)
+      .moveTo(400, currentY)
+      .lineTo(572, currentY)
       .strokeColor('#3b82f6')
       .lineWidth(1.5)
       .stroke();
+
+    currentY += 7;
 
     // Total
     doc
       .font('Helvetica-Bold')
       .fontSize(12)
       .fillColor('#1e40af')
-      .text('TOTAL:', labelX, startY + 45, { width: 100, align: 'right' })
+      .text('TOTAL:', labelX, currentY, { width: 100, align: 'right' })
       .fillColor('#3b82f6')
-      .text(this.formatCurrency(invoice.total), valueX, startY + 45, {
+      .text(this.formatCurrency(invoice.total), valueX, currentY, {
         width: 62,
         align: 'right',
       });
 
     // Estado de pago
-    const statusY = startY + 70;
+    const statusY = currentY + 25;
     const statusText = invoice.status === 'paid' ? 'PAGADA' : 'PENDIENTE';
     const statusColor = invoice.status === 'paid' ? '#10b981' : '#f59e0b';
 

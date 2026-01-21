@@ -38,4 +38,16 @@ export class CreatePaymentDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  // Campos específicos de Bold
+  @IsString()
+  @IsOptional()
+  boldTransactionId?: string;
+
+  @IsString()
+  @IsOptional()
+  boldPaymentMethod?: string;
+
+  @IsOptional()
+  boldPaymentData?: any;
 }

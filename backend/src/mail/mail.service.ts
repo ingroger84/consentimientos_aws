@@ -4,13 +4,35 @@ import * as nodemailer from 'nodemailer';
 import * as path from 'path';
 import { Consent } from '../consents/entities/consent.entity';
 import { User } from '../users/entities/user.entity';
+import { StorageService } from '../common/services/storage.service';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter;
 
-  constructor(private configService: ConfigService) {
+  // Branding footer para todos los correos
+  private readonly BRANDING_FOOTER = `
+    <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 2px solid #667eea; margin-top: 20px;">
+      <div style="font-size: 16px; font-weight: 600; color: #667eea; margin-bottom: 8px;">
+        DatAgree
+      </div>
+      <div style="font-size: 14px; color: #6c757d; margin-bottom: 5px;">
+        Sistema de Consentimientos Digitales
+      </div>
+      <div style="font-size: 13px; color: #6c757d;">
+        Powered by <strong style="color: #667eea;">Innova Systems</strong> Soluciones InformÃ¡ticas
+      </div>
+      <div style="font-size: 11px; margin-top: 15px; color: #adb5bd;">
+        Este es un correo automÃ¡tico, por favor no responder a este mensaje.
+      </div>
+    </div>
+  `;
+
+  constructor(
+    private configService: ConfigService,
+    private storageService: StorageService,
+  ) {
     this.initializeTransporter();
   }
 
@@ -52,7 +74,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: user.email,
-        subject: '¡Bienvenido al Sistema de Consentimientos!',
+        subject: 'ï¿½Bienvenido al Sistema de Consentimientos!',
         html: this.getWelcomeEmailTemplate(user, temporaryPassword, loginUrl),
       };
 
@@ -65,7 +87,7 @@ export class MailService {
   }
 
   /**
-   * Enviar correo de restablecimiento de contraseña
+   * Enviar correo de restablecimiento de contraseï¿½a
    */
   async sendPasswordResetEmail(user: User, resetToken: string, tenantSlug: string | null): Promise<void> {
     try {
@@ -78,7 +100,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: user.email,
-        subject: 'Restablecimiento de Contraseña - Sistema de Consentimientos',
+        subject: 'Restablecimiento de Contraseï¿½a - Sistema de Consentimientos',
         html: this.getPasswordResetEmailTemplate(user, resetUrl),
       };
 
@@ -99,11 +121,22 @@ export class MailService {
 
       // Adjuntar PDF unificado
       if (consent.pdfUrl) {
-        const pdfPath = path.join(process.cwd(), consent.pdfUrl);
-        attachments.push({
-          filename: `consentimientos-${consent.clientId}.pdf`,
-          path: pdfPath,
-        });
+        // Si la URL es de S3 (empieza con http), descargar el archivo
+        if (consent.pdfUrl.startsWith('http')) {
+          this.logger.log(`Descargando PDF desde S3: ${consent.pdfUrl}`);
+          const pdfBuffer = await this.storageService.downloadFile(consent.pdfUrl);
+          attachments.push({
+            filename: `consentimientos-${consent.clientId}.pdf`,
+            content: pdfBuffer,
+          });
+        } else {
+          // Si es una ruta local, usar el path
+          const pdfPath = path.join(process.cwd(), consent.pdfUrl);
+          attachments.push({
+            filename: `consentimientos-${consent.clientId}.pdf`,
+            path: pdfPath,
+          });
+        }
       }
 
       const mailOptions = {
@@ -294,19 +327,19 @@ export class MailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>¡Bienvenido!</h1>
+            <h1>ï¿½Bienvenido!</h1>
             <p>Tu cuenta ha sido creada exitosamente</p>
           </div>
           
           <div class="content">
             <p class="welcome-message">Hola ${user.name},</p>
             
-            <p>Es un placer darte la bienvenida al <strong>Sistema de Consentimientos Digitales</strong>, una solución moderna y eficiente para la gestión de consentimientos informados.</p>
+            <p>Es un placer darte la bienvenida al <strong>Sistema de Consentimientos Digitales</strong>, una soluciï¿½n moderna y eficiente para la gestiï¿½n de consentimientos informados.</p>
             
             <div class="info-box">
-              <h3>ğŸ“‹ Información de tu Cuenta</h3>
+              <h3>ğŸ“‹ Informaciï¿½n de tu Cuenta</h3>
               <div class="info-item">
-                <strong>Organización:</strong> ${tenantName}
+                <strong>Organizaciï¿½n:</strong> ${tenantName}
               </div>
               <div class="info-item">
                 <strong>Rol asignado:</strong> ${roleName}
@@ -329,11 +362,11 @@ export class MailService {
             </div>
 
             <div class="warning">
-              <strong>âš ï¸ Importante:</strong> Por seguridad, te recomendamos cambiar tu contraseña después del primer inicio de sesión.
+              <strong>âš ï¸ Importante:</strong> Por seguridad, te recomendamos cambiar tu contraseï¿½a despuï¿½s del primer inicio de sesiï¿½n.
             </div>
 
             <div style="text-align: center;">
-              <a href="${loginUrl}" class="button">Iniciar Sesión Ahora</a>
+              <a href="${loginUrl}" class="button">Iniciar Sesiï¿½n Ahora</a>
             </div>
 
             <div class="info-box">
@@ -346,7 +379,7 @@ export class MailService {
             <div class="features">
               <div class="feature">
                 <div class="feature-icon">ğŸ“</div>
-                <div class="feature-text">Gestión de Consentimientos</div>
+                <div class="feature-text">Gestiï¿½n de Consentimientos</div>
               </div>
               <div class="feature">
                 <div class="feature-icon">âœï¸</div>
@@ -354,7 +387,7 @@ export class MailService {
               </div>
               <div class="feature">
                 <div class="feature-icon">ğŸ“§</div>
-                <div class="feature-text">Envío Automático</div>
+                <div class="feature-text">Envï¿½o Automï¿½tico</div>
               </div>
               <div class="feature">
                 <div class="feature-icon">ğŸ”’</div>
@@ -364,17 +397,10 @@ export class MailService {
 
             <p style="margin-top: 30px;">Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar con tu administrador.</p>
             
-            <p>¡Bienvenido a bordo!</p>
+            <p>ï¿½Bienvenido a bordo!</p>
           </div>
           
-          <div class="footer">
-            <div class="footer-brand">Innova Systems</div>
-            <p>Soluciones InformÃ¡ticas</p>
-            <p style="margin-top: 15px;">Sistema de Consentimientos Digitales</p>
-            <p style="font-size: 11px; margin-top: 15px; color: #adb5bd;">
-              Este es un correo automático, por favor no responder a este mensaje.
-            </p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -545,14 +571,7 @@ export class MailService {
             <p style="font-weight: 600; color: #10b981;">${consent.branch.name}</p>
           </div>
           
-          <div class="footer">
-            <div class="footer-brand">Innova Systems</div>
-            <p>Soluciones InformÃ¡ticas</p>
-            <p style="margin-top: 15px;">Sistema de Consentimientos Digitales</p>
-            <p style="font-size: 11px; margin-top: 15px; color: #adb5bd;">
-              Este es un correo automático, por favor no responder a este mensaje.
-            </p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -560,7 +579,7 @@ export class MailService {
   }
 
   /**
-   * Template de correo de restablecimiento de contraseña
+   * Template de correo de restablecimiento de contraseï¿½a
    */
   private getPasswordResetEmailTemplate(user: User, resetUrl: string): string {
     const tenantName = user.tenant?.name || 'Sistema de Consentimientos';
@@ -669,21 +688,21 @@ export class MailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>ğŸ” Restablecimiento de Contraseña</h1>
-            <p>Solicitud de cambio de contraseña</p>
+            <h1>ğŸ” Restablecimiento de Contraseï¿½a</h1>
+            <p>Solicitud de cambio de contraseï¿½a</p>
           </div>
           
           <div class="content">
             <p class="greeting">Hola ${user.name},</p>
             
-            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>${tenantName}</strong>.</p>
+            <p>Hemos recibido una solicitud para restablecer la contraseï¿½a de tu cuenta en <strong>${tenantName}</strong>.</p>
 
             <div class="security-icon">ğŸ”’</div>
 
-            <p>Si solicitaste este cambio, haz clic en el botÃ³n de abajo para crear una nueva contraseña:</p>
+            <p>Si solicitaste este cambio, haz clic en el botÃ³n de abajo para crear una nueva contraseï¿½a:</p>
 
             <div style="text-align: center;">
-              <a href="${resetUrl}" class="button">Restablecer Contraseña</a>
+              <a href="${resetUrl}" class="button">Restablecer Contraseï¿½a</a>
             </div>
 
             <div class="info-box">
@@ -694,8 +713,8 @@ export class MailService {
             <div class="warning">
               <strong>âš ï¸ Â¿No solicitaste este cambio?</strong>
               <p style="margin: 10px 0 0 0;">
-                Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura. 
-                Tu contraseña actual permanecerÃ¡ sin cambios.
+                Si no solicitaste restablecer tu contraseï¿½a, puedes ignorar este correo de forma segura. 
+                Tu contraseï¿½a actual permanecerÃ¡ sin cambios.
               </p>
             </div>
 
@@ -709,27 +728,21 @@ export class MailService {
             <p style="margin-top: 30px;">Si tienes alguna pregunta o necesitas ayuda, no dudes en contactar con tu administrador.</p>
           </div>
           
-          <div class="footer">
-            <div class="footer-brand">Innova Systems</div>
-            <p>Soluciones InformÃ¡ticas</p>
-            <p style="margin-top: 15px;">Sistema de Consentimientos Digitales</p>
-            <p style="font-size: 11px; margin-top: 15px; color: #adb5bd;">
-              Este es un correo automático, por favor no responder a este mensaje.
-            </p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
     `;
   }
-  /**`n   * Enviar email de recordatorio de pago
+  /**
+   * Enviar email de recordatorio de pago
    */
   async sendPaymentReminderEmail(tenant: any, invoice: any, daysBeforeDue: number): Promise<void> {
     try {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: tenant.contactEmail,
-        subject: `Recordatorio: Pago pendiente - ${daysBeforeDue} días para el vencimiento`,
+        subject: `Recordatorio: Pago pendiente - ${daysBeforeDue} dï¿½as para el vencimiento`,
         html: this.getPaymentReminderTemplate(tenant, invoice, daysBeforeDue),
       };
 
@@ -762,7 +775,7 @@ export class MailService {
   }
 
   /**
-   * Enviar email de confirmación de pago
+   * Enviar email de confirmaciï¿½n de pago
    */
   async sendPaymentConfirmationEmail(tenant: any, payment: any, invoice: any): Promise<void> {
     try {
@@ -782,7 +795,7 @@ export class MailService {
   }
 
   /**
-   * Enviar email de suspensión de tenant
+   * Enviar email de suspensiï¿½n de tenant
    */
   async sendTenantSuspendedEmail(tenant: any, invoice: any): Promise<void> {
     try {
@@ -802,7 +815,7 @@ export class MailService {
   }
 
   /**
-   * Enviar email de activación de tenant
+   * Enviar email de activaciï¿½n de tenant
    */
   async sendTenantActivatedEmail(tenant: any, payment: any): Promise<void> {
     try {
@@ -854,7 +867,7 @@ export class MailService {
         <div class="container">
           <div class="header">
             <h1>â° Recordatorio de Pago</h1>
-            <p>Faltan ${daysBeforeDue} días para el vencimiento</p>
+            <p>Faltan ${daysBeforeDue} dï¿½as para el vencimiento</p>
           </div>
           <div class="content">
             <p>Estimado/a ${tenant.contactName},</p>
@@ -862,31 +875,28 @@ export class MailService {
             
             <div class="alert-box">
               <h3 style="margin-top: 0;">ğŸ“‹ Detalles de la Factura</h3>
-              <p><strong>Número de Factura:</strong> ${invoice.invoiceNumber}</p>
+              <p><strong>Nï¿½mero de Factura:</strong> ${invoice.invoiceNumber}</p>
               <p><strong>Monto Total:</strong> ${amount}</p>
               <p><strong>Fecha de Vencimiento:</strong> ${dueDate}</p>
-              <p><strong>Días Restantes:</strong> ${daysBeforeDue} días</p>
+              <p><strong>Dï¿½as Restantes:</strong> ${daysBeforeDue} dï¿½as</p>
             </div>
 
-            <p>Para evitar la suspensión de su servicio, por favor realice el pago antes de la fecha de vencimiento.</p>
+            <p>Para evitar la suspensiï¿½n de su servicio, por favor realice el pago antes de la fecha de vencimiento.</p>
 
             <div style="text-align: center; margin: 30px 0;">
               <a href="#" class="button">Ver Factura</a>
             </div>
 
-            <p><strong>Métodos de Pago:</strong></p>
+            <p><strong>Mï¿½todos de Pago:</strong></p>
             <ul>
               <li>Transferencia bancaria</li>
               <li>PSE</li>
-              <li>Tarjeta de crédito/débito</li>
+              <li>Tarjeta de crï¿½dito/dï¿½bito</li>
             </ul>
 
-            <p>Si ya realizó el pago, por favor ignore este mensaje.</p>
+            <p>Si ya realizï¿½ el pago, por favor ignore este mensaje.</p>
           </div>
-          <div class="footer">
-            <p>Sistema de Consentimientos Digitales - Innova Systems</p>
-            <p>Este es un correo automático, por favor no responder.</p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -900,7 +910,7 @@ export class MailService {
     const dueDate = new Date(invoice.dueDate).toLocaleDateString('es-CO');
     const amount = this.formatCurrency(invoice.total);
     const apiUrl = this.configService.get('API_URL') || 'http://localhost:3000';
-    // Generar token para acceso público al PDF
+    // Generar token para acceso pï¿½blico al PDF
     const token = Buffer.from(`${invoice.id}-${invoice.tenantId}`).toString('base64');
     const pdfUrl = `${apiUrl}/api/invoices/${invoice.id}/pdf/${token}`;
 
@@ -931,7 +941,7 @@ export class MailService {
             
             <div class="invoice-box">
               <h3 style="margin-top: 0; color: #3b82f6;">Resumen de Factura</h3>
-              <p><strong>Número:</strong> ${invoice.invoiceNumber}</p>
+              <p><strong>Nï¿½mero:</strong> ${invoice.invoiceNumber}</p>
               <p><strong>Monto:</strong> ${amount}</p>
               <p><strong>Fecha de Vencimiento:</strong> ${dueDate}</p>
             </div>
@@ -942,9 +952,7 @@ export class MailService {
 
             <p>Por favor realice el pago antes de la fecha de vencimiento para evitar interrupciones en el servicio.</p>
           </div>
-          <div class="footer">
-            <p>Sistema de Consentimientos Digitales - Innova Systems</p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -952,7 +960,7 @@ export class MailService {
   }
 
   /**
-   * Template de confirmación de pago
+   * Template de confirmaciï¿½n de pago
    */
   private getPaymentConfirmationTemplate(tenant: any, payment: any, invoice: any): string {
     const amount = this.formatCurrency(payment.amount);
@@ -976,7 +984,7 @@ export class MailService {
         <div class="container">
           <div class="header">
             <h1>? Pago Recibido</h1>
-            <p>Confirmación de Pago</p>
+            <p>Confirmaciï¿½n de Pago</p>
           </div>
           <div class="content">
             <p>Estimado/a ${tenant.contactName},</p>
@@ -987,15 +995,13 @@ export class MailService {
               <p><strong>Monto Pagado:</strong> ${amount}</p>
               <p><strong>Fecha de Pago:</strong> ${paymentDate}</p>
               ${invoice ? `<p><strong>Factura:</strong> ${invoice.invoiceNumber}</p>` : ''}
-              <p><strong>Método de Pago:</strong> ${this.getPaymentMethodLabel(payment.paymentMethod)}</p>
+              <p><strong>Mï¿½todo de Pago:</strong> ${this.getPaymentMethodLabel(payment.paymentMethod)}</p>
             </div>
 
-            <p>Su servicio continuará activo sin interrupciones.</p>
-            <p>Puede descargar su recibo de pago desde el panel de administración.</p>
+            <p>Su servicio continuarï¿½ activo sin interrupciones.</p>
+            <p>Puede descargar su recibo de pago desde el panel de administraciï¿½n.</p>
           </div>
-          <div class="footer">
-            <p>Sistema de Consentimientos Digitales - Innova Systems</p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -1035,7 +1041,7 @@ export class MailService {
             
             <div class="alert-box">
               <h3 style="margin-top: 0;">âš ï¸ Factura Vencida</h3>
-              <p><strong>Número de Factura:</strong> ${invoice.invoiceNumber}</p>
+              <p><strong>Nï¿½mero de Factura:</strong> ${invoice.invoiceNumber}</p>
               <p><strong>Monto Adeudado:</strong> ${amount}</p>
               <p><strong>Estado:</strong> Vencida</p>
             </div>
@@ -1056,9 +1062,7 @@ export class MailService {
 
             <p>Si tiene alguna pregunta, por favor contÃ¡ctenos.</p>
           </div>
-          <div class="footer">
-            <p>Sistema de Consentimientos Digitales - Innova Systems</p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -1100,7 +1104,7 @@ export class MailService {
             <p>Â¡Excelentes noticias! Su cuenta de <strong>${tenant.name}</strong> ha sido reactivada exitosamente.</p>
             
             <div class="success-box">
-              <h3 style="margin-top: 0;">? Detalles de Reactivación</h3>
+              <h3 style="margin-top: 0;">? Detalles de Reactivaciï¿½n</h3>
               <p><strong>Pago Recibido:</strong> ${amount}</p>
               <p><strong>Estado:</strong> Activo</p>
               <p><strong>PrÃ³xima RenovaciÃ³n:</strong> ${newExpiresAt}</p>
@@ -1119,9 +1123,7 @@ export class MailService {
 
             <p>Gracias por su confianza. Estamos aquÃ­ para ayudarle.</p>
           </div>
-          <div class="footer">
-            <p>Sistema de Consentimientos Digitales - Innova Systems</p>
-          </div>
+          ${this.BRANDING_FOOTER}
         </div>
       </body>
       </html>
@@ -1215,10 +1217,7 @@ export class MailService {
                 <li>Confirmar el cambio con el cliente</li>
               </ol>
             </div>
-            <div class="footer">
-              <p>Este es un correo automatico generado por el sistema de gestion de consentimientos.</p>
-              <p>Por favor, no responder a este correo.</p>
-            </div>
+            ${this.BRANDING_FOOTER}
           </body>
           </html>
         `,

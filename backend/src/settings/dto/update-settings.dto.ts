@@ -14,6 +14,10 @@ export class UpdateSettingsDto {
   @IsString()
   watermarkLogoUrl?: string;
 
+  @IsOptional()
+  @IsString()
+  faviconUrl?: string;
+
   // Colores principales
   @IsOptional()
   @IsHexColor()

@@ -5,6 +5,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Consent } from './entities/consent.entity';
 import { SettingsService } from '../settings/settings.service';
+import { StorageService } from '../common/services/storage.service';
 
 interface PdfGenerationResult {
   procedurePdfUrl: string;
@@ -41,6 +42,7 @@ export class PdfService {
   constructor(
     private configService: ConfigService,
     private settingsService: SettingsService,
+    private storageService: StorageService,
   ) {}
 
   async generateAllConsentPdfs(consent: Consent): Promise<PdfGenerationResult> {
@@ -71,13 +73,16 @@ export class PdfService {
     // Save unified PDF
     const pdfBytes = await pdfDoc.save();
     const fileName = `consent-unified-${consent.id}.pdf`;
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'consents');
 
-    await fs.mkdir(uploadsDir, { recursive: true });
-    const filePath = path.join(uploadsDir, fileName);
-    await fs.writeFile(filePath, pdfBytes);
+    // Subir a S3 o almacenamiento local usando StorageService
+    const pdfUrl = await this.storageService.uploadBuffer(
+      Buffer.from(pdfBytes),
+      'consents',
+      fileName,
+      'application/pdf'
+    );
 
-    return `/uploads/consents/${fileName}`;
+    return pdfUrl;
   }
 
   private async loadPdfTheme(pdfDoc: PDFDocument, tenantId?: string): Promise<PdfTheme> {
@@ -101,8 +106,7 @@ export class PdfService {
     let logoImage: PDFImage | undefined;
     if (settings.logoUrl) {
       try {
-        const logoPath = path.join(process.cwd(), 'uploads', 'logo', path.basename(settings.logoUrl));
-        const logoBytes = await fs.readFile(logoPath);
+        const logoBytes = await this.storageService.downloadFile(settings.logoUrl);
         const ext = path.extname(settings.logoUrl).toLowerCase();
         logoImage = await this.loadImageSafe(pdfDoc, logoBytes, ext);
       } catch (error) {
@@ -114,8 +118,7 @@ export class PdfService {
     let footerLogoImage: PDFImage | undefined;
     if (settings.footerLogoUrl) {
       try {
-        const logoPath = path.join(process.cwd(), 'uploads', 'logo', path.basename(settings.footerLogoUrl));
-        const logoBytes = await fs.readFile(logoPath);
+        const logoBytes = await this.storageService.downloadFile(settings.footerLogoUrl);
         const ext = path.extname(settings.footerLogoUrl).toLowerCase();
         footerLogoImage = await this.loadImageSafe(pdfDoc, logoBytes, ext);
       } catch (error) {
@@ -127,8 +130,7 @@ export class PdfService {
     let watermarkLogoImage: PDFImage | undefined;
     if (settings.watermarkLogoUrl) {
       try {
-        const logoPath = path.join(process.cwd(), 'uploads', 'logo', path.basename(settings.watermarkLogoUrl));
-        const logoBytes = await fs.readFile(logoPath);
+        const logoBytes = await this.storageService.downloadFile(settings.watermarkLogoUrl);
         const ext = path.extname(settings.watermarkLogoUrl).toLowerCase();
         watermarkLogoImage = await this.loadImageSafe(pdfDoc, logoBytes, ext);
       } catch (error) {

@@ -13,8 +13,6 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { SettingsService } from './settings.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
@@ -109,14 +107,6 @@ export class SettingsController {
   @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
   @UseInterceptors(
     FileInterceptor('logo', {
-      storage: diskStorage({
-        destination: './uploads/logo',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `logo-${uniqueSuffix}${ext}`);
-        },
-      }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
           return cb(new Error('Solo se permiten imágenes'), false);
@@ -138,14 +128,6 @@ export class SettingsController {
   @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
   @UseInterceptors(
     FileInterceptor('logo', {
-      storage: diskStorage({
-        destination: './uploads/logo',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `footer-logo-${uniqueSuffix}${ext}`);
-        },
-      }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
           return cb(new Error('Solo se permiten imágenes'), false);
@@ -167,14 +149,6 @@ export class SettingsController {
   @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
   @UseInterceptors(
     FileInterceptor('logo', {
-      storage: diskStorage({
-        destination: './uploads/logo',
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `watermark-${uniqueSuffix}${ext}`);
-        },
-      }),
       fileFilter: (req, file, cb) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
           return cb(new Error('Solo se permiten imágenes'), false);
@@ -189,6 +163,27 @@ export class SettingsController {
   uploadWatermarkLogo(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.settingsService.uploadWatermarkLogo(file, tenantId);
+  }
+
+  @Post('favicon')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @UseInterceptors(
+    FileInterceptor('favicon', {
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(ico|png|svg)$/)) {
+          return cb(new Error('Solo se permiten archivos .ico, .png o .svg'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 1 * 1024 * 1024, // 1MB
+      },
+    }),
+  )
+  uploadFavicon(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.uploadFavicon(file, tenantId);
   }
 
   @Get('email-config')

@@ -40,6 +40,12 @@ export class Invoice {
   @Column({ nullable: true })
   taxConfigId: string;
 
+  @Column({ default: false })
+  taxExempt: boolean; // Nueva columna para facturas exentas
+
+  @Column({ type: 'text', nullable: true })
+  taxExemptReason: string; // Razón de la exención
+
   @Column({ unique: true })
   invoiceNumber: string;
 
@@ -85,6 +91,16 @@ export class Invoice {
 
   @Column({ type: 'timestamp', nullable: true })
   cancelledAt: Date;
+
+  // Campos específicos de Bold
+  @Column({ type: 'text', nullable: true })
+  boldPaymentLink: string;
+
+  @Column({ nullable: true })
+  boldTransactionId: string;
+
+  @Column({ nullable: true })
+  boldPaymentReference: string;
 
   @OneToMany(() => Payment, payment => payment.invoice)
   payments: Payment[];

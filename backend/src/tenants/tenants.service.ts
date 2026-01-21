@@ -294,32 +294,47 @@ export class TenantsService {
       }
     });
 
-    // Datos de crecimiento (últimos 6 meses - simulado por ahora)
+    // Datos de crecimiento (últimos 6 meses)
     const now = new Date();
     const growthData = [];
+    
     for (let i = 5; i >= 0; i--) {
-      const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthName = month.toLocaleDateString('es-ES', { month: 'short' });
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+      const monthName = monthStart.toLocaleDateString('es-ES', { month: 'short' });
       
-      // Contar tenants creados hasta ese mes
-      const tenantsUntilMonth = tenants.filter(t => 
-        new Date(t.createdAt) <= month
-      ).length;
+      // Contar tenants creados EN ese mes específico
+      const tenantsInMonth = tenants.filter(t => {
+        const createdDate = new Date(t.createdAt);
+        return createdDate >= monthStart && createdDate <= monthEnd;
+      }).length;
+
+      // Contar consentimientos creados EN ese mes
+      let consentsInMonth = 0;
+      tenants.forEach(t => {
+        const consentsCount = t.consents?.filter(c => {
+          if (c.deletedAt) return false;
+          const consentDate = new Date(c.createdAt);
+          return consentDate >= monthStart && consentDate <= monthEnd;
+        }).length || 0;
+        consentsInMonth += consentsCount;
+      });
 
       growthData.push({
         month: monthName,
-        tenants: tenantsUntilMonth,
-        users: Math.floor(tenantsUntilMonth * 3.5), // Promedio estimado
-        consents: Math.floor(tenantsUntilMonth * 25), // Promedio estimado
+        tenants: tenantsInMonth,
+        users: Math.floor(tenantsInMonth * 3.5), // Promedio estimado
+        consents: consentsInMonth,
       });
     }
 
     // Distribución por plan
     const tenantsByPlan = [
-      { plan: 'Free', count: tenants.filter(t => t.plan === 'free').length },
-      { plan: 'Basic', count: tenants.filter(t => t.plan === 'basic').length },
-      { plan: 'Professional', count: tenants.filter(t => t.plan === 'professional').length },
-      { plan: 'Enterprise', count: tenants.filter(t => t.plan === 'enterprise').length },
+      { plan: 'Gratuito', count: tenants.filter(t => t.plan === 'free').length },
+      { plan: 'Básico', count: tenants.filter(t => t.plan === 'basic').length },
+      { plan: 'Emprendedor', count: tenants.filter(t => t.plan === 'professional').length },
+      { plan: 'Plus', count: tenants.filter(t => t.plan === 'enterprise').length },
+      { plan: 'Empresarial', count: tenants.filter(t => t.plan === 'custom').length },
     ].filter(item => item.count > 0);
 
     // Top tenants por actividad

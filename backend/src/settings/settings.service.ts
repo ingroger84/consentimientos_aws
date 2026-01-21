@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { AppSettings } from './entities/app-settings.entity';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
+import { StorageService } from '../common/services/storage.service';
 
 @Injectable()
 export class SettingsService {
   constructor(
     @InjectRepository(AppSettings)
     private settingsRepository: Repository<AppSettings>,
+    private storageService: StorageService,
   ) {}
 
   async getSettings(tenantId?: string) {
@@ -42,6 +44,7 @@ export class SettingsService {
       logoUrl: settingsMap['logoUrl'] || null,
       footerLogoUrl: settingsMap['footerLogoUrl'] || null,
       watermarkLogoUrl: settingsMap['watermarkLogoUrl'] || null,
+      faviconUrl: settingsMap['faviconUrl'] || null,
       
       // Colores principales
       primaryColor: settingsMap['primaryColor'] || '#3B82F6',
@@ -109,27 +112,59 @@ export class SettingsService {
   }
 
   async uploadLogo(file: Express.Multer.File, tenantId?: string) {
-    const logoPath = `/uploads/logo/${file.filename}`;
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `logo-${tenantId || 'global'}-${Date.now()}.${ext}`;
     
-    await this.updateSettings({ logoUrl: logoPath }, tenantId);
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
     
-    return { logoUrl: logoPath };
+    // Actualizar configuración
+    await this.updateSettings({ logoUrl }, tenantId);
+    
+    return { logoUrl };
   }
 
   async uploadFooterLogo(file: Express.Multer.File, tenantId?: string) {
-    const logoPath = `/uploads/logo/${file.filename}`;
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `footer-logo-${tenantId || 'global'}-${Date.now()}.${ext}`;
     
-    await this.updateSettings({ footerLogoUrl: logoPath }, tenantId);
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
     
-    return { footerLogoUrl: logoPath };
+    // Actualizar configuración
+    await this.updateSettings({ footerLogoUrl: logoUrl }, tenantId);
+    
+    return { footerLogoUrl: logoUrl };
   }
 
   async uploadWatermarkLogo(file: Express.Multer.File, tenantId?: string) {
-    const logoPath = `/uploads/logo/${file.filename}`;
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `watermark-${tenantId || 'global'}-${Date.now()}.${ext}`;
     
-    await this.updateSettings({ watermarkLogoUrl: logoPath }, tenantId);
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
     
-    return { watermarkLogoUrl: logoPath };
+    // Actualizar configuración
+    await this.updateSettings({ watermarkLogoUrl: logoUrl }, tenantId);
+    
+    return { watermarkLogoUrl: logoUrl };
+  }
+
+  async uploadFavicon(file: Express.Multer.File, tenantId?: string) {
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `favicon-${tenantId || 'global'}-${Date.now()}.${ext}`;
+    
+    // Subir a S3 o almacenamiento local
+    const faviconUrl = await this.storageService.uploadFile(file, 'favicon', filename);
+    
+    // Actualizar configuración
+    await this.updateSettings({ faviconUrl: faviconUrl }, tenantId);
+    
+    return { faviconUrl: faviconUrl };
   }
 
   /**

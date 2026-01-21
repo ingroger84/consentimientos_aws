@@ -8,12 +8,14 @@ import { Tenant } from '../tenants/entities/tenant.entity';
 import { PdfService } from './pdf.service';
 import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Consent, Answer, Tenant]),
     SettingsModule,
     MailModule,
+    CommonModule,
   ],
   controllers: [ConsentsController],
   providers: [ConsentsService, PdfService],

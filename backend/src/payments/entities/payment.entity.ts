@@ -76,6 +76,16 @@ export class Payment {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  // Campos específicos de Bold
+  @Column({ nullable: true })
+  boldTransactionId: string;
+
+  @Column({ nullable: true })
+  boldPaymentMethod: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  boldPaymentData: any;
+
   @CreateDateColumn()
   createdAt: Date;
 

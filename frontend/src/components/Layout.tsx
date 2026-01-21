@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { getResourceUrl } from '@/utils/api-url';
+import { getAppVersion } from '@/config/version';
 import PaymentReminderBanner from '@/components/billing/PaymentReminderBanner';
 import ResourceLimitNotifications from '@/components/ResourceLimitNotifications';
 import {
@@ -167,7 +168,7 @@ export default function Layout() {
 
           {/* User info */}
           <div className="p-4 border-t">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-2">
               <div>                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                 <p className="text-xs text-gray-500">{user?.role.name}</p>
               </div>
@@ -178,6 +179,12 @@ export default function Layout() {
               >
                 <LogOut className="w-5 h-5" />
               </button>
+            </div>
+            {/* Version info */}
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs text-gray-400 text-center">
+                v{getAppVersion()}
+              </p>
             </div>
           </div>
         </div>

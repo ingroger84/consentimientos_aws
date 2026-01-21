@@ -72,6 +72,17 @@ export default function TaxConfigPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validaciones
+    if (!formData.name.trim()) {
+      showMessage('Error: El nombre es requerido');
+      return;
+    }
+
+    if (formData.rate < 0 || formData.rate > 100) {
+      showMessage('Error: La tasa debe estar entre 0 y 100');
+      return;
+    }
+
     try {
       if (editingTax) {
         await taxConfigService.update(editingTax.id, formData);
@@ -84,7 +95,15 @@ export default function TaxConfigPage() {
       loadTaxConfigs();
     } catch (error: any) {
       console.error('Error saving tax config:', error);
-      showMessage(error.response?.data?.message || 'Error al guardar la configuración');
+      
+      // Manejar error de nombre duplicado
+      if (error.response?.data?.message?.includes('duplicate') || 
+          error.response?.data?.message?.includes('unique constraint') ||
+          error.response?.data?.message?.includes('ya existe')) {
+        showMessage('Error: Ya existe un impuesto con ese nombre. Por favor usa un nombre diferente.');
+      } else {
+        showMessage(error.response?.data?.message || 'Error al guardar la configuración');
+      }
     }
   };
 
@@ -280,17 +299,23 @@ export default function TaxConfigPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tasa (%) *
                 </label>
-                <input
-                  type="number"
-                  value={formData.rate}
-                  onChange={(e) => setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="19.00"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={formData.rate}
+                    onChange={(e) => setFormData({ ...formData, rate: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="19.00"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                  />
+                  <span className="absolute right-4 top-2.5 text-gray-500">%</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Ejemplo: Para IVA del 19%, ingresa 19
+                </p>
               </div>
 
               {/* Tipo de Aplicación */}
@@ -298,24 +323,46 @@ export default function TaxConfigPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Tipo de Aplicación *
                 </label>
-                <select
-                  value={formData.applicationType}
-                  onChange={(e) => setFormData({ ...formData, applicationType: e.target.value as TaxApplicationType })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                >
-                  <option value={TaxApplicationType.ADDITIONAL}>
-                    Adicional al precio (el impuesto se suma al monto)
-                  </option>
-                  <option value={TaxApplicationType.INCLUDED}>
-                    Incluido en el precio (el monto ya incluye el impuesto)
-                  </option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  {formData.applicationType === TaxApplicationType.ADDITIONAL
-                    ? 'El impuesto se sumará al monto base. Ej: $100 + 19% = $119'
-                    : 'El monto ya incluye el impuesto. Ej: $119 incluye 19% de impuesto'}
-                </p>
+                <div className="space-y-3">
+                  <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="applicationType"
+                      value={TaxApplicationType.ADDITIONAL}
+                      checked={formData.applicationType === TaxApplicationType.ADDITIONAL}
+                      onChange={(e) => setFormData({ ...formData, applicationType: e.target.value as TaxApplicationType })}
+                      className="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <div className="ml-3">
+                      <p className="font-medium text-gray-900">Adicional al precio</p>
+                      <p className="text-sm text-gray-600">
+                        El impuesto se suma al monto base
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Ejemplo: $100.000 + 19% = $119.000
+                      </p>
+                    </div>
+                  </label>
+                  <label className="flex items-start p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input
+                      type="radio"
+                      name="applicationType"
+                      value={TaxApplicationType.INCLUDED}
+                      checked={formData.applicationType === TaxApplicationType.INCLUDED}
+                      onChange={(e) => setFormData({ ...formData, applicationType: e.target.value as TaxApplicationType })}
+                      className="mt-1 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <div className="ml-3">
+                      <p className="font-medium text-gray-900">Incluido en el precio</p>
+                      <p className="text-sm text-gray-600">
+                        El monto ya incluye el impuesto
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        Ejemplo: $119.000 incluye 19% de impuesto ($19.000)
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* Descripción */}
