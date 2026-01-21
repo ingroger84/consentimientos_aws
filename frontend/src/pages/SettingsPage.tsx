@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Upload, Save, RefreshCw, Image, Palette, FileText, Building2, Mail, Send, AlertCircle, CheckCircle } from 'lucide-react';
+import { Upload, Save, RefreshCw, Image, Palette, FileText, Building2, Mail, Send, AlertCircle } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuthStore } from '@/store/authStore';
 import { getResourceUrl } from '@/utils/api-url';

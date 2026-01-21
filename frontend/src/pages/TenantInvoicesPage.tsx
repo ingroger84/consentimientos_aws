@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Download, Eye, DollarSign, Calendar, AlertCircle, Filter, X, ExternalLink } from 'lucide-react';
+import { FileText, Download, Eye, Calendar, AlertCircle, Filter, X, ExternalLink } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { invoicesService } from '@/services/invoices.service';
 import api from '@/services/api';
@@ -109,11 +109,11 @@ export default function TenantInvoicesPage() {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    loadInvoices();
-    setMessage('Pago registrado correctamente');
-    setTimeout(() => setMessage(''), 3000);
-  };
+  // const handlePaymentSuccess = () => {
+  //   loadInvoices();
+  //   setMessage('Pago registrado correctamente');
+  //   setTimeout(() => setMessage(''), 3000);
+  // };
 
   const getDaysUntilDue = (dueDate: string): number => {
     const due = new Date(dueDate);

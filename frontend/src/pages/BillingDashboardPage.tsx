@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { billingService, BillingStats, BillingHistory } from '@/services/billing.service';
 import { invoicesService, Invoice } from '@/services/invoices.service';
-import { paymentsService } from '@/services/payments.service';
 import {
   DollarSign,
   FileText,
@@ -17,7 +16,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  CreditCard,
   X,
   Plus,
   Search,
