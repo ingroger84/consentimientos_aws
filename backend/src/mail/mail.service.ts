@@ -74,7 +74,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: user.email,
-        subject: '¡Bienvenido al Sistema de Consentimientos!',
+        subject: 'Bienvenido al Sistema de Consentimientos',
         html: this.getWelcomeEmailTemplate(user, temporaryPassword, loginUrl),
       };
 
@@ -87,7 +87,7 @@ export class MailService {
   }
 
   /**
-   * Enviar correo de restablecimiento de contrase�a
+   * Enviar correo de restablecimiento de contrasena
    */
   async sendPasswordResetEmail(user: User, resetToken: string, tenantSlug: string | null): Promise<void> {
     try {
@@ -100,7 +100,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: user.email,
-        subject: 'Restablecimiento de Contraseña - Sistema de Consentimientos',
+        subject: 'Restablecimiento de Contrasena - Sistema de Consentimientos',
         html: this.getPasswordResetEmailTemplate(user, resetUrl),
       };
 
@@ -327,19 +327,19 @@ export class MailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>�Bienvenido!</h1>
+            <h1>Bienvenido!</h1>
             <p>Tu cuenta ha sido creada exitosamente</p>
           </div>
           
           <div class="content">
             <p class="welcome-message">Hola ${user.name},</p>
             
-            <p>Es un placer darte la bienvenida al <strong>Sistema de Consentimientos Digitales</strong>, una solución moderna y eficiente para la gestión de consentimientos informados.</p>
+            <p>Es un placer darte la bienvenida al <strong>Sistema de Consentimientos Digitales</strong>, una solucion moderna y eficiente para la gestion de consentimientos informados.</p>
             
             <div class="info-box">
-              <h3>📋 Información de tu Cuenta</h3>
+              <h3>Informacion de tu Cuenta</h3>
               <div class="info-item">
-                <strong>Organización:</strong> ${tenantName}
+                <strong>Organizacion:</strong> ${tenantName}
               </div>
               <div class="info-item">
                 <strong>Rol asignado:</strong> ${roleName}
@@ -350,27 +350,27 @@ export class MailService {
             </div>
 
             <div class="credentials-box">
-              <h3>🔐 Credenciales de Acceso</h3>
+              <h3>Credenciales de Acceso</h3>
               <div class="credential-item">
                 <strong>USUARIO</strong>
                 <div class="credential-value">${user.email}</div>
               </div>
               <div class="credential-item">
-                <strong>CONTRASEÑA TEMPORAL</strong>
+                <strong>CONTRASENA TEMPORAL</strong>
                 <div class="credential-value">${temporaryPassword}</div>
               </div>
             </div>
 
             <div class="warning">
-              <strong>⚠️ Importante:</strong> Por seguridad, te recomendamos cambiar tu contraseña después del primer inicio de sesión.
+              <strong>Importante:</strong> Por seguridad, te recomendamos cambiar tu contrasena despues del primer inicio de sesion.
             </div>
 
             <div style="text-align: center;">
-              <a href="${loginUrl}" class="button">Iniciar Sesi�n Ahora</a>
+              <a href="${loginUrl}" class="button">Iniciar Sesion Ahora</a>
             </div>
 
             <div class="info-box">
-              <h3>🔗 Enlace de Acceso</h3>
+              <h3>Enlace de Acceso</h3>
               <div class="info-item">
                 <a href="${loginUrl}" style="color: #667eea; word-break: break-all;">${loginUrl}</a>
               </div>
@@ -379,7 +379,7 @@ export class MailService {
             <div class="features">
               <div class="feature">
                 <div class="feature-icon">📝</div>
-                <div class="feature-text">Gestión de Consentimientos</div>
+                <div class="feature-text">Gestion de Consentimientos</div>
               </div>
               <div class="feature">
                 <div class="feature-icon">✍️</div>
@@ -387,7 +387,7 @@ export class MailService {
               </div>
               <div class="feature">
                 <div class="feature-icon">📧</div>
-                <div class="feature-text">Envío Automático</div>
+                <div class="feature-text">Envio Automatico</div>
               </div>
               <div class="feature">
                 <div class="feature-icon">🔒</div>
@@ -529,7 +529,7 @@ export class MailService {
             <p>Le enviamos sus consentimientos informados firmados correspondientes al servicio solicitado.</p>
             
             <div class="info-box">
-              <h3>📋 Detalles del Servicio</h3>
+              <h3>Detalles del Servicio</h3>
               <div class="info-item">
                 <strong>Servicio:</strong> ${consent.service.name}
               </div>
@@ -559,13 +559,13 @@ export class MailService {
             </div>
 
             <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
-              <strong style="color: #92400e;">📌 Importante:</strong>
+              <strong style="color: #92400e;">Importante:</strong>
               <p style="margin: 10px 0 0 0; color: #92400e;">
                 Guarde estos documentos para sus registros. Son documentos legales que certifican su consentimiento informado.
               </p>
             </div>
 
-            <p>Si tiene alguna pregunta o necesita información adicional, no dude en contactarnos.</p>
+            <p>Si tiene alguna pregunta o necesita informacion adicional, no dude en contactarnos.</p>
             
             <p style="margin-top: 30px;">Saludos cordiales,</p>
             <p style="font-weight: 600; color: #10b981;">${consent.branch.name}</p>
@@ -579,7 +579,7 @@ export class MailService {
   }
 
   /**
-   * Template de correo de restablecimiento de contrase�a
+   * Template de correo de restablecimiento de contrasena
    */
   private getPasswordResetEmailTemplate(user: User, resetUrl: string): string {
     const tenantName = user.tenant?.name || 'Sistema de Consentimientos';
@@ -688,38 +688,38 @@ export class MailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>🔐 Restablecimiento de Contraseña</h1>
-            <p>Solicitud de cambio de contraseña</p>
+            <h1>Restablecimiento de Contrasena</h1>
+            <p>Solicitud de cambio de contrasena</p>
           </div>
           
           <div class="content">
             <p class="greeting">Hola ${user.name},</p>
             
-            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en <strong>${tenantName}</strong>.</p>
+            <p>Hemos recibido una solicitud para restablecer la contrasena de tu cuenta en <strong>${tenantName}</strong>.</p>
 
             <div class="security-icon">🔒</div>
 
-            <p>Si solicitaste este cambio, haz clic en el botón de abajo para crear una nueva contraseña:</p>
+            <p>Si solicitaste este cambio, haz clic en el boton de abajo para crear una nueva contrasena:</p>
 
             <div style="text-align: center;">
-              <a href="${resetUrl}" class="button">Restablecer Contraseña</a>
+              <a href="${resetUrl}" class="button">Restablecer Contrasena</a>
             </div>
 
             <div class="info-box">
-              <p style="margin: 0;"><strong>⏰ Este enlace expirará en 1 hora</strong></p>
+              <p style="margin: 0;"><strong>Este enlace expirara en 1 hora</strong></p>
               <p style="margin: 10px 0 0 0; font-size: 14px;">Por seguridad, el enlace solo puede usarse una vez.</p>
             </div>
 
             <div class="warning">
-              <strong>⚠️ ¿No solicitaste este cambio?</strong>
+              <strong>No solicitaste este cambio?</strong>
               <p style="margin: 10px 0 0 0;">
-                Si no solicitaste restablecer tu contraseña, puedes ignorar este correo de forma segura. 
-                Tu contraseña actual permanecerá sin cambios.
+                Si no solicitaste restablecer tu contrasena, puedes ignorar este correo de forma segura. 
+                Tu contrasena actual permanecera sin cambios.
               </p>
             </div>
 
             <p style="margin-top: 30px; font-size: 14px; color: #6c757d;">
-              Si el botón no funciona, copia y pega este enlace en tu navegador:
+              Si el boton no funciona, copia y pega este enlace en tu navegador:
             </p>
             <p style="word-break: break-all; font-size: 12px; color: #6c757d;">
               ${resetUrl}
@@ -960,7 +960,7 @@ export class MailService {
   }
 
   /**
-   * Template de confirmaci�n de pago
+   * Template de confirmacion de pago
    */
   private getPaymentConfirmationTemplate(tenant: any, payment: any, invoice: any): string {
     const amount = this.formatCurrency(payment.amount);
@@ -1196,7 +1196,7 @@ export class MailService {
               <p>Un cliente ha solicitado cambiar su plan de suscripción</p>
             </div>
             <div class="content">
-              <h2>Información del Cliente</h2>
+              <h2>Informacion del Cliente</h2>
               <div class="info-box">
                 <div class="info-row"><span class="label">Nombre del Tenant:</span><span class="value">${data.tenantName}</span></div>
                 <div class="info-row"><span class="label">Email de Contacto:</span><span class="value">${data.tenantEmail}</span></div>
@@ -1212,8 +1212,8 @@ export class MailService {
               <h3>Próximos Pasos</h3>
               <ol>
                 <li>Revisar la solicitud del cliente</li>
-                <li>Verificar la información del tenant</li>
-                <li>Actualizar el plan desde el panel de administración</li>
+                <li>Verificar la informacion del tenant</li>
+                <li>Actualizar el plan desde el panel de administracion</li>
                 <li>Confirmar el cambio con el cliente</li>
               </ol>
             </div>

@@ -3,9 +3,9 @@
  * Formato: MAJOR.MINOR.PATCH - YYYYMMDD
  */
 export const APP_VERSION = {
-  version: '1.1.9',
+  version: '1.1.10',
   date: '20260121',
-  fullVersion: '1.1.9 - 20260121',
+  fullVersion: '1.1.10 - 20260121',
 } as const;
 
 export const getAppVersion = () => APP_VERSION.fullVersion;
