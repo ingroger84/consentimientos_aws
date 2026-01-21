@@ -56,65 +56,73 @@ export class BoldService {
     this.merchantId = this.configService.get<string>('BOLD_MERCHANT_ID');
     this.webhookSecret = this.configService.get<string>('BOLD_WEBHOOK_SECRET');
 
-    // Bold Colombia usa Wompi como procesador de pagos
-    // Sandbox: https://sandbox.wompi.co/v1
-    // Production: https://production.wompi.co/v1
-    const apiUrl = this.configService.get<string>('BOLD_API_URL') || 'https://sandbox.wompi.co/v1';
+    // Bold Colombia API
+    // Sandbox: https://api.online.payments.bold.co
+    const apiUrl = this.configService.get<string>('BOLD_API_URL') || 'https://api.online.payments.bold.co';
 
     this.apiClient = axios.create({
       baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.secretKey}`, // Wompi usa la clave privada (SECRET_KEY)
+        'Authorization': `x-api-key ${this.apiKey}`, // Bold usa Authorization: x-api-key
       },
       timeout: 30000,
     });
 
-    this.logger.log(`✅ Bold Service inicializado (Wompi API)`);
+    this.logger.log(`✅ Bold Service inicializado`);
     this.logger.log(`   API URL: ${apiUrl}`);
-    this.logger.log(`   Public Key: ${this.apiKey?.substring(0, 20)}...`);
+    this.logger.log(`   API Key: ${this.apiKey?.substring(0, 20)}...`);
+    this.logger.log(`   Merchant ID: ${this.merchantId}`);
   }
 
   /**
-   * Crear un link de pago en Bold (usando Wompi API)
+   * Crear un link de pago en Bold Colombia
    */
   async createPaymentLink(data: BoldPaymentLinkData): Promise<BoldPaymentLink> {
     try {
-      this.logger.log(`Creando link de pago en Wompi para: ${data.reference}`);
+      this.logger.log(`Creando intención de pago en Bold para: ${data.reference}`);
 
-      // Estructura de Wompi para crear payment links
+      // Estructura de Bold Colombia para crear intención de pago
       const payload = {
-        name: data.description,
+        reference_id: data.reference,
+        amount: {
+          currency: data.currency || 'COP',
+          total_amount: Math.round(data.amount), // Bold espera el monto en pesos (no centavos)
+        },
         description: data.description,
-        single_use: true, // Un solo uso por link
-        collect_shipping: false,
-        currency: data.currency || 'COP',
-        amount_in_cents: Math.round(data.amount * 100), // Wompi espera centavos
-        redirect_url: data.redirectUrl || this.configService.get('BOLD_SUCCESS_URL'),
-        expires_at: data.expirationDate ? data.expirationDate.toISOString() : null,
+        callback_url: data.redirectUrl || this.configService.get('BOLD_SUCCESS_URL'),
+        customer: {
+          name: data.customerName,
+          email: data.customerEmail,
+        },
       };
 
-      this.logger.log(`Payload para Wompi:`, JSON.stringify(payload, null, 2));
+      this.logger.log(`Payload para Bold:`, JSON.stringify(payload, null, 2));
 
-      const response = await this.apiClient.post('/payment_links', payload);
+      const response = await this.apiClient.post('/payment-intent', payload);
 
-      const paymentLinkId = response.data.data.id;
-      const paymentUrl = `https://checkout.wompi.co/l/${paymentLinkId}`;
+      // Bold devuelve la intención de pago con reference_id
+      const referenceId = response.data.reference_id;
+      
+      // Para obtener el link de pago, necesitamos construir la URL del checkout
+      // Según la documentación, después de crear la intención, se debe redirigir al usuario
+      const paymentUrl = `https://checkout.bold.co/payment/${referenceId}`;
 
-      this.logger.log(`✅ Link de pago creado: ${paymentUrl}`);
+      this.logger.log(`✅ Intención de pago creada: ${referenceId}`);
+      this.logger.log(`   URL de pago: ${paymentUrl}`);
 
       return {
-        id: paymentLinkId,
+        id: referenceId,
         url: paymentUrl,
         reference: data.reference,
         amount: data.amount,
-        status: 'pending',
-        createdAt: new Date(response.data.data.created_at),
+        status: response.data.status || 'ACTIVE',
+        createdAt: new Date(response.data.creation_date || Date.now()),
       };
     } catch (error) {
-      this.logger.error(`❌ Error al crear link de pago en Wompi:`, error.response?.data || error.message);
+      this.logger.error(`❌ Error al crear intención de pago en Bold:`, error.response?.data || error.message);
       throw new BadRequestException(
-        `Error al crear link de pago: ${error.response?.data?.error?.reason || error.message}`
+        `Error al crear intención de pago: ${error.response?.data?.message || error.message}`
       );
     }
   }
