@@ -1,7 +1,7 @@
 # Plan de Despliegue - datagree.net en AWS Lightsail
 
 **Fecha:** 2026-01-20
-**Servidor:** 100.28.198.249 (ip-172-26-6-228)
+**Servidor:** [AWS_SERVER_IP] ([AWS_INTERNAL_IP])
 **Dominio:** datagree.net
 **Repositorio:** git@github.com:ingroger84/consentimientos_aws.git
 
@@ -52,8 +52,8 @@
 - [ ] 6.4 Verificar logs y estado
 
 ### 7. CONFIGURACIÓN DNS
-- [ ] 7.1 Configurar registro A para datagree.net → 100.28.198.249
-- [ ] 7.2 Configurar wildcard *.datagree.net → 100.28.198.249
+- [ ] 7.1 Configurar registro A para datagree.net → [AWS_SERVER_IP]
+- [ ] 7.2 Configurar wildcard *.datagree.net → [AWS_SERVER_IP]
 - [ ] 7.3 Verificar propagación DNS
 
 ### 8. VERIFICACIÓN Y PRUEBAS
@@ -151,8 +151,8 @@
    - ✅ Todos los subdominios de tenants soportados
 
 8. **DNS Configurado:**
-   - ✅ datagree.net → 100.28.198.249
-   - ✅ *.datagree.net → 100.28.198.249
+   - ✅ datagree.net → [AWS_SERVER_IP]
+   - ✅ *.datagree.net → [AWS_SERVER_IP]
    - ✅ DNS propagado correctamente
 
 9. **Aplicación Accesible:**
@@ -186,8 +186,8 @@ env: {
 
 1. ✅ Backend funcionando correctamente
 2. ✅ DNS configurado:
-   - Registro A: datagree.net → 100.28.198.249
-   - Wildcard A: *.datagree.net → 100.28.198.249
+   - Registro A: datagree.net → [AWS_SERVER_IP]
+   - Wildcard A: *.datagree.net → [AWS_SERVER_IP]
 3. ✅ SSL instalado con Let's Encrypt:
    - Certificado válido hasta: 2026-04-21
    - Renovación automática configurada
@@ -208,13 +208,13 @@ env: {
 
 **Aplicación Web:**
 - URL: https://datagree.net
-- Super Admin: superadmin@sistema.com / superadmin123
-- Admin Demo: admin@consentimientos.com / admin123
-- Operador Demo: operador@consentimientos.com / operador123
-- Tenant Demo: clinica-demo
+- Super Admin: [SUPER_ADMIN_EMAIL] / [SUPER_ADMIN_PASSWORD]
+- Admin Demo: [ADMIN_DEMO_EMAIL] / [ADMIN_DEMO_PASSWORD]
+- Operador Demo: [OPERADOR_EMAIL] / [OPERADOR_PASSWORD]
+- Tenant Demo: [TENANT_SUBDOMAIN]
 
 **Servidor SSH:**
-- Host: 100.28.198.249
+- Host: [AWS_SERVER_IP]
 - User: ubuntu
 - Key: AWS-ISSABEL.pem
 
@@ -222,8 +222,8 @@ env: {
 - Host: localhost
 - Port: 5432
 - Database: consentimientos
-- User: datagree_admin
-- Password: DataGree2026!Secure
+- User: [DB_USERNAME]
+- Password: [DB_PASSWORD]
 
 **SSL Certificate:**
 - Issuer: Let's Encrypt

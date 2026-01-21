@@ -13,7 +13,7 @@ La aplicación **Sistema de Consentimientos Digitales** ha sido desplegada exito
 ### URLs de Acceso:
 - **Aplicación:** https://datagree.net
 - **API:** https://datagree.net/api/
-- **Servidor:** 100.28.198.249
+- **Servidor:** [AWS_SERVER_IP]
 
 ---
 
@@ -43,8 +43,8 @@ La aplicación **Sistema de Consentimientos Digitales** ha sido desplegada exito
 - ✅ Redirección HTTP → HTTPS
 
 ### 4. DNS
-- ✅ datagree.net → 100.28.198.249
-- ✅ *.datagree.net → 100.28.198.249
+- ✅ datagree.net → [AWS_SERVER_IP]
+- ✅ *.datagree.net → [AWS_SERVER_IP]
 - ✅ Propagación completada
 
 ---
@@ -53,21 +53,21 @@ La aplicación **Sistema de Consentimientos Digitales** ha sido desplegada exito
 
 ### Aplicación Web
 - **URL:** https://datagree.net
-- **Super Admin:** superadmin@sistema.com / superadmin123
-- **Admin Demo:** admin@consentimientos.com / admin123
-- **Operador Demo:** operador@consentimientos.com / operador123
-- **Tenant Demo:** clinica-demo
+- **Super Admin:** [SUPER_ADMIN_EMAIL] / [SUPER_ADMIN_PASSWORD]
+- **Admin Demo:** [ADMIN_DEMO_EMAIL] / [ADMIN_DEMO_PASSWORD]
+- **Operador Demo:** [OPERADOR_EMAIL] / [OPERADOR_PASSWORD]
+- **Tenant Demo:** [TENANT_SUBDOMAIN]
 
 ### Servidor SSH
-- **Host:** 100.28.198.249
+- **Host:** [AWS_SERVER_IP]
 - **Usuario:** ubuntu
 - **Key:** AWS-ISSABEL.pem
 
 ### Base de Datos
 - **Host:** localhost:5432
 - **Database:** consentimientos
-- **Usuario:** datagree_admin
-- **Password:** DataGree2026!Secure
+- **Usuario:** [DB_USERNAME]
+- **Password:** [DB_PASSWORD]
 
 ---
 
@@ -214,7 +214,7 @@ systemctl status certbot.timer
 
 Para cualquier problema o consulta:
 - **Documentación completa:** `DESPLIEGUE_AWS_DATAGREE.md`
-- **Logs del servidor:** SSH a 100.28.198.249
+- **Logs del servidor:** SSH a [AWS_SERVER_IP]
 - **Email:** info@innovasystems.com.co
 
 ---

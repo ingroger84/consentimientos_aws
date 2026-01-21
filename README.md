@@ -55,16 +55,16 @@ npm run dev
 
 ```
 URL:      http://admin.localhost:5173
-Email:    superadmin@sistema.com
-Password: superadmin123
+Email:    [SUPER_ADMIN_EMAIL]
+Password: [SUPER_ADMIN_PASSWORD]
 ```
 
 ### Tenant de Ejemplo
 
 ```
 URL:      http://cliente-demo.localhost:5173
-Email:    clientedemo@demo.com
-Password: (configurada al crear el tenant)
+Email:    [TENANT_EMAIL]
+Password: [TENANT_PASSWORD]
 ```
 
 ---
@@ -262,6 +262,8 @@ Desarrollado por el equipo de Innova Systems
 ---
 
 **¡Gracias por usar el Sistema de Consentimientos! 🚀**
-#   d a t a g r e e - v e r c e l  
- #   d a t a g r e e - v e r c e l  
+#   d a t a g r e e - v e r c e l 
+ 
+ #   d a t a g r e e - v e r c e l 
+ 
  

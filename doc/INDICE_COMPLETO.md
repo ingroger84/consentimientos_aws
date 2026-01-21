@@ -295,7 +295,7 @@ La documentación está organizada en 28 carpetas temáticas numeradas del 01 al
 ### Producción
 - **URL Principal**: https://datagree.net
 - **Panel Admin**: https://admin.datagree.net
-- **Servidor**: 100.28.198.249
+- **Servidor**: [AWS_SERVER_IP]
 
 ### Repositorio
 - **GitHub**: git@github.com:ingroger84/consentimientos_aws.git

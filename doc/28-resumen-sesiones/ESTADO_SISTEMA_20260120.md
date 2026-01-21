@@ -153,12 +153,12 @@ OK Conexion exitosa con S3!
 ## Credenciales de Prueba
 
 ### Super Admin
-- **Email**: superadmin@sistema.com
-- **Password**: superadmin123
+- **Email**: [SUPER_ADMIN_EMAIL]
+- **Password**: [SUPER_ADMIN_PASSWORD]
 
 ### Tenant Admin (Ejemplo)
-- **Email**: admin@consentimientos.com
-- **Password**: admin123
+- **Email**: [TENANT_ADMIN_EMAIL]
+- **Password**: [TENANT_ADMIN_PASSWORD]
 
 ---
 
@@ -199,22 +199,22 @@ OK Conexion exitosa con S3!
 # Database
 DB_HOST=localhost
 DB_PORT=5432
-DB_USERNAME=admin
-DB_PASSWORD=admin123
+DB_USERNAME=[DB_USERNAME]
+DB_PASSWORD=[DB_PASSWORD]
 DB_DATABASE=consentimientos
 
 # AWS S3
 USE_S3=true
-AWS_ACCESS_KEY_ID=AKIA42IJAAWUEQGB6KHY
-AWS_SECRET_ACCESS_KEY=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
+AWS_ACCESS_KEY_ID=[AWS_ACCESS_KEY_ID]
+AWS_SECRET_ACCESS_KEY=[AWS_SECRET_ACCESS_KEY]
 AWS_REGION=us-east-1
 AWS_S3_BUCKET=datagree-uploads
 
 # Email
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=info@innovasystems.com.co
-SMTP_FROM=info@innovasystems.com.co
+SMTP_USER=[SMTP_USER]
+SMTP_FROM=[SMTP_FROM]
 ```
 
 ---

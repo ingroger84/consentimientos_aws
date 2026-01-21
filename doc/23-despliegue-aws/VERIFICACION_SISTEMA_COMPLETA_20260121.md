@@ -10,7 +10,7 @@
 El sistema de consentimientos digitales está completamente desplegado, configurado y operativo en producción en AWS Lightsail. Todas las funcionalidades críticas han sido verificadas y están funcionando correctamente.
 
 **URL Principal:** https://datagree.net  
-**Servidor:** 100.28.198.249 (Ubuntu 24.04)
+**Servidor:** [AWS_SERVER_IP] (Ubuntu 24.04)
 
 ---
 
@@ -56,8 +56,8 @@ El sistema de consentimientos digitales está completamente desplegado, configur
 - ✅ **Redirección HTTP→HTTPS:** Activa
 
 ### 6. DNS
-- ✅ **datagree.net:** A → 100.28.198.249
-- ✅ ***.datagree.net:** A → 100.28.198.249
+- ✅ **datagree.net:** A → [AWS_SERVER_IP]
+- ✅ ***.datagree.net:** A → [AWS_SERVER_IP]
 - ✅ **Propagación:** Completada
 - ✅ **Resolución:** Funcionando
 
@@ -122,9 +122,9 @@ Disco:
 
 ### Funcionalidades Verificadas:
 1. ✅ **Acceso a la aplicación:** https://datagree.net
-2. ✅ **Login Super Admin:** superadmin@sistema.com
-3. ✅ **Login Tenant Admin:** roger.caraballo@gmail.com (demo-estetica)
-4. ✅ **Subdominios:** https://demo-estetica.datagree.net
+2. ✅ **Login Super Admin:** [SUPER_ADMIN_EMAIL]
+3. ✅ **Login Tenant Admin:** [TENANT_ADMIN_EMAIL] ([TENANT_SUBDOMAIN])
+4. ✅ **Subdominios:** https://[TENANT_SUBDOMAIN].datagree.net
 5. ✅ **API:** https://datagree.net/api/
 6. ✅ **SSL en subdominios:** Certificado wildcard funcionando
 7. ✅ **Middleware de tenants:** Detectando subdominios correctamente
@@ -146,26 +146,26 @@ Disco:
 
 ### Aplicación Web
 - **URL:** https://datagree.net
-- **Super Admin:** superadmin@sistema.com / superadmin123
-- **Admin Demo:** admin@consentimientos.com / admin123
-- **Tenant Demo:** demo-estetica (roger.caraballo@gmail.com)
+- **Super Admin:** [SUPER_ADMIN_EMAIL] / [SUPER_ADMIN_PASSWORD]
+- **Admin Demo:** [ADMIN_DEMO_EMAIL] / [ADMIN_DEMO_PASSWORD]
+- **Tenant Demo:** [TENANT_SUBDOMAIN] ([TENANT_EMAIL])
 
 ### Servidor SSH
-- **Host:** 100.28.198.249
+- **Host:** [AWS_SERVER_IP]
 - **Usuario:** ubuntu
 - **Key:** AWS-ISSABEL.pem
-- **Comando:** `ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249`
+- **Comando:** `ssh -i AWS-ISSABEL.pem ubuntu@[AWS_SERVER_IP]`
 
 ### Base de Datos
 - **Host:** localhost:5432
 - **Database:** consentimientos
-- **Usuario:** datagree_admin
-- **Password:** DataGree2026!Secure
+- **Usuario:** [DB_USERNAME]
+- **Password:** [DB_PASSWORD]
 - **Comando:** `sudo -u postgres psql consentimientos`
 
 ### AWS Route 53 (SSL Renewal)
-- **Access Key:** AKIA42IJAAWUI3LTPJKP
-- **Secret:** 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
+- **Access Key:** [AWS_ROUTE53_ACCESS_KEY]
+- **Secret:** [AWS_ROUTE53_SECRET_KEY]
 - **Region:** us-east-1
 
 ---
@@ -353,7 +353,7 @@ journalctl -xe
 
 ### Contacto
 - **Email:** info@innovasystems.com.co
-- **Servidor:** 100.28.198.249
+- **Servidor:** [AWS_SERVER_IP]
 - **Repositorio:** git@github.com:ingroger84/consentimientos_aws.git
 
 ---

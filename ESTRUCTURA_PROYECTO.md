@@ -147,19 +147,19 @@ pm2 restart datagree-backend
 ## 🔐 Credenciales
 
 ### Aplicación (Producción)
-- **Super Admin:** superadmin@sistema.com / superadmin123
-- **Admin Demo:** admin@consentimientos.com / admin123
+- **Super Admin:** [ADMIN_EMAIL] / [ADMIN_PASSWORD]
+- **Admin Demo:** [DEMO_EMAIL] / [DEMO_PASSWORD]
 
 ### Servidor AWS
-- **Host:** 100.28.198.249
+- **Host:** [AWS_SERVER_IP]
 - **Usuario:** ubuntu
 - **Clave:** AWS-ISSABEL.pem
 
 ### Base de Datos
 - **Host:** localhost:5432
 - **Database:** consentimientos
-- **Usuario:** datagree_admin
-- **Password:** DataGree2026!Secure
+- **Usuario:** [DB_USERNAME]
+- **Password:** [DB_PASSWORD]
 
 ---
 
