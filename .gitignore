@@ -10,13 +10,30 @@ coverage/
 # Production
 dist/
 build/
+backend/dist/
+frontend/dist/
+frontend/build/
 
-# Environment
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Backend environment
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.test.local
+backend/.env.production.local
+
+# Frontend environment
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
 # IDE
 .vscode/
@@ -29,9 +46,11 @@ build/
 .DS_Store
 Thumbs.db
 
-# Uploads
+# Uploads and temporary files
 uploads/
 temp/
+backend/uploads/
+frontend/uploads/
 
 # Keys (SSH, certificates, etc.)
 keys/
