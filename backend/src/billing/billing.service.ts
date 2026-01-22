@@ -279,7 +279,6 @@ export class BillingService {
 
     return await query.getMany();
   }
-}
 
   /**
    * Suspender cuentas gratuitas con trial expirado
@@ -293,7 +292,7 @@ export class BillingService {
     // Buscar tenants con plan gratuito, en estado TRIAL y con trial expirado
     const expiredTrials = await this.tenantsRepository.find({
       where: {
-        plan: 'free',
+        plan: 'free' as any,
         status: TenantStatus.TRIAL,
         trialEndsAt: LessThan(now),
       },
@@ -335,3 +334,4 @@ export class BillingService {
 
     return { suspended, errors };
   }
+}

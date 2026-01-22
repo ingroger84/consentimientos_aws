@@ -91,8 +91,6 @@ export class BillingSchedulerService {
       this.logger.error('Error al actualizar facturas vencidas:', error);
     }
   }
-}
-
 
   // Suspender cuentas gratuitas expiradas - Diario a las 02:00
   @Cron('0 2 * * *')
@@ -111,3 +109,4 @@ export class BillingSchedulerService {
       this.logger.error('Error al ejecutar suspensión de cuentas gratuitas:', error);
     }
   }
+}

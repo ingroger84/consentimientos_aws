@@ -743,10 +743,18 @@ export class TenantsService {
       
       console.log(`[TenantsService] Plan ${planId} actualizado exitosamente`);
       
-      // Limpiar cache después de guardar
+      // Limpiar cache después de guardar para forzar recarga
       if (require.cache[resolvedPath]) {
         delete require.cache[resolvedPath];
       }
+      
+      // IMPORTANTE: Recompilar el archivo TypeScript en producción
+      // En desarrollo, esto se hace automáticamente con ts-node
+      // En producción, necesitamos recompilar o usar un enfoque diferente
+      
+      // Alternativa: Guardar también en un archivo JSON que se lee dinámicamente
+      const jsonPath = path.join(__dirname, './plans.json');
+      fs.writeFileSync(jsonPath, JSON.stringify(updatedPlans, null, 2), 'utf-8');
       
       return updatedPlans[planId];
     } catch (error) {
