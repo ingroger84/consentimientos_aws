@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   FileText, 
   Users, 
@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const features = [
