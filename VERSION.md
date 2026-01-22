@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 2.1.2
+## Versión Actual: 2.1.3
 **Fecha:** 2026-01-22
 **Tipo de Cambio:** PATCH
 
@@ -18,13 +18,13 @@
 
 ## Historial de Versiones
 
+### 2.1.3 - 2026-01-22 [PATCH]
+- Frontend: 5 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 2.1.2 - 2026-01-22 [PATCH]
 - Frontend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
-
-### 2.1.1 - 2026-01-22 [PATCH]
-- Frontend: 1 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
 
 ---
 

@@ -133,37 +133,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary" style={{ background: `linear-gradient(135deg, ${settings.primaryColor} 0%, ${settings.secondaryColor} 100%)` }}>
+    <div className="min-h-screen flex items-center justify-center bg-primary px-4 sm:px-6 lg:px-8" style={{ background: `linear-gradient(135deg, ${settings.primaryColor} 0%, ${settings.secondaryColor} 100%)` }}>
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+          <div className="text-center mb-6 sm:mb-8">
             {settings.logoUrl ? (
               <div className="flex justify-center mb-4">
                 <img
                   src={getResourceUrl(settings.logoUrl)}
                   alt={settings.companyName}
-                  className="h-20 object-contain"
+                  className="h-16 sm:h-20 object-contain"
                 />
               </div>
             ) : (
-              <div className="w-20 h-20 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center" style={{ backgroundColor: settings.primaryColor }}>
-                <span className="text-3xl font-bold text-white">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center" style={{ backgroundColor: settings.primaryColor }}>
+                <span className="text-2xl sm:text-3xl font-bold text-white">
                   {settings.companyName.charAt(0)}
                 </span>
               </div>
             )}
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {settings.companyName}
             </h1>
-            <p className="text-gray-600 mt-2">Ingresa tus credenciales</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Ingresa tus credenciales</p>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
               {error}
             </div>
           )}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email
@@ -177,8 +178,9 @@ export default function LoginPage() {
                     message: 'Email inválido',
                   },
                 })}
-                className="input"
+                className="input text-base"
                 placeholder="tu@email.com"
+                autoComplete="email"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -198,8 +200,9 @@ export default function LoginPage() {
                     message: 'Mínimo 6 caracteres',
                   },
                 })}
-                className="input"
+                className="input text-base"
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">
@@ -221,7 +224,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn btn-primary py-3 text-lg"
+              className="w-full btn btn-primary py-3 text-base sm:text-lg font-medium touch-manipulation"
             >
               {loading ? 'Ingresando...' : 'Ingresar'}
             </button>

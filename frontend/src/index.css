@@ -12,11 +12,26 @@
   body {
     @apply bg-gray-50 text-gray-900;
   }
+
+  /* Mejoras para móviles */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Mejorar legibilidad en móviles */
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px; /* Prevenir zoom en iOS */
+    }
+  }
 }
 
 @layer components {
   .btn {
     @apply px-4 py-2 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+    /* Mejorar área táctil en móviles */
+    min-height: 44px;
+    touch-action: manipulation;
   }
   
   .btn-primary {
@@ -26,6 +41,10 @@
   
   .btn-primary:hover {
     filter: brightness(0.9);
+  }
+  
+  .btn-primary:active {
+    filter: brightness(0.85);
   }
   
   .btn-secondary {
@@ -38,6 +57,9 @@
   
   .input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent;
+    /* Mejorar experiencia en móviles */
+    min-height: 44px;
+    font-size: 16px; /* Prevenir zoom en iOS */
   }
   
   .input:focus {
@@ -46,6 +68,13 @@
   
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
+  }
+
+  /* Responsive card */
+  @media (max-width: 640px) {
+    .card {
+      @apply p-4;
+    }
   }
 
   .text-primary {
@@ -58,6 +87,26 @@
 
   .border-primary {
     border-color: var(--color-primary);
+  }
+
+  /* Tablas responsive */
+  .table-responsive {
+    @apply overflow-x-auto -mx-4 sm:mx-0;
+  }
+
+  .table-responsive table {
+    @apply min-w-full;
+  }
+
+  /* Modales responsive */
+  .modal-content {
+    @apply max-h-[90vh] overflow-y-auto;
+  }
+
+  @media (max-width: 640px) {
+    .modal-content {
+      @apply max-h-[85vh];
+    }
   }
 }
 
@@ -105,5 +154,39 @@
 
   .animate-scale-in {
     animation: scale-in 0.2s ease-out;
+  }
+
+  /* Utilidades para móviles */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Ocultar scrollbar pero mantener funcionalidad */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Texto truncado responsive */
+  .truncate-mobile {
+    @apply truncate;
+  }
+
+  @media (min-width: 640px) {
+    .truncate-mobile {
+      @apply overflow-visible whitespace-normal;
+    }
   }
 }
