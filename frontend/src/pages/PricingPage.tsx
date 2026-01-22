@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
+import { getApiBaseUrl } from '@/utils/api-url';
 
 interface Plan {
   id: string;
@@ -46,9 +47,9 @@ export default function PricingPage() {
 
   const loadPlans = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      console.log('Loading plans from:', `${apiUrl}/tenants/plans`);
-      const response = await axios.get(`${apiUrl}/tenants/plans`);
+      const apiUrl = getApiBaseUrl();
+      console.log('Loading plans from:', `${apiUrl}/api/tenants/plans`);
+      const response = await axios.get(`${apiUrl}/api/tenants/plans`);
       console.log('Plans loaded:', response.data);
       // Filtrar el plan gratuito - solo el Super Admin puede asignarlo
       const filteredPlans = response.data.filter((plan: Plan) => plan.id !== 'free');
@@ -98,10 +99,10 @@ export default function PricingPage() {
     setRequestingPlan(plan.id);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = getApiBaseUrl();
       const price = billingCycle === 'annual' ? plan.priceAnnual : plan.priceMonthly;
       
-      await axios.post(`${apiUrl}/tenants/request-plan-change`, {
+      await axios.post(`${apiUrl}/api/tenants/request-plan-change`, {
         planId: plan.id,
         planName: plan.name,
         billingCycle,
