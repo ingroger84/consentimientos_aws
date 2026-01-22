@@ -43,20 +43,27 @@ function App() {
     initialize();
   }, [initialize]);
 
-  // Detectar si estamos en un subdominio (tenant o admin)
-  const isSubdomain = () => {
+  // Detectar si estamos en el dominio principal (sin subdominio)
+  const isMainDomain = () => {
     const hostname = window.location.hostname;
-    // Si es localhost, verificar puerto o path
+    
+    // En desarrollo (localhost), siempre mostrar login
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return true; // En desarrollo, siempre mostrar login
+      return false; // No es dominio principal, mostrar login
     }
-    // En producción, verificar si NO es el dominio principal
+    
+    // En producción, verificar si es exactamente el dominio principal
+    // datagree.net = dominio principal (landing)
+    // admin.datagree.net = subdominio (login)
+    // tenant.datagree.net = subdominio (login)
     const parts = hostname.split('.');
-    // Si tiene más de 2 partes (ej: admin.datagree.net) o es un subdominio conocido
-    return parts.length > 2 || hostname.startsWith('admin.') || hostname.includes('.');
+    
+    // Si tiene exactamente 2 partes (ej: datagree.net), es el dominio principal
+    // Si tiene más de 2 partes (ej: admin.datagree.net), es un subdominio
+    return parts.length === 2;
   };
 
-  const showLanding = !isSubdomain();
+  const showLanding = isMainDomain();
 
   return (
     <ThemeProvider>
