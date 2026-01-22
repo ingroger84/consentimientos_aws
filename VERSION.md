@@ -1,61 +1,70 @@
 # Versión del Sistema
 
-## Versión Actual: 1.1.39
+## Versión Actual: 2.0.0
 **Fecha:** 2026-01-22
+**Tipo de Cambio:** MAJOR
 
 ---
 
 ## Formato de Versión
 
-`MAJOR.MINOR.PATCH - YYYYMMDD`
+`MAJOR.MINOR.PATCH`
 
-- **MAJOR**: Cambios incompatibles con versiones anteriores
+- **MAJOR**: Cambios incompatibles con versiones anteriores (breaking changes)
 - **MINOR**: Nueva funcionalidad compatible con versiones anteriores
-- **PATCH**: Correcciones de errores compatibles con versiones anteriores
-- **YYYYMMDD**: Fecha de la actualización
+- **PATCH**: Correcciones de errores y mejoras compatibles
 
 ---
 
 ## Historial de Versiones
 
-### 1.1.39 - 2026-01-22
-- Actualización automática del sistema
-- Mejoras y correcciones
+### 2.0.0 - 2026-01-22 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 9 archivo(s) modificado(s)
+- Scripts: 6 archivo(s) modificado(s)
 
-### 1.1.1 - 2026-01-20
-- Sistema de impuestos mejorado
-- Facturas exentas de impuestos
-- Selección flexible de impuestos
-- UI mejorada en configuración de impuestos
-- Migración de base de datos completada
-
-### 1.1.0 - 2026-01-20
-- Implementación de versionamiento
-- Versión visible en login y sidebar
-- Corrección de nombres de planes
-- Dashboard con estadísticas reales
+### 1.2.1 - 2026-01-22 [PATCH]
+- Formato de versión mejorado (sin paréntesis en fecha)
+- Preparación para despliegue en producción
 
 ---
 
-## Actualización Automática
+## Sistema de Versionamiento Automático
 
-La versión se actualiza automáticamente con cada commit a GitHub mediante Git Hooks.
+### Detección Inteligente de Cambios
 
-**Script:** `update-version-auto.js`
-**Hook:** `.husky/pre-commit`
+El sistema detecta automáticamente el tipo de versión basándose en:
+
+1. **MAJOR (X.0.0)**: 
+   - Cambios en migraciones de base de datos
+   - Modificaciones en autenticación
+   - Cambios incompatibles en APIs
+   - Mensaje de commit con "BREAKING CHANGE"
+
+2. **MINOR (0.X.0)**:
+   - Nuevas funcionalidades (feat:, feature:)
+   - Adición de múltiples archivos nuevos
+   - Mensaje de commit con "feat:" o "[MINOR]"
+
+3. **PATCH (0.0.X)**:
+   - Correcciones de bugs (fix:, bugfix:)
+   - Optimizaciones
+   - Mejoras menores
+   - Por defecto si no se detecta otro tipo
+
+### Uso
+
+**Automático:** Se ejecuta en cada commit mediante Git Hook
+**Manual:** `node scripts/utils/smart-version.js`
 
 ---
 
-## Actualización Manual
+## Sincronización
 
-Si necesitas actualizar la versión manualmente:
-
-```powershell
-.\update-version.ps1
-```
-
-O especificando la versión:
-
-```powershell
-.\update-version.ps1 -Version "2.0.0"
-```
+La versión se sincroniza automáticamente en:
+- ✓ frontend/package.json
+- ✓ backend/package.json
+- ✓ frontend/src/config/version.ts
+- ✓ backend/src/config/version.ts
+- ✓ VERSION.md (este archivo)

@@ -1,8 +1,60 @@
 # Sistema de Versionamiento
 
-## Descripción General
+## 🎯 Descripción General
 
-El sistema implementa un control de versiones siguiendo Semantic Versioning (SemVer) con fecha de actualización, visible para los usuarios en la interfaz.
+Sistema inteligente de versionamiento automático que detecta el tipo de cambio y actualiza la versión apropiadamente siguiendo Semantic Versioning y mejores prácticas de SaaS.
+
+## 📚 Documentación
+
+- **[Sistema Inteligente](SISTEMA_INTELIGENTE.md)** - Documentación completa del nuevo sistema
+- **[Ejemplos de Uso](EJEMPLOS.md)** - Casos de uso y ejemplos prácticos
+- **[Auto-Versionamiento](AUTO_VERSIONAMIENTO.md)** - Configuración de Git Hooks
+
+## ✨ Características Principales
+
+### 1. Detección Automática Inteligente
+- Analiza archivos modificados
+- Interpreta mensajes de commit
+- Detecta tipo de cambio (MAJOR/MINOR/PATCH)
+
+### 2. Sincronización Total
+- Frontend y Backend sincronizados
+- package.json actualizados
+- VERSION.md con historial detallado
+- README.md con badge actualizado
+
+### 3. Historial Detallado
+- Registro de todos los cambios
+- Descripción automática de modificaciones
+- Fecha y tipo de cambio
+
+## 🚀 Inicio Rápido
+
+### Ver Versión Actual
+```powershell
+.\scripts\utils\version.ps1 show
+```
+
+### Incrementar Versión
+```powershell
+# Automático (detecta tipo de cambio)
+git commit -m "feat: nueva funcionalidad"
+
+# Manual
+.\scripts\utils\version.ps1 patch   # 1.2.0 → 1.2.1
+.\scripts\utils\version.ps1 minor   # 1.2.0 → 1.3.0
+.\scripts\utils\version.ps1 major   # 1.2.0 → 2.0.0
+```
+
+### Verificar Sincronización
+```powershell
+node scripts/utils/verify-version-sync.js
+```
+
+### Ver Ayuda
+```powershell
+.\scripts\utils\version-help.ps1
+```
 
 ## Formato de Versión
 

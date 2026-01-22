@@ -154,9 +154,15 @@ La documentación está organizada en 28 carpetas temáticas numeradas del 01 al
 ### 🔧 Configuración y Mantenimiento
 
 #### [15-versionamiento/](./15-versionamiento/)
-- Versionamiento automático
-- Configuración de hooks
-- Ejemplos de uso
+- **Sistema Inteligente de Versionamiento Automático**
+- Detección automática de tipo de cambio (MAJOR/MINOR/PATCH)
+- Sincronización total de versiones
+- Historial detallado de cambios
+- Convenciones de commit (Conventional Commits)
+- Scripts de gestión y verificación
+- [Guía Rápida](./15-versionamiento/GUIA_RAPIDA.md)
+- [Sistema Inteligente](./15-versionamiento/SISTEMA_INTELIGENTE.md)
+- [Resumen](./15-versionamiento/RESUMEN_SISTEMA_INTELIGENTE.md)
 
 #### [27-configuracion-sistema/](./27-configuracion-sistema/)
 - Correcciones de S3

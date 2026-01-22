@@ -1,6 +1,5 @@
-# Auto-incrementar versión antes de cada commit
-echo "Actualizando versión del sistema..."
-node scripts/utils/update-version-auto.js
+# Sistema Inteligente de Versionamiento Automático
+node scripts/utils/smart-version.js
 
 # Agregar archivos de versión al commit
 git add frontend/src/config/version.ts
@@ -8,5 +7,3 @@ git add backend/src/config/version.ts
 git add frontend/package.json
 git add backend/package.json
 git add VERSION.md
-
-echo "✓ Versión actualizada automáticamente"

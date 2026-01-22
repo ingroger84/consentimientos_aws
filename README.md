@@ -2,7 +2,7 @@
 
 > Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
 
-[![Version](https://img.shields.io/badge/version-1.1.28-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-1.2.1-blue.svg)](VERSION.md)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](#)
