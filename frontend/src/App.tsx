@@ -47,8 +47,11 @@ function App() {
   const isMainDomain = () => {
     const hostname = window.location.hostname;
     
+    console.log('[App] Hostname:', hostname);
+    
     // En desarrollo (localhost), siempre mostrar login
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      console.log('[App] Localhost detectado -> Login');
       return false; // No es dominio principal, mostrar login
     }
     
@@ -56,14 +59,20 @@ function App() {
     // datagree.net = dominio principal (landing)
     // admin.datagree.net = subdominio (login)
     // tenant.datagree.net = subdominio (login)
-    const parts = hostname.split('.');
     
-    // Si tiene exactamente 2 partes (ej: datagree.net), es el dominio principal
-    // Si tiene más de 2 partes (ej: admin.datagree.net), es un subdominio
-    return parts.length === 2;
+    // Verificar si es exactamente datagree.net (sin www)
+    if (hostname === 'datagree.net' || hostname === 'www.datagree.net') {
+      console.log('[App] Dominio principal detectado -> Landing');
+      return true;
+    }
+    
+    // Cualquier otro caso (subdominios) -> Login
+    console.log('[App] Subdominio detectado -> Login');
+    return false;
   };
 
   const showLanding = isMainDomain();
+  console.log('[App] showLanding:', showLanding);
 
   return (
     <ThemeProvider>
