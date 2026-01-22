@@ -7,12 +7,14 @@ import { User } from '../users/entities/user.entity';
 import { Role } from '../roles/entities/role.entity';
 import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Tenant, User, Role]),
     forwardRef(() => SettingsModule),
     MailModule,
+    NotificationsModule,
   ],
   controllers: [TenantsController],
   providers: [TenantsService],

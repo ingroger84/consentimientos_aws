@@ -1230,4 +1230,249 @@ export class MailService {
       throw error;
     }
   }
+
+  /**
+   * Enviar notificación al Super Admin sobre nueva cuenta creada
+   */
+  async sendNewAccountNotification(tenant: any, adminUser: any): Promise<void> {
+    try {
+      // Obtener email del Super Admin desde settings o usar uno por defecto
+      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || 'admin@datagree.net';
+      
+      const baseDomain = this.configService.get('BASE_DOMAIN');
+      const tenantUrl = baseDomain === 'localhost' 
+        ? `http://${tenant.slug}.localhost:5173`
+        : `https://${tenant.slug}.${baseDomain}`;
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: superAdminEmail,
+        subject: '🎉 Nueva Cuenta Creada - DatAgree',
+        html: this.getNewAccountNotificationTemplate(tenant, adminUser, tenantUrl),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`New account notification sent to Super Admin: ${superAdminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending new account notification:`, error);
+      // No lanzar error para no bloquear la creación de la cuenta
+    }
+  }
+
+  /**
+   * Template de notificación de nueva cuenta para Super Admin
+   */
+  private getNewAccountNotificationTemplate(tenant: any, adminUser: any, tenantUrl: string): string {
+    const planNames = {
+      free: 'Gratuito (7 días)',
+      basic: 'Básico',
+      professional: 'Emprendedor',
+      enterprise: 'Plus',
+      custom: 'Empresarial',
+    };
+
+    const planName = planNames[tenant.plan] || tenant.plan;
+    const trialEndsAt = tenant.trialEndsAt ? new Date(tenant.trialEndsAt).toLocaleDateString('es-ES') : 'N/A';
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+          }
+          .header .emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+          }
+          .content {
+            padding: 40px 30px;
+          }
+          .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          .info-box h3 {
+            margin: 0 0 15px 0;
+            color: #10b981;
+            font-size: 16px;
+          }
+          .info-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+          }
+          .info-item strong {
+            color: #10b981;
+            display: inline-block;
+            min-width: 150px;
+          }
+          .plan-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 10px 0;
+          }
+          .action-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+          }
+          .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+          }
+          .stat-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+          }
+          .stat-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #10b981;
+          }
+          .stat-card .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="emoji">🎉</div>
+            <h1>Nueva Cuenta Creada</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">
+              Un nuevo cliente se ha registrado en DatAgree
+            </p>
+          </div>
+
+          <div class="content">
+            <p style="font-size: 16px; color: #374151;">
+              ¡Hola Super Admin! 👋
+            </p>
+            <p style="font-size: 16px; color: #374151;">
+              Te informamos que se ha creado una nueva cuenta en la plataforma desde la landing page.
+            </p>
+
+            <div class="info-box">
+              <h3>📊 Información de la Empresa</h3>
+              <div class="info-item">
+                <strong>Nombre:</strong> ${tenant.name}
+              </div>
+              <div class="info-item">
+                <strong>Subdominio:</strong> ${tenant.slug}.datagree.net
+              </div>
+              <div class="info-item">
+                <strong>Contacto:</strong> ${tenant.contactName || 'N/A'}
+              </div>
+              <div class="info-item">
+                <strong>Email:</strong> ${tenant.contactEmail || 'N/A'}
+              </div>
+              <div class="info-item">
+                <strong>Teléfono:</strong> ${tenant.contactPhone || 'N/A'}
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>👤 Administrador de la Cuenta</h3>
+              <div class="info-item">
+                <strong>Nombre:</strong> ${adminUser.name}
+              </div>
+              <div class="info-item">
+                <strong>Email:</strong> ${adminUser.email}
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>💳 Plan Seleccionado</h3>
+              <div class="plan-badge">${planName}</div>
+              <div class="info-item">
+                <strong>Estado:</strong> ${tenant.status === 'trial' ? 'Período de Prueba' : 'Activo'}
+              </div>
+              ${tenant.trialEndsAt ? `
+              <div class="info-item">
+                <strong>Trial expira:</strong> ${trialEndsAt}
+              </div>
+              ` : ''}
+            </div>
+
+              <div class="stat-card">
+                <div class="number">${tenant.storageLimitMb} MB</div>
+                <div class="label">Almacenamiento</div>
+              </div>
+            </div>
+
+            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+              <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                <strong>💡 Acción recomendada:</strong> Puedes revisar la cuenta desde el panel de administración y contactar al cliente si es necesario.
+              </p>
+            </div>
+          </div>
+
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;">
+              <strong>DatAgree</strong> - Sistema de Gestión de Consentimientos
+            </p>
+            <p style="margin: 0; font-size: 12px;">
+              Este es un correo automático. No responder a este mensaje.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 }

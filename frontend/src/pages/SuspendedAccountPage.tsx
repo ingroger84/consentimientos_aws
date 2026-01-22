@@ -1,13 +1,65 @@
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Mail, Phone, ArrowLeft } from 'lucide-react';
+import { AlertCircle, Mail, Phone, ArrowLeft, CreditCard, Clock } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getResourceUrl } from '@/utils/api-url';
+import { useEffect, useState } from 'react';
+import api from '@/services/api';
+
+interface PlanInfo {
+  id: string;
+  name: string;
+  priceMonthly: number;
+  description: string;
+}
 
 export default function SuspendedAccountPage() {
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const { settings } = useTheme();
+  const [plans, setPlans] = useState<PlanInfo[]>([]);
+  const [isFreeAccount, setIsFreeAccount] = useState(false);
+
+  useEffect(() => {
+    // Verificar si es cuenta gratuita
+    if (user?.tenant) {
+      checkAccountType();
+    }
+    // Cargar planes disponibles
+    loadPlans();
+  }, [user]);
+
+  const checkAccountType = async () => {
+    try {
+      const response = await api.get(`/tenants/${user?.tenant?.id}`);
+      setIsFreeAccount(response.data.plan === 'free');
+    } catch (error) {
+      console.error('Error checking account type:', error);
+    }
+  };
+
+  const loadPlans = async () => {
+    try {
+      const response = await api.get('/tenants/plans');
+      // Filtrar solo planes de pago
+      const paidPlans = response.data.filter((p: PlanInfo) => p.id !== 'free');
+      setPlans(paidPlans);
+    } catch (error) {
+      console.error('Error loading plans:', error);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  const handleContactSales = () => {
+    window.location.href = 'mailto:ventas@datagree.net?subject=Solicitud de Plan - Cuenta Suspendida';
+  };
 
   const handleLogout = () => {
     logout();
@@ -48,14 +100,60 @@ export default function SuspendedAccountPage() {
           </h1>
 
           {/* Mensaje principal */}
-          <div className="bg-red-50 border-l-4 border-red-500 p-6 mb-6 rounded-r-lg">
-            <p className="text-lg text-gray-800 mb-4">
-              Tu cuenta ha sido suspendida temporalmente debido a facturas pendientes de pago.
-            </p>
-            <p className="text-gray-700">
-              Para reactivar tu cuenta, por favor realiza el pago de las facturas vencidas o contacta al administrador del sistema.
-            </p>
+          <div className={`${isFreeAccount ? 'bg-yellow-50 border-yellow-500' : 'bg-red-50 border-red-500'} border-l-4 p-6 mb-6 rounded-r-lg`}>
+            {isFreeAccount ? (
+              <>
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock className="w-6 h-6 text-yellow-600" />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Período de Prueba Finalizado
+                  </h2>
+                </div>
+                <p className="text-lg text-gray-800 mb-4">
+                  Tu período de prueba gratuito de 7 días ha finalizado.
+                </p>
+                <p className="text-gray-700">
+                  Para continuar usando DatAgree y acceder a todas las funcionalidades, selecciona uno de nuestros planes de pago.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg text-gray-800 mb-4">
+                  Tu cuenta ha sido suspendida temporalmente debido a facturas pendientes de pago.
+                </p>
+                <p className="text-gray-700">
+                  Para reactivar tu cuenta, por favor realiza el pago de las facturas vencidas o contacta al administrador del sistema.
+                </p>
+              </>
+            )}
           </div>
+
+          {/* Planes disponibles (solo para cuentas gratuitas) */}
+          {isFreeAccount && plans.length > 0 && (
+            <div className="bg-gradient-to-br from-primary-50 to-purple-50 rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">
+                Selecciona un Plan para Continuar
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                {plans.map((plan) => (
+                  <div key={plan.id} className="bg-white rounded-lg p-4 border-2 border-gray-200 hover:border-primary-500 transition">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{plan.description}</p>
+                    <div className="text-2xl font-bold text-primary-600 mb-3">
+                      {formatPrice(plan.priceMonthly)}<span className="text-sm text-gray-600">/mes</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={handleContactSales}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              >
+                <CreditCard className="w-5 h-5" />
+                Contactar para Contratar un Plan
+              </button>
+            </div>
+          )}
 
           {/* Información de contacto */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
@@ -75,17 +173,19 @@ export default function SuspendedAccountPage() {
           </div>
 
           {/* Pasos para reactivar */}
-          <div className="bg-blue-50 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              Pasos para reactivar tu cuenta:
-            </h2>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>Revisa las facturas pendientes en tu correo electrónico</li>
-              <li>Realiza el pago correspondiente</li>
-              <li>Notifica al administrador sobre el pago realizado</li>
-              <li>Tu cuenta será reactivada en las próximas horas</li>
-            </ol>
-          </div>
+          {!isFreeAccount && (
+            <div className="bg-blue-50 rounded-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Pasos para reactivar tu cuenta:
+              </h2>
+              <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                <li>Revisa las facturas pendientes en tu correo electrónico</li>
+                <li>Realiza el pago correspondiente</li>
+                <li>Notifica al administrador sobre el pago realizado</li>
+                <li>Tu cuenta será reactivada en las próximas horas</li>
+              </ol>
+            </div>
+          )}
 
           {/* Botones de acción */}
           <div className="flex flex-col sm:flex-row gap-4">
@@ -97,19 +197,25 @@ export default function SuspendedAccountPage() {
               Cerrar Sesión
             </button>
             <a
-              href="mailto:admin@example.com"
+              href={isFreeAccount ? "mailto:ventas@datagree.net" : "mailto:soporte@datagree.net"}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <Mail className="w-5 h-5" />
-              Contactar Soporte
+              {isFreeAccount ? 'Contactar Ventas' : 'Contactar Soporte'}
             </a>
           </div>
 
           {/* Nota adicional */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            <p>
-              Una vez realizado el pago, tu cuenta será reactivada automáticamente.
-            </p>
+            {isFreeAccount ? (
+              <p>
+                Contáctanos para seleccionar el plan que mejor se adapte a tus necesidades.
+              </p>
+            ) : (
+              <p>
+                Una vez realizado el pago, tu cuenta será reactivada automáticamente.
+              </p>
+            )}
           </div>
         </div>
       </div>

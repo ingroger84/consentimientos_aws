@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { consentService } from '@/services/consent.service';
@@ -12,15 +12,17 @@ import { useToast } from '@/hooks/useToast';
 
 export default function CreateConsentPage() {
   const navigate = useNavigate();
+  const { id: consentIdParam } = useParams<{ id: string }>();
+  const isEditMode = !!consentIdParam;
   const toast = useToast();
   const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [consentId, setConsentId] = useState<string | null>(null);
+  const [consentId, setConsentId] = useState<string | null>(consentIdParam || null);
   const [formData, setFormData] = useState<any>({});
   const [clientPhoto, setClientPhoto] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
   const { data: services, isLoading: servicesLoading, error: servicesError } = useQuery({
     queryKey: ['services'],
@@ -42,14 +44,55 @@ export default function CreateConsentPage() {
     },
   });
 
+  // Cargar consentimiento existente si estamos en modo edición
+  const { data: existingConsent, isLoading: loadingConsent } = useQuery({
+    queryKey: ['consent', consentIdParam],
+    queryFn: () => consentService.getById(consentIdParam!),
+    enabled: isEditMode,
+  });
+
+  // Cargar datos del consentimiento existente
+  useEffect(() => {
+    if (existingConsent && isEditMode) {
+      const service = services?.find((s) => s.id === existingConsent.service.id);
+      setSelectedService(service || null);
+      setClientPhoto(existingConsent.clientPhoto || null);
+      
+      const initialData = {
+        clientName: existingConsent.clientName,
+        clientId: existingConsent.clientId,
+        clientEmail: existingConsent.clientEmail,
+        clientPhone: existingConsent.clientPhone,
+        serviceId: existingConsent.service.id,
+        branchId: existingConsent.branch.id,
+      };
+      
+      setFormData(initialData);
+      reset(initialData);
+    }
+  }, [existingConsent, isEditMode, services, reset]);
+
   const createMutation = useMutation({
-    mutationFn: consentService.create,
+    mutationFn: (data: any) => {
+      if (isEditMode && consentId) {
+        // En modo edición, actualizar el consentimiento existente
+        return api.patch(`/consents/${consentId}`, data).then(res => res.data);
+      } else {
+        // En modo creación, crear nuevo consentimiento
+        return consentService.create(data);
+      }
+    },
     onSuccess: (data) => {
-      setConsentId(data.id);
+      if (!isEditMode) {
+        setConsentId(data.id);
+      }
       setStep(3);
     },
     onError: (error: any) => {
-      toast.error('Error al crear consentimiento', error.response?.data?.message || error.message);
+      toast.error(
+        isEditMode ? 'Error al actualizar consentimiento' : 'Error al crear consentimiento',
+        error.response?.data?.message || error.message
+      );
     },
   });
 
@@ -141,7 +184,7 @@ export default function CreateConsentPage() {
         <div className="card">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-gray-900">
-              Nuevo Consentimiento
+              {isEditMode ? 'Editar Consentimiento' : 'Nuevo Consentimiento'}
             </h1>
             <div className="flex items-center gap-2 mt-4">
               {[1, 2, 3].map((s) => (
@@ -160,7 +203,7 @@ export default function CreateConsentPage() {
 
           {step === 1 && (
             <>
-              {servicesLoading || branchesLoading ? (
+              {(servicesLoading || branchesLoading || (isEditMode && loadingConsent)) ? (
                 <div className="text-center py-8">
                   <p>Cargando datos...</p>
                   {servicesLoading && <p className="text-sm text-gray-500">Cargando servicios...</p>}

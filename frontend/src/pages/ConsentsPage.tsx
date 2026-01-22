@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { consentService } from '@/services/consent.service';
-import { Plus, FileText, Mail, Loader2, Search, Trash2 } from 'lucide-react';
+import { Plus, FileText, Mail, Loader2, Search, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import PdfViewer from '@/components/PdfViewer';
@@ -160,6 +160,18 @@ export default function ConsentsPage() {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
+                        {/* Botón de Editar para consentimientos en DRAFT */}
+                        {consent.status === 'DRAFT' && (
+                          <Link
+                            to={`/consents/edit/${consent.id}`}
+                            className="text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                            title="Editar Consentimiento"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </Link>
+                        )}
+                        
+                        {/* Acciones para consentimientos con PDF (ya firmados) */}
                         {consent.pdfUrl ? (
                           <>
                             <button
@@ -191,7 +203,7 @@ export default function ConsentsPage() {
                               </button>
                             )}
                           </>
-                        ) : (
+                        ) : consent.status !== 'DRAFT' && (
                           <span className="text-gray-400 text-sm">Sin PDF</span>
                         )}
                       </div>

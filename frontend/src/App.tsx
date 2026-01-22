@@ -8,11 +8,12 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ToastContainer from './components/ui/ToastContainer';
 import ConfirmDialogContainer from './components/ui/ConfirmDialogContainer';
 
-// Eager loading para páginas críticas (auth)
+// Eager loading para páginas críticas (auth y landing)
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SuspendedAccountPage from './pages/SuspendedAccountPage';
+import PublicLandingPage from './pages/PublicLandingPage';
 
 // Lazy loading para páginas secundarias (mejor performance)
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -47,16 +48,17 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={<LoadingSpinner fullScreen />}>
           <Routes>
+            <Route path="/" element={<PublicLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/suspended" element={<SuspendedAccountPage />} />
             
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/consents" element={<ConsentsPage />} />
               <Route path="/consents/new" element={<CreateConsentPage />} />
+              <Route path="/consents/edit/:id" element={<CreateConsentPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />

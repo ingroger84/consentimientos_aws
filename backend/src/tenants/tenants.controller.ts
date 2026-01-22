@@ -43,8 +43,8 @@ export class TenantsController {
     return this.tenantsService.updatePlan(id, updateData);
   }
 
+  @Public()
   @Post()
-  @RequirePermissions(PERMISSIONS.MANAGE_TENANTS)
   create(@Body() createTenantDto: CreateTenantDto) {
     return this.tenantsService.create(createTenantDto);
   }

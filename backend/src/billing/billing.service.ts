@@ -280,3 +280,58 @@ export class BillingService {
     return await query.getMany();
   }
 }
+
+  /**
+   * Suspender cuentas gratuitas con trial expirado
+   * Se ejecuta diariamente para verificar cuentas gratuitas que han superado su período de prueba
+   */
+  async suspendExpiredFreeTrials(): Promise<{ suspended: number; errors: string[] }> {
+    console.log('[BillingService] Iniciando suspensión de cuentas gratuitas expiradas...');
+
+    const now = new Date();
+
+    // Buscar tenants con plan gratuito, en estado TRIAL y con trial expirado
+    const expiredTrials = await this.tenantsRepository.find({
+      where: {
+        plan: 'free',
+        status: TenantStatus.TRIAL,
+        trialEndsAt: LessThan(now),
+      },
+    });
+
+    console.log(`[BillingService] Encontradas ${expiredTrials.length} cuentas gratuitas expiradas`);
+
+    let suspended = 0;
+    const errors: string[] = [];
+
+    for (const tenant of expiredTrials) {
+      try {
+        // Suspender tenant
+        tenant.status = TenantStatus.SUSPENDED;
+        await this.tenantsRepository.save(tenant);
+
+        // Registrar en historial
+        await this.billingHistoryRepository.save({
+          tenantId: tenant.id,
+          action: BillingAction.TENANT_SUSPENDED,
+          description: `Cuenta gratuita suspendida - Trial de 7 días expirado`,
+          metadata: {
+            plan: tenant.plan,
+            trialEndsAt: tenant.trialEndsAt,
+            daysExpired: Math.floor((now.getTime() - tenant.trialEndsAt.getTime()) / (1000 * 60 * 60 * 24)),
+          },
+        });
+
+        suspended++;
+        console.log(`[BillingService] Tenant ${tenant.name} (${tenant.slug}) suspendido - Trial expirado`);
+      } catch (error) {
+        const errorMsg = `Error al suspender tenant ${tenant.id}: ${error.message}`;
+        console.error(`[BillingService] ${errorMsg}`);
+        errors.push(errorMsg);
+      }
+    }
+
+    console.log(`[BillingService] Suspensión completada: ${suspended} tenants suspendidos, ${errors.length} errores`);
+
+    return { suspended, errors };
+  }

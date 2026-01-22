@@ -6,6 +6,7 @@ export interface CreateConsentDto {
   clientId: string;
   clientEmail: string;
   clientPhone?: string;
+  clientPhoto?: string;
   serviceId: string;
   branchId: string;
   answers: Array<{
@@ -28,6 +29,10 @@ export const consentService = {
   async getOne(id: string): Promise<Consent> {
     const { data } = await api.get<Consent>(`/consents/${id}`);
     return data;
+  },
+
+  async getById(id: string): Promise<Consent> {
+    return this.getOne(id);
   },
 
   async create(dto: CreateConsentDto): Promise<Consent> {

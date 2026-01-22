@@ -9,6 +9,7 @@ import { User } from '../users/entities/user.entity';
 import { Role, RoleType } from '../roles/entities/role.entity';
 import { SettingsService } from '../settings/settings.service';
 import { MailService } from '../mail/mail.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { applyPlanLimits } from './tenants-plan.helper';
 
 @Injectable()
@@ -23,6 +24,7 @@ export class TenantsService {
     private dataSource: DataSource,
     private settingsService: SettingsService,
     private mailService: MailService,
+    private notificationsService: NotificationsService,
   ) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
@@ -60,9 +62,11 @@ export class TenantsService {
         throw new ConflictException('El email del administrador ya está en uso. Por favor usa uno diferente.');
       }
 
-      // Establecer fecha de fin de trial (30 días por defecto)
+      // Establecer fecha de fin de trial según el plan
       if (!createTenantDto.trialEndsAt && createTenantDto.status === TenantStatus.TRIAL) {
-        const trialDays = 30;
+        // Plan gratuito: 7 días de trial
+        // Otros planes: 30 días de trial
+        const trialDays = createTenantDto.plan === 'free' ? 7 : 30;
         createTenantDto.trialEndsAt = new Date();
         createTenantDto.trialEndsAt.setDate(createTenantDto.trialEndsAt.getDate() + trialDays);
       }
@@ -137,6 +141,27 @@ export class TenantsService {
       } catch (emailError) {
         // No fallar la creación del tenant si el correo falla
         console.error('[TenantsService] Error al enviar correo de bienvenida:', emailError.message);
+      }
+
+      // ENVIAR NOTIFICACIÓN AL SUPER ADMIN
+      try {
+        await this.mailService.sendNewAccountNotification(savedTenant, {
+          name: adminUser.name,
+          email: adminUser.email,
+        });
+        console.log('[TenantsService] Notificación enviada al Super Admin');
+      } catch (notificationError) {
+        // No fallar la creación del tenant si la notificación falla
+        console.error('[TenantsService] Error al enviar notificación al Super Admin:', notificationError.message);
+      }
+
+      // CREAR NOTIFICACIÓN EN EL SISTEMA
+      try {
+        await this.notificationsService.createNewAccountNotification(savedTenant);
+        console.log('[TenantsService] Notificación creada en el sistema');
+      } catch (notificationError) {
+        // No fallar la creación del tenant si la notificación falla
+        console.error('[TenantsService] Error al crear notificación en el sistema:', notificationError.message);
       }
 
       return savedTenant;

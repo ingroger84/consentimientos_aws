@@ -28,7 +28,7 @@ export const PLANS: Record<string, PlanConfig> = {
   "free": {
     "id": "free",
     "name": "Gratuito",
-    "description": "Ideal para probar el sistema",
+    "description": "Prueba gratis por 7 días",
     "priceMonthly": 0,
     "priceAnnual": 0,
     "limits": {

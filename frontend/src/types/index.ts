@@ -67,6 +67,7 @@ export interface Consent {
   clientId: string;
   clientEmail: string;
   clientPhone?: string;
+  clientPhoto?: string;
   signatureData?: string;
   signedAt?: string;
   pdfUrl?: string;

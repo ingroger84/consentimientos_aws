@@ -2,7 +2,7 @@
 
 > Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
 
-[![Version](https://img.shields.io/badge/version-1.1.16-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-1.1.28-blue.svg)](VERSION.md)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](#)
@@ -24,6 +24,13 @@
 ---
 
 ## ✨ Características Principales
+
+### 🌐 Landing Page SaaS
+- Landing page comercial completa con información del producto
+- Visualización de planes y precios con toggle mensual/anual
+- Registro de cuenta tenant desde la landing page
+- Envío automático de correo de bienvenida
+- Diseño responsive y moderno
 
 ### 🏢 Multi-Tenant
 - Gestión de múltiples clientes (tenants) independientes
@@ -107,6 +114,13 @@ El sistema estará disponible en:
 ---
 
 ## 🔐 Acceso al Sistema
+
+### Landing Page Pública
+
+```
+URL:      http://localhost:5173
+Función:  Información comercial y registro de nuevas cuentas
+```
 
 ### Super Admin (Administrador del Sistema)
 
@@ -234,6 +248,11 @@ datagree/
 ### 🎨 Personalización
 - [Personalización del Sistema](doc/04-personalizacion/PERSONALIZACION_SISTEMA.md)
 - [Personalización de PDFs](doc/04-personalizacion/PERSONALIZACION_PDF_COMPLETA.md)
+
+### 🌐 Landing Page y Registro
+- [Landing Page SaaS](doc/27-landing-page-saas/README.md) - Landing comercial completa
+- [Inicio Rápido](doc/27-landing-page-saas/INICIO_RAPIDO.md) - Guía de inicio rápido
+- [Guía de Pruebas](doc/27-landing-page-saas/GUIA_PRUEBAS.md) - Checklist de pruebas
 
 ### 💰 Facturación y Pagos
 - [Sistema de Impuestos](doc/14-impuestos/README.md)

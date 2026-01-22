@@ -20,6 +20,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { BillingModule } from './billing/billing.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { CommonModule } from './common/common.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
@@ -35,6 +36,7 @@ import { Invoice } from './invoices/entities/invoice.entity';
 import { TaxConfig } from './invoices/entities/tax-config.entity';
 import { PaymentReminder } from './billing/entities/payment-reminder.entity';
 import { BillingHistory } from './billing/entities/billing-history.entity';
+import { Notification } from './notifications/entities/notification.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 
@@ -71,6 +73,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
           TaxConfig,
           PaymentReminder,
           BillingHistory,
+          Notification,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
@@ -109,6 +112,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     InvoicesModule,
     BillingModule,
     WebhooksModule,
+    NotificationsModule,
 
     // Serve static files
     ServeStaticModule.forRoot({

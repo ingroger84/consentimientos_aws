@@ -137,6 +137,13 @@ export class ConsentsController {
     }
   }
 
+  @Patch(':id')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.CREATE_CONSENTS)
+  update(@Param('id') id: string, @Body() updateConsentDto: CreateConsentDto) {
+    return this.consentsService.update(id, updateConsentDto);
+  }
+
   @Patch(':id/sign')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.SIGN_CONSENTS)

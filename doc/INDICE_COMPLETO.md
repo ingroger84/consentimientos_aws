@@ -318,3 +318,35 @@ Para más información, consulta:
 
 **Generado:** 2026-01-21  
 **Versión del sistema:** 1.1.2
+
+
+---
+
+### 🌐 Landing Page y Marketing
+
+#### [27-landing-page-saas/](./27-landing-page-saas/)
+- Landing page comercial completa
+- Sección de planes y precios
+- Registro de cuenta tenant desde la landing
+- Modal de registro con validaciones
+- Envío automático de correo de bienvenida
+- Guía de inicio rápido
+- Checklist de pruebas completo
+- Configuración para dominio datagree.net
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `INICIO_RAPIDO.md` - Guía de inicio rápido
+- `GUIA_PRUEBAS.md` - Checklist de pruebas
+
+**Características:**
+- ✅ Diseño responsive y moderno
+- ✅ 8 secciones informativas
+- ✅ 5 planes configurables
+- ✅ Toggle mensual/anual
+- ✅ Formulario de registro completo
+- ✅ Validaciones frontend y backend
+- ✅ Correo de bienvenida automático
+- ✅ Integración con backend
+
+---

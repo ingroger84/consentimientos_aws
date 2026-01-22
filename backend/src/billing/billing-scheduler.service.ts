@@ -92,3 +92,22 @@ export class BillingSchedulerService {
     }
   }
 }
+
+
+  // Suspender cuentas gratuitas expiradas - Diario a las 02:00
+  @Cron('0 2 * * *')
+  async handleSuspendExpiredFreeTrials() {
+    this.logger.log('Ejecutando tarea: Suspender cuentas gratuitas expiradas');
+    
+    try {
+      const result = await this.billingService.suspendExpiredFreeTrials();
+      this.logger.log(`Cuentas gratuitas suspendidas: ${result.suspended}`);
+      
+      if (result.errors.length > 0) {
+        this.logger.error(`Errores al suspender cuentas: ${result.errors.length}`);
+        result.errors.forEach(error => this.logger.error(error));
+      }
+    } catch (error) {
+      this.logger.error('Error al ejecutar suspensión de cuentas gratuitas:', error);
+    }
+  }

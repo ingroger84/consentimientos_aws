@@ -71,6 +71,52 @@ export class ConsentsService {
     return this.findOne(savedConsent.id);
   }
 
+  async update(id: string, updateConsentDto: CreateConsentDto): Promise<Consent> {
+    // Buscar el consentimiento existente
+    const consent = await this.consentsRepository.findOne({
+      where: { id },
+      relations: ['service', 'branch', 'tenant', 'answers'],
+    });
+
+    if (!consent) {
+      throw new NotFoundException('Consentimiento no encontrado');
+    }
+
+    // Solo permitir editar consentimientos en estado DRAFT
+    if (consent.status !== ConsentStatus.DRAFT) {
+      throw new BadRequestException('Solo se pueden editar consentimientos en estado DRAFT');
+    }
+
+    // Actualizar los datos del consentimiento
+    consent.clientName = updateConsentDto.clientName;
+    consent.clientId = updateConsentDto.clientId;
+    consent.clientEmail = updateConsentDto.clientEmail;
+    consent.clientPhone = updateConsentDto.clientPhone;
+    consent.clientPhoto = updateConsentDto.clientPhoto;
+    consent.service = { id: updateConsentDto.serviceId } as any;
+    consent.branch = { id: updateConsentDto.branchId } as any;
+
+    await this.consentsRepository.save(consent);
+
+    // Eliminar respuestas anteriores
+    if (consent.answers && consent.answers.length > 0) {
+      await this.answersRepository.remove(consent.answers);
+    }
+
+    // Guardar nuevas respuestas
+    const answers = updateConsentDto.answers.map((answerDto) =>
+      this.answersRepository.create({
+        value: answerDto.value,
+        consent: consent,
+        question: { id: answerDto.questionId } as any,
+      }),
+    );
+
+    await this.answersRepository.save(answers);
+
+    return this.findOne(consent.id);
+  }
+
   async findAll(search?: string, user?: User): Promise<Consent[]> {
     const queryBuilder = this.consentsRepository
       .createQueryBuilder('consent')
