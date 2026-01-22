@@ -17,6 +17,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import api from '../services/api';
+import { useAuthStore } from '../store/authStore';
 
 interface Statistics {
   total: number;
@@ -46,6 +47,10 @@ const STATUS_LABELS: Record<string, string> = {
 export default function TenantDashboard() {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuthStore();
+
+  // Verificar si el usuario es operador
+  const isOperator = user?.role?.type === 'OPERADOR';
 
   useEffect(() => {
     loadStatistics();
@@ -116,6 +121,30 @@ export default function TenantDashboard() {
           Bienvenido al sistema de gestión de consentimientos digitales
         </p>
       </div>
+
+      {/* Para OPERADORES: Mostrar Accesos Rápidos primero */}
+      {isOperator && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Accesos Rápidos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card) => (
+              <Link
+                key={card.title}
+                to={card.href}
+                className="card hover:shadow-xl transition-shadow"
+              >
+                <div className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
+                  <card.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {card.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{card.description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Estadística Total */}
       {stats && (
@@ -297,27 +326,29 @@ export default function TenantDashboard() {
         </div>
       )}
 
-      {/* Accesos Rápidos */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Accesos Rápidos</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.map((card) => (
-            <Link
-              key={card.title}
-              to={card.href}
-              className="card hover:shadow-xl transition-shadow"
-            >
-              <div className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
-                <card.icon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {card.title}
-              </h3>
-              <p className="text-gray-600 text-sm">{card.description}</p>
-            </Link>
-          ))}
+      {/* Accesos Rápidos - Solo para NO operadores (ya se mostraron arriba para operadores) */}
+      {!isOperator && (
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Accesos Rápidos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card) => (
+              <Link
+                key={card.title}
+                to={card.href}
+                className="card hover:shadow-xl transition-shadow"
+              >
+                <div className={`${card.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
+                  <card.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {card.title}
+                </h3>
+                <p className="text-gray-600 text-sm">{card.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
