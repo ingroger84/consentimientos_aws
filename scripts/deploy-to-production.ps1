@@ -122,8 +122,8 @@ echo ""
 echo "Verificar en: https://datagree.net"
 '@
 
-# Guardar script temporalmente
-$deployScript | Out-File -FilePath "temp-deploy.sh" -Encoding UTF8 -NoNewline
+# Guardar script temporalmente con finales de línea Unix (LF)
+$deployScript -replace "`r`n", "`n" | Out-File -FilePath "temp-deploy.sh" -Encoding UTF8 -NoNewline
 
 Write-Host "7. Copiando script de despliegue al servidor..." -ForegroundColor Yellow
 & scp -i $SSH_KEY temp-deploy.sh "${SERVER_USER}@${SERVER_IP}:~/deploy.sh"
