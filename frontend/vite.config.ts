@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [
@@ -9,20 +8,12 @@ export default defineConfig({
       // Optimizacion de React en produccion
       babel: {
         plugins: [
-          // Eliminar propTypes en produccion
-          ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }],
+          // Eliminar propTypes en produccion (si se usan)
+          // ['babel-plugin-transform-react-remove-prop-types', { removeImport: true }],
         ],
       },
     }),
-    // Visualizador de bundle (solo en analisis)
-    process.env.ANALYZE === 'true' &&
-      visualizer({
-        filename: './dist/stats.html',
-        open: true,
-        gzipSize: true,
-        brotliSize: true,
-      }),
-  ].filter(Boolean),
+  ],
   
   resolve: {
     alias: {
