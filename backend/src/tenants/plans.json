@@ -45,8 +45,7 @@
       "whiteLabel": false,
       "backup": "none",
       "supportResponseTime": "24h"
-    },
-    "popular": true
+    }
   },
   "professional": {
     "id": "professional",
@@ -70,7 +69,8 @@
       "whiteLabel": false,
       "backup": "weekly",
       "supportResponseTime": "12h"
-    }
+    },
+    "popular": true
   },
   "enterprise": {
     "id": "enterprise",

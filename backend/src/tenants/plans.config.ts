@@ -71,8 +71,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "whiteLabel": false,
       "backup": "none",
       "supportResponseTime": "24h"
-    },
-    "popular": true
+    }
   },
   "professional": {
     "id": "professional",
@@ -96,7 +95,8 @@ export const PLANS: Record<string, PlanConfig> = {
       "whiteLabel": false,
       "backup": "weekly",
       "supportResponseTime": "12h"
-    }
+    },
+    "popular": true
   },
   "enterprise": {
     "id": "enterprise",
