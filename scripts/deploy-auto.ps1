@@ -149,7 +149,7 @@ if ($sqlResult -match "TABLE_OK") {
 Write-Step "PASO 4: INSTALAR DEPENDENCIAS DEL BACKEND"
 Write-Info "Ejecutando npm install en backend..."
 
-$backendCommand = "cd $PROJECT_PATH/backend; npm install --production 2>&1; if [ `$? -eq 0 ]; then echo BACKEND_DEPS_OK; else echo BACKEND_DEPS_ERROR; fi"
+$backendCommand = "cd $PROJECT_PATH/backend; npm install 2>&1; if [ `$? -eq 0 ]; then echo BACKEND_DEPS_OK; else echo BACKEND_DEPS_ERROR; fi"
 
 $backendResult = & ssh -i $SSH_KEY "${SERVER_USER}@${SERVER_IP}" $backendCommand 2>&1
 

@@ -43,12 +43,28 @@ function App() {
     initialize();
   }, [initialize]);
 
+  // Detectar si estamos en un subdominio (tenant o admin)
+  const isSubdomain = () => {
+    const hostname = window.location.hostname;
+    // Si es localhost, verificar puerto o path
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return true; // En desarrollo, siempre mostrar login
+    }
+    // En producción, verificar si NO es el dominio principal
+    const parts = hostname.split('.');
+    // Si tiene más de 2 partes (ej: admin.datagree.net) o es un subdominio conocido
+    return parts.length > 2 || hostname.startsWith('admin.') || hostname.includes('.');
+  };
+
+  const showLanding = !isSubdomain();
+
   return (
     <ThemeProvider>
       <BrowserRouter>
         <Suspense fallback={<LoadingSpinner fullScreen />}>
           <Routes>
-            <Route path="/" element={<PublicLandingPage />} />
+            {/* Ruta raíz: Landing si es dominio principal, Login si es subdominio */}
+            <Route path="/" element={showLanding ? <PublicLandingPage /> : <LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
