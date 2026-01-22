@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 2.0.0
+## Versión Actual: 2.1.0
 **Fecha:** 2026-01-22
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,15 +18,14 @@
 
 ## Historial de Versiones
 
+### 2.1.0 - 2026-01-22 [MINOR]
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 2.0.0 - 2026-01-22 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 9 archivo(s) modificado(s)
 - Scripts: 6 archivo(s) modificado(s)
-
-### 1.2.1 - 2026-01-22 [PATCH]
-- Formato de versión mejorado (sin paréntesis en fecha)
-- Preparación para despliegue en producción
 
 ---
 
