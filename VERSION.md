@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 1.1.34
+## Versión Actual: 1.1.35
 **Fecha:** 2026-01-21
 
 ---
@@ -18,7 +18,7 @@
 
 ## Historial de Versiones
 
-### 1.1.34 - 2026-01-21
+### 1.1.35 - 2026-01-21
 - Actualización automática del sistema
 - Mejoras y correcciones
 

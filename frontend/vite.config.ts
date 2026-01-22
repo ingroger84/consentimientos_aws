@@ -36,28 +36,15 @@ export default defineConfig({
     // Optimizacion de chunks para mejor caching
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Separar node_modules por paquete
-          if (id.includes('node_modules')) {
-            // React core
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'vendor-react';
-            }
-            // UI components
-            if (id.includes('lucide-react') || id.includes('recharts')) {
-              return 'vendor-ui';
-            }
-            // Forms y validacion
-            if (id.includes('react-hook-form') || id.includes('axios')) {
-              return 'vendor-forms';
-            }
-            // State management
-            if (id.includes('zustand') || id.includes('@tanstack/react-query')) {
-              return 'vendor-state';
-            }
-            // Otros vendors
-            return 'vendor-other';
-          }
+        manualChunks: {
+          // React core - mantener junto
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // UI components
+          'vendor-ui': ['lucide-react', 'recharts'],
+          // Forms y validacion
+          'vendor-forms': ['react-hook-form', 'axios'],
+          // State management
+          'vendor-state': ['zustand', '@tanstack/react-query'],
         },
         // Nombres de archivo con hash para cache busting
         entryFileNames: 'assets/[name]-[hash].js',
