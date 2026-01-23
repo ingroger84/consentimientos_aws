@@ -157,8 +157,8 @@ const buffer = await this.storageService.downloadFile(fileUrl);
 
 ```env
 USE_S3=true
-AWS_ACCESS_KEY_ID=AKIA42IJAAWUEQGB6KHY
-AWS_SECRET_ACCESS_KEY=hIXAyJ6SLzy52iMF201C+be4ubqtm2Dzy/wxfptM
+AWS_ACCESS_KEY_ID=YOUR_AWS_ACCESS_KEY_HERE
+AWS_SECRET_ACCESS_KEY=YOUR_AWS_SECRET_KEY_HERE
 AWS_REGION=us-east-1
 AWS_S3_BUCKET=datagree-uploads
 ```

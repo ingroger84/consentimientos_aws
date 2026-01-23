@@ -9,7 +9,7 @@
 
 ### ✅ Credenciales S3 - FUNCIONANDO CORRECTAMENTE
 
-**Access Key ID:** AKIA42IJAAWUEQGB6KHY  
+**Access Key ID:** AKIA************6KHY (oculta por seguridad)  
 **Estado:** ✅ Activas y sin cuarentena
 
 #### Pruebas Realizadas:
@@ -127,8 +127,8 @@ Disponible: 33 GB
 
 ### Verificar Credenciales AWS:
 ```powershell
-$env:AWS_ACCESS_KEY_ID='AKIA42IJAAWUEQGB6KHY'
-$env:AWS_SECRET_ACCESS_KEY='hIXAyJ6SLzy52iMF201C+be4ubqtm2Dzy/wxfptM'
+$env:AWS_ACCESS_KEY_ID='YOUR_AWS_ACCESS_KEY_HERE'
+$env:AWS_SECRET_ACCESS_KEY='YOUR_AWS_SECRET_KEY_HERE'
 $env:AWS_DEFAULT_REGION='us-east-1'
 aws s3 ls
 aws s3 ls s3://datagree-uploads/ --recursive

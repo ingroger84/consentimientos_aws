@@ -53,8 +53,8 @@ Las credenciales de Route 53 están configuradas en `/root/.aws/credentials`:
 
 ```ini
 [default]
-aws_access_key_id = AKIA42IJAAWUI3LTPJKP
-aws_secret_access_key = cU5RjqiKTW5QMMpe376x5DK0/FtE+eS6REamqaOp
+aws_access_key_id = YOUR_AWS_ACCESS_KEY_HERE
+aws_secret_access_key = YOUR_AWS_SECRET_KEY_HERE
 region = us-east-1
 ```
 

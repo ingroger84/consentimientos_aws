@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 2.4.4
+## Versión Actual: 2.4.7
 **Fecha:** 2026-01-22
 **Tipo de Cambio:** PATCH
 
@@ -18,11 +18,12 @@
 
 ## Historial de Versiones
 
-### 2.4.4 - 2026-01-22 [PATCH]
+### 2.4.7 - 2026-01-22 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
 
-### 2.4.3 - 2026-01-22 [PATCH]
+### 2.4.6 - 2026-01-22 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
 
 ---
 
