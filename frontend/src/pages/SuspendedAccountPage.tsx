@@ -58,7 +58,7 @@ export default function SuspendedAccountPage() {
   };
 
   const handleContactSales = () => {
-    window.location.href = 'mailto:ventas@datagree.net?subject=Solicitud de Plan - Cuenta Suspendida';
+    window.location.href = 'mailto:ventas@archivoenlinea.com?subject=Solicitud de Plan - Cuenta Suspendida';
   };
 
   const handleLogout = () => {
@@ -113,7 +113,7 @@ export default function SuspendedAccountPage() {
                   Tu período de prueba gratuito de 7 días ha finalizado.
                 </p>
                 <p className="text-gray-700">
-                  Para continuar usando DatAgree y acceder a todas las funcionalidades, selecciona uno de nuestros planes de pago.
+                  Para continuar usando Archivo en Línea y acceder a todas las funcionalidades, selecciona uno de nuestros planes de pago.
                 </p>
               </>
             ) : (
@@ -197,7 +197,7 @@ export default function SuspendedAccountPage() {
               Cerrar Sesión
             </button>
             <a
-              href={isFreeAccount ? "mailto:ventas@datagree.net" : "mailto:soporte@datagree.net"}
+              href={isFreeAccount ? "mailto:ventas@archivoenlinea.com" : "mailto:soporte@archivoenlinea.com"}
               className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <Mail className="w-5 h-5" />

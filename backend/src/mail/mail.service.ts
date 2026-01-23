@@ -15,7 +15,7 @@ export class MailService {
   private readonly BRANDING_FOOTER = `
     <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 2px solid #667eea; margin-top: 20px;">
       <div style="font-size: 16px; font-weight: 600; color: #667eea; margin-bottom: 8px;">
-        DatAgree
+        Archivo en Línea
       </div>
       <div style="font-size: 14px; color: #6c757d; margin-bottom: 5px;">
         Sistema de Consentimientos Digitales
@@ -1237,7 +1237,7 @@ export class MailService {
   async sendNewAccountNotification(tenant: any, adminUser: any): Promise<void> {
     try {
       // Obtener email del Super Admin desde settings o usar uno por defecto
-      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || 'admin@datagree.net';
+      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || 'admin@archivoenlinea.com';
       
       const baseDomain = this.configService.get('BASE_DOMAIN');
       const tenantUrl = baseDomain === 'localhost' 
@@ -1247,7 +1247,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: superAdminEmail,
-        subject: '🎉 Nueva Cuenta Creada - DatAgree',
+        subject: '🎉 Nueva Cuenta Creada - Archivo en Línea',
         html: this.getNewAccountNotificationTemplate(tenant, adminUser, tenantUrl),
       };
 
@@ -1395,7 +1395,7 @@ export class MailService {
             <div class="emoji">🎉</div>
             <h1>Nueva Cuenta Creada</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">
-              Un nuevo cliente se ha registrado en DatAgree
+              Un nuevo cliente se ha registrado en Archivo en Línea
             </p>
           </div>
 
@@ -1413,7 +1413,7 @@ export class MailService {
                 <strong>Nombre:</strong> ${tenant.name}
               </div>
               <div class="info-item">
-                <strong>Subdominio:</strong> ${tenant.slug}.datagree.net
+                <strong>Subdominio:</strong> ${tenant.slug}.archivoenlinea.com
               </div>
               <div class="info-item">
                 <strong>Contacto:</strong> ${tenant.contactName || 'N/A'}
@@ -1464,7 +1464,7 @@ export class MailService {
 
           <div class="footer">
             <p style="margin: 0 0 10px 0;">
-              <strong>DatAgree</strong> - Sistema de Gestión de Consentimientos
+              <strong>Archivo en Línea</strong> - Sistema de Gestión de Consentimientos
             </p>
             <p style="margin: 0; font-size: 12px;">
               Este es un correo automático. No responder a este mensaje.

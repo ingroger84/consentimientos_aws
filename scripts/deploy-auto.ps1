@@ -13,7 +13,7 @@ $ErrorActionPreference = "Continue"
 $SERVER_IP = "100.28.198.249"
 $SERVER_USER = "ubuntu"
 $SSH_KEY = "AWS-ISSABEL.pem"
-$PROJECT_PATH = "/home/ubuntu/consentimientos_aws"
+$PROJECT_PATH = "/home/ubuntu/archivoenlinea_aws"
 
 function Write-Step($message) {
     Write-Host ""
@@ -38,7 +38,7 @@ function Write-Info($message) {
 Clear-Host
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "   DESPLIEGUE AUTOMATICO - DATAGREE" -ForegroundColor Cyan
+Write-Host "   DESPLIEGUE AUTOMATICO - ARCHIVO EN LINEA" -ForegroundColor Cyan
 Write-Host "            Version 1.1.28" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
@@ -181,7 +181,7 @@ if ($envResult -match "ENV_EXISTS") {
 Write-Step "PASO 6: REINICIAR BACKEND CON PM2"
 Write-Info "Reiniciando proceso datagree-backend..."
 
-$pm2Command = "pm2 restart datagree-backend; sleep 3; if pm2 list | grep -q 'datagree-backend.*online'; then echo PM2_OK; else echo PM2_ERROR; fi"
+$pm2Command = "pm2 restart archivoenlinea-backend; sleep 3; if pm2 list | grep -q 'archivoenlinea-backend.*online'; then echo PM2_OK; else echo PM2_ERROR; fi"
 
 $pm2Result = & ssh -i $SSH_KEY "${SERVER_USER}@${SERVER_IP}" $pm2Command 2>&1
 
@@ -229,7 +229,7 @@ if ($frontendBuildResult -match "FRONTEND_BUILD_OK") {
 Write-Step "PASO 9: VERIFICACION FINAL"
 Write-Info "Verificando estado del sistema..."
 
-$verifyCommand = "pm2 list | grep datagree-backend; echo ''; curl -s http://localhost:3000/api/tenants/plans | head -c 100; echo ''; echo VERIFY_OK"
+$verifyCommand = "pm2 list | grep archivoenlinea-backend; echo ''; curl -s http://localhost:3000/api/tenants/plans | head -c 100; echo ''; echo VERIFY_OK"
 
 $verifyResult = & ssh -i $SSH_KEY "${SERVER_USER}@${SERVER_IP}" $verifyCommand 2>&1
 
@@ -245,7 +245,7 @@ if (-not $SkipTests) {
     # Test 1: API responde
     Write-Info "Test 1: Verificando que la API responde..."
     try {
-        $apiTest = Invoke-WebRequest -Uri "https://datagree.net/api/tenants/plans" -UseBasicParsing -TimeoutSec 10
+        $apiTest = Invoke-WebRequest -Uri "https://archivoenlinea.com/api/tenants/plans" -UseBasicParsing -TimeoutSec 10
         if ($apiTest.StatusCode -eq 200) {
             Write-Success "API responde correctamente (200 OK)"
         }
@@ -256,7 +256,7 @@ if (-not $SkipTests) {
     # Test 2: Landing page carga
     Write-Info "Test 2: Verificando que la landing page carga..."
     try {
-        $landingTest = Invoke-WebRequest -Uri "https://datagree.net" -UseBasicParsing -TimeoutSec 10
+        $landingTest = Invoke-WebRequest -Uri "https://archivoenlinea.com" -UseBasicParsing -TimeoutSec 10
         if ($landingTest.StatusCode -eq 200) {
             Write-Success "Landing page carga correctamente (200 OK)"
         }
@@ -275,13 +275,13 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 
 Write-Host "URLs de verificacion:" -ForegroundColor Cyan
-Write-Host "  - Landing Page: https://datagree.net" -ForegroundColor Yellow
-Write-Host "  - Admin Panel:  https://admin.datagree.net" -ForegroundColor Yellow
-Write-Host "  - API:          https://datagree.net/api" -ForegroundColor Yellow
+Write-Host "  - Landing Page: https://archivoenlinea.com" -ForegroundColor Yellow
+Write-Host "  - Admin Panel:  https://admin.archivoenlinea.com" -ForegroundColor Yellow
+Write-Host "  - API:          https://archivoenlinea.com/api" -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "Proximos pasos:" -ForegroundColor Cyan
-Write-Host "  1. Abre https://datagree.net en tu navegador" -ForegroundColor White
+Write-Host "  1. Abre https://archivoenlinea.com en tu navegador" -ForegroundColor White
 Write-Host "  2. Verifica que la landing page carga correctamente" -ForegroundColor White
 Write-Host "  3. Prueba el registro de una cuenta de prueba" -ForegroundColor White
 Write-Host "  4. Verifica que lleguen los correos" -ForegroundColor White
@@ -289,7 +289,7 @@ Write-Host "  5. Revisa las notificaciones en el dashboard del Super Admin" -For
 Write-Host ""
 
 Write-Host "Logs del backend:" -ForegroundColor Cyan
-Write-Host "  ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'pm2 logs datagree-backend'" -ForegroundColor Gray
+Write-Host "  ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'pm2 logs archivoenlinea-backend'" -ForegroundColor Gray
 Write-Host ""
 
 Write-Success "Despliegue finalizado"

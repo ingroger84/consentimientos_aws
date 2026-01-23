@@ -123,7 +123,7 @@ export default function PublicLandingPage() {
       name: 'Dr. Carlos Méndez',
       role: 'Director Médico',
       company: 'Clínica Salud Total',
-      content: 'DatAgree transformó completamente nuestra gestión de consentimientos. Ahorramos más de 10 horas semanales en tareas administrativas.',
+      content: 'Archivo en Línea transformó completamente nuestra gestión de consentimientos. Ahorramos más de 10 horas semanales en tareas administrativas.',
       rating: 5
     },
     {
@@ -150,7 +150,7 @@ export default function PublicLandingPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-                DatAgree
+                Archivo en Línea
               </span>
             </div>
             
@@ -299,7 +299,7 @@ export default function PublicLandingPage() {
               Todo lo que necesitas en una sola plataforma
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              DatAgree incluye todas las herramientas necesarias para gestionar consentimientos de forma profesional y segura
+              Archivo en Línea incluye todas las herramientas necesarias para gestionar consentimientos de forma profesional y segura
             </p>
           </div>
 
@@ -321,7 +321,7 @@ export default function PublicLandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                ¿Por qué elegir DatAgree?
+                ¿Por qué elegir Archivo en Línea?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
                 Transforma la gestión de consentimientos en tu negocio con nuestra plataforma intuitiva, segura y completamente en español.
@@ -369,7 +369,7 @@ export default function PublicLandingPage() {
               Ideal para cualquier negocio
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              DatAgree se adapta a las necesidades de diferentes industrias y sectores empresariales
+              Archivo en Línea se adapta a las necesidades de diferentes industrias y sectores empresariales
             </p>
           </div>
 
@@ -401,7 +401,7 @@ export default function PublicLandingPage() {
               Lo que dicen nuestros clientes
             </h2>
             <p className="text-xl text-gray-600">
-              Empresas de todos los tamaños confían en DatAgree
+              Empresas de todos los tamaños confían en Archivo en Línea
             </p>
           </div>
 
@@ -448,7 +448,7 @@ export default function PublicLandingPage() {
             ¿Listo para digitalizar tus consentimientos?
           </h2>
           <p className="text-xl text-primary-100 mb-8">
-            Únete a cientos de empresas que ya confían en DatAgree para gestionar sus consentimientos de forma profesional
+            Únete a cientos de empresas que ya confían en Archivo en Línea para gestionar sus consentimientos de forma profesional
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="#pricing" className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg">
@@ -463,7 +463,7 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-white text-xl font-bold mb-4">DatAgree</h3>
+              <h3 className="text-white text-xl font-bold mb-4">Archivo en Línea</h3>
               <p className="text-sm mb-4">
                 La plataforma líder en gestión de consentimientos digitales para empresas de todos los tamaños.
               </p>
@@ -485,7 +485,7 @@ export default function PublicLandingPage() {
               <h4 className="text-white font-semibold mb-4">Soporte</h4>
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="hover:text-white transition">Documentación</a></li>
-                <li><a href="mailto:soporte@datagree.net" className="hover:text-white transition">Contacto</a></li>
+                <li><a href="mailto:soporte@archivoenlinea.com" className="hover:text-white transition">Contacto</a></li>
                 <li><a href="#" className="hover:text-white transition">FAQ</a></li>
                 <li><a href="#" className="hover:text-white transition">Estado del Sistema</a></li>
               </ul>
@@ -500,7 +500,7 @@ export default function PublicLandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} DatAgree by Innova Systems. Todos los derechos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} Archivo en Línea by Innova Systems. Todos los derechos reservados.</p>
             <p className="mt-2 text-gray-500">Hecho con ❤️ en Colombia</p>
           </div>
         </div>

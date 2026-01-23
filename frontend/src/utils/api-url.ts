@@ -4,7 +4,7 @@
  * - cliente-demo.localhost:5173 -> http://cliente-demo.localhost:3000
  * - admin.localhost:5173 -> http://admin.localhost:3000
  * - localhost:5173 -> http://localhost:3000
- * - admin.datagree.net -> https://admin.datagree.net
+ * - admin.archivoenlinea.com -> https://admin.archivoenlinea.com
  */
 export function getApiBaseUrl(): string {
   // Si hay variable de entorno, usarla (sin /api)

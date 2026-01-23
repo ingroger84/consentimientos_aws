@@ -103,7 +103,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold text-primary-600">DatAgree</span>
+              <span className="text-2xl font-bold text-primary-600">Archivo en Línea</span>
             </div>
             
             {/* Desktop Menu */}
@@ -183,7 +183,7 @@ export default function LandingPage() {
               <div className="bg-white rounded-2xl shadow-2xl p-8">
                 <img 
                   src="/hero-dashboard.png" 
-                  alt="DatAgree Dashboard" 
+                  alt="Archivo en Línea Dashboard" 
                   className="rounded-lg"
                   onError={(e) => {
                     e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="400"%3E%3Crect fill="%23f3f4f6" width="600" height="400"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="24" fill="%239ca3af"%3EDashboard Preview%3C/text%3E%3C/svg%3E';
@@ -203,7 +203,7 @@ export default function LandingPage() {
               Todo lo que necesitas en una sola plataforma
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              DatAgree incluye todas las herramientas necesarias para gestionar consentimientos de forma profesional
+              Archivo en Línea incluye todas las herramientas necesarias para gestionar consentimientos de forma profesional
             </p>
           </div>
 
@@ -225,7 +225,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                ¿Por qué elegir DatAgree?
+                ¿Por qué elegir Archivo en Línea?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
                 Transforma la gestión de consentimientos en tu negocio con nuestra plataforma intuitiva y segura.
@@ -273,7 +273,7 @@ export default function LandingPage() {
               Ideal para cualquier negocio
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              DatAgree se adapta a las necesidades de diferentes industrias y sectores
+              Archivo en Línea se adapta a las necesidades de diferentes industrias y sectores
             </p>
           </div>
 
@@ -296,7 +296,7 @@ export default function LandingPage() {
             ¿Listo para digitalizar tus consentimientos?
           </h2>
           <p className="text-xl text-primary-100 mb-8">
-            Únete a cientos de empresas que ya confían en DatAgree para gestionar sus consentimientos
+            Únete a cientos de empresas que ya confían en Archivo en Línea para gestionar sus consentimientos
           </p>
           <a href="#pricing" className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg">
             Ver Planes y Precios
@@ -309,7 +309,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-white text-xl font-bold mb-4">DatAgree</h3>
+              <h3 className="text-white text-xl font-bold mb-4">Archivo en Línea</h3>
               <p className="text-sm">
                 La plataforma líder en gestión de consentimientos digitales para empresas de todos los tamaños.
               </p>
@@ -339,7 +339,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} DatAgree. Todos los derechos reservados.</p>
+            <p>&copy; {new Date().getFullYear()} Archivo en Línea. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>

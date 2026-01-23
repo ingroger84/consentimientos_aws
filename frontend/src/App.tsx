@@ -56,12 +56,12 @@ function App() {
     }
     
     // En producción, verificar si es exactamente el dominio principal
-    // datagree.net = dominio principal (landing)
-    // admin.datagree.net = subdominio (login)
-    // tenant.datagree.net = subdominio (login)
+    // archivoenlinea.com = dominio principal (landing)
+    // admin.archivoenlinea.com = subdominio (login)
+    // tenant.archivoenlinea.com = subdominio (login)
     
-    // Verificar si es exactamente datagree.net (sin www)
-    if (hostname === 'datagree.net' || hostname === 'www.datagree.net') {
+    // Verificar si es exactamente archivoenlinea.com (sin www)
+    if (hostname === 'archivoenlinea.com' || hostname === 'www.archivoenlinea.com') {
       console.log('[App] Dominio principal detectado -> Landing');
       return true;
     }

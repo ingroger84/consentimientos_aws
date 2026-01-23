@@ -196,7 +196,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
           Todos los planes incluyen: Almacenamiento en la nube, Firma digital, Envío de emails, Personalización básica
         </p>
         <p className="text-sm mt-2">
-          ¿Necesitas más? <a href="mailto:ventas@datagree.net" className="text-primary-600 hover:underline">Contáctanos para un plan personalizado</a>
+          ¿Necesitas más? <a href="mailto:ventas@archivoenlinea.com" className="text-primary-600 hover:underline">Contáctanos para un plan personalizado</a>
         </p>
       </div>
     </div>

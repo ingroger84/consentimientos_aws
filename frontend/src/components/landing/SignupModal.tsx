@@ -188,10 +188,10 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
                         placeholder="clinica-salud"
                         required
                       />
-                      <span className="text-gray-600">.datagree.net</span>
+                      <span className="text-gray-600">.archivoenlinea.com</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
-                      Este será tu URL de acceso: {formData.slug || 'tu-empresa'}.datagree.net
+                      Este será tu URL de acceso: {formData.slug || 'tu-empresa'}.archivoenlinea.com
                     </p>
                   </div>
 
@@ -383,7 +383,7 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
                   <strong>Tu URL de acceso:</strong>
                 </p>
                 <p className="text-lg font-semibold text-primary-600">
-                  {formData.slug}.datagree.net
+                  {formData.slug}.archivoenlinea.com
                 </p>
               </div>
               <div className="space-y-3">
