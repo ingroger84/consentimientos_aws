@@ -180,12 +180,12 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
           <div className="mt-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-xs text-gray-500 mb-1">URL de Acceso:</p>
             <a
-              href={`https://${tenant.slug}.${import.meta.env.VITE_BASE_DOMAIN}`}
+              href={`https://${tenant.slug}.${import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium break-all"
             >
-              https://{tenant.slug}.{import.meta.env.VITE_BASE_DOMAIN}
+              https://{tenant.slug}.{import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}
             </a>
           </div>
         </div>
