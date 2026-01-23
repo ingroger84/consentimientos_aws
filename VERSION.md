@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 5.1.0
+## Versión Actual: 6.0.0
 **Fecha:** 2026-01-22
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,14 +18,14 @@
 
 ## Historial de Versiones
 
-### 5.1.0 - 2026-01-22 [MINOR]
-- Documentación: 1 archivo(s) modificado(s)
-
-### 5.0.0 - 2026-01-22 [MAJOR]
+### 6.0.0 - 2026-01-22 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
 - Scripts: 2 archivo(s) modificado(s)
+
+### 5.1.1 - 2026-01-22 [PATCH]
+- Mejoras y correcciones generales
 
 ---
 
