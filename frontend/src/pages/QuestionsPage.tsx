@@ -518,7 +518,7 @@ export default function QuestionsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <a
-                      href={`http://${tenant.slug}.localhost:5173`}
+                      href={`https://${tenant.slug}.${import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 hover:text-blue-800 hover:underline"

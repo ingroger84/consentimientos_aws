@@ -53,12 +53,12 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
             {/* URL del Tenant */}
             <div className="mt-2">
               <a
-                href={`http://${tenant.slug}.localhost:5173`}
+                href={`https://${tenant.slug}.${import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
               >
-                🔗 http://{tenant.slug}.localhost:5173
+                🔗 https://{tenant.slug}.{import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}
               </a>
             </div>
           </div>

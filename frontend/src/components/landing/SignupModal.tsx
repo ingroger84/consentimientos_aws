@@ -388,7 +388,7 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
               </div>
               <div className="space-y-3">
                 <a
-                  href={`http://${formData.slug}.localhost:5173/login`}
+                  href={`https://${formData.slug}.${import.meta.env.VITE_BASE_DOMAIN || 'archivoenlinea.com'}/login`}
                   className="btn btn-primary w-full"
                 >
                   Ir a Iniciar Sesión
