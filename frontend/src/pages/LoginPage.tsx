@@ -120,12 +120,19 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginCredentials) => {
     try {
+      console.log('[LoginPage] Iniciando login...');
       setLoading(true);
       setError('');
       const response = await authService.login(data);
+      console.log('[LoginPage] Login exitoso, respuesta:', response);
+      console.log('[LoginPage] Usuario:', response.user);
       setUser(response.user);
+      console.log('[LoginPage] Usuario guardado en store');
+      console.log('[LoginPage] Navegando a /dashboard...');
       navigate('/dashboard');
+      console.log('[LoginPage] Navegación completada');
     } catch (err: any) {
+      console.error('[LoginPage] Error en login:', err);
       setError(err.response?.data?.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);

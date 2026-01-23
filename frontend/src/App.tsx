@@ -40,7 +40,9 @@ function App() {
   const initialize = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
+    console.log('[App] Inicializando aplicación...');
     initialize();
+    console.log('[App] Aplicación inicializada');
   }, [initialize]);
 
   // Detectar si estamos en el dominio principal (sin subdominio)
@@ -48,6 +50,7 @@ function App() {
     const hostname = window.location.hostname;
     
     console.log('[App] Hostname:', hostname);
+    console.log('[App] Pathname:', window.location.pathname);
     
     // En desarrollo (localhost), siempre mostrar login
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
@@ -73,6 +76,7 @@ function App() {
 
   const showLanding = isMainDomain();
   console.log('[App] showLanding:', showLanding);
+  console.log('[App] Renderizando App...');
 
   return (
     <ThemeProvider>

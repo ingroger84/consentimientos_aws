@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiando Caché...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 500px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .message {
+            color: #666;
+            margin: 1rem 0;
+            line-height: 1.6;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+            display: none;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: none;
+        }
+        .button:hover {
+            background: #5568d3;
+        }
+        .steps {
+            text-align: left;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+        }
+        .step {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .step:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Limpiando Caché del Sistema</h1>
+        <div class="spinner" id="spinner"></div>
+        <div class="message" id="message">
+            Por favor espera mientras limpiamos el caché de tu navegador...
+        </div>
+        <div class="steps" id="steps" style="display: none;">
+            <div class="step">Limpieza de localStorage</div>
+            <div class="step">Limpieza de sessionStorage</div>
+            <div class="step">Limpieza de caché del navegador</div>
+            <div class="step">Limpieza de Service Workers</div>
+            <div class="step">Recarga forzada de recursos</div>
+        </div>
+        <div class="success" id="success">
+            ✅ ¡Caché limpiado exitosamente!
+        </div>
+        <button class="button" id="continueBtn" onclick="redirectToLogin()">
+            Continuar al Login
+        </button>
+    </div>
+
+    <script>
+        console.log('[ClearCache] Iniciando limpieza completa...');
+
+        async function clearAllCache() {
+            try {
+                // 1. Limpiar localStorage
+                console.log('[ClearCache] Limpiando localStorage...');
+                localStorage.clear();
+
+                // 2. Limpiar sessionStorage
+                console.log('[ClearCache] Limpiando sessionStorage...');
+                sessionStorage.clear();
+
+                // 3. Limpiar cookies
+                console.log('[ClearCache] Limpiando cookies...');
+                document.cookie.split(";").forEach(function(c) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+
+                // 4. Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    console.log('[ClearCache] Desregistrando Service Workers...');
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        console.log('[ClearCache] Service Worker desregistrado');
+                    }
+                }
+
+                // 5. Limpiar Cache API
+                if ('caches' in window) {
+                    console.log('[ClearCache] Limpiando Cache API...');
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => {
+                            console.log('[ClearCache] Eliminando cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }
+
+                // 6. Limpiar IndexedDB
+                if ('indexedDB' in window) {
+                    console.log('[ClearCache] Limpiando IndexedDB...');
+                    const databases = await indexedDB.databases();
+                    databases.forEach(db => {
+                        if (db.name) {
+                            indexedDB.deleteDatabase(db.name);
+                            console.log('[ClearCache] Base de datos eliminada:', db.name);
+                        }
+                    });
+                }
+
+                console.log('[ClearCache] ✅ Limpieza completada exitosamente');
+                return true;
+
+            } catch (error) {
+                console.error('[ClearCache] Error durante la limpieza:', error);
+                return true; // Continuar de todos modos
+            }
+        }
+
+        function redirectToLogin() {
+            console.log('[ClearCache] Redirigiendo al login...');
+            // Forzar recarga completa sin caché
+            window.location.href = '/login?nocache=' + Date.now();
+        }
+
+        // Ejecutar limpieza automáticamente
+        (async function() {
+            // Mostrar pasos
+            setTimeout(() => {
+                document.getElementById('steps').style.display = 'block';
+            }, 500);
+
+            // Esperar 2 segundos para que el usuario vea el mensaje
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Ejecutar limpieza
+            await clearAllCache();
+
+            // Mostrar éxito
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('success').style.display = 'block';
+            document.getElementById('continueBtn').style.display = 'inline-block';
+
+            // Redirigir automáticamente después de 3 segundos
+            setTimeout(() => {
+                redirectToLogin();
+            }, 3000);
+        })();
+    </script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 7.0.2
+## Versión Actual: 8.0.0
 **Fecha:** 2026-01-23
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,11 +18,14 @@
 
 ## Historial de Versiones
 
-### 7.0.2 - 2026-01-23 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 8.0.0 - 2026-01-23 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 12 archivo(s) modificado(s)
+- Documentación: 16 archivo(s) modificado(s)
+- Scripts: 6 archivo(s) modificado(s)
 
-### 7.0.1 - 2026-01-22 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 7.0.4 - 2026-01-23 [PATCH]
+- Mejoras y correcciones generales
 
 ---
 

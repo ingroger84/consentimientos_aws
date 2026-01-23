@@ -45,10 +45,35 @@ export default function SuperAdminDashboard() {
 
   const loadGlobalStats = async () => {
     try {
+      console.log('[SuperAdminDashboard] Cargando estadísticas globales...');
       const data = await tenantsService.getGlobalStats();
+      console.log('[SuperAdminDashboard] Estadísticas cargadas:', data);
       setStats(data);
     } catch (error) {
-      console.error('Error loading global stats:', error);
+      console.error('[SuperAdminDashboard] Error loading global stats:', error);
+      // Establecer datos por defecto para evitar pantalla en blanco
+      setStats({
+        totalTenants: 0,
+        activeTenants: 0,
+        suspendedTenants: 0,
+        trialTenants: 0,
+        expiredTenants: 0,
+        totalUsers: 0,
+        totalBranches: 0,
+        totalServices: 0,
+        totalConsents: 0,
+        tenantsNearLimit: 0,
+        tenantsAtLimit: 0,
+        planDistribution: {
+          free: 0,
+          basic: 0,
+          professional: 0,
+          enterprise: 0,
+        },
+        tenantsByPlan: [],
+        growthData: [],
+        topTenants: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -57,15 +82,23 @@ export default function SuperAdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-600">Cargando estadísticas...</div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <div className="ml-4 text-gray-600">Cargando estadísticas...</div>
       </div>
     );
   }
 
   if (!stats) {
+    console.error('[SuperAdminDashboard] Stats is null after loading');
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-red-600">Error al cargar estadísticas</div>
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-600 text-lg">Error al cargar estadísticas</div>
+        <button 
+          onClick={loadGlobalStats}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }

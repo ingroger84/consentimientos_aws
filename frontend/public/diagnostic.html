@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico del Sistema</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 2rem;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #00ff00;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 0.5rem;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border: 1px solid #00ff00;
+        }
+        .section h2 {
+            color: #ffff00;
+            margin-top: 0;
+        }
+        .info {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #1a1a1a;
+            border-left: 3px solid #00ff00;
+        }
+        .error {
+            color: #ff0000;
+            border-left-color: #ff0000;
+        }
+        .success {
+            color: #00ff00;
+            border-left-color: #00ff00;
+        }
+        .warning {
+            color: #ffff00;
+            border-left-color: #ffff00;
+        }
+        button {
+            background: #00ff00;
+            color: #1a1a1a;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        .actions {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 1rem;
+            overflow-x: auto;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 DIAGNÓSTICO DEL SISTEMA</h1>
+        
+        <div class="section">
+            <h2>📊 Información del Navegador</h2>
+            <div id="browserInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>💾 Estado del Almacenamiento</h2>
+            <div id="storageInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 Recursos Cargados</h2>
+            <div id="resourcesInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Service Workers</h2>
+            <div id="swInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>📦 Cache API</h2>
+            <div id="cacheInfo"></div>
+        </div>
+
+        <div class="actions">
+            <button onclick="clearEverything()">🗑️ LIMPIAR TODO</button>
+            <button onclick="location.reload(true)">🔄 RECARGAR</button>
+            <button onclick="window.location.href='/login'">➡️ IR AL LOGIN</button>
+        </div>
+    </div>
+
+    <script>
+        // Información del navegador
+        function displayBrowserInfo() {
+            const info = document.getElementById('browserInfo');
+            info.innerHTML = `
+                <div class="info">
+                    <strong>User Agent:</strong><br>
+                    <pre>${navigator.userAgent}</pre>
+                </div>
+                <div class="info">
+                    <strong>URL Actual:</strong> ${window.location.href}
+                </div>
+                <div class="info">
+                    <strong>Hostname:</strong> ${window.location.hostname}
+                </div>
+                <div class="info">
+                    <strong>Protocol:</strong> ${window.location.protocol}
+                </div>
+            `;
+        }
+
+        // Estado del almacenamiento
+        function displayStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            let html = '';
+
+            // localStorage
+            const localStorageKeys = Object.keys(localStorage);
+            html += `
+                <div class="info ${localStorageKeys.length > 0 ? 'warning' : 'success'}">
+                    <strong>localStorage:</strong> ${localStorageKeys.length} items<br>
+                    ${localStorageKeys.length > 0 ? '<pre>' + JSON.stringify(localStorageKeys, null, 2) + '</pre>' : 'Vacío ✓'}
+                </div>
+            `;
+
+            // sessionStorage
+            const sessionStorageKeys = Object.keys(sessionStorage);
+            html += `
+                <div class="info ${sessionStorageKeys.length > 0 ? 'warning' : 'success'}">
+                    <strong>sessionStorage:</strong> ${sessionStorageKeys.length} items<br>
+                    ${sessionStorageKeys.length > 0 ? '<pre>' + JSON.stringify(sessionStorageKeys, null, 2) + '</pre>' : 'Vacío ✓'}
+                </div>
+            `;
+
+            // Cookies
+            const cookies = document.cookie.split(';').filter(c => c.trim());
+            html += `
+                <div class="info ${cookies.length > 0 ? 'warning' : 'success'}">
+                    <strong>Cookies:</strong> ${cookies.length} items<br>
+                    ${cookies.length > 0 ? '<pre>' + cookies.join('\n') + '</pre>' : 'Vacío ✓'}
+                </div>
+            `;
+
+            info.innerHTML = html;
+        }
+
+        // Recursos cargados
+        function displayResourcesInfo() {
+            const info = document.getElementById('resourcesInfo');
+            const resources = performance.getEntriesByType('resource');
+            
+            const jsFiles = resources.filter(r => r.name.includes('.js'));
+            const cssFiles = resources.filter(r => r.name.includes('.css'));
+            
+            let html = `
+                <div class="info">
+                    <strong>Total de recursos:</strong> ${resources.length}
+                </div>
+                <div class="info">
+                    <strong>Archivos JavaScript (${jsFiles.length}):</strong>
+                    <pre>${jsFiles.map(r => r.name).join('\n')}</pre>
+                </div>
+                <div class="info">
+                    <strong>Archivos CSS (${cssFiles.length}):</strong>
+                    <pre>${cssFiles.map(r => r.name).join('\n')}</pre>
+                </div>
+            `;
+            
+            info.innerHTML = html;
+        }
+
+        // Service Workers
+        async function displaySWInfo() {
+            const info = document.getElementById('swInfo');
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    if (registrations.length > 0) {
+                        let html = `<div class="info warning"><strong>Service Workers encontrados:</strong> ${registrations.length}</div>`;
+                        registrations.forEach((reg, i) => {
+                            html += `
+                                <div class="info warning">
+                                    <strong>SW ${i + 1}:</strong><br>
+                                    Scope: ${reg.scope}<br>
+                                    State: ${reg.active ? reg.active.state : 'N/A'}
+                                </div>
+                            `;
+                        });
+                        info.innerHTML = html;
+                    } else {
+                        info.innerHTML = '<div class="info success">No hay Service Workers registrados ✓</div>';
+                    }
+                } catch (error) {
+                    info.innerHTML = `<div class="info error">Error: ${error.message}</div>`;
+                }
+            } else {
+                info.innerHTML = '<div class="info">Service Workers no soportados</div>';
+            }
+        }
+
+        // Cache API
+        async function displayCacheInfo() {
+            const info = document.getElementById('cacheInfo');
+            
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    
+                    if (cacheNames.length > 0) {
+                        let html = `<div class="info warning"><strong>Caches encontrados:</strong> ${cacheNames.length}</div>`;
+                        
+                        for (const cacheName of cacheNames) {
+                            const cache = await caches.open(cacheName);
+                            const keys = await cache.keys();
+                            html += `
+                                <div class="info warning">
+                                    <strong>${cacheName}:</strong> ${keys.length} items<br>
+                                    <pre>${keys.map(k => k.url).join('\n')}</pre>
+                                </div>
+                            `;
+                        }
+                        info.innerHTML = html;
+                    } else {
+                        info.innerHTML = '<div class="info success">No hay caches ✓</div>';
+                    }
+                } catch (error) {
+                    info.innerHTML = `<div class="info error">Error: ${error.message}</div>`;
+                }
+            } else {
+                info.innerHTML = '<div class="info">Cache API no soportada</div>';
+            }
+        }
+
+        // Limpiar todo
+        async function clearEverything() {
+            console.log('[Diagnostic] Limpiando todo...');
+            
+            try {
+                // localStorage
+                localStorage.clear();
+                console.log('[Diagnostic] localStorage limpiado');
+                
+                // sessionStorage
+                sessionStorage.clear();
+                console.log('[Diagnostic] sessionStorage limpiado');
+                
+                // Cookies
+                document.cookie.split(";").forEach(function(c) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+                console.log('[Diagnostic] Cookies limpiadas');
+                
+                // Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                    console.log('[Diagnostic] Service Workers desregistrados');
+                }
+                
+                // Cache API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+                    console.log('[Diagnostic] Caches eliminados');
+                }
+                
+                alert('✅ Todo limpiado exitosamente!\n\nAhora se recargará la página.');
+                location.reload(true);
+                
+            } catch (error) {
+                console.error('[Diagnostic] Error:', error);
+                alert('❌ Error durante la limpieza: ' + error.message);
+            }
+        }
+
+        // Inicializar
+        displayBrowserInfo();
+        displayStorageInfo();
+        displayResourcesInfo();
+        displaySWInfo();
+        displayCacheInfo();
+    </script>
+</body>
+</html>

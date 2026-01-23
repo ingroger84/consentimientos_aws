@@ -236,6 +236,17 @@ export default function Layout() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{user?.name}</p>
                 <p className="text-xs text-gray-500 truncate">{user?.role.name}</p>
+                {/* Mostrar sede para usuarios operadores */}
+                {user?.branches && user.branches.length > 0 && (
+                  <div className="mt-1 flex items-center gap-1">
+                    <Building2 className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                    <p className="text-xs text-gray-600 truncate">
+                      {user.branches.length === 1 
+                        ? user.branches[0].name 
+                        : `${user.branches.length} sedes`}
+                    </p>
+                  </div>
+                )}
               </div>
               <button
                 onClick={() => {

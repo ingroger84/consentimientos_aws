@@ -3,13 +3,21 @@
  */
 
 /**
- * Calcula la fecha de la próxima factura basándose en la fecha de creación y el día de facturación
+ * Calcula la fecha de la próxima factura basándose en la fecha de creación, el día de facturación y el plan
  * @param createdAt Fecha de creación del tenant
  * @param billingDay Día del mes para facturación (1-28). Si no se proporciona, usa la fecha de creación + 1 mes
+ * @param plan Plan del tenant (free, basic, professional, enterprise)
  */
-export function getNextInvoiceDate(createdAt: string | Date, billingDay?: number): Date {
+export function getNextInvoiceDate(createdAt: string | Date, billingDay?: number, plan?: string): Date {
   const created = new Date(createdAt);
   const today = new Date();
+  
+  // Para plan gratuito (free), la próxima factura es 7 días después de la creación
+  if (plan === 'free') {
+    const nextInvoice = new Date(created);
+    nextInvoice.setDate(nextInvoice.getDate() + 7);
+    return nextInvoice;
+  }
   
   // Si no hay billingDay, usar el comportamiento anterior (fecha de creación + 1 mes)
   if (!billingDay) {
@@ -46,9 +54,10 @@ export function getNextInvoiceDate(createdAt: string | Date, billingDay?: number
  * Calcula cuántos días faltan para la próxima factura
  * @param createdAt Fecha de creación del tenant
  * @param billingDay Día del mes para facturación (1-28)
+ * @param plan Plan del tenant (free, basic, professional, enterprise)
  */
-export function getDaysUntilNextInvoice(createdAt: string | Date, billingDay?: number): number {
-  const nextInvoice = getNextInvoiceDate(createdAt, billingDay);
+export function getDaysUntilNextInvoice(createdAt: string | Date, billingDay?: number, plan?: string): number {
+  const nextInvoice = getNextInvoiceDate(createdAt, billingDay, plan);
   const today = new Date();
   
   // Normalizar las fechas a medianoche para comparación precisa

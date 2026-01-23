@@ -312,10 +312,10 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
           </div>
           <div className="text-right">
             <div className="text-xs font-medium text-gray-900">
-              {formatDate(getNextInvoiceDate(tenant.createdAt, tenant.billingDay))}
+              {formatDate(getNextInvoiceDate(tenant.createdAt, tenant.billingDay, tenant.plan))}
             </div>
-            <div className={`text-xs font-semibold ${getInvoiceDaysColor(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay))}`}>
-              {getInvoiceDaysText(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay))}
+            <div className={`text-xs font-semibold ${getInvoiceDaysColor(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay, tenant.plan))}`}>
+              {getInvoiceDaysText(getDaysUntilNextInvoice(tenant.createdAt, tenant.billingDay, tenant.plan))}
             </div>
           </div>
         </div>
