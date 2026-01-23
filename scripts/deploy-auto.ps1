@@ -13,7 +13,7 @@ $ErrorActionPreference = "Continue"
 $SERVER_IP = "100.28.198.249"
 $SERVER_USER = "ubuntu"
 $SSH_KEY = "AWS-ISSABEL.pem"
-$PROJECT_PATH = "/home/ubuntu/archivoenlinea_aws"
+$PROJECT_PATH = "/home/ubuntu/consentimientos_aws"
 
 function Write-Step($message) {
     Write-Host ""
@@ -181,7 +181,7 @@ if ($envResult -match "ENV_EXISTS") {
 Write-Step "PASO 6: REINICIAR BACKEND CON PM2"
 Write-Info "Reiniciando proceso datagree-backend..."
 
-$pm2Command = "pm2 restart archivoenlinea-backend; sleep 3; if pm2 list | grep -q 'archivoenlinea-backend.*online'; then echo PM2_OK; else echo PM2_ERROR; fi"
+$pm2Command = "pm2 restart datagree-backend; sleep 3; if pm2 list | grep -q 'datagree-backend.*online'; then echo PM2_OK; else echo PM2_ERROR; fi"
 
 $pm2Result = & ssh -i $SSH_KEY "${SERVER_USER}@${SERVER_IP}" $pm2Command 2>&1
 
@@ -229,7 +229,7 @@ if ($frontendBuildResult -match "FRONTEND_BUILD_OK") {
 Write-Step "PASO 9: VERIFICACION FINAL"
 Write-Info "Verificando estado del sistema..."
 
-$verifyCommand = "pm2 list | grep archivoenlinea-backend; echo ''; curl -s http://localhost:3000/api/tenants/plans | head -c 100; echo ''; echo VERIFY_OK"
+$verifyCommand = "pm2 list | grep datagree-backend; echo ''; curl -s http://localhost:3000/api/tenants/plans | head -c 100; echo ''; echo VERIFY_OK"
 
 $verifyResult = & ssh -i $SSH_KEY "${SERVER_USER}@${SERVER_IP}" $verifyCommand 2>&1
 
@@ -289,7 +289,7 @@ Write-Host "  5. Revisa las notificaciones en el dashboard del Super Admin" -For
 Write-Host ""
 
 Write-Host "Logs del backend:" -ForegroundColor Cyan
-Write-Host "  ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'pm2 logs archivoenlinea-backend'" -ForegroundColor Gray
+Write-Host "  ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'pm2 logs datagree-backend'" -ForegroundColor Gray
 Write-Host ""
 
 Write-Success "Despliegue finalizado"
