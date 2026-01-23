@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 4.0.0
+## Versión Actual: 5.0.0
 **Fecha:** 2026-01-22
 **Tipo de Cambio:** MAJOR
 
@@ -18,12 +18,13 @@
 
 ## Historial de Versiones
 
-### 4.0.0 - 2026-01-22 [MAJOR]
+### 5.0.0 - 2026-01-22 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
+- Scripts: 2 archivo(s) modificado(s)
 
-### 3.0.2 - 2026-01-22 [PATCH]
+### 4.0.1 - 2026-01-22 [PATCH]
 - Mejoras y correcciones generales
 
 ---
