@@ -67,6 +67,14 @@ Path: /etc/letsencrypt/live/www.archivoenlinea.com/
 Estado: ✅ Activo
 ```
 
+#### Certificado 3: Tenants (clinica-demo + demo-estetica)
+```
+Dominios: clinica-demo.archivoenlinea.com, demo-estetica.archivoenlinea.com
+Expira: 2026-04-23
+Path: /etc/letsencrypt/live/clinica-demo.archivoenlinea.com/
+Estado: ✅ Activo
+```
+
 **Renovación automática:** ✅ Configurada
 
 ---
@@ -115,6 +123,8 @@ SMTP_FROM_NAME=Archivo en Línea
 | https://archivoenlinea.com | HTTPS | ✅ OK | 200 |
 | https://www.archivoenlinea.com | HTTPS | ✅ OK | 200 |
 | https://admin.archivoenlinea.com | HTTPS | ✅ OK | 200 |
+| https://clinica-demo.archivoenlinea.com | HTTPS | ✅ OK | 200 |
+| https://demo-estetica.archivoenlinea.com | HTTPS | ✅ OK | 200 |
 | http://archivoenlinea.com | HTTP | ✅ Redirect | 301 → HTTPS |
 
 ### Funcionalidades Verificadas
@@ -125,6 +135,7 @@ SMTP_FROM_NAME=Archivo en Línea
 - ✅ Backend respondiendo en /api
 - ✅ Frontend servido correctamente
 - ✅ Subdominios funcionando
+- ✅ SSL en tenants (clinica-demo, demo-estetica)
 
 ---
 
@@ -181,6 +192,23 @@ ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 'sudo systemctl reload nginx'
 ---
 
 ## 🎯 Próximos Pasos Sugeridos
+
+### Opcional - Agregar SSL a Nuevos Tenants
+
+Cuando crees un nuevo tenant, usa el script automatizado:
+
+```powershell
+.\scripts\add-tenant-ssl.ps1 -TenantSlug "nombre-del-tenant"
+```
+
+O manualmente:
+
+```bash
+ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249
+sudo certbot --nginx -d nuevo-tenant.archivoenlinea.com --non-interactive --agree-tos --email rcaraballo@innovasystems.com.co --redirect
+```
+
+Ver documentación completa en: `CERTIFICADOS_SSL_TENANTS_20260122.md`
 
 ### Opcional - Renombrar Proceso PM2
 

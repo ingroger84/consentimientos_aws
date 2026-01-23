@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 2.3.1
+## Versión Actual: 2.3.2
 **Fecha:** 2026-01-22
 **Tipo de Cambio:** PATCH
 
@@ -18,11 +18,12 @@
 
 ## Historial de Versiones
 
+### 2.3.2 - 2026-01-22 [PATCH]
+- Documentación: 2 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
+
 ### 2.3.1 - 2026-01-22 [PATCH]
 - Documentación: 3 archivo(s) modificado(s)
-
-### 2.3.0 - 2026-01-22 [MINOR]
-- Scripts: 1 archivo(s) modificado(s)
 
 ---
 
