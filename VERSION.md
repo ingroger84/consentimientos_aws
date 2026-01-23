@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 3.0.0
+## Versión Actual: 3.0.1
 **Fecha:** 2026-01-22
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,13 +18,13 @@
 
 ## Historial de Versiones
 
+### 3.0.1 - 2026-01-22 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 3.0.0 - 2026-01-22 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 3 archivo(s) modificado(s)
-
-### 2.4.9 - 2026-01-22 [PATCH]
-- Mejoras y correcciones generales
 
 ---
 
