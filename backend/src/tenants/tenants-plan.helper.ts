@@ -37,13 +37,21 @@ export function applyPlanLimits(dto: CreateTenantDto): CreateTenantDto {
   const now = new Date();
   dto.planStartedAt = now;
 
-  // Calcular fecha de expiración según el ciclo de facturación
+  // Calcular fecha de expiración según el plan y ciclo de facturación
   const expiresAt = new Date(now);
-  if (billingCycle === BillingCycle.ANNUAL) {
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+  
+  // Plan gratuito: 7 días de prueba
+  if (planId === TenantPlan.FREE) {
+    expiresAt.setDate(expiresAt.getDate() + 7);
   } else {
-    expiresAt.setMonth(expiresAt.getMonth() + 1);
+    // Planes de pago: según ciclo de facturación
+    if (billingCycle === BillingCycle.ANNUAL) {
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    } else {
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+    }
   }
+  
   dto.planExpiresAt = expiresAt;
 
   // Auto-renovación por defecto

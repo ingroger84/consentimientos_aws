@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 6.0.0
+## Versión Actual: 7.0.0
 **Fecha:** 2026-01-22
 **Tipo de Cambio:** MAJOR
 
@@ -18,13 +18,12 @@
 
 ## Historial de Versiones
 
-### 6.0.0 - 2026-01-22 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
+### 7.0.0 - 2026-01-22 [MAJOR]
+- Backend: 4 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
-- Scripts: 2 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
 
-### 5.1.1 - 2026-01-22 [PATCH]
+### 6.1.0 - 2026-01-22 [MINOR]
 - Mejoras y correcciones generales
 
 ---
