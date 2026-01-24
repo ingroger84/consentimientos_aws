@@ -27,6 +27,7 @@ export class BillingService {
     const currentDay = now.getDate();
 
     // Buscar tenants activos cuyo día de facturación coincida con hoy (±1 día de tolerancia)
+    // EXCLUIR: tenants con plan gratuito o en período de prueba
     const tenants = await this.tenantsRepository
       .createQueryBuilder('tenant')
       .where('tenant.status = :status', { status: TenantStatus.ACTIVE })
@@ -34,15 +35,31 @@ export class BillingService {
         minDay: Math.max(1, currentDay - 1),
         maxDay: Math.min(28, currentDay + 1),
       })
+      .andWhere('tenant.plan != :freePlan', { freePlan: 'free' })
       .getMany();
 
     console.log(`[BillingService] Encontrados ${tenants.length} tenants para facturar (día de corte: ${currentDay})`);
 
     let generated = 0;
     const errors: string[] = [];
+    let skipped = 0;
 
     for (const tenant of tenants) {
       try {
+        // Verificación adicional: No generar facturas para planes gratuitos o en trial
+        if (tenant.plan === 'free') {
+          console.log(`[BillingService] Tenant ${tenant.name} tiene plan gratuito - omitiendo facturación`);
+          skipped++;
+          continue;
+        }
+
+        // Si el tenant tiene trialEndsAt y aún está en período de prueba, no facturar
+        if (tenant.trialEndsAt && tenant.trialEndsAt > now) {
+          console.log(`[BillingService] Tenant ${tenant.name} está en período de prueba hasta ${tenant.trialEndsAt.toISOString()} - omitiendo facturación`);
+          skipped++;
+          continue;
+        }
+
         // Calcular fecha de próxima factura basada en billingDay
         const nextBillingDate = new Date(now);
         nextBillingDate.setDate(tenant.billingDay);
@@ -93,7 +110,7 @@ export class BillingService {
       }
     }
 
-    console.log(`[BillingService] Generación completada: ${generated} facturas generadas, ${errors.length} errores`);
+    console.log(`[BillingService] Generación completada: ${generated} facturas generadas, ${skipped} omitidas (plan gratuito/trial), ${errors.length} errores`);
 
     return { generated, errors };
   }

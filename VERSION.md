@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 8.0.0
+## Versión Actual: 8.1.0
 **Fecha:** 2026-01-23
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,14 +18,15 @@
 
 ## Historial de Versiones
 
+### 8.1.0 - 2026-01-23 [MINOR]
+- Backend: 2 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 8.0.0 - 2026-01-23 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 12 archivo(s) modificado(s)
 - Documentación: 16 archivo(s) modificado(s)
 - Scripts: 6 archivo(s) modificado(s)
-
-### 7.0.4 - 2026-01-23 [PATCH]
-- Mejoras y correcciones generales
 
 ---
 
