@@ -36,6 +36,13 @@ export class ConsentTemplatesController {
     return this.templatesService.create(createDto, tenantId);
   }
 
+  @Post('initialize-defaults')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.CREATE_TEMPLATES)
+  initializeDefaults(@TenantSlug() tenantId: string) {
+    return this.templatesService.initializeDefaults(tenantId);
+  }
+
   @Get()
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.VIEW_TEMPLATES)

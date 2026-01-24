@@ -1,27 +1,45 @@
 # Estado Final - Sistema de Plantillas de Consentimiento
-**Fecha**: 23 de enero de 2026
-**Hora**: 22:10 (hora local)
-**Versión**: 11.1.1
+**Fecha**: 24 de enero de 2026
+**Hora**: Actualizado
+**Versión**: 11.1.2
 
 ## ✅ RESUMEN EJECUTIVO
 
 El sistema de plantillas de consentimiento editables está **100% OPERATIVO** en producción. Todos los componentes están desplegados, configurados y funcionando correctamente.
 
+### 🔧 Últimas Correcciones (24/01/2026)
+
+#### Corrección 1: Conexión del Frontend
+- ✅ **Problema**: Frontend intentaba conectarse a localhost en lugar del servidor de producción
+- ✅ **Solución**: Recompilado y redesplego frontend con configuración correcta
+- ✅ **Documento**: `CORRECCION_API_URL_FRONTEND_20260124.md`
+
+#### Corrección 2: CORS para Subdominios
+- ✅ **Problema**: Subdominios tenant mostraban errores de CORS al conectarse al backend
+- ✅ **Causa**: Variable `CORS_ORIGIN` tenía configurado dominio antiguo `datagree.net`
+- ✅ **Solución**: Actualizado `CORS_ORIGIN` a `archivoenlinea.com` y reiniciado backend
+- ✅ **Estado**: Todos los subdominios ahora funcionan correctamente
+- ✅ **Documento**: `CORRECCION_CORS_SUBDOMINIOS_20260124.md`
+
 ## 🎯 ESTADO DE COMPONENTES
 
 ### Backend ✅
 - **Estado**: Online (PID 109019)
-- **Versión**: 11.1.1
-- **Endpoints**: 9 endpoints registrados
+- **Versión**: 11.1.2
+- **Endpoints**: 10 endpoints registrados (incluye initialize-defaults)
 - **Módulo**: ConsentTemplatesModule cargado
-- **Base de Datos**: Tabla `consent_templates` creada con 12 plantillas
+- **Base de Datos**: Tabla `consent_templates` creada
+- **Corrección**: Método helper `getTenantIdFromSlug()` implementado
 
 ### Frontend ✅
-- **Estado**: Desplegado en `/var/www/html/`
-- **Página**: ConsentTemplatesPage accesible
+- **Estado**: Desplegado en ambas ubicaciones
+  - `/var/www/html/` (dominio principal)
+  - `/home/ubuntu/consentimientos_aws/frontend/dist/` (subdominios)
+- **Página**: ConsentTemplatesPage con sistema de toast y confirm
 - **Modales**: 4 modales implementados (Crear, Editar, Ver, Helper)
 - **Ruta**: `/consent-templates` configurada
 - **Menú**: Enlace "Plantillas" visible
+- **Corrección**: Conexión API corregida (ya no intenta conectar a localhost)
 
 ### Base de Datos ✅
 - **Tabla**: `consent_templates` creada
@@ -50,15 +68,16 @@ El sistema de plantillas de consentimiento editables está **100% OPERATIVO** en
 ## 📊 ENDPOINTS REGISTRADOS
 
 ```
-POST   /api/consent-templates                    - Crear plantilla
-GET    /api/consent-templates                    - Listar todas
-GET    /api/consent-templates/by-type/:type      - Filtrar por tipo
-GET    /api/consent-templates/default/:type      - Obtener predeterminada
-GET    /api/consent-templates/variables          - Variables disponibles
-GET    /api/consent-templates/:id                - Obtener una plantilla
-PATCH  /api/consent-templates/:id                - Actualizar plantilla
-PATCH  /api/consent-templates/:id/set-default    - Marcar como default
-DELETE /api/consent-templates/:id                - Eliminar plantilla
+POST   /api/consent-templates                       - Crear plantilla
+GET    /api/consent-templates                       - Listar todas
+GET    /api/consent-templates/by-type/:type         - Filtrar por tipo
+GET    /api/consent-templates/default/:type         - Obtener predeterminada
+GET    /api/consent-templates/variables             - Variables disponibles
+POST   /api/consent-templates/initialize-defaults   - Inicializar plantillas predeterminadas
+GET    /api/consent-templates/:id                   - Obtener una plantilla
+PATCH  /api/consent-templates/:id                   - Actualizar plantilla
+PATCH  /api/consent-templates/:id/set-default       - Marcar como default
+DELETE /api/consent-templates/:id                   - Eliminar plantilla
 ```
 
 ## 🗄️ BASE DE DATOS
@@ -246,7 +265,19 @@ El sistema soporta 14 variables que se reemplazan automáticamente:
 - [ ] Eliminar plantilla
 - [ ] Verificar que se eliminó
 
-## ⚠️ PROBLEMAS CONOCIDOS
+## ⚠️ PROBLEMAS CONOCIDOS Y RESUELTOS
+
+### ✅ RESUELTO: Error de CORS en Subdominios (24/01/2026)
+- **Problema**: Subdominios tenant mostraban errores de CORS
+- **Causa**: Variable `CORS_ORIGIN` tenía configurado dominio antiguo `datagree.net`
+- **Solución**: Actualizado a `archivoenlinea.com` y reiniciado backend
+- **Estado**: ✅ Resuelto
+
+### ✅ RESUELTO: Error de Conexión a Localhost (24/01/2026)
+- **Problema**: Frontend intentaba conectarse a `localhost:3000` en producción
+- **Causa**: Archivos compilados antiguos o con configuración incorrecta
+- **Solución**: Recompilado y redesplego frontend
+- **Estado**: ✅ Resuelto
 
 ### 1. Error en Logs de Clientes (CONOCIDO)
 - **Problema**: Error "column Client.tenantId does not exist"
@@ -301,12 +332,14 @@ El sistema de plantillas de consentimiento editables está **COMPLETAMENTE OPERA
 
 ### Logros
 - ✅ 37 archivos implementados (26 nuevos, 11 modificados)
-- ✅ 9 endpoints REST funcionando
+- ✅ 10 endpoints REST funcionando (incluye initialize-defaults)
 - ✅ 4 permisos configurados en 3 roles
-- ✅ 12 plantillas por defecto creadas
+- ✅ Sistema de inicialización de plantillas predeterminadas
 - ✅ 14 variables dinámicas disponibles
+- ✅ Sistema de toast notifications y confirm dialogs
 - ✅ Documentación completa
 - ✅ Código sincronizado en GitHub
+- ✅ Corrección de conexión API aplicada
 
 ### Beneficios
 - 🎯 100% personalizable por el usuario
@@ -327,5 +360,6 @@ El sistema de plantillas de consentimiento editables está **COMPLETAMENTE OPERA
 ---
 
 **Desarrollado por**: Kiro AI Assistant
-**Fecha de Finalización**: 23 de enero de 2026
-**Versión del Sistema**: 11.1.0
+**Fecha de Finalización**: 24 de enero de 2026
+**Versión del Sistema**: 11.1.2
+**Última Actualización**: Corrección de conexión API

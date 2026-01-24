@@ -4,18 +4,42 @@ import { Repository } from 'typeorm';
 import { ConsentTemplate, TemplateType } from './entities/consent-template.entity';
 import { CreateConsentTemplateDto } from './dto/create-consent-template.dto';
 import { UpdateConsentTemplateDto } from './dto/update-consent-template.dto';
+import { Tenant } from '../tenants/entities/tenant.entity';
 
 @Injectable()
 export class ConsentTemplatesService {
   constructor(
     @InjectRepository(ConsentTemplate)
     private templatesRepository: Repository<ConsentTemplate>,
+    @InjectRepository(Tenant)
+    private tenantsRepository: Repository<Tenant>,
   ) {}
+
+  /**
+   * Convierte un slug de tenant a UUID
+   */
+  private async getTenantIdFromSlug(tenantSlug?: string): Promise<string | null> {
+    if (!tenantSlug) {
+      return null;
+    }
+
+    const tenant = await this.tenantsRepository.findOne({
+      where: { slug: tenantSlug },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException(`Tenant con slug "${tenantSlug}" no encontrado`);
+    }
+
+    return tenant.id;
+  }
 
   async create(
     createDto: CreateConsentTemplateDto,
-    tenantId?: string,
+    tenantSlug?: string,
   ): Promise<ConsentTemplate> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+
     // Si se marca como default, desactivar otros defaults del mismo tipo
     if (createDto.isDefault) {
       await this.templatesRepository.update(
@@ -36,7 +60,9 @@ export class ConsentTemplatesService {
     return this.templatesRepository.save(template);
   }
 
-  async findAll(tenantId?: string): Promise<ConsentTemplate[]> {
+  async findAll(tenantSlug?: string): Promise<ConsentTemplate[]> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    
     return this.templatesRepository.find({
       where: { tenantId: tenantId || null },
       order: { type: 'ASC', createdAt: 'DESC' },
@@ -45,8 +71,10 @@ export class ConsentTemplatesService {
 
   async findByType(
     type: TemplateType,
-    tenantId?: string,
+    tenantSlug?: string,
   ): Promise<ConsentTemplate[]> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    
     return this.templatesRepository.find({
       where: {
         tenantId: tenantId || null,
@@ -59,8 +87,10 @@ export class ConsentTemplatesService {
 
   async findDefaultByType(
     type: TemplateType,
-    tenantId?: string,
+    tenantSlug?: string,
   ): Promise<ConsentTemplate> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    
     const template = await this.templatesRepository.findOne({
       where: {
         tenantId: tenantId || null,
@@ -93,7 +123,9 @@ export class ConsentTemplatesService {
     return template;
   }
 
-  async findOne(id: string, tenantId?: string): Promise<ConsentTemplate> {
+  async findOne(id: string, tenantSlug?: string): Promise<ConsentTemplate> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    
     const template = await this.templatesRepository.findOne({
       where: {
         id,
@@ -111,9 +143,10 @@ export class ConsentTemplatesService {
   async update(
     id: string,
     updateDto: UpdateConsentTemplateDto,
-    tenantId?: string,
+    tenantSlug?: string,
   ): Promise<ConsentTemplate> {
-    const template = await this.findOne(id, tenantId);
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    const template = await this.findOne(id, tenantSlug);
 
     // Si se marca como default, desactivar otros defaults del mismo tipo
     if (updateDto.isDefault && !template.isDefault) {
@@ -131,8 +164,8 @@ export class ConsentTemplatesService {
     return this.templatesRepository.save(template);
   }
 
-  async remove(id: string, tenantId?: string): Promise<void> {
-    const template = await this.findOne(id, tenantId);
+  async remove(id: string, tenantSlug?: string): Promise<void> {
+    const template = await this.findOne(id, tenantSlug);
 
     if (template.isDefault) {
       throw new BadRequestException(
@@ -143,8 +176,9 @@ export class ConsentTemplatesService {
     await this.templatesRepository.remove(template);
   }
 
-  async setAsDefault(id: string, tenantId?: string): Promise<ConsentTemplate> {
-    const template = await this.findOne(id, tenantId);
+  async setAsDefault(id: string, tenantSlug?: string): Promise<ConsentTemplate> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    const template = await this.findOne(id, tenantSlug);
 
     // Desactivar otros defaults del mismo tipo
     await this.templatesRepository.update(
@@ -193,6 +227,137 @@ export class ConsentTemplatesService {
       signTime: 'Hora de firma',
       currentDate: 'Fecha actual',
       currentYear: 'Año actual',
+    };
+  }
+
+  /**
+   * Inicializa las plantillas predeterminadas para un tenant
+   */
+  async initializeDefaults(tenantSlug?: string): Promise<{ message: string; count: number }> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+    
+    // Verificar si ya existen plantillas para este tenant
+    const existingTemplates = await this.templatesRepository.find({
+      where: { tenantId: tenantId || null },
+    });
+
+    // Si ya existen plantillas, retornar mensaje informativo
+    if (existingTemplates.length > 0) {
+      return {
+        message: `Ya tienes ${existingTemplates.length} plantilla(s) creada(s). Puedes editarlas o crear nuevas según tus necesidades.`,
+        count: existingTemplates.length,
+      };
+    }
+
+    // Definir las plantillas predeterminadas
+    const defaultTemplates = [
+      {
+        name: 'Consentimiento de Procedimiento (Predeterminado)',
+        type: 'procedure' as TemplateType,
+        content: `DECLARACIÓN DE CONSENTIMIENTO
+
+Declaro que he sido informado(a) sobre el procedimiento/servicio mencionado, sus beneficios, riesgos y alternativas. Autorizo voluntariamente la realización del procedimiento/servicio descrito en este documento.
+
+He tenido la oportunidad de hacer preguntas y todas mis dudas han sido resueltas satisfactoriamente. Comprendo que puedo retirar este consentimiento en cualquier momento antes del procedimiento.
+
+Servicio: {{serviceName}}
+Sede: {{branchName}}
+Fecha: {{signDate}}
+
+Firma del paciente: _______________________
+Nombre: {{clientName}}
+Identificación: {{clientId}}`,
+        description: 'Plantilla predeterminada para consentimientos de procedimientos médicos y servicios',
+        isActive: true,
+        isDefault: true,
+      },
+      {
+        name: 'Tratamiento de Datos Personales (Predeterminado)',
+        type: 'data_treatment' as TemplateType,
+        content: `AUTORIZACIÓN PARA TRATAMIENTO DE DATOS PERSONALES
+
+De acuerdo con la Ley Estatutaria 1581 de 2012 de Protección de Datos y sus normas reglamentarias, doy mi consentimiento, como Titular de los datos, para que éstos sean incorporados en una base de datos responsabilidad de {{branchName}}, para que sean tratados con arreglo a los siguientes criterios:
+
+1. FINALIDAD DEL TRATAMIENTO
+La finalidad del tratamiento será la prestación de servicios médicos/profesionales, gestión administrativa, facturación, y comunicaciones relacionadas con los servicios contratados.
+
+2. DERECHOS DEL TITULAR
+Como titular de los datos personales, tengo derecho a:
+- Conocer, actualizar y rectificar mis datos personales
+- Solicitar prueba de la autorización otorgada
+- Ser informado sobre el uso que se ha dado a mis datos
+- Presentar quejas ante la Superintendencia de Industria y Comercio
+- Revocar la autorización y/o solicitar la supresión de datos
+- Acceder de forma gratuita a mis datos personales
+
+3. EJERCICIO DE DERECHOS
+Para ejercitar los derechos de acceso, corrección, supresión, revocación o reclamo, puedo dirigirme a:
+- Correo electrónico: {{branchEmail}}
+- Dirección: {{branchAddress}}
+- Teléfono: {{branchPhone}}
+
+TITULAR DE LOS DATOS
+Nombre: {{clientName}}
+Identificación: {{clientId}}
+Email: {{clientEmail}}
+Teléfono: {{clientPhone}}
+Fecha: {{currentDate}}`,
+        description: 'Plantilla predeterminada para autorización de tratamiento de datos personales según Ley 1581 de 2012',
+        isActive: true,
+        isDefault: true,
+      },
+      {
+        name: 'Autorización de Derechos de Imagen (Predeterminado)',
+        type: 'image_rights' as TemplateType,
+        content: `AUTORIZACIÓN DE USO DE IMAGEN Y DATOS PERSONALES
+
+Autorizo expresamente el uso de mi imagen, voz y/o cualquier otro dato de carácter personal que pueda ser captado en fotografías, videos o grabaciones realizadas durante el procedimiento/servicio.
+
+1. ALCANCE DE LA AUTORIZACIÓN
+Esta autorización incluye:
+- Fotografías del procedimiento con fines médicos y de registro
+- Uso de imágenes para documentación clínica
+- Almacenamiento seguro en la historia clínica
+- Uso interno para fines de seguimiento y control de calidad
+
+2. PROTECCIÓN DE LA PRIVACIDAD
+La institución se compromete a:
+- Proteger mi identidad y datos personales
+- No publicar imágenes sin autorización expresa adicional
+- Usar las imágenes únicamente para los fines autorizados
+- Mantener la confidencialidad de la información
+
+3. REVOCACIÓN
+Puedo revocar esta autorización en cualquier momento mediante comunicación escrita dirigida a {{branchName}}.
+
+4. DATOS DEL TITULAR
+Nombre completo: {{clientName}}
+Identificación: {{clientId}}
+Servicio: {{serviceName}}
+Sede: {{branchName}}
+Fecha: {{currentDate}}
+
+Declaro que he leído y comprendido esta autorización y la otorgo de manera libre y voluntaria.`,
+        description: 'Plantilla predeterminada para autorización de uso de imagen y datos personales',
+        isActive: true,
+        isDefault: true,
+      },
+    ];
+
+    // Crear las plantillas
+    const createdTemplates = [];
+    for (const templateData of defaultTemplates) {
+      const template = this.templatesRepository.create({
+        ...templateData,
+        tenantId: tenantId || null,
+      });
+      const saved = await this.templatesRepository.save(template);
+      createdTemplates.push(saved);
+    }
+
+    return {
+      message: `Se crearon ${createdTemplates.length} plantillas predeterminadas exitosamente`,
+      count: createdTemplates.length,
     };
   }
 }

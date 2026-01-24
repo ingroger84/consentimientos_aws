@@ -45,6 +45,11 @@ class TemplateService {
   async delete(id: string): Promise<void> {
     await api.delete(`/consent-templates/${id}`);
   }
+
+  async initializeDefaults(): Promise<{ message: string; count: number }> {
+    const { data } = await api.post<{ message: string; count: number }>('/consent-templates/initialize-defaults', {});
+    return data;
+  }
 }
 
 export const templateService = new TemplateService();

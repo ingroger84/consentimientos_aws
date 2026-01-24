@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Edit, Trash2, Star, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, FileText, Edit, Trash2, Star, Eye, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { templateService } from '../services/template.service';
 import { ConsentTemplate, TEMPLATE_TYPE_LABELS, TemplateType } from '../types/template';
 import { usePermissions } from '../hooks/usePermissions';
+import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
 import CreateTemplateModal from '../components/templates/CreateTemplateModal';
 import EditTemplateModal from '../components/templates/EditTemplateModal';
 import ViewTemplateModal from '../components/templates/ViewTemplateModal';
 
 export default function ConsentTemplatesPage() {
   const { hasPermission } = usePermissions();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [templates, setTemplates] = useState<ConsentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -16,6 +20,7 @@ export default function ConsentTemplatesPage() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ConsentTemplate | null>(null);
   const [filterType, setFilterType] = useState<TemplateType | 'all'>('all');
+  const [initializing, setInitializing] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -26,8 +31,9 @@ export default function ConsentTemplatesPage() {
       setLoading(true);
       const data = await templateService.getAll();
       setTemplates(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al cargar plantillas:', error);
+      toast.error('Error al cargar plantillas', error.response?.data?.message || 'No se pudieron cargar las plantillas');
     } finally {
       setLoading(false);
     }
@@ -55,28 +61,66 @@ export default function ConsentTemplatesPage() {
   };
 
   const handleSetAsDefault = async (template: ConsentTemplate) => {
-    if (!confirm(`¿Marcar "${template.name}" como plantilla predeterminada?`)) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: '¿Marcar como predeterminada?',
+      message: `¿Deseas marcar "${template.name}" como plantilla predeterminada?`,
+      type: 'warning'
+    });
+    
+    if (!confirmed) return;
 
     try {
       await templateService.setAsDefault(template.id);
-      loadTemplates();
+      await loadTemplates();
+      toast.success('Plantilla predeterminada', 'La plantilla fue marcada como predeterminada exitosamente');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al establecer plantilla predeterminada');
+      toast.error('Error al actualizar', error.response?.data?.message || 'No se pudo establecer la plantilla como predeterminada');
     }
   };
 
   const handleDeleteTemplate = async (template: ConsentTemplate) => {
-    if (!confirm(`¿Está seguro de eliminar la plantilla "${template.name}"?`)) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: '¿Eliminar plantilla?',
+      message: `¿Estás seguro de eliminar la plantilla "${template.name}"? Esta acción no se puede deshacer.`,
+      type: 'danger'
+    });
+    
+    if (!confirmed) return;
 
     try {
       await templateService.delete(template.id);
-      loadTemplates();
+      await loadTemplates();
+      toast.success('Plantilla eliminada', 'La plantilla fue eliminada exitosamente');
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Error al eliminar plantilla');
+      toast.error('Error al eliminar', error.response?.data?.message || 'No se pudo eliminar la plantilla');
+    }
+  };
+
+  const handleInitializeDefaults = async () => {
+    const confirmed = await confirm({
+      title: '¿Crear plantillas predeterminadas?',
+      message: 'Se crearán 3 plantillas con contenido legal estándar colombiano que podrás editar según tus necesidades.',
+      type: 'info'
+    });
+    
+    if (!confirmed) return;
+
+    try {
+      setInitializing(true);
+      const result = await templateService.initializeDefaults();
+      await loadTemplates();
+      toast.success(
+        '¡Plantillas creadas!', 
+        `Se crearon ${result.count} plantillas predeterminadas exitosamente. Ahora puedes editarlas según tus necesidades.`,
+        5000
+      );
+    } catch (error: any) {
+      toast.error(
+        'Error al crear plantillas', 
+        error.response?.data?.message || 'No se pudieron crear las plantillas predeterminadas'
+      );
+    } finally {
+      setInitializing(false);
     }
   };
 
@@ -95,22 +139,11 @@ export default function ConsentTemplatesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Plantillas de Consentimiento</h1>
-          <p className="text-gray-600 mt-1">
-            Gestiona las plantillas de texto para los consentimientos
-          </p>
-        </div>
-        {hasPermission('create_templates') && (
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <Plus className="w-5 h-5" />
-            Nueva Plantilla
-          </button>
-        )}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Plantillas de Consentimiento</h1>
+        <p className="text-gray-600 mt-1">
+          Gestiona las plantillas de texto para los consentimientos
+        </p>
       </div>
 
       {/* Filter */}
@@ -148,8 +181,35 @@ export default function ConsentTemplatesPage() {
           Cargando plantillas...
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-          No hay plantillas registradas
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No hay plantillas registradas
+          </h3>
+          <p className="text-gray-600 mb-6">
+            Crea plantillas personalizadas o inicializa las plantillas predeterminadas con contenido legal estándar
+          </p>
+          <div className="flex gap-4 justify-center">
+            {hasPermission('create_templates') && (
+              <>
+                <button
+                  onClick={handleInitializeDefaults}
+                  disabled={initializing}
+                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={`w-5 h-5 ${initializing ? 'animate-spin' : ''}`} />
+                  {initializing ? 'Creando...' : 'Crear Plantillas Predeterminadas'}
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <Plus className="w-5 h-5" />
+                  Nueva Plantilla Personalizada
+                </button>
+              </>
+            )}
+          </div>
         </div>
       ) : (
         <div className="space-y-6">
