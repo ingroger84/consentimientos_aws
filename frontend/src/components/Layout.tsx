@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useSessionCheck } from '@/hooks/useSessionCheck';
 import { getResourceUrl } from '@/utils/api-url';
 import { getAppVersion } from '@/config/version';
 import PaymentReminderBanner from '@/components/billing/PaymentReminderBanner';
@@ -34,6 +35,9 @@ export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Verificar sesión periódicamente
+  useSessionCheck();
 
   const handleLogout = () => {
     logout();
