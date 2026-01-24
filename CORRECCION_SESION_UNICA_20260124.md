@@ -127,9 +127,10 @@ ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 "pm2 logs datagree-backend --lines 
 
 ## Versión
 
-- **Versión actual**: 12.0.0
+- **Versión anterior**: 12.0.0
+- **Versión actual**: 13.0.0
 - **Fecha**: 24 de Enero 2026
-- **Tipo de cambio**: PATCH (corrección de bug)
+- **Tipo de cambio**: MAJOR (sistema de versionamiento automático detectó cambio mayor)
 
 ## Pruebas Realizadas
 
