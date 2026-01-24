@@ -75,6 +75,12 @@ export default function Layout() {
       permission: 'view_templates'
     },
     { 
+      name: 'Historias Clínicas', 
+      href: '/medical-records', 
+      icon: FileText,
+      permission: 'view_medical_records'
+    },
+    { 
       name: 'Usuarios', 
       href: '/users', 
       icon: Users,

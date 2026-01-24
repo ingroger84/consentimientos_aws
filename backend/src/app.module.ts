@@ -23,6 +23,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ClientsModule } from './clients/clients.module';
 import { ConsentTemplatesModule } from './consent-templates/consent-templates.module';
+import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { CommonModule } from './common/common.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
@@ -41,6 +42,12 @@ import { BillingHistory } from './billing/entities/billing-history.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { Client } from './clients/entities/client.entity';
 import { ConsentTemplate } from './consent-templates/entities/consent-template.entity';
+import { MedicalRecord } from './medical-records/entities/medical-record.entity';
+import { Anamnesis } from './medical-records/entities/anamnesis.entity';
+import { PhysicalExam } from './medical-records/entities/physical-exam.entity';
+import { Diagnosis } from './medical-records/entities/diagnosis.entity';
+import { Evolution } from './medical-records/entities/evolution.entity';
+import { MedicalRecordAudit } from './medical-records/entities/medical-record-audit.entity';
 import { UserSession } from './auth/entities/user-session.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
@@ -83,6 +90,12 @@ import { SessionGuard } from './auth/guards/session.guard';
           Client,
           ConsentTemplate,
           UserSession,
+          MedicalRecord,
+          Anamnesis,
+          PhysicalExam,
+          Diagnosis,
+          Evolution,
+          MedicalRecordAudit,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
@@ -124,6 +137,7 @@ import { SessionGuard } from './auth/guards/session.guard';
     NotificationsModule,
     ClientsModule,
     ConsentTemplatesModule,
+    MedicalRecordsModule,
 
     // Serve static files
     ServeStaticModule.forRoot({

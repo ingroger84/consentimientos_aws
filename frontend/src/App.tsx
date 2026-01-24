@@ -37,6 +37,9 @@ const CreateManualInvoicePage = lazy(() => import('./pages/CreateManualInvoicePa
 const TenantInvoicesPage = lazy(() => import('./pages/TenantInvoicesPage'));
 const TaxConfigPage = lazy(() => import('./pages/TaxConfigPage'));
 const ConsentTemplatesPage = lazy(() => import('./pages/ConsentTemplatesPage'));
+const MedicalRecordsPage = lazy(() => import('./pages/MedicalRecordsPage'));
+const CreateMedicalRecordPage = lazy(() => import('./pages/CreateMedicalRecordPage'));
+const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -136,6 +139,9 @@ function App() {
               <Route path="/consents/edit/:id" element={<CreateConsentPage />} />
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/consent-templates" element={<ConsentTemplatesPage />} />
+              <Route path="/medical-records" element={<MedicalRecordsPage />} />
+              <Route path="/medical-records/new" element={<CreateMedicalRecordPage />} />
+              <Route path="/medical-records/:id" element={<ViewMedicalRecordPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />

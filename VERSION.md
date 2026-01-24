@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 13.1.2
+## Versión Actual: 14.0.0
 **Fecha:** 2026-01-24
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,11 +18,15 @@
 
 ## Historial de Versiones
 
-### 13.1.2 - 2026-01-24 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 14.0.0 - 2026-01-24 [MAJOR]
+- Backend: 24 archivo(s) modificado(s)
+- Frontend: 10 archivo(s) modificado(s)
+- Documentación: 15 archivo(s) modificado(s)
 
-### 13.1.1 - 2026-01-24 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 13.2.0 - 2026-01-24 [MINOR]
+- Backend: 22 archivo(s) modificado(s)
+- Frontend: 8 archivo(s) modificado(s)
+- Documentación: 14 archivo(s) modificado(s)
 
 ---
 
