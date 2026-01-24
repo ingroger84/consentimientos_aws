@@ -10,6 +10,42 @@ const settingsApi = axios.create({
   },
 });
 
+// Función para extraer el tenant slug del hostname
+const getTenantSlug = (): string | null => {
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  
+  // localhost o IP sin subdominio
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    return null;
+  }
+  
+  // Si tiene 2 partes y el segundo es localhost, el primero es el tenant
+  // Ejemplo: clinica-demo.localhost -> tenant 'clinica-demo'
+  if (parts.length === 2 && parts[1] === 'localhost') {
+    const subdomain = parts[0];
+    // Si es 'admin', no es un tenant
+    if (subdomain === 'admin') {
+      return null;
+    }
+    return subdomain;
+  }
+  
+  // Si tiene 3 o más partes, el primero es el tenant
+  // Ejemplo: clinica-demo.archivoenlinea.com -> tenant 'clinica-demo'
+  if (parts.length >= 3) {
+    const subdomain = parts[0];
+    // Si es 'admin' o 'www', no es un tenant
+    if (subdomain === 'admin' || subdomain === 'www') {
+      return null;
+    }
+    return subdomain;
+  }
+  
+  // Dominio principal sin subdominio
+  return null;
+};
+
 // Agregar token si existe, pero no redirigir en 401
 settingsApi.interceptors.request.use(
   (config) => {
@@ -17,6 +53,14 @@ settingsApi.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Agregar el tenant slug como header
+    const tenantSlug = getTenantSlug();
+    if (tenantSlug) {
+      config.headers['X-Tenant-Slug'] = tenantSlug;
+      console.log('[ThemeContext] Enviando X-Tenant-Slug:', tenantSlug);
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)

@@ -23,7 +23,21 @@ export class TenantMiddleware implements NestMiddleware {
 
   use(req: Request, res: Response, next: NextFunction) {
     const host = req.get('host') || req.hostname;
-    const tenantSlug = this.extractTenantSlug(host);
+    
+    // Primero intentar obtener el tenant slug del header X-Tenant-Slug
+    // Esto es útil cuando el frontend está en un subdominio pero hace peticiones a localhost:3000
+    const headerTenantSlug = req.get('X-Tenant-Slug') || req.get('x-tenant-slug');
+    
+    // Si hay header, usarlo directamente
+    let tenantSlug: string | null = null;
+    if (headerTenantSlug) {
+      tenantSlug = headerTenantSlug;
+      this.logger.debug(`Tenant slug desde header: ${tenantSlug}`);
+    } else {
+      // Si no hay header, extraer del host
+      tenantSlug = this.extractTenantSlug(host);
+      this.logger.debug(`Tenant slug desde host: ${tenantSlug || 'null'}`);
+    }
     
     // Agregar el tenantSlug al request para uso posterior
     req['tenantSlug'] = tenantSlug;
