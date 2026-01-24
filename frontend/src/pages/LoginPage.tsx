@@ -126,6 +126,15 @@ export default function LoginPage() {
       const response = await authService.login(data);
       console.log('[LoginPage] Login exitoso, respuesta:', response);
       console.log('[LoginPage] Usuario:', response.user);
+      console.log('[LoginPage] Token:', response.access_token ? response.access_token.substring(0, 20) + '...' : 'NULL');
+      
+      // Guardar token y usuario en localStorage
+      console.log('[LoginPage] Guardando token en localStorage...');
+      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      // Actualizar store
+      console.log('[LoginPage] Actualizando store...');
       setUser(response.user);
       console.log('[LoginPage] Usuario guardado en store');
       console.log('[LoginPage] Navegando a /dashboard...');

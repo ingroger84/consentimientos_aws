@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 13.0.1
+## Versión Actual: 13.0.2
 **Fecha:** 2026-01-24
 **Tipo de Cambio:** PATCH
 
@@ -18,12 +18,12 @@
 
 ## Historial de Versiones
 
-### 13.0.1 - 2026-01-24 [PATCH]
+### 13.0.2 - 2026-01-24 [PATCH]
+- Frontend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
-### 13.0.0 - 2026-01-24 [MAJOR]
-- Backend: 1 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
+### 13.0.1 - 2026-01-24 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
