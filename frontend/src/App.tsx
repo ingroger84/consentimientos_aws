@@ -43,9 +43,46 @@ function App() {
 
   useEffect(() => {
     console.log('[App] Inicializando aplicación...');
+    
+    // Limpiar localStorage si el subdominio cambió
+    const currentSubdomain = getCurrentSubdomain();
+    const storedSubdomain = localStorage.getItem('current_subdomain');
+    
+    console.log('[App] Subdominio actual:', currentSubdomain);
+    console.log('[App] Subdominio almacenado:', storedSubdomain);
+    
+    if (storedSubdomain && storedSubdomain !== currentSubdomain) {
+      console.log('[App] Subdominio cambió, limpiando localStorage...');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.setItem('current_subdomain', currentSubdomain);
+    } else if (!storedSubdomain) {
+      console.log('[App] Primera vez, guardando subdominio...');
+      localStorage.setItem('current_subdomain', currentSubdomain);
+    }
+    
     initialize();
     console.log('[App] Aplicación inicializada');
   }, [initialize]);
+
+  // Función para obtener el subdominio actual
+  const getCurrentSubdomain = () => {
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    
+    // localhost o IP
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+      return 'localhost';
+    }
+    
+    // Dominio principal (archivoenlinea.com o www.archivoenlinea.com)
+    if (parts.length === 2 || (parts.length === 3 && parts[0] === 'www')) {
+      return 'main';
+    }
+    
+    // Subdominio (admin.archivoenlinea.com, demo-estetica.archivoenlinea.com, etc.)
+    return parts[0];
+  };
 
   // Detectar si estamos en el dominio principal (sin subdominio)
   const isMainDomain = () => {
