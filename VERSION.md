@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 11.1.0
+## Versión Actual: 11.1.1
 **Fecha:** 2026-01-23
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,13 +18,11 @@
 
 ## Historial de Versiones
 
-### 11.1.0 - 2026-01-23 [MINOR]
+### 11.1.1 - 2026-01-23 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
 
-### 11.0.0 - 2026-01-23 [MAJOR]
-- Backend: 17 archivo(s) modificado(s)
-- Frontend: 12 archivo(s) modificado(s)
-- Documentación: 8 archivo(s) modificado(s)
+### 11.1.0 - 2026-01-23 [MINOR]
+- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
