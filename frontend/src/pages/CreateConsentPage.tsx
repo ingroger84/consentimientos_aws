@@ -5,8 +5,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { consentService } from '@/services/consent.service';
 import api from '@/services/api';
 import { Service, Branch } from '@/types';
+import { Client, ClientDocumentType } from '@/types/client';
 import SignaturePad from '@/components/SignaturePad';
 import CameraCapture from '@/components/CameraCapture';
+import ClientSearchForm from '@/components/consents/ClientSearchForm';
 import { ArrowLeft, Camera, User } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 
@@ -21,6 +23,30 @@ export default function CreateConsentPage() {
   const [formData, setFormData] = useState<any>({});
   const [clientPhoto, setClientPhoto] = useState<string | null>(null);
   const [showCamera, setShowCamera] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientDocumentType, setClientDocumentType] = useState<ClientDocumentType>(ClientDocumentType.CC);
+
+  // Handlers para ClientSearchForm
+  const handleClientSelected = (client: Client | null) => {
+    setSelectedClient(client);
+  };
+
+  const handleClientDataChange = (data: {
+    clientName: string;
+    clientId: string;
+    clientEmail: string;
+    clientPhone: string;
+    documentType: ClientDocumentType;
+  }) => {
+    setFormData({
+      ...formData,
+      clientName: data.clientName,
+      clientId: data.clientId,
+      clientEmail: data.clientEmail,
+      clientPhone: data.clientPhone,
+    });
+    setClientDocumentType(data.documentType);
+  };
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
@@ -137,6 +163,9 @@ export default function CreateConsentPage() {
       clientPhoto: clientPhoto || undefined,
       serviceId: formData.serviceId,
       branchId: formData.branchId,
+      // Nuevos campos para gestión de clientes
+      documentType: clientDocumentType,
+      existingClientId: selectedClient?.id,
       answers,
     };
 
@@ -274,71 +303,17 @@ export default function CreateConsentPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre Completo *
-                      </label>
-                      <input
-                        {...register('clientName', { required: 'El nombre es requerido' })}
-                        className="input"
-                        defaultValue={formData.clientName || ''}
-                        placeholder="Juan Pérez"
-                      />
-                      {errors.clientName && (
-                        <p className="text-red-600 text-sm mt-1">{errors.clientName.message as string}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Identificación *
-                      </label>
-                      <input
-                        {...register('clientId', { required: 'La identificación es requerida' })}
-                        className="input"
-                        defaultValue={formData.clientId || ''}
-                        placeholder="123456789"
-                      />
-                      {errors.clientId && (
-                        <p className="text-red-600 text-sm mt-1">{errors.clientId.message as string}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        {...register('clientEmail', {
-                          required: 'El email es requerido',
-                          pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: 'Email inválido',
-                          },
-                        })}
-                        className="input"
-                        defaultValue={formData.clientEmail || ''}
-                        placeholder="correo@ejemplo.com"
-                      />
-                      {errors.clientEmail && (
-                        <p className="text-red-600 text-sm mt-1">{errors.clientEmail.message as string}</p>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Teléfono
-                      </label>
-                      <input
-                        {...register('clientPhone')}
-                        className="input"
-                        defaultValue={formData.clientPhone || ''}
-                        placeholder="+57 300 123 4567"
-                      />
-                    </div>
-                  </div>
+                  {/* Búsqueda/Creación de Cliente */}
+                  <ClientSearchForm
+                    onClientSelected={handleClientSelected}
+                    onClientDataChange={handleClientDataChange}
+                    initialData={{
+                      clientName: formData.clientName,
+                      clientId: formData.clientId,
+                      clientEmail: formData.clientEmail,
+                      clientPhone: formData.clientPhone,
+                    }}
+                  />
 
                   {/* Photo Capture Section */}
                   <div className="border-t pt-6">
@@ -502,6 +477,9 @@ export default function CreateConsentPage() {
                           clientPhone: formData.clientPhone,
                           serviceId: formData.serviceId,
                           branchId: formData.branchId,
+                          // Nuevos campos para gestión de clientes
+                          documentType: clientDocumentType,
+                          existingClientId: selectedClient?.id,
                           answers: [],
                         };
                         createMutation.mutate(completeData);

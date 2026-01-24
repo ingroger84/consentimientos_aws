@@ -9,6 +9,7 @@ import { PdfService } from './pdf.service';
 import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { CommonModule } from '../common/common.module';
+import { ClientsModule } from '../clients/clients.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CommonModule } from '../common/common.module';
     SettingsModule,
     MailModule,
     CommonModule,
+    ClientsModule,
   ],
   controllers: [ConsentsController],
   providers: [ConsentsService, PdfService],

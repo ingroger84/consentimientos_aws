@@ -11,6 +11,7 @@ import { User } from '../../users/entities/user.entity';
 import { Branch } from '../../branches/entities/branch.entity';
 import { Service } from '../../services/entities/service.entity';
 import { Consent } from '../../consents/entities/consent.entity';
+import { Client } from '../../clients/entities/client.entity';
 
 export enum TenantStatus {
   ACTIVE = 'active',
@@ -144,4 +145,7 @@ export class Tenant {
 
   @OneToMany(() => Consent, (consent) => consent.tenant)
   consents: Consent[];
+
+  @OneToMany(() => Client, (client) => client.tenant)
+  clients: Client[];
 }

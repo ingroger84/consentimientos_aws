@@ -6,8 +6,10 @@ import {
   IsUUID,
   IsArray,
   ValidateNested,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ClientDocumentType } from '../../clients/entities/client.entity';
 
 export class AnswerDto {
   @IsUUID()
@@ -51,6 +53,15 @@ export class CreateConsentDto {
   @ValidateNested({ each: true })
   @Type(() => AnswerDto)
   answers: AnswerDto[];
+
+  // Información adicional del cliente para crear/vincular
+  @IsEnum(ClientDocumentType)
+  @IsOptional()
+  documentType?: ClientDocumentType;
+
+  @IsUUID()
+  @IsOptional()
+  existingClientId?: string; // ID del cliente si ya existe
 
   // tenantId se inyectará automáticamente desde el usuario autenticado
   // No debe ser enviado por el cliente

@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 8.1.1
+## Versión Actual: 9.0.0
 **Fecha:** 2026-01-23
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,12 +18,13 @@
 
 ## Historial de Versiones
 
+### 9.0.0 - 2026-01-23 [MAJOR]
+- Backend: 14 archivo(s) modificado(s)
+- Frontend: 10 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 8.1.1 - 2026-01-23 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 8.1.0 - 2026-01-23 [MINOR]
-- Backend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
 
 ---
 

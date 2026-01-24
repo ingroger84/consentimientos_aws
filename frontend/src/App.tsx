@@ -19,6 +19,7 @@ import PublicLandingPage from './pages/PublicLandingPage';
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ConsentsPage = lazy(() => import('./pages/ConsentsPage'));
 const CreateConsentPage = lazy(() => import('./pages/CreateConsentPage'));
+const ClientsPage = lazy(() => import('./pages/ClientsPage'));
 const UsersPage = lazy(() => import('./pages/UsersPage'));
 const BranchesPage = lazy(() => import('./pages/BranchesPage'));
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
@@ -95,6 +96,7 @@ function App() {
               <Route path="/consents" element={<ConsentsPage />} />
               <Route path="/consents/new" element={<CreateConsentPage />} />
               <Route path="/consents/edit/:id" element={<CreateConsentPage />} />
+              <Route path="/clients" element={<ClientsPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />

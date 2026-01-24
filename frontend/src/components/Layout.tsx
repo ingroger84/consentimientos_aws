@@ -24,6 +24,7 @@ import {
   Percent,
   Menu,
   X,
+  UserCircle,
 } from 'lucide-react';
 
 export default function Layout() {
@@ -55,6 +56,12 @@ export default function Layout() {
       name: 'Consentimientos', 
       href: '/consents', 
       icon: FileText,
+      permission: 'view_consents'
+    },
+    { 
+      name: 'Clientes', 
+      href: '/clients', 
+      icon: UserCircle,
       permission: 'view_consents'
     },
     { 

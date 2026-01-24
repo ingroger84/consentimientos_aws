@@ -4,6 +4,7 @@ import { Service } from '../../services/entities/service.entity';
 import { Branch } from '../../branches/entities/branch.entity';
 import { Answer } from '../../answers/entities/answer.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
+import { Client } from '../../clients/entities/client.entity';
 
 export enum ConsentStatus {
   DRAFT = 'DRAFT',
@@ -62,6 +63,12 @@ export class Consent extends BaseEntity {
 
   @ManyToOne(() => Tenant, (tenant) => tenant.consents, { nullable: true })
   tenant: Tenant;
+
+  @ManyToOne(() => Client, (client) => client.consents, { nullable: true })
+  client: Client;
+
+  @Column({ name: 'client_id', nullable: true })
+  clientId: string;
 
   @OneToMany(() => Answer, (answer) => answer.consent, { eager: true })
   answers: Answer[];

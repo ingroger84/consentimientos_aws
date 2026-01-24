@@ -9,6 +9,8 @@ import { SignConsentDto } from './dto/sign-consent.dto';
 import { PdfService } from './pdf.service';
 import { MailService } from '../mail/mail.service';
 import { User } from '../users/entities/user.entity';
+import { ClientsService } from '../clients/clients.service';
+import { ClientDocumentType } from '../clients/entities/client.entity';
 
 @Injectable()
 export class ConsentsService {
@@ -21,6 +23,7 @@ export class ConsentsService {
     private tenantsRepository: Repository<Tenant>,
     private pdfService: PdfService,
     private mailService: MailService,
+    private clientsService: ClientsService,
   ) {}
 
   async create(createConsentDto: CreateConsentDto, user: User): Promise<Consent> {
@@ -39,6 +42,48 @@ export class ConsentsService {
     if (tenantId) {
       await this.checkConsentLimit(tenantId);
     }
+
+    // GESTIÓN DE CLIENTE
+    let clientId: string | undefined;
+
+    if (tenantId) {
+      // Si se proporciona un cliente existente, usarlo
+      if (createConsentDto.existingClientId) {
+        clientId = createConsentDto.existingClientId;
+        // Actualizar estadísticas del cliente
+        await this.clientsService.incrementConsentsCount(clientId);
+      } else {
+        // Buscar si el cliente ya existe por documento
+        const documentType = createConsentDto.documentType || ClientDocumentType.CC;
+        const existingClient = await this.clientsService.findByDocument(
+          documentType,
+          createConsentDto.clientId,
+          tenantId
+        );
+
+        if (existingClient) {
+          // Cliente existe, vincularlo
+          clientId = existingClient.id;
+          await this.clientsService.incrementConsentsCount(clientId);
+        } else {
+          // Cliente no existe, crearlo
+          try {
+            const newClient = await this.clientsService.create({
+              fullName: createConsentDto.clientName,
+              documentType: documentType,
+              documentNumber: createConsentDto.clientId,
+              email: createConsentDto.clientEmail,
+              phone: createConsentDto.clientPhone,
+            }, tenantId);
+            clientId = newClient.id;
+            await this.clientsService.incrementConsentsCount(clientId);
+          } catch (error) {
+            // Si falla la creación del cliente, continuar sin vincular
+            console.error('Error al crear cliente:', error);
+          }
+        }
+      }
+    }
     
     const consent = this.consentsRepository.create({
       clientName: createConsentDto.clientName,
@@ -49,12 +94,14 @@ export class ConsentsService {
       service: { id: createConsentDto.serviceId } as any,
       branch: { id: createConsentDto.branchId } as any,
       tenant: tenantId ? { id: tenantId } as any : null,
+      client: clientId ? { id: clientId } as any : null,
       status: ConsentStatus.DRAFT,
     });
 
     const savedConsent = await this.consentsRepository.save(consent);
     console.log('Consentimiento guardado con foto:', !!savedConsent.clientPhoto);
     console.log('Consentimiento guardado con tenantId:', savedConsent.tenant?.id || 'null (Super Admin)');
+    console.log('Consentimiento guardado con clientId:', savedConsent.clientId || 'null');
     console.log('==============================');
 
     // Save answers
