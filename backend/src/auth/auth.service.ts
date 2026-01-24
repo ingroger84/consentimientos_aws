@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { MailService } from '../mail/mail.service';
+import { SessionService } from './services/session.service';
 import { User } from '../users/entities/user.entity';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +17,7 @@ export class AuthService {
     private tenantsService: TenantsService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private sessionService: SessionService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -31,8 +33,15 @@ export class AuthService {
    * Login con validación de tenant por subdominio
    * @param user - Usuario autenticado
    * @param tenantSlug - Slug del tenant extraído del subdominio (null para Super Admin)
+   * @param userAgent - User agent del navegador
+   * @param ipAddress - Dirección IP del cliente
    */
-  async login(user: User, tenantSlug?: string | null) {
+  async login(
+    user: User,
+    tenantSlug?: string | null,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
     this.logger.log(`Login attempt - User: ${user.email}, Tenant Slug: ${tenantSlug || 'null'}`);
 
     // Validar que el usuario pertenece al tenant del subdominio
@@ -46,8 +55,20 @@ export class AuthService {
       tenantSlug: user.tenant?.slug || null,
     };
 
+    const access_token = this.jwtService.sign(payload);
+
+    // Crear sesión y cerrar sesiones anteriores
+    await this.sessionService.createSession(
+      user.id,
+      access_token,
+      userAgent,
+      ipAddress,
+    );
+
+    this.logger.log(`Sesión creada para usuario ${user.email}. Sesiones anteriores cerradas.`);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token,
       user: {
         id: user.id,
         name: user.name,
@@ -342,6 +363,31 @@ export class AuthService {
           slug: user.tenant.slug,
         } : null,
       },
+    };
+  }
+
+  /**
+   * Logout - Cierra la sesión actual
+   */
+  async logout(token: string): Promise<{ message: string }> {
+    await this.sessionService.closeSessionByJwt(token);
+    this.logger.log('Sesión cerrada exitosamente');
+    
+    return {
+      message: 'Sesión cerrada exitosamente',
+    };
+  }
+
+  /**
+   * Logout de todas las sesiones de un usuario
+   */
+  async logoutAll(userId: string): Promise<{ message: string; count: number }> {
+    const count = await this.sessionService.closeAllUserSessions(userId);
+    this.logger.log(`${count} sesión(es) cerrada(s) para usuario ${userId}`);
+    
+    return {
+      message: `${count} sesión(es) cerrada(s) exitosamente`,
+      count,
     };
   }
 }

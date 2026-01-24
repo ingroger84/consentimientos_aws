@@ -20,7 +20,10 @@ export class AuthController {
     @Request() req: any,
     @TenantSlug() tenantSlug: string | null,
   ) {
-    return this.authService.login(req.user, tenantSlug);
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    
+    return this.authService.login(req.user, tenantSlug, userAgent, ipAddress);
   }
 
   @Get('validate')
@@ -88,5 +91,20 @@ export class AuthController {
       date: APP_VERSION.date,
       fullVersion: getAppVersion(),
     };
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  @AllowAnyTenant()
+  async logout(@Request() req: any) {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    return this.authService.logout(token);
+  }
+
+  @Post('logout-all')
+  @UseGuards(AuthGuard('jwt'))
+  @AllowAnyTenant()
+  async logoutAll(@Request() req: any) {
+    return this.authService.logoutAll(req.user.sub);
   }
 }

@@ -41,8 +41,10 @@ import { BillingHistory } from './billing/entities/billing-history.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { Client } from './clients/entities/client.entity';
 import { ConsentTemplate } from './consent-templates/entities/consent-template.entity';
+import { UserSession } from './auth/entities/user-session.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
+import { SessionGuard } from './auth/guards/session.guard';
 
 @Module({
   imports: [
@@ -80,6 +82,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
           Notification,
           Client,
           ConsentTemplate,
+          UserSession,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
@@ -133,6 +136,11 @@ import { TenantGuard } from './common/guards/tenant.guard';
     {
       provide: APP_GUARD,
       useClass: TenantGuard,
+    },
+    // Registrar SessionGuard globalmente (después del JwtAuthGuard)
+    {
+      provide: APP_GUARD,
+      useClass: SessionGuard,
     },
   ],
 })

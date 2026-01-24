@@ -25,6 +25,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const message = error.response?.data?.message || '';
+      
+      // Verificar si es un error de sesión cerrada por otro dispositivo
+      if (message.includes('sesión ha sido cerrada') || message.includes('iniciaste sesión en otro dispositivo')) {
+        // Mostrar alerta antes de redirigir
+        alert('Tu sesión ha sido cerrada porque iniciaste sesión en otro dispositivo o navegador.');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+      
       // Solo limpiar y redirigir si no estamos ya en la página de login
       if (!window.location.pathname.includes('/login')) {
         localStorage.removeItem('token');
