@@ -1,12 +1,12 @@
 # 📚 Índice Completo de Documentación
 
-**Última actualización:** 2026-01-21
+**Última actualización:** 2026-01-24
 
 ---
 
 ## 🗂️ Organización de la Documentación
 
-La documentación está organizada en 28 carpetas temáticas numeradas del 01 al 28.
+La documentación está organizada en 42 carpetas temáticas numeradas del 01 al 42.
 
 ---
 
@@ -289,19 +289,20 @@ La documentación está organizada en 28 carpetas temáticas numeradas del 01 al
 
 ## 📊 Estadísticas de Documentación
 
-- **Total de carpetas**: 28
-- **Categorías principales**: 10
-- **Última actualización**: 2026-01-21
+- **Total de carpetas**: 42
+- **Categorías principales**: 20
+- **Última actualización**: 2026-01-24
 - **Estado del sistema**: ✅ 100% Operativo en Producción
+- **Versión actual**: 13.0.5
 
 ---
 
 ## 🔗 Enlaces Importantes
 
 ### Producción
-- **URL Principal**: https://datagree.net
-- **Panel Admin**: https://admin.datagree.net
-- **Servidor**: [AWS_SERVER_IP]
+- **URL Principal**: https://archivoenlinea.com
+- **Panel Admin**: https://admin.archivoenlinea.com
+- **Servidor**: 100.28.198.249
 
 ### Repositorio
 - **GitHub**: git@github.com:ingroger84/consentimientos_aws.git
@@ -322,9 +323,120 @@ Para más información, consulta:
 
 ---
 
-**Generado:** 2026-01-21  
-**Versión del sistema:** 1.1.2
+**Generado:** 2026-01-24  
+**Versión del sistema:** 13.0.5
 
+
+---
+
+### 📋 Gestión de Clientes
+
+#### [32-gestion-clientes/](./32-gestion-clientes/)
+- Sistema completo de gestión de clientes
+- Integración con consentimientos
+- Permisos por rol
+- Guía de pruebas
+
+---
+
+### 📄 Plantillas de Consentimiento
+
+#### [33-plantillas-consentimiento/](./33-plantillas-consentimiento/)
+- Sistema de plantillas personalizables
+- Plantillas predeterminadas
+- Gestión por tenant
+- Tipos de plantillas (consentimiento, tratamiento de datos, autorización)
+
+---
+
+### 🔐 Sesión Única
+
+#### [34-sesion-unica/](./34-sesion-unica/)
+- Sistema de sesión única por usuario
+- Cierre automático de sesiones anteriores
+- Verificación periódica de sesión
+- Seguridad mejorada
+
+---
+
+### 📝 Actualizaciones GitHub
+
+#### [35-actualizaciones-github/](./35-actualizaciones-github/)
+- Historial de actualizaciones al repositorio
+- Cambios por versión
+- Commits y merges
+- Documentación de releases
+
+---
+
+### 🚀 Despliegues
+
+#### [36-despliegues/](./36-despliegues/)
+- Historial de despliegues en producción
+- Despliegues por versión
+- Comandos ejecutados
+- Verificaciones post-despliegue
+
+---
+
+### 🔧 Correcciones
+
+#### [37-correcciones/](./37-correcciones/)
+- Correcciones de bugs
+- Fixes de frontend y backend
+- Correcciones de dominio y enrutamiento
+- Correcciones de facturación
+- Correcciones de autenticación
+
+---
+
+### ⚙️ Implementaciones
+
+#### [38-implementaciones/](./38-implementaciones/)
+- Nuevas funcionalidades implementadas
+- Documentación técnica de features
+- Guías de implementación
+- Especificaciones técnicas
+
+---
+
+### 🔒 SSL y Certificados
+
+#### [39-ssl-certificados/](./39-ssl-certificados/)
+- Configuración de certificados SSL
+- Certificados wildcard
+- Problemas y soluciones SSL
+- Guías de configuración HTTPS
+
+---
+
+### ☁️ AWS e Infraestructura
+
+#### [40-aws-infraestructura/](./40-aws-infraestructura/)
+- Configuración de infraestructura AWS
+- Seguridad y credenciales
+- Optimizaciones de servidor
+- Verificación de conexiones
+
+---
+
+### 📊 Análisis y Estados
+
+#### [41-analisis-estados/](./41-analisis-estados/)
+- Análisis técnicos del sistema
+- Estados actuales
+- Resúmenes ejecutivos
+- Reportes de progreso
+
+---
+
+### 💡 Soluciones
+
+#### [42-soluciones/](./42-soluciones/)
+- Soluciones a problemas comunes
+- Instrucciones de troubleshooting
+- Workarounds y fixes
+- Guías de resolución de problemas
 
 ---
 
