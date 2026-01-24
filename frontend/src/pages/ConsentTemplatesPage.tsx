@@ -287,7 +287,7 @@ export default function ConsentTemplatesPage() {
                             <Edit className="w-5 h-5" />
                           </button>
                         )}
-                        {hasPermission('delete_templates') && !template.isDefault && (
+                        {hasPermission('delete_templates') && (
                           <button
                             onClick={() => handleDeleteTemplate(template)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
