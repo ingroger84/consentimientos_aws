@@ -3,11 +3,13 @@ import { Search, Plus, User, Phone, Mail, FileText, Edit, Trash2 } from 'lucide-
 import { clientService } from '../services/client.service';
 import { Client, DOCUMENT_TYPE_LABELS } from '../types/client';
 import { useDebounce } from '../hooks/useDebounce';
+import { usePermissions } from '../hooks/usePermissions';
 import CreateClientModal from '../components/clients/CreateClientModal';
 import EditClientModal from '../components/clients/EditClientModal';
 import ClientDetailsModal from '../components/clients/ClientDetailsModal';
 
 export default function ClientsPage() {
+  const { hasPermission } = usePermissions();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -88,13 +90,15 @@ export default function ClientsPage() {
             Gestiona la base de datos de clientes del tenant
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          <Plus className="w-5 h-5" />
-          Nuevo Cliente
-        </button>
+        {hasPermission('create_clients') && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Cliente
+          </button>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -203,21 +207,25 @@ export default function ClientsPage() {
                         >
                           <FileText className="w-5 h-5" />
                         </button>
-                        <button
-                          onClick={() => handleEditClient(client)}
-                          className="text-yellow-600 hover:text-yellow-900"
-                          title="Editar"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClient(client)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Eliminar"
-                          disabled={client.consentsCount > 0}
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        {hasPermission('edit_clients') && (
+                          <button
+                            onClick={() => handleEditClient(client)}
+                            className="text-yellow-600 hover:text-yellow-900"
+                            title="Editar"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                        )}
+                        {hasPermission('delete_clients') && (
+                          <button
+                            onClick={() => handleDeleteClient(client)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Eliminar"
+                            disabled={client.consentsCount > 0}
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

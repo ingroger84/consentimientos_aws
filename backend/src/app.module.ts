@@ -22,6 +22,7 @@ import { BillingModule } from './billing/billing.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ClientsModule } from './clients/clients.module';
+import { ConsentTemplatesModule } from './consent-templates/consent-templates.module';
 import { CommonModule } from './common/common.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
@@ -39,6 +40,7 @@ import { PaymentReminder } from './billing/entities/payment-reminder.entity';
 import { BillingHistory } from './billing/entities/billing-history.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { Client } from './clients/entities/client.entity';
+import { ConsentTemplate } from './consent-templates/entities/consent-template.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 
@@ -77,6 +79,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
           BillingHistory,
           Notification,
           Client,
+          ConsentTemplate,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
@@ -117,6 +120,7 @@ import { TenantGuard } from './common/guards/tenant.guard';
     WebhooksModule,
     NotificationsModule,
     ClientsModule,
+    ConsentTemplatesModule,
 
     // Serve static files
     ServeStaticModule.forRoot({

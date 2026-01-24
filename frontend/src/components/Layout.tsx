@@ -62,7 +62,13 @@ export default function Layout() {
       name: 'Clientes', 
       href: '/clients', 
       icon: UserCircle,
-      permission: 'view_consents'
+      permission: 'view_clients'
+    },
+    { 
+      name: 'Plantillas', 
+      href: '/consent-templates', 
+      icon: FileText,
+      permission: 'view_templates'
     },
     { 
       name: 'Usuarios', 

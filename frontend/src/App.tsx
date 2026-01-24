@@ -36,6 +36,7 @@ const BillingDashboardPage = lazy(() => import('./pages/BillingDashboardPage'));
 const CreateManualInvoicePage = lazy(() => import('./pages/CreateManualInvoicePage'));
 const TenantInvoicesPage = lazy(() => import('./pages/TenantInvoicesPage'));
 const TaxConfigPage = lazy(() => import('./pages/TaxConfigPage'));
+const ConsentTemplatesPage = lazy(() => import('./pages/ConsentTemplatesPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -97,6 +98,7 @@ function App() {
               <Route path="/consents/new" element={<CreateConsentPage />} />
               <Route path="/consents/edit/:id" element={<CreateConsentPage />} />
               <Route path="/clients" element={<ClientsPage />} />
+              <Route path="/consent-templates" element={<ConsentTemplatesPage />} />
               <Route path="/users" element={<UsersPage />} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />
