@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Service } from '../../services/entities/service.entity';
 import { Branch } from '../../branches/entities/branch.entity';
@@ -65,10 +65,8 @@ export class Consent extends BaseEntity {
   tenant: Tenant;
 
   @ManyToOne(() => Client, (client) => client.consents, { nullable: true })
+  @JoinColumn({ name: 'client_uuid' })
   client: Client;
-
-  @Column({ name: 'client_id', nullable: true })
-  clientId: string;
 
   @OneToMany(() => Answer, (answer) => answer.consent, { eager: true })
   answers: Answer[];

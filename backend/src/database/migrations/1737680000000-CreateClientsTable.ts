@@ -167,18 +167,18 @@ export class CreateClientsTable1737680000000 implements MigrationInterface {
       }),
     );
 
-    // Agregar columna client_id a la tabla consents
+    // Agregar columna client_uuid a la tabla consents
     await queryRunner.query(`
       ALTER TABLE consents 
-      ADD COLUMN client_id uuid NULL
+      ADD COLUMN client_uuid uuid NULL
     `);
 
-    // Crear índice para client_id en consents
+    // Crear índice para client_uuid en consents
     await queryRunner.createIndex(
       'consents',
       new TableIndex({
-        name: 'IDX_consents_client',
-        columnNames: ['client_id'],
+        name: 'IDX_consents_client_uuid',
+        columnNames: ['client_uuid'],
       }),
     );
 
@@ -186,7 +186,7 @@ export class CreateClientsTable1737680000000 implements MigrationInterface {
     await queryRunner.createForeignKey(
       'consents',
       new TableForeignKey({
-        columnNames: ['client_id'],
+        columnNames: ['client_uuid'],
         referencedColumnNames: ['id'],
         referencedTableName: 'clients',
         onDelete: 'SET NULL',
@@ -198,19 +198,19 @@ export class CreateClientsTable1737680000000 implements MigrationInterface {
     // Eliminar foreign key de consents
     const consentsTable = await queryRunner.getTable('consents');
     const clientForeignKey = consentsTable.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('client_id') !== -1,
+      (fk) => fk.columnNames.indexOf('client_uuid') !== -1,
     );
     if (clientForeignKey) {
       await queryRunner.dropForeignKey('consents', clientForeignKey);
     }
 
     // Eliminar índice de consents
-    await queryRunner.dropIndex('consents', 'IDX_consents_client');
+    await queryRunner.dropIndex('consents', 'IDX_consents_client_uuid');
 
-    // Eliminar columna client_id de consents
+    // Eliminar columna client_uuid de consents
     await queryRunner.query(`
       ALTER TABLE consents 
-      DROP COLUMN client_id
+      DROP COLUMN client_uuid
     `);
 
     // Eliminar foreign key de clients

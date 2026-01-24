@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 9.0.0
+## Versión Actual: 10.0.0
 **Fecha:** 2026-01-23
 **Tipo de Cambio:** MAJOR
 
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
+### 10.0.0 - 2026-01-23 [MAJOR]
+- Backend: 6 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 9.0.0 - 2026-01-23 [MAJOR]
 - Backend: 14 archivo(s) modificado(s)
 - Frontend: 10 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
-
-### 8.1.1 - 2026-01-23 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
