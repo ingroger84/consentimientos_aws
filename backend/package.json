@@ -1,6 +1,6 @@
 {
   "name": "consentimientos-backend",
-  "version": "12.0.0",
+  "version": "13.0.0",
   "description": "API REST para Sistema de Consentimientos Digitales",
   "author": "",
   "private": true,

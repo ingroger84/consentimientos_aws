@@ -6,6 +6,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { TenantSlug } from '../common/decorators/tenant-slug.decorator';
 import { AllowAnyTenant } from '../common/decorators/allow-any-tenant.decorator';
+import { SkipSessionCheck } from './decorators/skip-session-check.decorator';
 import { getAppVersion, APP_VERSION } from '../config/version';
 
 @Controller('auth')
@@ -15,6 +16,7 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async login(
     @Body() loginDto: LoginDto,
     @Request() req: any,
@@ -29,6 +31,7 @@ export class AuthController {
   @Get('validate')
   @UseGuards(AuthGuard('jwt'))
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async validate(@Request() req: any) {
     // El token ya fue validado por el guard JWT
     // Retornar los datos del usuario completos
@@ -49,6 +52,7 @@ export class AuthController {
 
   @Post('forgot-password')
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async forgotPassword(
     @Body() forgotPasswordDto: ForgotPasswordDto,
     @TenantSlug() tenantSlug: string | null,
@@ -58,6 +62,7 @@ export class AuthController {
 
   @Post('reset-password')
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(
       resetPasswordDto.token,
@@ -76,6 +81,7 @@ export class AuthController {
 
   @Get('magic-login/:token')
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async magicLogin(
     @Param('token') token: string,
     @TenantSlug() tenantSlug: string | null,
@@ -85,6 +91,7 @@ export class AuthController {
 
   @Get('version')
   @AllowAnyTenant()
+  @SkipSessionCheck()
   async getVersion() {
     return {
       version: APP_VERSION.version,
