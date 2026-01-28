@@ -10,18 +10,20 @@ export interface PlanConfig {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;
+    mrConsentTemplates: number;
+    consentTemplates: number;
     services: number;
     questions: number;
     storageMb: number;
   };
   features: {
-    watermark: boolean;
     customization: boolean;
     advancedReports: boolean;
-    apiAccess: boolean;
     prioritySupport: boolean;
     customDomain: boolean;
     whiteLabel: boolean;
+    apiAccess: boolean;
     backup: string;
     supportResponseTime: string;
   };

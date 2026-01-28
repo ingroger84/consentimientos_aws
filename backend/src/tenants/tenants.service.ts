@@ -10,7 +10,9 @@ import { Role, RoleType } from '../roles/entities/role.entity';
 import { SettingsService } from '../settings/settings.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { MRConsentTemplatesService } from '../medical-record-consent-templates/mr-consent-templates.service';
 import { applyPlanLimits } from './tenants-plan.helper';
+import { getPlanConfig } from './plans.config';
 
 @Injectable()
 export class TenantsService {
@@ -25,6 +27,7 @@ export class TenantsService {
     private settingsService: SettingsService,
     private mailService: MailService,
     private notificationsService: NotificationsService,
+    private mrConsentTemplatesService: MRConsentTemplatesService,
   ) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
@@ -126,6 +129,15 @@ export class TenantsService {
 
       console.log('[TenantsService] Configuración del tenant inicializada');
 
+      // COPIAR PLANTILLAS GLOBALES DE HC AL TENANT
+      try {
+        const copiedCount = await this.mrConsentTemplatesService.copyGlobalTemplatesToTenant(savedTenant.id);
+        console.log(`[TenantsService] ${copiedCount} plantillas HC copiadas al tenant`);
+      } catch (templatesError) {
+        // No fallar la creación del tenant si la copia de plantillas falla
+        console.error('[TenantsService] Error al copiar plantillas HC:', templatesError.message);
+      }
+
       // ENVIAR EMAIL DE BIENVENIDA AL ADMINISTRADOR
       try {
         // Cargar el usuario completo con relaciones para el correo
@@ -193,10 +205,30 @@ export class TenantsService {
   }
 
   async findAll(): Promise<Tenant[]> {
-    return await this.tenantsRepository.find({
-      relations: ['users', 'branches', 'services', 'consents'],
+    const tenants = await this.tenantsRepository.find({
+      relations: ['users', 'branches', 'services', 'consents', 'clients', 'medicalRecords'],
       order: { createdAt: 'DESC' },
     });
+
+    // Para cada tenant, contar los consentimientos HC
+    for (const tenant of tenants) {
+      try {
+        const mrConsentsRepo = this.dataSource.getRepository('MedicalRecordConsent');
+        const mrConsentsCount = await mrConsentsRepo
+          .createQueryBuilder('consent')
+          .innerJoin('consent.medicalRecord', 'mr')
+          .where('mr.tenantId = :tenantId', { tenantId: tenant.id })
+          .getCount();
+        
+        // Agregar el conteo como propiedad temporal
+        (tenant as any).medicalRecordConsentsCount = mrConsentsCount;
+      } catch (error) {
+        console.error(`Error counting MR consents for tenant ${tenant.id}:`, error);
+        (tenant as any).medicalRecordConsentsCount = 0;
+      }
+    }
+
+    return tenants;
   }
 
   async findOne(id: string): Promise<Tenant> {
@@ -293,113 +325,289 @@ export class TenantsService {
   }
 
   async getGlobalStats() {
-    const tenants = await this.tenantsRepository.find({
-      relations: ['users', 'branches', 'services', 'consents'],
-    });
+    try {
+      const tenants = await this.tenantsRepository.find({
+        relations: ['users', 'branches', 'services', 'consents'],
+      });
 
-    // Calcular tenants cerca del límite y en el límite
-    let tenantsNearLimit = 0;
-    let tenantsAtLimit = 0;
+      // Inicializar valores por defecto
+      let totalMedicalRecords = 0;
+      let activeMedicalRecords = 0;
+      let closedMedicalRecords = 0;
+      let totalClients = 0;
+      let newClientsThisMonth = 0;
+      let totalConsentTemplates = 0;
+      let activeConsentTemplates = 0;
+      let totalMRConsentTemplates = 0;
+      let activeMRConsentTemplates = 0;
+      let topTenantsByMedicalRecords = [];
+      let topTenantsByClients = [];
 
-    tenants.forEach(tenant => {
-      const userCount = tenant.users?.filter(u => !u.deletedAt).length || 0;
-      const branchCount = tenant.branches?.filter(b => !b.deletedAt).length || 0;
-      const consentCount = tenant.consents?.filter(c => !c.deletedAt).length || 0;
+      // Intentar obtener estadísticas de historias clínicas
+      try {
+        const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
+        totalMedicalRecords = await medicalRecordsRepo.count();
+        activeMedicalRecords = await medicalRecordsRepo.count({ where: { status: 'OPEN' } });
+        closedMedicalRecords = await medicalRecordsRepo.count({ where: { status: 'CLOSED' } });
 
-      const userPercentage = (userCount / tenant.maxUsers) * 100;
-      const branchPercentage = (branchCount / tenant.maxBranches) * 100;
-      const consentPercentage = (consentCount / tenant.maxConsents) * 100;
+        // Top tenants por historias clínicas
+        const medicalRecordsByTenant = await medicalRecordsRepo
+          .createQueryBuilder('mr')
+          .select('mr.tenantId', 'tenantId')
+          .addSelect('COUNT(*)', 'count')
+          .groupBy('mr.tenantId')
+          .orderBy('count', 'DESC')
+          .limit(10)
+          .getRawMany();
 
-      const maxPercentage = Math.max(userPercentage, branchPercentage, consentPercentage);
-
-      if (maxPercentage >= 100) {
-        tenantsAtLimit++;
-      } else if (maxPercentage >= 80) {
-        tenantsNearLimit++;
+        topTenantsByMedicalRecords = medicalRecordsByTenant.map((item) => {
+          const tenant = tenants.find(t => t.id === item.tenantId);
+          return {
+            id: tenant?.id || '',
+            name: tenant?.name || 'Desconocido',
+            slug: tenant?.slug || '',
+            medicalRecordsCount: parseInt(item.count) || 0,
+            branchesCount: tenant?.branches?.filter(b => !b.deletedAt).length || 0,
+          };
+        });
+      } catch (error) {
+        console.error('Error loading medical records stats:', error);
       }
-    });
 
-    // Datos de crecimiento (últimos 6 meses)
-    const now = new Date();
-    const growthData = [];
-    
-    for (let i = 5; i >= 0; i--) {
-      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
-      const monthName = monthStart.toLocaleDateString('es-ES', { month: 'short' });
+      // Intentar obtener estadísticas de clientes
+      try {
+        const clientsRepo = this.dataSource.getRepository('Client');
+        totalClients = await clientsRepo.count();
+
+        // Clientes nuevos este mes
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        newClientsThisMonth = await clientsRepo
+          .createQueryBuilder('client')
+          .where('client.created_at >= :startOfMonth', { startOfMonth })
+          .getCount();
+
+        // Top tenants por clientes
+        const clientsByTenant = await clientsRepo
+          .createQueryBuilder('client')
+          .select('client.tenantId', 'tenantId')
+          .addSelect('COUNT(*)', 'count')
+          .groupBy('client.tenantId')
+          .orderBy('count', 'DESC')
+          .limit(10)
+          .getRawMany();
+
+        topTenantsByClients = clientsByTenant.map((item) => {
+          const tenant = tenants.find(t => t.id === item.tenantId);
+          return {
+            id: tenant?.id || '',
+            name: tenant?.name || 'Desconocido',
+            slug: tenant?.slug || '',
+            clientsCount: parseInt(item.count) || 0,
+          };
+        });
+      } catch (error) {
+        console.error('Error loading clients stats:', error);
+      }
+
+      // Intentar obtener estadísticas de plantillas
+      try {
+        const consentTemplatesRepo = this.dataSource.getRepository('ConsentTemplate');
+        totalConsentTemplates = await consentTemplatesRepo.count();
+        activeConsentTemplates = await consentTemplatesRepo.count({ where: { isActive: true } });
+      } catch (error) {
+        console.error('Error loading consent templates stats:', error);
+      }
+
+      try {
+        const mrConsentTemplatesRepo = this.dataSource.getRepository('MRConsentTemplate');
+        totalMRConsentTemplates = await mrConsentTemplatesRepo.count();
+        activeMRConsentTemplates = await mrConsentTemplatesRepo.count({ where: { isActive: true } });
+      } catch (error) {
+        console.error('Error loading MR consent templates stats:', error);
+      }
+
+      // Calcular tenants cerca del límite y en el límite
+      let tenantsNearLimit = 0;
+      let tenantsAtLimit = 0;
+
+      tenants.forEach(tenant => {
+        const userCount = tenant.users?.filter(u => !u.deletedAt).length || 0;
+        const branchCount = tenant.branches?.filter(b => !b.deletedAt).length || 0;
+        const consentCount = tenant.consents?.filter(c => !c.deletedAt).length || 0;
+
+        const userPercentage = (userCount / tenant.maxUsers) * 100;
+        const branchPercentage = (branchCount / tenant.maxBranches) * 100;
+        const consentPercentage = (consentCount / tenant.maxConsents) * 100;
+
+        const maxPercentage = Math.max(userPercentage, branchPercentage, consentPercentage);
+
+        if (maxPercentage >= 100) {
+          tenantsAtLimit++;
+        } else if (maxPercentage >= 80) {
+          tenantsNearLimit++;
+        }
+      });
+
+      // Datos de crecimiento (últimos 6 meses)
+      const now = new Date();
+      const growthData = [];
       
-      // Contar tenants creados EN ese mes específico
-      const tenantsInMonth = tenants.filter(t => {
-        const createdDate = new Date(t.createdAt);
-        return createdDate >= monthStart && createdDate <= monthEnd;
-      }).length;
+      for (let i = 5; i >= 0; i--) {
+        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
+        const monthName = monthStart.toLocaleDateString('es-ES', { month: 'short' });
+        
+        // Contar tenants creados EN ese mes específico
+        const tenantsInMonth = tenants.filter(t => {
+          const createdDate = new Date(t.createdAt);
+          return createdDate >= monthStart && createdDate <= monthEnd;
+        }).length;
 
-      // Contar consentimientos creados EN ese mes
-      let consentsInMonth = 0;
-      tenants.forEach(t => {
-        const consentsCount = t.consents?.filter(c => {
-          if (c.deletedAt) return false;
-          const consentDate = new Date(c.createdAt);
-          return consentDate >= monthStart && consentDate <= monthEnd;
-        }).length || 0;
-        consentsInMonth += consentsCount;
-      });
+        // Contar consentimientos creados EN ese mes
+        let consentsInMonth = 0;
+        tenants.forEach(t => {
+          const consentsCount = t.consents?.filter(c => {
+            if (c.deletedAt) return false;
+            const consentDate = new Date(c.createdAt);
+            return consentDate >= monthStart && consentDate <= monthEnd;
+          }).length || 0;
+          consentsInMonth += consentsCount;
+        });
 
-      growthData.push({
-        month: monthName,
-        tenants: tenantsInMonth,
-        users: Math.floor(tenantsInMonth * 3.5), // Promedio estimado
-        consents: consentsInMonth,
-      });
+        // Contar historias clínicas creadas EN ese mes
+        let medicalRecordsInMonth = 0;
+        try {
+          const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
+          medicalRecordsInMonth = await medicalRecordsRepo
+            .createQueryBuilder('mr')
+            .where('mr.created_at >= :monthStart', { monthStart })
+            .andWhere('mr.created_at <= :monthEnd', { monthEnd })
+            .getCount();
+        } catch (error) {
+          console.error('Error counting medical records for month:', error);
+        }
+
+        // Contar clientes creados EN ese mes
+        let clientsInMonth = 0;
+        try {
+          const clientsRepo = this.dataSource.getRepository('Client');
+          clientsInMonth = await clientsRepo
+            .createQueryBuilder('client')
+            .where('client.created_at >= :monthStart', { monthStart })
+            .andWhere('client.created_at <= :monthEnd', { monthEnd })
+            .getCount();
+        } catch (error) {
+          console.error('Error counting clients for month:', error);
+        }
+
+        growthData.push({
+          month: monthName,
+          tenants: tenantsInMonth,
+          users: Math.floor(tenantsInMonth * 3.5), // Promedio estimado
+          consents: consentsInMonth,
+          medicalRecords: medicalRecordsInMonth,
+          clients: clientsInMonth,
+        });
+      }
+
+      // Distribución por plan
+      const tenantsByPlan = [
+        { plan: 'Gratuito', count: tenants.filter(t => t.plan === 'free').length },
+        { plan: 'Básico', count: tenants.filter(t => t.plan === 'basic').length },
+        { plan: 'Emprendedor', count: tenants.filter(t => t.plan === 'professional').length },
+        { plan: 'Plus', count: tenants.filter(t => t.plan === 'enterprise').length },
+        { plan: 'Empresarial', count: tenants.filter(t => t.plan === 'custom').length },
+      ].filter(item => item.count > 0);
+
+      // Top tenants por actividad (consentimientos)
+      const topTenants = tenants
+        .map(tenant => ({
+          id: tenant.id,
+          name: tenant.name,
+          plan: tenant.plan,
+          consentsCount: tenant.consents?.filter(c => !c.deletedAt).length || 0,
+          usersCount: tenant.users?.filter(u => !u.deletedAt).length || 0,
+          lastActivity: tenant.updatedAt || tenant.createdAt,
+        }))
+        .sort((a, b) => b.consentsCount - a.consentsCount)
+        .slice(0, 10);
+
+      const stats = {
+        totalTenants: tenants.length,
+        activeTenants: tenants.filter(t => t.status === TenantStatus.ACTIVE).length,
+        suspendedTenants: tenants.filter(t => t.status === TenantStatus.SUSPENDED).length,
+        trialTenants: tenants.filter(t => t.status === TenantStatus.TRIAL).length,
+        expiredTenants: tenants.filter(t => t.status === TenantStatus.EXPIRED).length,
+        totalUsers: tenants.reduce((sum, t) => sum + (t.users?.filter(u => !u.deletedAt).length || 0), 0),
+        totalBranches: tenants.reduce((sum, t) => sum + (t.branches?.filter(b => !b.deletedAt).length || 0), 0),
+        totalServices: tenants.reduce((sum, t) => sum + (t.services?.filter(s => !s.deletedAt).length || 0), 0),
+        totalConsents: tenants.reduce((sum, t) => sum + (t.consents?.filter(c => !c.deletedAt).length || 0), 0),
+        // Nuevas métricas
+        totalMedicalRecords,
+        activeMedicalRecords,
+        closedMedicalRecords,
+        totalClients,
+        newClientsThisMonth,
+        totalConsentTemplates,
+        activeConsentTemplates,
+        totalMRConsentTemplates,
+        activeMRConsentTemplates,
+        planDistribution: {
+          free: tenants.filter(t => t.plan === 'free').length,
+          basic: tenants.filter(t => t.plan === 'basic').length,
+          professional: tenants.filter(t => t.plan === 'professional').length,
+          enterprise: tenants.filter(t => t.plan === 'enterprise').length,
+        },
+        // Campos adicionales para el dashboard del Super Admin
+        tenantsNearLimit,
+        tenantsAtLimit,
+        growthData,
+        tenantsByPlan,
+        topTenants,
+        topTenantsByMedicalRecords,
+        topTenantsByClients,
+      };
+
+      return stats;
+    } catch (error) {
+      console.error('Error in getGlobalStats:', error);
+      // Retornar estadísticas básicas en caso de error
+      return {
+        totalTenants: 0,
+        activeTenants: 0,
+        suspendedTenants: 0,
+        trialTenants: 0,
+        expiredTenants: 0,
+        totalUsers: 0,
+        totalBranches: 0,
+        totalServices: 0,
+        totalConsents: 0,
+        totalMedicalRecords: 0,
+        activeMedicalRecords: 0,
+        closedMedicalRecords: 0,
+        totalClients: 0,
+        newClientsThisMonth: 0,
+        totalConsentTemplates: 0,
+        activeConsentTemplates: 0,
+        totalMRConsentTemplates: 0,
+        activeMRConsentTemplates: 0,
+        tenantsNearLimit: 0,
+        tenantsAtLimit: 0,
+        planDistribution: {
+          free: 0,
+          basic: 0,
+          professional: 0,
+          enterprise: 0,
+        },
+        growthData: [],
+        tenantsByPlan: [],
+        topTenants: [],
+        topTenantsByMedicalRecords: [],
+        topTenantsByClients: [],
+      };
     }
-
-    // Distribución por plan
-    const tenantsByPlan = [
-      { plan: 'Gratuito', count: tenants.filter(t => t.plan === 'free').length },
-      { plan: 'Básico', count: tenants.filter(t => t.plan === 'basic').length },
-      { plan: 'Emprendedor', count: tenants.filter(t => t.plan === 'professional').length },
-      { plan: 'Plus', count: tenants.filter(t => t.plan === 'enterprise').length },
-      { plan: 'Empresarial', count: tenants.filter(t => t.plan === 'custom').length },
-    ].filter(item => item.count > 0);
-
-    // Top tenants por actividad
-    const topTenants = tenants
-      .map(tenant => ({
-        id: tenant.id,
-        name: tenant.name,
-        plan: tenant.plan,
-        consentsCount: tenant.consents?.filter(c => !c.deletedAt).length || 0,
-        usersCount: tenant.users?.filter(u => !u.deletedAt).length || 0,
-        lastActivity: tenant.updatedAt || tenant.createdAt,
-      }))
-      .sort((a, b) => b.consentsCount - a.consentsCount)
-      .slice(0, 10);
-
-    const stats = {
-      totalTenants: tenants.length,
-      activeTenants: tenants.filter(t => t.status === TenantStatus.ACTIVE).length,
-      suspendedTenants: tenants.filter(t => t.status === TenantStatus.SUSPENDED).length,
-      trialTenants: tenants.filter(t => t.status === TenantStatus.TRIAL).length,
-      expiredTenants: tenants.filter(t => t.status === TenantStatus.EXPIRED).length,
-      totalUsers: tenants.reduce((sum, t) => sum + (t.users?.filter(u => !u.deletedAt).length || 0), 0),
-      totalBranches: tenants.reduce((sum, t) => sum + (t.branches?.filter(b => !b.deletedAt).length || 0), 0),
-      totalServices: tenants.reduce((sum, t) => sum + (t.services?.filter(s => !s.deletedAt).length || 0), 0),
-      totalConsents: tenants.reduce((sum, t) => sum + (t.consents?.filter(c => !c.deletedAt).length || 0), 0),
-      planDistribution: {
-        free: tenants.filter(t => t.plan === 'free').length,
-        basic: tenants.filter(t => t.plan === 'basic').length,
-        professional: tenants.filter(t => t.plan === 'professional').length,
-        enterprise: tenants.filter(t => t.plan === 'enterprise').length,
-      },
-      // Campos adicionales para el dashboard del Super Admin
-      tenantsNearLimit,
-      tenantsAtLimit,
-      growthData,
-      tenantsByPlan,
-      topTenants,
-    };
-
-    return stats;
   }
 
   async getUsage(id: string) {
@@ -411,13 +619,32 @@ export class TenantsService {
     const servicesCount = tenant.services?.filter(s => !s.deletedAt).length || 0;
     const consentsCount = tenant.consents?.filter(c => !c.deletedAt).length || 0;
 
+    // Contar nuevos recursos (sin filtro de deletedAt ya que estas entidades no tienen soft delete)
+    const medicalRecordsCount = await this.dataSource
+      .getRepository('MedicalRecord')
+      .count({ where: { tenantId: id } });
+    
+    const consentTemplatesCount = await this.dataSource
+      .getRepository('ConsentTemplate')
+      .count({ where: { tenantId: id } });
+    
+    const mrConsentTemplatesCount = await this.dataSource
+      .getRepository('MRConsentTemplate')
+      .count({ where: { tenantId: id } });
+
     // Calcular almacenamiento usado (simulado por ahora - en MB)
     // En producción, esto debería calcular el tamaño real de archivos subidos
     const storageUsedMb = Math.floor(consentsCount * 0.5); // Estimado: 0.5 MB por consentimiento
 
+    // Obtener límites del plan
+    const planConfig = getPlanConfig(tenant.plan);
+    const medicalRecordsLimit = planConfig?.limits.medicalRecords || 999999;
+    const consentTemplatesLimit = planConfig?.limits.consentTemplates || 999999;
+    const mrConsentTemplatesLimit = planConfig?.limits.mrConsentTemplates || 999999;
+
     // Calcular porcentajes
     const calculatePercentage = (current: number, max: number) => {
-      if (max === 0) return 0;
+      if (max === 0 || max === -1) return 0; // -1 = ilimitado
       return Math.min(Math.round((current / max) * 100), 100);
     };
 
@@ -443,17 +670,35 @@ export class TenantsService {
           percentage: calculatePercentage(branchesCount, tenant.maxBranches),
           status: this.getUsageStatus(branchesCount, tenant.maxBranches),
         },
-        services: {
-          current: servicesCount,
-          max: tenant.maxServices || 999999,
-          percentage: calculatePercentage(servicesCount, tenant.maxServices || 999999),
-          status: this.getUsageStatus(servicesCount, tenant.maxServices || 999999),
-        },
         consents: {
           current: consentsCount,
           max: tenant.maxConsents,
           percentage: calculatePercentage(consentsCount, tenant.maxConsents),
           status: this.getUsageStatus(consentsCount, tenant.maxConsents),
+        },
+        medicalRecords: {
+          current: medicalRecordsCount,
+          max: medicalRecordsLimit === -1 ? 999999 : medicalRecordsLimit,
+          percentage: medicalRecordsLimit === -1 ? 0 : calculatePercentage(medicalRecordsCount, medicalRecordsLimit),
+          status: medicalRecordsLimit === -1 ? 'normal' as const : this.getUsageStatus(medicalRecordsCount, medicalRecordsLimit),
+        },
+        consentTemplates: {
+          current: consentTemplatesCount,
+          max: consentTemplatesLimit === -1 ? 999999 : consentTemplatesLimit,
+          percentage: consentTemplatesLimit === -1 ? 0 : calculatePercentage(consentTemplatesCount, consentTemplatesLimit),
+          status: consentTemplatesLimit === -1 ? 'normal' as const : this.getUsageStatus(consentTemplatesCount, consentTemplatesLimit),
+        },
+        mrConsentTemplates: {
+          current: mrConsentTemplatesCount,
+          max: mrConsentTemplatesLimit === -1 ? 999999 : mrConsentTemplatesLimit,
+          percentage: mrConsentTemplatesLimit === -1 ? 0 : calculatePercentage(mrConsentTemplatesCount, mrConsentTemplatesLimit),
+          status: mrConsentTemplatesLimit === -1 ? 'normal' as const : this.getUsageStatus(mrConsentTemplatesCount, mrConsentTemplatesLimit),
+        },
+        services: {
+          current: servicesCount,
+          max: tenant.maxServices || 999999,
+          percentage: calculatePercentage(servicesCount, tenant.maxServices || 999999),
+          status: this.getUsageStatus(servicesCount, tenant.maxServices || 999999),
         },
         questions: {
           current: 0, // TODO: Implementar conteo de preguntas personalizadas
@@ -474,6 +719,9 @@ export class TenantsService {
         branchesCount,
         servicesCount,
         consentsCount,
+        medicalRecordsCount,
+        consentTemplatesCount,
+        mrConsentTemplatesCount,
         storageUsedMb,
       }),
     };
@@ -504,9 +752,15 @@ export class TenantsService {
     branchesCount: number;
     servicesCount: number;
     consentsCount: number;
+    medicalRecordsCount: number;
+    consentTemplatesCount: number;
+    mrConsentTemplatesCount: number;
     storageUsedMb: number;
   }) {
     const alerts = [];
+
+    // Obtener límites del plan
+    const planConfig = getPlanConfig(tenant.plan);
 
     // Alertas de límites alcanzados
     if (counts.usersCount >= tenant.maxUsers) {
@@ -549,6 +803,60 @@ export class TenantsService {
         resource: 'consents',
         message: `Estás cerca del límite de consentimientos (${counts.consentsCount}/${tenant.maxConsents})`,
       });
+    }
+
+    // Alertas para Historias Clínicas
+    const medicalRecordsLimit = planConfig?.limits.medicalRecords || 999999;
+    if (medicalRecordsLimit !== -1) {
+      if (counts.medicalRecordsCount >= medicalRecordsLimit) {
+        alerts.push({
+          type: 'critical',
+          resource: 'medicalRecords',
+          message: `Has alcanzado el límite de historias clínicas (${counts.medicalRecordsCount}/${medicalRecordsLimit})`,
+        });
+      } else if (counts.medicalRecordsCount >= medicalRecordsLimit * 0.8) {
+        alerts.push({
+          type: 'warning',
+          resource: 'medicalRecords',
+          message: `Estás cerca del límite de historias clínicas (${counts.medicalRecordsCount}/${medicalRecordsLimit})`,
+        });
+      }
+    }
+
+    // Alertas para Plantillas CN
+    const consentTemplatesLimit = planConfig?.limits.consentTemplates || 999999;
+    if (consentTemplatesLimit !== -1) {
+      if (counts.consentTemplatesCount >= consentTemplatesLimit) {
+        alerts.push({
+          type: 'critical',
+          resource: 'consentTemplates',
+          message: `Has alcanzado el límite de plantillas CN (${counts.consentTemplatesCount}/${consentTemplatesLimit})`,
+        });
+      } else if (counts.consentTemplatesCount >= consentTemplatesLimit * 0.8) {
+        alerts.push({
+          type: 'warning',
+          resource: 'consentTemplates',
+          message: `Estás cerca del límite de plantillas CN (${counts.consentTemplatesCount}/${consentTemplatesLimit})`,
+        });
+      }
+    }
+
+    // Alertas para Plantillas HC
+    const mrConsentTemplatesLimit = planConfig?.limits.mrConsentTemplates || 999999;
+    if (mrConsentTemplatesLimit !== -1) {
+      if (counts.mrConsentTemplatesCount >= mrConsentTemplatesLimit) {
+        alerts.push({
+          type: 'critical',
+          resource: 'mrConsentTemplates',
+          message: `Has alcanzado el límite de plantillas HC (${counts.mrConsentTemplatesCount}/${mrConsentTemplatesLimit})`,
+        });
+      } else if (counts.mrConsentTemplatesCount >= mrConsentTemplatesLimit * 0.8) {
+        alerts.push({
+          type: 'warning',
+          resource: 'mrConsentTemplates',
+          message: `Estás cerca del límite de plantillas HC (${counts.mrConsentTemplatesCount}/${mrConsentTemplatesLimit})`,
+        });
+      }
     }
 
     const maxStorage = tenant.storageLimitMb || 999999;

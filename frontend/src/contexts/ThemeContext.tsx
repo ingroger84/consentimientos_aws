@@ -2,7 +2,81 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import axios from 'axios';
 import { getApiBaseUrl } from '../utils/api-url';
 
-// Crear una instancia de axios especial para settings que no redirija en 401
+// Función para extraer el tenant slug del hostname
+const getTenantSlug = (): string | null => {
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  
+  console.log('[getTenantSlug] hostname:', hostname);
+  console.log('[getTenantSlug] parts:', parts);
+  
+  // localhost o IP sin subdominio
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+    console.log('[getTenantSlug] Detectado como localhost sin subdominio -> NULL (Super Admin)');
+    return null;
+  }
+  
+  // Si tiene 2 partes y el segundo es localhost, el primero puede ser el tenant
+  // Ejemplo: clinica-demo.localhost -> tenant 'clinica-demo'
+  // Ejemplo: admin.localhost -> NULL (Super Admin)
+  if (parts.length === 2 && parts[1] === 'localhost') {
+    const subdomain = parts[0];
+    // Si es 'admin', no es un tenant - es Super Admin
+    if (subdomain === 'admin') {
+      console.log('[getTenantSlug] Detectado "admin" subdomain -> NULL (Super Admin)');
+      return null;
+    }
+    console.log('[getTenantSlug] Detectado tenant:', subdomain);
+    return subdomain;
+  }
+  
+  // Si tiene 3 o más partes, el primero puede ser el tenant
+  // Ejemplo: clinica-demo.archivoenlinea.com -> tenant 'clinica-demo'
+  // Ejemplo: admin.archivoenlinea.com -> NULL (Super Admin)
+  if (parts.length >= 3) {
+    const subdomain = parts[0];
+    // Si es 'admin' o 'www', no es un tenant
+    if (subdomain === 'admin' || subdomain === 'www') {
+      console.log('[getTenantSlug] Detectado "admin" o "www" subdomain -> NULL (Super Admin)');
+      return null;
+    }
+    console.log('[getTenantSlug] Detectado tenant:', subdomain);
+    return subdomain;
+  }
+  
+  // Dominio principal sin subdominio
+  console.log('[getTenantSlug] Dominio principal sin subdominio -> NULL (Super Admin)');
+  return null;
+};
+
+// Crear una instancia de axios para el endpoint PÚBLICO (sin token)
+const publicSettingsApi = axios.create({
+  baseURL: `${getApiBaseUrl()}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor para agregar SOLO el tenant slug (NO el token)
+publicSettingsApi.interceptors.request.use(
+  (config) => {
+    const tenantSlug = getTenantSlug();
+    console.log('[publicSettingsApi] Interceptor - tenantSlug:', tenantSlug);
+    console.log('[publicSettingsApi] Interceptor - URL:', config.url);
+    
+    if (tenantSlug) {
+      config.headers['X-Tenant-Slug'] = tenantSlug;
+      console.log('[publicSettingsApi] Enviando X-Tenant-Slug:', tenantSlug);
+    } else {
+      console.log('[publicSettingsApi] NO enviando X-Tenant-Slug (Super Admin)');
+    }
+    
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Crear una instancia de axios para endpoints AUTENTICADOS (con token)
 const settingsApi = axios.create({
   baseURL: `${getApiBaseUrl()}/api`,
   headers: {
@@ -10,43 +84,7 @@ const settingsApi = axios.create({
   },
 });
 
-// Función para extraer el tenant slug del hostname
-const getTenantSlug = (): string | null => {
-  const hostname = window.location.hostname;
-  const parts = hostname.split('.');
-  
-  // localhost o IP sin subdominio
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-    return null;
-  }
-  
-  // Si tiene 2 partes y el segundo es localhost, el primero es el tenant
-  // Ejemplo: clinica-demo.localhost -> tenant 'clinica-demo'
-  if (parts.length === 2 && parts[1] === 'localhost') {
-    const subdomain = parts[0];
-    // Si es 'admin', no es un tenant
-    if (subdomain === 'admin') {
-      return null;
-    }
-    return subdomain;
-  }
-  
-  // Si tiene 3 o más partes, el primero es el tenant
-  // Ejemplo: clinica-demo.archivoenlinea.com -> tenant 'clinica-demo'
-  if (parts.length >= 3) {
-    const subdomain = parts[0];
-    // Si es 'admin' o 'www', no es un tenant
-    if (subdomain === 'admin' || subdomain === 'www') {
-      return null;
-    }
-    return subdomain;
-  }
-  
-  // Dominio principal sin subdominio
-  return null;
-};
-
-// Agregar token si existe, pero no redirigir en 401
+// Interceptor para agregar token Y tenant slug
 settingsApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -54,11 +92,15 @@ settingsApi.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Agregar el tenant slug como header
     const tenantSlug = getTenantSlug();
+    console.log('[settingsApi] Interceptor - tenantSlug:', tenantSlug);
+    console.log('[settingsApi] Interceptor - URL:', config.url);
+    
     if (tenantSlug) {
       config.headers['X-Tenant-Slug'] = tenantSlug;
-      console.log('[ThemeContext] Enviando X-Tenant-Slug:', tenantSlug);
+      console.log('[settingsApi] Enviando X-Tenant-Slug:', tenantSlug);
+    } else {
+      console.log('[settingsApi] NO enviando X-Tenant-Slug (Super Admin)');
     }
     
     return config;
@@ -67,10 +109,17 @@ settingsApi.interceptors.request.use(
 );
 
 export interface ThemeSettings {
+  // Logos CN (Consentimientos tradicionales)
   logoUrl: string | null;
   footerLogoUrl: string | null;
   watermarkLogoUrl: string | null;
   faviconUrl: string | null;
+  
+  // Logos HC (Historias Clínicas)
+  hcLogoUrl: string | null;
+  hcFooterLogoUrl: string | null;
+  hcWatermarkLogoUrl: string | null;
+  
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -98,10 +147,17 @@ interface ThemeContextType {
 }
 
 const defaultSettings: ThemeSettings = {
+  // Logos CN
   logoUrl: null,
   footerLogoUrl: null,
   watermarkLogoUrl: null,
   faviconUrl: null,
+  
+  // Logos HC
+  hcLogoUrl: null,
+  hcFooterLogoUrl: null,
+  hcWatermarkLogoUrl: null,
+  
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',
@@ -139,51 +195,87 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const [loading, setLoading] = useState(true);
 
   const loadSettings = async () => {
+    console.log('[ThemeContext] ========== LOADING SETTINGS ==========');
+    console.log('[ThemeContext] Current URL:', window.location.href);
+    console.log('[ThemeContext] Hostname:', window.location.hostname);
+    
     try {
       // Intentar cargar settings públicos directamente si no hay token
       const token = localStorage.getItem('token');
+      console.log('[ThemeContext] Token present:', !!token);
       
       if (!token) {
-        // Sin token, usar endpoint público
+        // Sin token, usar endpoint público (sin enviar token)
         console.log('[ThemeContext] No token found, loading public settings');
         try {
-          const response = await settingsApi.get('/settings/public');
+          console.log('[ThemeContext] Calling GET /settings/public...');
+          const response = await publicSettingsApi.get('/settings/public');
+          console.log('[ThemeContext] ✓ Public settings loaded successfully');
+          console.log('[ThemeContext] Company Name:', response.data.companyName);
+          console.log('[ThemeContext] Primary Color:', response.data.primaryColor);
+          console.log('[ThemeContext] Logo URL:', response.data.logoUrl);
           setSettings(response.data);
           applyTheme(response.data);
-        } catch (publicError) {
-          console.log('[ThemeContext] Public settings failed, using defaults');
+        } catch (publicError: any) {
+          console.error('[ThemeContext] ✗ Public settings failed');
+          console.error('[ThemeContext] Error:', publicError.message);
+          console.error('[ThemeContext] Response:', publicError.response?.data);
+          console.error('[ThemeContext] Status:', publicError.response?.status);
+          console.log('[ThemeContext] Using default settings');
+          setSettings(defaultSettings);
           applyTheme(defaultSettings);
         }
       } else {
         // Con token, intentar cargar settings autenticados
         try {
           console.log('[ThemeContext] Token found, loading authenticated settings');
+          console.log('[ThemeContext] Calling GET /settings...');
           const response = await settingsApi.get('/settings');
+          console.log('[ThemeContext] ✓ Authenticated settings loaded successfully');
+          console.log('[ThemeContext] Company Name:', response.data.companyName);
+          console.log('[ThemeContext] Primary Color:', response.data.primaryColor);
+          console.log('[ThemeContext] Logo URL:', response.data.logoUrl);
           setSettings(response.data);
           applyTheme(response.data);
         } catch (authError: any) {
-          // Si falla con token, intentar público sin propagar el error
+          console.error('[ThemeContext] ✗ Authenticated settings failed');
+          console.error('[ThemeContext] Error:', authError.message);
+          console.error('[ThemeContext] Response:', authError.response?.data);
+          console.error('[ThemeContext] Status:', authError.response?.status);
+          
+          // Si falla con token, intentar público sin enviar token
           if (authError?.response?.status === 401) {
-            console.log('[ThemeContext] Auth failed, falling back to public settings');
+            console.log('[ThemeContext] Auth failed (401), falling back to public settings');
             try {
-              const response = await settingsApi.get('/settings/public');
+              console.log('[ThemeContext] Calling GET /settings/public...');
+              const response = await publicSettingsApi.get('/settings/public');
+              console.log('[ThemeContext] ✓ Public settings loaded successfully (fallback)');
+              console.log('[ThemeContext] Company Name:', response.data.companyName);
               setSettings(response.data);
               applyTheme(response.data);
-            } catch (publicError) {
-              console.log('[ThemeContext] Public settings failed, using defaults');
+            } catch (publicError: any) {
+              console.error('[ThemeContext] ✗ Public settings failed (fallback)');
+              console.error('[ThemeContext] Error:', publicError.message);
+              console.log('[ThemeContext] Using default settings');
+              setSettings(defaultSettings);
               applyTheme(defaultSettings);
             }
           } else {
-            console.error('[ThemeContext] Unexpected error:', authError);
+            console.error('[ThemeContext] Unexpected error, using defaults');
+            setSettings(defaultSettings);
             applyTheme(defaultSettings);
           }
         }
       }
     } catch (error: any) {
+      console.error('[ThemeContext] ========== FATAL ERROR ==========');
       console.error('[ThemeContext] Fatal error loading settings:', error);
+      console.error('[ThemeContext] Using default settings');
+      setSettings(defaultSettings);
       applyTheme(defaultSettings);
     } finally {
       setLoading(false);
+      console.log('[ThemeContext] ========== SETTINGS LOAD COMPLETE ==========');
     }
   };
 

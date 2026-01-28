@@ -156,6 +156,129 @@ export class MailService {
   }
 
   /**
+   * Enviar correo con consentimiento de Historia Clínica
+   */
+  async sendMedicalRecordConsentEmail(data: {
+    to: string;
+    clientName: string;
+    consentNumber: string;
+    pdfUrl: string;
+    companyName: string;
+  }): Promise<void> {
+    try {
+      const attachments = [];
+
+      // Descargar PDF desde S3
+      if (data.pdfUrl && data.pdfUrl.startsWith('http')) {
+        this.logger.log(`Descargando PDF desde S3: ${data.pdfUrl}`);
+        const pdfBuffer = await this.storageService.downloadFile(data.pdfUrl);
+        attachments.push({
+          filename: `${data.consentNumber}.pdf`,
+          content: pdfBuffer,
+        });
+      }
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: data.to,
+        subject: `Consentimiento Informado - ${data.companyName}`,
+        html: this.getMedicalRecordConsentEmailTemplate(data),
+        attachments,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Medical record consent email sent to ${data.to}`);
+    } catch (error) {
+      this.logger.error(`Error sending medical record consent email to ${data.to}:`, error);
+      throw error;
+    }
+  }
+
+  private getMedicalRecordConsentEmailTemplate(data: {
+    clientName: string;
+    consentNumber: string;
+    companyName: string;
+  }): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          .content {
+            padding: 30px;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+          }
+          .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #3B82F6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Consentimiento Informado</h1>
+          </div>
+          <div class="content">
+            <p>Estimado/a <strong>${data.clientName}</strong>,</p>
+            
+            <p>Adjunto encontrará su consentimiento informado generado en nuestra institución.</p>
+            
+            <p><strong>Número de Consentimiento:</strong> ${data.consentNumber}</p>
+            
+            <p>Este documento ha sido generado electrónicamente y contiene su firma digital.</p>
+            
+            <p>Por favor, conserve este documento para sus registros.</p>
+            
+            <p>Si tiene alguna pregunta o necesita asistencia, no dude en contactarnos.</p>
+            
+            <p>Atentamente,<br><strong>${data.companyName}</strong></p>
+          </div>
+          <div class="footer">
+            <p>Este es un correo automático, por favor no responda a este mensaje.</p>
+            <p>&copy; ${new Date().getFullYear()} ${data.companyName}. Todos los derechos reservados.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
    * Template de correo de bienvenida
    */
   private getWelcomeEmailTemplate(user: User, temporaryPassword: string, loginUrl: string): string {

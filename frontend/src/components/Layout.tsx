@@ -26,15 +26,38 @@ import {
   Menu,
   X,
   UserCircle,
+  RefreshCw,
+  FileStack,
+  ClipboardList,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
+// Tipo para las secciones de navegación
+interface NavSection {
+  title: string;
+  items: NavItem[];
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+}
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: any;
+  permission: string;
+  badge?: string;
+}
+
 export default function Layout() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, setUser } = useAuthStore();
   const { settings } = useTheme();
   const { hasPermission } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [refreshingPermissions, setRefreshingPermissions] = useState(false);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
 
   // Verificar sesión periódicamente
   useSessionCheck();
@@ -48,122 +71,274 @@ export default function Layout() {
     setMobileMenuOpen(false);
   };
 
-  // Definir todas las opciones de navegación con sus permisos requeridos
-  const allNavigation = [
-    { 
-      name: 'Dashboard', 
-      href: '/dashboard', 
-      icon: LayoutDashboard,
-      permission: 'view_dashboard'
-    },
-    { 
-      name: 'Consentimientos', 
-      href: '/consents', 
+  const toggleSection = (sectionTitle: string) => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }));
+  };
+
+  const handleRefreshPermissions = async () => {
+    try {
+      setRefreshingPermissions(true);
+      const api = (await import('@/services/api')).default;
+      const response = await api.post('/auth/refresh-token');
+      const { access_token, user: updatedUser } = response.data;
+      
+      // Actualizar token y usuario en localStorage
+      localStorage.setItem('token', access_token);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Actualizar usuario en el store
+      setUser(updatedUser);
+      
+      // Mostrar mensaje de éxito
+      alert('Permisos actualizados correctamente. La página se recargará.');
+      
+      // Recargar la página para aplicar los cambios
+      window.location.reload();
+    } catch (error) {
+      console.error('Error al refrescar permisos:', error);
+      alert('Error al actualizar permisos. Por favor, intenta cerrar sesión y volver a iniciar.');
+    } finally {
+      setRefreshingPermissions(false);
+    }
+  };
+
+  // Organizar navegación por secciones lógicas
+  const getNavigationSections = (): NavSection[] => {
+    const sections: NavSection[] = [];
+
+    // Sección: Principal (siempre visible)
+    sections.push({
+      title: 'Principal',
+      items: [
+        { 
+          name: 'Dashboard', 
+          href: '/dashboard', 
+          icon: LayoutDashboard,
+          permission: 'view_dashboard'
+        },
+      ],
+      defaultOpen: true
+    });
+
+    // Sección: Gestión Clínica (HC y Consentimientos)
+    const clinicalItems: NavItem[] = [];
+    
+    if (user?.role.type === 'super_admin') {
+      clinicalItems.push({
+        name: 'Historias Clínicas',
+        href: '/super-admin/medical-records',
+        icon: ClipboardList,
+        permission: 'view_global_stats'
+      });
+    } else {
+      clinicalItems.push({
+        name: 'Historias Clínicas',
+        href: '/medical-records',
+        icon: ClipboardList,
+        permission: 'view_medical_records'
+      });
+    }
+    
+    clinicalItems.push({
+      name: 'Consentimientos',
+      href: '/consents',
       icon: FileText,
       permission: 'view_consents'
-    },
-    { 
-      name: 'Clientes', 
-      href: '/clients', 
-      icon: UserCircle,
-      permission: 'view_clients'
-    },
-    { 
-      name: 'Plantillas', 
-      href: '/consent-templates', 
+    });
+
+    if (clinicalItems.length > 0) {
+      sections.push({
+        title: 'Gestión Clínica',
+        items: clinicalItems,
+        collapsible: true,
+        defaultOpen: true
+      });
+    }
+
+    // Sección: Plantillas
+    const templateItems: NavItem[] = [];
+    
+    templateItems.push({
+      name: 'Plantillas HC',
+      href: '/mr-consent-templates',
+      icon: FileStack,
+      permission: 'view_mr_consent_templates'
+    });
+    
+    templateItems.push({
+      name: 'Plantillas CN',
+      href: '/consent-templates',
       icon: FileText,
       permission: 'view_templates'
-    },
-    { 
-      name: 'Historias Clínicas', 
-      href: '/medical-records', 
-      icon: FileText,
-      permission: 'view_medical_records'
-    },
-    { 
-      name: 'Usuarios', 
-      href: '/users', 
+    });
+
+    if (templateItems.length > 0) {
+      sections.push({
+        title: 'Plantillas',
+        items: templateItems,
+        collapsible: true,
+        defaultOpen: false
+      });
+    }
+
+    // Sección: Gestión de Datos
+    const dataItems: NavItem[] = [];
+    
+    dataItems.push({
+      name: 'Clientes',
+      href: '/clients',
+      icon: UserCircle,
+      permission: 'view_clients'
+    });
+    
+    dataItems.push({
+      name: 'Usuarios',
+      href: '/users',
       icon: Users,
       permission: 'view_users'
-    },
-    { 
-      name: 'Roles y Permisos', 
-      href: '/roles', 
-      icon: Shield,
-      permission: 'view_roles'
-    },
-    { 
-      name: 'Sedes', 
-      href: '/branches', 
+    });
+
+    if (dataItems.length > 0) {
+      sections.push({
+        title: 'Gestión de Datos',
+        items: dataItems,
+        collapsible: true,
+        defaultOpen: false
+      });
+    }
+
+    // Sección: Configuración de Organización
+    const orgItems: NavItem[] = [];
+    
+    orgItems.push({
+      name: 'Sedes',
+      href: '/branches',
       icon: Building2,
       permission: 'view_branches'
-    },
-    { 
-      name: 'Servicios', 
-      href: '/services', 
+    });
+    
+    orgItems.push({
+      name: 'Servicios',
+      href: '/services',
       icon: Briefcase,
       permission: 'view_services'
-    },
-    { 
-      name: 'Preguntas', 
-      href: '/questions', 
+    });
+    
+    orgItems.push({
+      name: 'Preguntas',
+      href: '/questions',
       icon: HelpCircle,
       permission: 'view_questions'
-    },
-    { 
-      name: 'Configuración', 
-      href: '/settings', 
-      icon: Settings,
-      permission: 'view_settings'
-    },
-  ];
+    });
+    
+    orgItems.push({
+      name: 'Roles y Permisos',
+      href: '/roles',
+      icon: Shield,
+      permission: 'view_roles'
+    });
 
-  // Agregar opciones de facturación para usuarios de tenant (no super_admin)
-  if (user?.tenant) {
-    allNavigation.push({
-      name: 'Mi Plan',
-      href: '/my-plan',
-      icon: CreditCard,
-      permission: 'view_dashboard'
-    });
-    allNavigation.push({
-      name: 'Mis Facturas',
-      href: '/my-invoices',
-      icon: Receipt,
-      permission: 'view_invoices'
-    });
-  }
+    if (orgItems.length > 0) {
+      sections.push({
+        title: 'Organización',
+        items: orgItems,
+        collapsible: true,
+        defaultOpen: false
+      });
+    }
 
-  // Agregar opciones de administración para super_admin
-  if (user?.role.type === 'super_admin') {
-    allNavigation.push({
-      name: 'Tenants',
-      href: '/tenants',
-      icon: Building,
-      permission: 'manage_tenants'
-    });
-    allNavigation.push({
-      name: 'Planes',
-      href: '/plans',
-      icon: CreditCard,
-      permission: 'manage_tenants'
-    });
-    allNavigation.push({
-      name: 'Facturación',
-      href: '/billing',
-      icon: DollarSign,
-      permission: 'manage_tenants'
-    });
-    allNavigation.push({
-      name: 'Impuestos',
-      href: '/tax-config',
-      icon: Percent,
-      permission: 'manage_tenants'
-    });
-  }
+    // Sección: Facturación (solo para tenants)
+    if (user?.tenant) {
+      const billingItems: NavItem[] = [];
+      
+      billingItems.push({
+        name: 'Mi Plan',
+        href: '/my-plan',
+        icon: CreditCard,
+        permission: 'view_dashboard'
+      });
+      
+      billingItems.push({
+        name: 'Mis Facturas',
+        href: '/my-invoices',
+        icon: Receipt,
+        permission: 'view_invoices'
+      });
 
-  // Filtrar navegación según permisos del usuario
-  const navigation = allNavigation.filter(item => hasPermission(item.permission));
+      if (billingItems.length > 0) {
+        sections.push({
+          title: 'Facturación',
+          items: billingItems,
+          collapsible: true,
+          defaultOpen: false
+        });
+      }
+    }
+
+    // Sección: Administración (solo para super_admin)
+    if (user?.role.type === 'super_admin') {
+      sections.push({
+        title: 'Administración',
+        items: [
+          {
+            name: 'Tenants',
+            href: '/tenants',
+            icon: Building,
+            permission: 'manage_tenants'
+          },
+          {
+            name: 'Planes',
+            href: '/plans',
+            icon: CreditCard,
+            permission: 'manage_tenants'
+          },
+          {
+            name: 'Facturación',
+            href: '/billing',
+            icon: DollarSign,
+            permission: 'manage_tenants'
+          },
+          {
+            name: 'Impuestos',
+            href: '/tax-config',
+            icon: Percent,
+            permission: 'manage_tenants'
+          },
+        ],
+        collapsible: true,
+        defaultOpen: false
+      });
+    }
+
+    // Sección: Configuración (siempre al final)
+    sections.push({
+      title: 'Configuración',
+      items: [
+        {
+          name: 'Configuración',
+          href: '/settings',
+          icon: Settings,
+          permission: 'view_settings'
+        },
+      ],
+      defaultOpen: true
+    });
+
+    return sections;
+  };
+
+  const navigationSections = getNavigationSections();
+
+  // Filtrar secciones y items según permisos
+  const filteredSections = navigationSections
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => hasPermission(item.permission))
+    }))
+    .filter(section => section.items.length > 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -229,26 +404,78 @@ export default function Layout() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+          <nav className="flex-1 px-4 py-6 space-y-4 overflow-y-auto">
+            {filteredSections.map((section) => {
+              const isSectionCollapsed = collapsedSections[section.title] ?? !section.defaultOpen;
+              const hasActiveItem = section.items.some(item => 
+                location.pathname === item.href || location.pathname.startsWith(item.href + '/')
+              );
+
               return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  onClick={closeMobileMenu}
-                  className={`
-                    flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors
-                    ${isActive 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                    }
-                  `}
-                  style={isActive ? { color: settings.primaryColor, backgroundColor: `${settings.primaryColor}15` } : {}}
-                >
-                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-                  <span className="truncate">{item.name}</span>
-                </Link>
+                <div key={section.title} className="space-y-1">
+                  {/* Section Header */}
+                  {section.collapsible ? (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleSection(section.title);
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+                      type="button"
+                    >
+                      <span>{section.title}</span>
+                      {isSectionCollapsed ? (
+                        <ChevronRight className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </button>
+                  ) : (
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {section.title}
+                    </div>
+                  )}
+
+                  {/* Section Items */}
+                  {!isSectionCollapsed && (
+                    <div className="space-y-1">
+                      {section.items.map((item) => {
+                        const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+                        return (
+                          <Link
+                            key={item.name}
+                            to={item.href}
+                            onClick={closeMobileMenu}
+                            className={`
+                              flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
+                              ${isActive 
+                                ? 'bg-primary/10 text-primary' 
+                                : 'text-gray-700 hover:bg-gray-100'
+                              }
+                            `}
+                            style={isActive ? { color: settings.primaryColor, backgroundColor: `${settings.primaryColor}15` } : {}}
+                          >
+                            <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                            <span className="truncate">{item.name}</span>
+                            {item.badge && (
+                              <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-600 rounded-full">
+                                {item.badge}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Separator after section (except last) */}
+                  {section !== filteredSections[filteredSections.length - 1] && (
+                    <div className="pt-3">
+                      <div className="border-t border-gray-200"></div>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </nav>
@@ -271,16 +498,26 @@ export default function Layout() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  closeMobileMenu();
-                }}
-                className="ml-2 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
-                title="Cerrar sesión"
-              >
-                <LogOut className="w-5 h-5" />
-              </button>
+              <div className="flex gap-1 ml-2 flex-shrink-0">
+                <button
+                  onClick={handleRefreshPermissions}
+                  disabled={refreshingPermissions}
+                  className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Actualizar permisos"
+                >
+                  <RefreshCw className={`w-5 h-5 ${refreshingPermissions ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    closeMobileMenu();
+                  }}
+                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             {/* Version info */}
             <div className="pt-2 border-t border-gray-200">

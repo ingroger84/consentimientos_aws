@@ -38,7 +38,7 @@ interface EmailConfigForm {
   useEncryption: boolean;
 }
 
-type TabType = 'company' | 'logos' | 'colors' | 'texts' | 'email';
+type TabType = 'company' | 'logos-cn' | 'logos-hc' | 'colors' | 'texts' | 'email';
 
 export default function SettingsPage() {
   const { user } = useAuthStore();
@@ -50,6 +50,9 @@ export default function SettingsPage() {
   const [uploadingFooterLogo, setUploadingFooterLogo] = useState(false);
   const [uploadingWatermark, setUploadingWatermark] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [uploadingHCLogo, setUploadingHCLogo] = useState(false);
+  const [uploadingHCFooterLogo, setUploadingHCFooterLogo] = useState(false);
+  const [uploadingHCWatermark, setUploadingHCWatermark] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testEmail, setTestEmail] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -58,6 +61,9 @@ export default function SettingsPage() {
   const footerLogoInputRef = useRef<HTMLInputElement>(null);
   const watermarkInputRef = useRef<HTMLInputElement>(null);
   const faviconInputRef = useRef<HTMLInputElement>(null);
+  const hcLogoInputRef = useRef<HTMLInputElement>(null);
+  const hcFooterLogoInputRef = useRef<HTMLInputElement>(null);
+  const hcWatermarkInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -143,7 +149,7 @@ export default function SettingsPage() {
     }
   };
 
-  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'footer' | 'watermark' | 'favicon') => {
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'footer' | 'watermark' | 'favicon' | 'hc-logo' | 'hc-footer' | 'hc-watermark') => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -178,6 +184,9 @@ export default function SettingsPage() {
       if (type === 'footer') setUploadingFooterLogo(true);
       if (type === 'watermark') setUploadingWatermark(true);
       if (type === 'favicon') setUploadingFavicon(true);
+      if (type === 'hc-logo') setUploadingHCLogo(true);
+      if (type === 'hc-footer') setUploadingHCFooterLogo(true);
+      if (type === 'hc-watermark') setUploadingHCWatermark(true);
       
       setMessage('');
 
@@ -188,7 +197,10 @@ export default function SettingsPage() {
       const endpoint = type === 'logo' ? '/settings/logo' : 
                       type === 'footer' ? '/settings/footer-logo' : 
                       type === 'watermark' ? '/settings/watermark-logo' :
-                      '/settings/favicon';
+                      type === 'favicon' ? '/settings/favicon' :
+                      type === 'hc-logo' ? '/settings/hc-logo' :
+                      type === 'hc-footer' ? '/settings/hc-footer-logo' :
+                      '/settings/hc-watermark-logo';
 
       await api.post(endpoint, formData, {
         headers: {
@@ -201,7 +213,10 @@ export default function SettingsPage() {
       const label = type === 'logo' ? 'Logo' :
                    type === 'footer' ? 'Logo del footer' :
                    type === 'watermark' ? 'Marca de agua' :
-                   'Favicon';
+                   type === 'favicon' ? 'Favicon' :
+                   type === 'hc-logo' ? 'Logo HC' :
+                   type === 'hc-footer' ? 'Logo del footer HC' :
+                   'Marca de agua HC';
       
       setMessage(`${label} actualizado correctamente`);
       
@@ -216,6 +231,9 @@ export default function SettingsPage() {
       if (type === 'footer') setUploadingFooterLogo(false);
       if (type === 'watermark') setUploadingWatermark(false);
       if (type === 'favicon') setUploadingFavicon(false);
+      if (type === 'hc-logo') setUploadingHCLogo(false);
+      if (type === 'hc-footer') setUploadingHCFooterLogo(false);
+      if (type === 'hc-watermark') setUploadingHCWatermark(false);
     }
   };
 
@@ -256,7 +274,8 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'company' as TabType, label: 'Empresa', icon: Building2 },
-    { id: 'logos' as TabType, label: 'Logos', icon: Image },
+    { id: 'logos-cn' as TabType, label: 'Logos CN', icon: Image },
+    { id: 'logos-hc' as TabType, label: 'Logos HC', icon: Image },
     { id: 'colors' as TabType, label: 'Colores', icon: Palette },
     { id: 'texts' as TabType, label: 'Textos', icon: FileText },
   ];
@@ -432,10 +451,10 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {activeTab === 'logos' && (
+        {activeTab === 'logos-cn' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
             <div className="card">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo Principal</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo Principal CN</h2>
               
               <div className="mb-4">
                 {settings.logoUrl ? (
@@ -484,12 +503,12 @@ export default function SettingsPage() {
               </button>
 
               <p className="text-sm text-gray-500 mt-2">
-                Aparece en el header del PDF
+                Aparece en el header del PDF de consentimientos tradicionales
               </p>
             </div>
 
             <div className="card">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo del Footer</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo del Footer CN</h2>
               
               <div className="mb-4">
                 {settings.footerLogoUrl ? (
@@ -538,12 +557,12 @@ export default function SettingsPage() {
               </button>
 
               <p className="text-sm text-gray-500 mt-2">
-                Aparece en el footer del PDF
+                Aparece en el footer del PDF de consentimientos tradicionales
               </p>
             </div>
 
             <div className="card">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Marca de Agua</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Marca de Agua CN</h2>
               
               <div className="mb-4">
                 {settings.watermarkLogoUrl ? (
@@ -592,7 +611,7 @@ export default function SettingsPage() {
               </button>
 
               <p className="text-sm text-gray-500 mt-2">
-                Aparece centrada en el fondo del PDF
+                Aparece centrada en el fondo del PDF de consentimientos tradicionales
               </p>
             </div>
 
@@ -648,6 +667,190 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-500 mt-2">
                 Aparece en la pestaña del navegador (.ico, .png, .svg)
               </p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'logos-hc' && (
+          <div className="space-y-6">
+            <div className="card bg-blue-50 border-blue-200">
+              <div className="flex items-start">
+                <AlertCircle className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-2">Logos para Historias Clínicas</h3>
+                  <p className="text-sm text-blue-800">
+                    Estos logos se usarán exclusivamente en los PDFs generados desde el módulo de Historias Clínicas.
+                    Si no configuras logos HC, se usarán automáticamente los logos CN como respaldo.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="card">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo Principal HC</h2>
+                
+                <div className="mb-4">
+                  {settings.hcLogoUrl ? (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                      <img
+                        src={getResourceUrl(settings.hcLogoUrl)}
+                        alt="Logo principal HC"
+                        className="max-h-32 object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <div className="text-center text-gray-500">
+                        <Upload className="w-12 h-12 mx-auto mb-2" />
+                        <p className="text-sm">No configurado</p>
+                        <p className="text-xs mt-1">Usando logo CN</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  ref={hcLogoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleLogoUpload(e, 'hc-logo')}
+                  className="hidden"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => hcLogoInputRef.current?.click()}
+                  disabled={uploadingHCLogo}
+                  className="btn btn-primary w-full"
+                >
+                  {uploadingHCLogo ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Subiendo...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Subir Logo HC
+                    </>
+                  )}
+                </button>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Aparece en el header del PDF de historias clínicas
+                </p>
+              </div>
+
+              <div className="card">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Logo del Footer HC</h2>
+                
+                <div className="mb-4">
+                  {settings.hcFooterLogoUrl ? (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                      <img
+                        src={getResourceUrl(settings.hcFooterLogoUrl)}
+                        alt="Logo del footer HC"
+                        className="max-h-32 object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <div className="text-center text-gray-500">
+                        <Upload className="w-12 h-12 mx-auto mb-2" />
+                        <p className="text-sm">No configurado</p>
+                        <p className="text-xs mt-1">Usando logo CN</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  ref={hcFooterLogoInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleLogoUpload(e, 'hc-footer')}
+                  className="hidden"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => hcFooterLogoInputRef.current?.click()}
+                  disabled={uploadingHCFooterLogo}
+                  className="btn btn-primary w-full"
+                >
+                  {uploadingHCFooterLogo ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Subiendo...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Subir Logo Footer HC
+                    </>
+                  )}
+                </button>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Aparece en el footer del PDF de historias clínicas
+                </p>
+              </div>
+
+              <div className="card">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Marca de Agua HC</h2>
+                
+                <div className="mb-4">
+                  {settings.hcWatermarkLogoUrl ? (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg">
+                      <img
+                        src={getResourceUrl(settings.hcWatermarkLogoUrl)}
+                        alt="Marca de agua HC"
+                        className="max-h-32 object-contain opacity-30"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <div className="text-center text-gray-500">
+                        <Upload className="w-12 h-12 mx-auto mb-2" />
+                        <p className="text-sm">No configurado</p>
+                        <p className="text-xs mt-1">Usando marca de agua CN</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <input
+                  ref={hcWatermarkInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleLogoUpload(e, 'hc-watermark')}
+                  className="hidden"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => hcWatermarkInputRef.current?.click()}
+                  disabled={uploadingHCWatermark}
+                  className="btn btn-primary w-full"
+                >
+                  {uploadingHCWatermark ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Subiendo...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Subir Marca de Agua HC
+                    </>
+                  )}
+                </button>
+
+                <p className="text-sm text-gray-500 mt-2">
+                  Aparece centrada en el fondo del PDF de historias clínicas
+                </p>
+              </div>
             </div>
           </div>
         )}

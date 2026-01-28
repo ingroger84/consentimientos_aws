@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, OneToMany, Index } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany, Index, JoinColumn } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 import { Consent } from '../../consents/entities/consent.entity';
@@ -71,6 +71,7 @@ export class Client extends BaseEntity {
 
   // Relaciones
   @ManyToOne(() => Tenant, (tenant) => tenant.clients)
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
   @Column({ name: 'tenant_id' })

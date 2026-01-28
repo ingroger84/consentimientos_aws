@@ -20,7 +20,20 @@ export class Role extends BaseEntity {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ type: 'simple-array', default: '' })
+  @Column({ 
+    type: 'text',
+    transformer: {
+      to: (value: string[]) => JSON.stringify(value || []),
+      from: (value: string) => {
+        if (!value) return [];
+        try {
+          return typeof value === 'string' ? JSON.parse(value) : value;
+        } catch {
+          return [];
+        }
+      }
+    }
+  })
   permissions: string[];
 
   @OneToMany(() => User, (user) => user.role)

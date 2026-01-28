@@ -12,6 +12,9 @@ interface PricingPlan {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;
+    mrConsentTemplates: number;
+    consentTemplates: number;
     services: number;
     questions: number;
     storageMb: number;
@@ -22,6 +25,7 @@ interface PricingPlan {
     prioritySupport: boolean;
     customDomain: boolean;
     whiteLabel: boolean;
+    apiAccess: boolean;
     backup: string;
     supportResponseTime: string;
   };
@@ -43,7 +47,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
 
   const fetchPlans = async () => {
     try {
-      const response = await api.get('/tenants/plans');
+      const response = await api.get('/plans/public');
       setPlans(response.data);
     } catch (error) {
       console.error('Error fetching plans:', error);
@@ -61,17 +65,30 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   };
 
   const getFeaturesList = (plan: PricingPlan) => {
+    const formatLimit = (value: number, singular: string, plural: string) => {
+      if (value === -1) return `${plural} ilimitados`;
+      return `${value} ${value === 1 ? singular : plural}`;
+    };
+
+    const formatStorage = (mb: number) => {
+      if (mb >= 1000) return `${(mb / 1000).toFixed(0)} GB`;
+      return `${mb} MB`;
+    };
+
     const features = [
-      `${plan.limits.users} ${plan.limits.users === 1 ? 'usuario' : 'usuarios'}`,
-      `${plan.limits.branches} ${plan.limits.branches === 1 ? 'sede' : 'sedes'}`,
-      `${plan.limits.consents} consentimientos/mes`,
-      `${plan.limits.services} servicios`,
-      `${plan.limits.storageMb} MB de almacenamiento`,
+      formatLimit(plan.limits.users, 'usuario', 'usuarios'),
+      formatLimit(plan.limits.branches, 'sede', 'sedes'),
+      formatLimit(plan.limits.consents, 'consentimiento', 'consentimientos') + '/mes',
+      formatLimit(plan.limits.medicalRecords, 'historia clínica', 'historias clínicas') + '/mes',
+      formatLimit(plan.limits.consentTemplates, 'plantilla CN', 'plantillas CN'),
+      formatLimit(plan.limits.mrConsentTemplates, 'plantilla HC', 'plantillas HC'),
+      `${formatStorage(plan.limits.storageMb)} de almacenamiento`,
       plan.features.customization && 'Personalización completa',
       plan.features.advancedReports && 'Reportes avanzados',
       plan.features.prioritySupport && 'Soporte prioritario',
       plan.features.customDomain && 'Dominio personalizado',
       plan.features.whiteLabel && 'Marca blanca',
+      plan.features.apiAccess && 'Acceso a API',
       plan.features.backup !== 'none' && `Backup ${plan.features.backup === 'daily' ? 'diario' : 'semanal'}`,
       `Soporte: ${plan.features.supportResponseTime}`,
     ].filter(Boolean);

@@ -36,7 +36,7 @@
 
 ### Credenciales en Uso (servidor de producción):
 - **Usuario IAM:** `datagree-s3-app-user`
-- **Access Key:** `AKIA42IJAAWUHIHRZM4L`
+- **Access Key:** Ver CREDENCIALES.md
 - **Estado:** ✅ Seguras y funcionando
 
 ---
@@ -57,7 +57,7 @@ Aunque tu servidor NO usa estas credenciales, debes desactivarlas para evitar qu
 5. Después de 24-48 horas: "Actions" → "Delete"
 ```
 
-**⚠️ IMPORTANTE:** NO desactives las credenciales de `datagree-s3-app-user` (AKIA42IJAAWUHIHRZM4L) porque esas SÍ están en uso.
+**⚠️ IMPORTANTE:** NO desactives las credenciales de `datagree-s3-app-user` (ver CREDENCIALES.md) porque esas SÍ están en uso.
 
 ---
 

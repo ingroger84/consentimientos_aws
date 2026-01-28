@@ -211,10 +211,13 @@ export default function PlansManagementPage() {
                   {[
                     { key: 'users', label: 'Usuarios', icon: Users },
                     { key: 'branches', label: 'Sedes', icon: Building2 },
-                    { key: 'consents', label: 'Consentimientos', icon: FileText },
+                    { key: 'consents', label: 'Consentimientos/mes', icon: FileText },
+                    { key: 'medicalRecords', label: 'Historias Clínicas/mes', icon: FileText },
+                    { key: 'consentTemplates', label: 'Plantillas CN', icon: FileText },
+                    { key: 'mrConsentTemplates', label: 'Plantillas HC', icon: FileText },
                     { key: 'services', label: 'Servicios', icon: Briefcase },
                     { key: 'questions', label: 'Preguntas', icon: HelpCircle },
-                    { key: 'storageMb', label: 'Storage (MB)', icon: HardDrive },
+                    { key: 'storageMb', label: 'Almacenamiento (MB)', icon: HardDrive },
                   ].map(({ key, label, icon: Icon }) => (
                     <div key={key} className="flex items-center gap-2">
                       <Icon className="w-4 h-4 text-gray-500" />
@@ -226,11 +229,14 @@ export default function PlansManagementPage() {
                             value={currentData.limits?.[key as keyof typeof currentData.limits] || 0}
                             onChange={(e) => handleLimitChange(key, parseInt(e.target.value))}
                             className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                            min="1"
+                            min="-1"
+                            placeholder="-1 = ilimitado"
                           />
                         ) : (
                           <p className="text-sm font-semibold text-gray-900">
-                            {plan.limits[key as keyof typeof plan.limits]}
+                            {plan.limits[key as keyof typeof plan.limits] === -1 
+                              ? 'Ilimitado' 
+                              : plan.limits[key as keyof typeof plan.limits]}
                           </p>
                         )}
                       </div>

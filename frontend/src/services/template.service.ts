@@ -1,5 +1,5 @@
 import api from './api';
-import { ConsentTemplate, CreateTemplateDto, UpdateTemplateDto, TemplateType } from '@/types/template';
+import { ConsentTemplate, CreateTemplateDto, UpdateTemplateDto, TemplateType } from '../types/template';
 
 class TemplateService {
   async getAll(): Promise<ConsentTemplate[]> {

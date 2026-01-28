@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Version</title>
+</head>
+<body>
+    <h1>Version Check</h1>
+    <p>Current hostname: <span id="hostname"></span></p>
+    <p>Tenant slug detected: <span id="tenant"></span></p>
+    <button onclick="testHeader()">Test X-Tenant-Slug Header</button>
+    <pre id="result"></pre>
+
+    <script>
+        document.getElementById('hostname').textContent = window.location.hostname;
+        
+        // Función para extraer tenant slug
+        function getTenantSlug() {
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                return null;
+            }
+            
+            if (parts.length === 2 && parts[1] === 'localhost') {
+                const subdomain = parts[0];
+                if (subdomain === 'admin') {
+                    return null;
+                }
+                return subdomain;
+            }
+            
+            if (parts.length >= 3) {
+                const subdomain = parts[0];
+                if (subdomain === 'admin' || subdomain === 'www') {
+                    return null;
+                }
+                return subdomain;
+            }
+            
+            return null;
+        }
+
+        const tenantSlug = getTenantSlug();
+        document.getElementById('tenant').textContent = tenantSlug || 'null (Super Admin)';
+
+        async function testHeader() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/settings/public', {
+                    headers: {
+                        'X-Tenant-Slug': tenantSlug || '',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

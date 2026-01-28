@@ -1,33 +1,9 @@
 import { IsString, IsUUID, IsDateString, IsOptional, IsIn, IsNumber, IsBoolean, IsObject } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
-// Medical Record DTOs
-export class CreateMedicalRecordDto {
-  @IsUUID()
-  clientId: string;
-
-  @IsUUID()
-  @IsOptional()
-  branchId?: string;
-
-  @IsDateString()
-  admissionDate: string;
-
-  @IsString()
-  @IsIn(['consulta', 'urgencia', 'hospitalizacion', 'control'])
-  admissionType: string;
-}
-
-export class UpdateMedicalRecordDto extends PartialType(CreateMedicalRecordDto) {
-  @IsString()
-  @IsOptional()
-  @IsIn(['active', 'closed', 'archived'])
-  status?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isLocked?: boolean;
-}
+// Medical Record DTOs - Importar desde archivos separados
+export { CreateMedicalRecordDto, CreateClientDataDto } from './create-medical-record.dto';
+export { UpdateMedicalRecordDto } from './update-medical-record.dto';
 
 // Anamnesis DTOs
 export class CreateAnamnesisDto {

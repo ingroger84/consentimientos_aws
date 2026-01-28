@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 15.0.2
-**Fecha:** 2026-01-24
-**Tipo de Cambio:** PATCH
+## Versión Actual: 19.0.0
+**Fecha:** 2026-01-27
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
-### 15.0.2 - 2026-01-24 [PATCH]
-- Backend: 1 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
+### 19.0.0 - 2026-01-27 [MAJOR]
+- Documentación: 4 archivo(s) modificado(s)
 
-### 15.0.1 - 2026-01-24 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 18.0.0 - 2026-01-27 [MAJOR]
+- Backend: 68 archivo(s) modificado(s)
+- Frontend: 45 archivo(s) modificado(s)
+- Documentación: 205 archivo(s) modificado(s)
+- Scripts: 11 archivo(s) modificado(s)
 
 ---
 

@@ -468,3 +468,352 @@ Para más información, consulta:
 - ✅ Integración con backend
 
 ---
+
+### 🏥 Historias Clínicas
+
+#### [43-historias-clinicas/](./43-historias-clinicas/)
+- Módulo completo de historias clínicas
+- Gestión de anamnesis y evoluciones
+- Firmas digitales
+- Exportación a PDF
+- Sistema de permisos granular
+- Integración con clientes y sedes
+
+**Archivos principales:**
+- `00_INDICE_VISUAL.md` - Índice visual del módulo
+- `RESUMEN_FINAL.md` - Resumen ejecutivo
+- `INSTRUCCIONES_USUARIO.md` - Guía de uso
+- `ACTIVACION_EXITOSA.md` - Verificación de activación
+
+**Características:**
+- ✅ 7 tablas con auditoría completa
+- ✅ 9 endpoints REST
+- ✅ 3 páginas frontend (listado, crear, ver)
+- ✅ 7 permisos configurables
+- ✅ Cierre y firma de historias
+- ✅ Exportación a PDF
+
+#### [44-correccion-login-tenant/](./44-correccion-login-tenant/)
+- Corrección del login de tenant con logo personalizado
+- Implementación de header X-Tenant-Slug
+- Configuración de CORS
+- Middleware de tenant mejorado
+
+**Problema resuelto:**
+- Login mostraba logo genérico en lugar del logo del tenant
+- Frontend en subdominio no enviaba información del tenant
+
+**Solución:**
+- Header X-Tenant-Slug en todas las peticiones
+- Middleware lee header además de subdominio
+- CORS configurado para permitir header personalizado
+
+#### [45-categoria-historias-clinicas-permisos/](./45-categoria-historias-clinicas-permisos/)
+- Categoría "Historias Clínicas" en Roles y Permisos
+- Definición de 7 permisos en constantes del backend
+- Configuración de permisos por rol
+- Visualización en página de Roles y Permisos
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual
+- `INSTRUCCIONES_USUARIO.md` - Instrucciones de uso
+
+**Permisos incluidos:**
+- ✅ Ver historias clínicas
+- ✅ Crear historias clínicas
+- ✅ Editar historias clínicas
+- ✅ Eliminar historias clínicas
+- ✅ Cerrar historias clínicas
+- ✅ Firmar historias clínicas
+- ✅ Exportar historias clínicas
+
+---
+
+## 📊 Estadísticas de Documentación
+
+- **Total de carpetas:** 45
+- **Última actualización:** 2026-01-24
+- **Versión del sistema:** 15.0.3
+- **Estado:** ✅ Actualizado
+
+---
+
+## 🔍 Cómo Usar Este Índice
+
+1. **Buscar por categoría:** Usa las secciones temáticas
+2. **Buscar por número:** Usa Ctrl+F para buscar "XX-nombre"
+3. **Leer README:** Cada carpeta tiene un README.md principal
+4. **Seguir enlaces:** Los enlaces te llevan directamente a las carpetas
+
+---
+
+## 📝 Convenciones
+
+- **[XX-nombre/]** - Enlace a carpeta de documentación
+- **✅** - Característica implementada y verificada
+- **⚠️** - Advertencia o consideración importante
+- **📌** - Nota destacada
+- **🔧** - Configuración técnica
+- **🎯** - Objetivo o resultado esperado
+
+---
+
+#### [46-busqueda-clientes-historias-clinicas/](./46-busqueda-clientes-historias-clinicas/)
+- Búsqueda y creación de clientes en historias clínicas
+- Integración del componente ClientSearchForm
+- Validación automática de duplicados
+- Clientes compartidos entre módulos
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual con diagramas
+- `GUIA_PRUEBAS.md` - 18 casos de prueba detallados
+- `RESUMEN_FINAL.md` - Resumen ejecutivo
+
+**Funcionalidades:**
+- ✅ Búsqueda inteligente en tiempo real
+- ✅ Creación de clientes inline
+- ✅ Validación de duplicados automática
+- ✅ Debounce de 500ms
+- ✅ Máximo 50 resultados
+- ✅ Componente reutilizable
+
+**Beneficios:**
+- ✅ 75% más rápido crear HC
+- ✅ 100% reducción de duplicados
+- ✅ Experiencia consistente
+- ✅ Código DRY
+
+---
+
+#### [55-correccion-plantillas-consentimiento/](./55-correccion-plantillas-consentimiento/)
+- Corrección de errores al cargar y crear plantillas
+- Solución de SyntaxError en navegador
+- Limpieza de caché del frontend
+- Documentación completa de troubleshooting
+
+**Archivos principales:**
+- `README.md` - Análisis completo del problema y solución
+- `RESUMEN_VISUAL.md` - Diagramas y flujos visuales
+- `INSTRUCCIONES_USUARIO.md` - Guía paso a paso para el usuario
+- `CHANGELOG.md` - Registro detallado de cambios
+
+**Problema resuelto:**
+- Error "SyntaxError: Unexpected token 'new'"
+- Error al cargar plantillas
+- Error al crear plantillas predeterminadas
+
+**Solución:**
+- Corrección de import path en template.service.ts
+- Script de limpieza de caché (fix-frontend-cache.ps1)
+- Instrucciones para limpiar caché del navegador
+
+**Funcionalidades verificadas:**
+- ✅ Listar plantillas
+- ✅ Crear plantillas
+- ✅ Editar plantillas
+- ✅ Eliminar plantillas
+- ✅ Inicializar plantillas predeterminadas
+- ✅ Sistema de variables dinámicas
+
+---
+
+## 📊 Estadísticas de Documentación
+
+- **Total de carpetas:** 55
+- **Última actualización:** 2026-01-25
+- **Versión del sistema:** 15.0.9
+- **Estado:** ✅ Actualizado
+
+---
+
+### 🔧 Correcciones y Mejoras Recientes de HC (2026-01-26)
+
+#### [66-logos-separados-cn-hc/](./66-logos-separados-cn-hc/)
+- Separación de logos para Consentimientos Normales y Historias Clínicas
+- Configuración independiente de logos HC
+- Fallback automático a logos CN si no hay logos HC configurados
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual
+- `COMPLETADO.md` - Verificación final
+
+**Funcionalidades:**
+- ✅ Logo principal HC independiente
+- ✅ Logo footer HC independiente
+- ✅ Marca de agua HC independiente
+- ✅ Fallback automático a logos CN
+
+---
+
+#### [67-firma-digital-hc/](./67-firma-digital-hc/)
+- Implementación de firma digital en consentimientos HC
+- Captura de firma con canvas
+- Captura de foto del paciente con cámara
+- Integración en PDF
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual
+- `INSTRUCCIONES_PRUEBA.md` - Guía de pruebas
+- `COMPLETADO.md` - Verificación final
+
+**Funcionalidades:**
+- ✅ Canvas de firma con botón limpiar
+- ✅ Captura de foto con cámara
+- ✅ Vista previa de firma y foto
+- ✅ Integración en PDF con cajas de 120x120
+
+---
+
+#### [71-mejoras-pdf-hc/](./71-mejoras-pdf-hc/)
+- Mejoras en el diseño del PDF de consentimientos HC
+- Header azul con logo circular
+- Títulos con fondo naranja
+- Uso de logos HC configurados
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual
+- `CORRECCION_FINAL.md` - Verificación final
+
+**Mejoras:**
+- ✅ Header azul mejorado
+- ✅ Logo circular en header
+- ✅ Títulos con fondo naranja (#F59E0B)
+- ✅ Usa configuración de Logos HC
+
+---
+
+#### [73-correccion-permisos-operador-hc/](./73-correccion-permisos-operador-hc/)
+- Corrección de permisos del rol Operador en plantillas HC
+- Removido permiso de eliminar plantillas HC
+- Permisos correctos: ver, crear, editar (NO eliminar)
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `SOLUCION_FINAL.md` - Solución implementada
+
+**Corrección:**
+- ✅ Removido `delete_mr_consent_templates` del Operador
+- ✅ Permisos correctos aplicados
+- ✅ Sesiones limpiadas para aplicar cambios
+
+---
+
+#### [74-remover-eliminar-consents-operador/](./74-remover-eliminar-consents-operador/)
+- Removido permiso de eliminar consentimientos HC del Operador
+- Solo Administradores pueden eliminar consentimientos
+- Operador puede: ver vista previa y reenviar email
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+
+**Corrección:**
+- ✅ Removido `delete:medical-record-consents` del Operador
+- ✅ Solo Administradores pueden eliminar
+- ✅ Sesiones limpiadas
+
+---
+
+#### [75-ajuste-footer-firma-pdf/](./75-ajuste-footer-firma-pdf/)
+- Ajuste de espaciado entre firma y footer en PDF HC
+- Firma y foto más separadas del footer
+- Footer bien posicionado en la parte inferior
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+
+**Ajustes:**
+- ✅ Espacio después de firma: 30 → 50 puntos
+- ✅ Footer desde abajo: 30 → 40 puntos
+- ✅ Tamaño de fuente footer: 8 → 9 puntos
+
+---
+
+#### [76-ajuste-firma-footer-final/](./76-ajuste-firma-footer-final/)
+- Ajuste final de posicionamiento de firma y footer
+- Firma y foto mucho más arriba
+- Mayor separación del footer
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+
+**Ajustes:**
+- ✅ Espacio mínimo: 200 → 280 puntos desde abajo (+80)
+- ✅ Espacio después de firma: 50 → 80 puntos (+30)
+- ✅ Footer: 40 → 50 puntos desde abajo (+10)
+- ✅ Total: +120 puntos de espacio adicional
+
+---
+
+#### [77-correccion-sobreposicion-texto/](./77-correccion-sobreposicion-texto/) ⭐ NUEVO
+- Corrección de sobreposición de texto en PDF HC
+- Espacio adicional entre contenido y firma
+- Título "FIRMA Y CONSENTIMIENTO" bien separado
+
+**Archivos principales:**
+- `README.md` - Documentación completa
+- `RESUMEN_VISUAL.md` - Guía visual detallada
+- `INSTRUCCIONES_PRUEBA.md` - Guía de pruebas paso a paso
+
+**Problema resuelto:**
+- El texto del contenido (Historia Clínica, Fecha de admisión) se sobreponía con el título "FIRMA Y CONSENTIMIENTO"
+
+**Solución:**
+- ✅ Espacio después del contenido: +40 puntos
+- ✅ Espacio antes del título de firma: +50 puntos
+- ✅ Total de espacio adicional: 90 puntos
+- ✅ Sin sobreposición de textos
+- ✅ Diseño profesional y legible
+
+**Estado:**
+- ✅ Código implementado
+- ✅ Sin errores de compilación
+- ✅ Backend corriendo
+- ✅ Frontend corriendo
+- ⏳ Pendiente de prueba por usuario
+
+---
+
+## 📊 Estadísticas de Documentación Actualizadas
+
+- **Total de carpetas:** 77+
+- **Última actualización:** 2026-01-26
+- **Versión del sistema:** 15.0.10
+- **Estado:** ✅ Actualizado
+
+---
+
+## 🎯 Resumen de Sesión 2026-01-26
+
+### Correcciones Implementadas Hoy
+
+1. ✅ **Permisos del Operador** - Corregidos permisos en plantillas y consentimientos HC
+2. ✅ **Ajustes de PDF** - Múltiples ajustes de espaciado en firma y footer
+3. ✅ **Corrección de Sobreposición** - Solución final para sobreposición de texto
+
+### Archivos Modificados
+
+- `backend/src/medical-records/medical-records-pdf.service.ts` - Ajustes de espaciado
+- `backend/fix-operador-permissions.js` - Script de corrección de permisos
+- `backend/remove-delete-consent-from-operador.js` - Script de remoción de permisos
+
+### Documentación Creada
+
+- 3 carpetas nuevas de documentación (75, 76, 77)
+- 10+ archivos de documentación
+- Guías visuales y de pruebas
+- Resúmenes ejecutivos
+
+---
+
+## 📝 Próximos Pasos
+
+1. ⏳ **Probar corrección de sobreposición** - Generar nuevo consentimiento HC
+2. ⏳ **Verificar espaciado** - Confirmar que no hay sobreposición
+3. ⏳ **Validar con usuario** - Obtener aprobación final
+
+---

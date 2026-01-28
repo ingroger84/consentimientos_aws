@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Search, Eye } from 'lucide-react';
+import { Plus, FileText, Search, Eye, LayoutGrid, List, User, Calendar, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { medicalRecordsService } from '../services/medical-records.service';
 import { MedicalRecord } from '../types/medical-record';
 import { usePermissions } from '../hooks/usePermissions';
 import { useToast } from '../hooks/useToast';
+
+type ViewMode = 'table' | 'cards';
 
 export default function MedicalRecordsPage() {
   const { hasPermission } = usePermissions();
@@ -13,6 +15,7 @@ export default function MedicalRecordsPage() {
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('table'); // Vista de tabla por defecto
 
   useEffect(() => {
     loadRecords();
@@ -33,9 +36,10 @@ export default function MedicalRecordsPage() {
   const filteredRecords = records.filter(record => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
+    const clientName = record.client?.name || record.client?.fullName || '';
     return (
       record.recordNumber.toLowerCase().includes(search) ||
-      record.client?.name.toLowerCase().includes(search) ||
+      clientName.toLowerCase().includes(search) ||
       record.client?.documentNumber.includes(search)
     );
   });
@@ -93,6 +97,32 @@ export default function MedicalRecordsPage() {
             />
           </div>
 
+          {/* View Toggle */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('table')}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              title="Vista de tabla"
+            >
+              <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`p-2 rounded transition-colors ${
+                viewMode === 'cards'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              title="Vista de tarjetas"
+            >
+              <LayoutGrid className="w-5 h-5" />
+            </button>
+          </div>
+
           {/* Create */}
           {hasPermission('create_medical_records') && (
             <button
@@ -132,7 +162,117 @@ export default function MedicalRecordsPage() {
             </button>
           )}
         </div>
+      ) : viewMode === 'table' ? (
+        /* Vista de Tabla */
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Historia Clínica
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Paciente
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Fecha Admisión
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Sede
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Estado
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredRecords.map((record) => (
+                  <tr 
+                    key={record.id} 
+                    className="hover:bg-gray-50 cursor-pointer"
+                    onClick={() => navigate(`/medical-records/${record.id}`)}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {record.recordNumber}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Creada: {new Date(record.createdAt).toLocaleDateString('es-CO')}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 text-gray-400 mr-2" />
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {record.client?.name || record.client?.fullName || 'Sin nombre'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {record.client?.documentType} {record.client?.documentNumber}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">
+                        {getAdmissionTypeText(record.admissionType)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center text-sm text-gray-900">
+                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                        {new Date(record.admissionDate).toLocaleDateString('es-CO')}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {record.branch ? (
+                        <div className="flex items-center text-sm text-gray-900">
+                          <Building2 className="w-4 h-4 text-gray-400 mr-2" />
+                          {record.branch.name}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs font-medium rounded ${getStatusColor(record.status)}`}>
+                        {getStatusText(record.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/medical-records/${record.id}`);
+                        }}
+                        className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
+                        title="Ver detalles"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : (
+        /* Vista de Tarjetas */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRecords.map((record) => (
             <div
@@ -146,7 +286,7 @@ export default function MedicalRecordsPage() {
                     {record.recordNumber}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {record.client?.name}
+                    {record.client?.name || record.client?.fullName || 'Sin nombre'}
                   </p>
                   <p className="text-xs text-gray-500">
                     {record.client?.documentType} {record.client?.documentNumber}

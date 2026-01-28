@@ -19,6 +19,11 @@ export function applyPlanLimits(dto: CreateTenantDto): CreateTenantDto {
   dto.maxServices = dto.maxServices || planConfig.limits.services;
   dto.maxQuestions = dto.maxQuestions || planConfig.limits.questions;
   dto.storageLimitMb = dto.storageLimitMb || planConfig.limits.storageMb;
+  
+  // Nuevos límites para HC
+  dto.maxMedicalRecords = dto.maxMedicalRecords || planConfig.limits.medicalRecords;
+  dto.maxMRConsentTemplates = dto.maxMRConsentTemplates || planConfig.limits.mrConsentTemplates;
+  dto.maxConsentTemplates = dto.maxConsentTemplates || planConfig.limits.consentTemplates;
 
   // Aplicar precio del plan
   dto.planPrice = calculatePrice(planId, billingCycle);

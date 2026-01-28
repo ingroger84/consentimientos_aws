@@ -37,7 +37,9 @@ const CreateManualInvoicePage = lazy(() => import('./pages/CreateManualInvoicePa
 const TenantInvoicesPage = lazy(() => import('./pages/TenantInvoicesPage'));
 const TaxConfigPage = lazy(() => import('./pages/TaxConfigPage'));
 const ConsentTemplatesPage = lazy(() => import('./pages/ConsentTemplatesPage'));
+const MRConsentTemplatesPage = lazy(() => import('./pages/MRConsentTemplatesPage'));
 const MedicalRecordsPage = lazy(() => import('./pages/MedicalRecordsPage'));
+const SuperAdminMedicalRecordsPage = lazy(() => import('./pages/SuperAdminMedicalRecordsPage'));
 const CreateMedicalRecordPage = lazy(() => import('./pages/CreateMedicalRecordPage'));
 const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage'));
 
@@ -127,6 +129,7 @@ function App() {
           <Routes>
             {/* Ruta raíz: Landing si es dominio principal, Login si es subdominio */}
             <Route path="/" element={showLanding ? <PublicLandingPage /> : <LoginPage />} />
+            <Route path="/landing" element={<PublicLandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -139,7 +142,9 @@ function App() {
               <Route path="/consents/edit/:id" element={<CreateConsentPage />} />
               <Route path="/clients" element={<ClientsPage />} />
               <Route path="/consent-templates" element={<ConsentTemplatesPage />} />
+              <Route path="/mr-consent-templates" element={<MRConsentTemplatesPage />} />
               <Route path="/medical-records" element={<MedicalRecordsPage />} />
+              <Route path="/super-admin/medical-records" element={<SuperAdminMedicalRecordsPage />} />
               <Route path="/medical-records/new" element={<CreateMedicalRecordPage />} />
               <Route path="/medical-records/:id" element={<ViewMedicalRecordPage />} />
               <Route path="/users" element={<UsersPage />} />

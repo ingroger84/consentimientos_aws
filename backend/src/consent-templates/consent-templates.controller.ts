@@ -50,6 +50,13 @@ export class ConsentTemplatesController {
     return this.templatesService.findAll(tenantId);
   }
 
+  @Get('stats/overview')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
+  getStats(@TenantSlug() tenantId: string) {
+    return this.templatesService.getStatistics(tenantId);
+  }
+
   @Get('by-type/:type')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.VIEW_TEMPLATES)

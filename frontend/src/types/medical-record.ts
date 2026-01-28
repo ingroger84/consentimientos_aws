@@ -17,7 +17,8 @@ export interface MedicalRecord {
   // Relaciones
   client?: {
     id: string;
-    name: string;
+    name?: string; // Alias para fullName
+    fullName?: string; // Campo real en backend
     documentType: string;
     documentNumber: string;
     email?: string;
@@ -37,6 +38,32 @@ export interface MedicalRecord {
   physicalExams?: PhysicalExam[];
   diagnoses?: Diagnosis[];
   evolutions?: Evolution[];
+  consents?: MedicalRecordConsent[];
+}
+
+export interface MedicalRecordConsent {
+  id: string;
+  medicalRecordId: string;
+  consentId: string;
+  evolutionId?: string;
+  createdDuringConsultation: boolean;
+  requiredForProcedure: boolean;
+  procedureName?: string;
+  diagnosisCode?: string;
+  diagnosisDescription?: string;
+  notes?: string;
+  createdAt: string;
+  createdBy: string;
+  consent?: {
+    id: string;
+    consentNumber: string;
+    status: string;
+    pdfUrl?: string;
+  };
+  creator?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface Anamnesis {

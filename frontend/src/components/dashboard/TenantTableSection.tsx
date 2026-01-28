@@ -21,9 +21,17 @@ interface Tenant {
   maxUsers: number;
   maxBranches: number;
   maxConsents: number;
+  maxServices?: number;
+  maxMedicalRecords?: number;
+  maxMRConsentTemplates?: number;
+  maxConsentTemplates?: number;
   users?: any[];
   branches?: any[];
   consents?: any[];
+  services?: any[];
+  clients?: any[];
+  medicalRecords?: any[];
+  medicalRecordConsentsCount?: number;
   createdAt: string;
 }
 
@@ -137,6 +145,9 @@ export default function TenantTableSection() {
         maxUsers: editingTenant.maxUsers,
         maxBranches: editingTenant.maxBranches,
         maxConsents: editingTenant.maxConsents,
+        maxMedicalRecords: editingTenant.maxMedicalRecords,
+        maxMRConsentTemplates: editingTenant.maxMRConsentTemplates,
+        maxConsentTemplates: editingTenant.maxConsentTemplates,
         plan: editingTenant.plan as any, // Cast para evitar error de tipo
       });
       
@@ -248,10 +259,15 @@ export default function TenantTableSection() {
                 const userCount = tenant.users?.filter((u: any) => !u.deletedAt).length || 0;
                 const branchCount = tenant.branches?.filter((b: any) => !b.deletedAt).length || 0;
                 const consentCount = tenant.consents?.filter((c: any) => !c.deletedAt).length || 0;
+                const serviceCount = tenant.services?.filter((s: any) => !s.deletedAt).length || 0;
+                const medicalRecordsCount = tenant.medicalRecords?.length || 0;
+                const mrConsentsCount = tenant.medicalRecordConsentsCount || 0;
 
                 const userPercentage = getResourcePercentage(userCount, tenant.maxUsers);
                 const branchPercentage = getResourcePercentage(branchCount, tenant.maxBranches);
                 const consentPercentage = getResourcePercentage(consentCount, tenant.maxConsents);
+                const servicePercentage = getResourcePercentage(serviceCount, tenant.maxServices || 999999);
+                const medicalRecordsPercentage = getResourcePercentage(medicalRecordsCount, tenant.maxMedicalRecords || 999999);
 
                 return (
                   <tr key={tenant.id} className="hover:bg-gray-50">
@@ -272,15 +288,15 @@ export default function TenantTableSection() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="space-y-2 min-w-[250px]">
+                      <div className="space-y-1.5 min-w-[280px]">
                         {/* Usuarios */}
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 w-24">
-                            <span className="text-xs text-gray-600">👥 Usuarios</span>
+                          <div className="flex items-center gap-1 w-20">
+                            <span className="text-xs text-gray-600">👥 Users</span>
                           </div>
-                          <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
-                              className={`h-2.5 rounded-full transition-all ${
+                              className={`h-2 rounded-full transition-all ${
                                 userPercentage >= 100 ? 'bg-red-500' :
                                 userPercentage >= 80 ? 'bg-yellow-500' :
                                 'bg-green-500'
@@ -288,14 +304,14 @@ export default function TenantTableSection() {
                               style={{ width: `${Math.min(userPercentage, 100)}%` }}
                             />
                           </div>
-                          <span className={`text-xs font-semibold w-16 text-right ${
+                          <span className={`text-xs font-semibold w-14 text-right ${
                             userPercentage >= 100 ? 'text-red-600' :
                             userPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-900'
                           }`}>
                             {userCount}/{tenant.maxUsers}
                           </span>
-                          <span className={`text-xs font-medium w-12 text-right ${
+                          <span className={`text-xs font-medium w-10 text-right ${
                             userPercentage >= 100 ? 'text-red-600' :
                             userPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-500'
@@ -306,12 +322,12 @@ export default function TenantTableSection() {
 
                         {/* Sedes */}
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 w-24">
+                          <div className="flex items-center gap-1 w-20">
                             <span className="text-xs text-gray-600">🏢 Sedes</span>
                           </div>
-                          <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
-                              className={`h-2.5 rounded-full transition-all ${
+                              className={`h-2 rounded-full transition-all ${
                                 branchPercentage >= 100 ? 'bg-red-500' :
                                 branchPercentage >= 80 ? 'bg-yellow-500' :
                                 'bg-green-500'
@@ -319,14 +335,14 @@ export default function TenantTableSection() {
                               style={{ width: `${Math.min(branchPercentage, 100)}%` }}
                             />
                           </div>
-                          <span className={`text-xs font-semibold w-16 text-right ${
+                          <span className={`text-xs font-semibold w-14 text-right ${
                             branchPercentage >= 100 ? 'text-red-600' :
                             branchPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-900'
                           }`}>
                             {branchCount}/{tenant.maxBranches}
                           </span>
-                          <span className={`text-xs font-medium w-12 text-right ${
+                          <span className={`text-xs font-medium w-10 text-right ${
                             branchPercentage >= 100 ? 'text-red-600' :
                             branchPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-500'
@@ -335,14 +351,45 @@ export default function TenantTableSection() {
                           </span>
                         </div>
 
+                        {/* Servicios */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 w-20">
+                            <span className="text-xs text-gray-600">⚕️ Servs</span>
+                          </div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                servicePercentage >= 100 ? 'bg-red-500' :
+                                servicePercentage >= 80 ? 'bg-yellow-500' :
+                                'bg-green-500'
+                              }`}
+                              style={{ width: `${Math.min(servicePercentage, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-semibold w-14 text-right ${
+                            servicePercentage >= 100 ? 'text-red-600' :
+                            servicePercentage >= 80 ? 'text-yellow-600' :
+                            'text-gray-900'
+                          }`}>
+                            {serviceCount}/{tenant.maxServices || 0}
+                          </span>
+                          <span className={`text-xs font-medium w-10 text-right ${
+                            servicePercentage >= 100 ? 'text-red-600' :
+                            servicePercentage >= 80 ? 'text-yellow-600' :
+                            'text-gray-500'
+                          }`}>
+                            {Math.round(servicePercentage)}%
+                          </span>
+                        </div>
+
                         {/* Consentimientos */}
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 w-24">
-                            <span className="text-xs text-gray-600">📄 Consents</span>
+                          <div className="flex items-center gap-1 w-20">
+                            <span className="text-xs text-gray-600">📄 CN</span>
                           </div>
-                          <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
                             <div
-                              className={`h-2.5 rounded-full transition-all ${
+                              className={`h-2 rounded-full transition-all ${
                                 consentPercentage >= 100 ? 'bg-red-500' :
                                 consentPercentage >= 80 ? 'bg-yellow-500' :
                                 'bg-green-500'
@@ -350,19 +397,64 @@ export default function TenantTableSection() {
                               style={{ width: `${Math.min(consentPercentage, 100)}%` }}
                             />
                           </div>
-                          <span className={`text-xs font-semibold w-16 text-right ${
+                          <span className={`text-xs font-semibold w-14 text-right ${
                             consentPercentage >= 100 ? 'text-red-600' :
                             consentPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-900'
                           }`}>
                             {consentCount}/{tenant.maxConsents}
                           </span>
-                          <span className={`text-xs font-medium w-12 text-right ${
+                          <span className={`text-xs font-medium w-10 text-right ${
                             consentPercentage >= 100 ? 'text-red-600' :
                             consentPercentage >= 80 ? 'text-yellow-600' :
                             'text-gray-500'
                           }`}>
                             {Math.round(consentPercentage)}%
+                          </span>
+                        </div>
+
+                        {/* Historias Clínicas */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 w-20">
+                            <span className="text-xs text-gray-600">🏥 HC</span>
+                          </div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                medicalRecordsPercentage >= 100 ? 'bg-red-500' :
+                                medicalRecordsPercentage >= 80 ? 'bg-yellow-500' :
+                                'bg-green-500'
+                              }`}
+                              style={{ width: `${Math.min(medicalRecordsPercentage, 100)}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-semibold w-14 text-right ${
+                            medicalRecordsPercentage >= 100 ? 'text-red-600' :
+                            medicalRecordsPercentage >= 80 ? 'text-yellow-600' :
+                            'text-gray-900'
+                          }`}>
+                            {medicalRecordsCount}/{tenant.maxMedicalRecords || 0}
+                          </span>
+                          <span className={`text-xs font-medium w-10 text-right ${
+                            medicalRecordsPercentage >= 100 ? 'text-red-600' :
+                            medicalRecordsPercentage >= 80 ? 'text-yellow-600' :
+                            'text-gray-500'
+                          }`}>
+                            {Math.round(medicalRecordsPercentage)}%
+                          </span>
+                        </div>
+
+                        {/* Consentimientos HC */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 w-20">
+                            <span className="text-xs text-gray-600">📋 CN-HC</span>
+                          </div>
+                          <div className="flex-1"></div>
+                          <span className="text-xs font-semibold w-14 text-right text-gray-900">
+                            {mrConsentsCount}
+                          </span>
+                          <span className="text-xs font-medium w-10 text-right text-gray-500">
+                            -
                           </span>
                         </div>
                       </div>
@@ -499,6 +591,48 @@ export default function TenantTableSection() {
                     onChange={(e) => setEditingTenant({ ...editingTenant, maxConsents: parseInt(e.target.value) })}
                     className="input w-full"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Máx. Historias Clínicas
+                  </label>
+                  <input
+                    type="number"
+                    min="-1"
+                    value={editingTenant.maxMedicalRecords || 0}
+                    onChange={(e) => setEditingTenant({ ...editingTenant, maxMedicalRecords: parseInt(e.target.value) })}
+                    className="input w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Máx. Plantillas HC
+                  </label>
+                  <input
+                    type="number"
+                    min="-1"
+                    value={editingTenant.maxMRConsentTemplates || 0}
+                    onChange={(e) => setEditingTenant({ ...editingTenant, maxMRConsentTemplates: parseInt(e.target.value) })}
+                    className="input w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Máx. Plantillas CN
+                  </label>
+                  <input
+                    type="number"
+                    min="-1"
+                    value={editingTenant.maxConsentTemplates || 0}
+                    onChange={(e) => setEditingTenant({ ...editingTenant, maxConsentTemplates: parseInt(e.target.value) })}
+                    className="input w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
                 </div>
               </div>
 

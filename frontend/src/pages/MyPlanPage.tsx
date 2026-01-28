@@ -37,6 +37,9 @@ interface PlanUsage {
     branches: ResourceUsage;
     services: ResourceUsage;
     consents: ResourceUsage;
+    medicalRecords: ResourceUsage;
+    consentTemplates: ResourceUsage;
+    mrConsentTemplates: ResourceUsage;
     questions: ResourceUsage;
     storage: ResourceUsage;
   };
@@ -112,6 +115,12 @@ const MyPlanPage: React.FC = () => {
         return <Briefcase className={iconClass} />;
       case 'consents':
         return <FileText className={iconClass} />;
+      case 'medicalRecords':
+        return <FileText className={iconClass} />;
+      case 'consentTemplates':
+        return <FileText className={iconClass} />;
+      case 'mrConsentTemplates':
+        return <FileText className={iconClass} />;
       case 'questions':
         return <HelpCircle className={iconClass} />;
       case 'storage':
@@ -126,7 +135,10 @@ const MyPlanPage: React.FC = () => {
       users: 'Usuarios',
       branches: 'Sedes',
       services: 'Servicios Médicos',
-      consents: 'Consentimientos',
+      consents: 'Consentimientos (CN)',
+      medicalRecords: 'Historias Clínicas (HC)',
+      consentTemplates: 'Plantillas CN',
+      mrConsentTemplates: 'Plantillas HC',
       questions: 'Preguntas Personalizadas',
       storage: 'Almacenamiento',
     };

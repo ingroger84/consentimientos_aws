@@ -8,6 +8,7 @@ import { Role } from '../roles/entities/role.entity';
 import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { MRConsentTemplatesModule } from '../medical-record-consent-templates/mr-consent-templates.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     forwardRef(() => SettingsModule),
     MailModule,
     NotificationsModule,
+    forwardRef(() => MRConsentTemplatesModule),
   ],
   controllers: [TenantsController],
   providers: [TenantsService],

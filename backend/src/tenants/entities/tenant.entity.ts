@@ -12,6 +12,8 @@ import { Branch } from '../../branches/entities/branch.entity';
 import { Service } from '../../services/entities/service.entity';
 import { Consent } from '../../consents/entities/consent.entity';
 import { Client } from '../../clients/entities/client.entity';
+import { MedicalRecord } from '../../medical-records/entities/medical-record.entity';
+import { MedicalRecordConsent } from '../../medical-records/entities/medical-record-consent.entity';
 
 export enum TenantStatus {
   ACTIVE = 'active',
@@ -96,6 +98,15 @@ export class Tenant {
   @Column({ type: 'int', default: 5, name: 'max_questions' })
   maxQuestions: number;
 
+  @Column({ type: 'int', default: 5, name: 'max_medical_records' })
+  maxMedicalRecords: number;
+
+  @Column({ type: 'int', default: 2, name: 'max_mr_consent_templates' })
+  maxMRConsentTemplates: number;
+
+  @Column({ type: 'int', default: 3, name: 'max_consent_templates' })
+  maxConsentTemplates: number;
+
   @Column({ type: 'int', default: 100, name: 'storage_limit_mb' })
   storageLimitMb: number;
 
@@ -148,4 +159,10 @@ export class Tenant {
 
   @OneToMany(() => Client, (client) => client.tenant)
   clients: Client[];
+
+  @OneToMany(() => MedicalRecord, (medicalRecord) => medicalRecord.tenant)
+  medicalRecords: MedicalRecord[];
+
+  @OneToMany(() => MedicalRecordConsent, (mrConsent) => mrConsent.medicalRecord)
+  medicalRecordConsents: MedicalRecordConsent[];
 }

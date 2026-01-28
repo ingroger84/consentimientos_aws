@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, ILike } from 'typeorm';
+import { Repository, Like, ILike, MoreThanOrEqual } from 'typeorm';
 import { Client, ClientDocumentType } from './entities/client.entity';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -193,27 +193,53 @@ export class ClientsService {
    * Obtener estadísticas de clientes
    */
   async getStats(tenantId: string) {
-    const totalClients = await this.clientsRepository.count({
+    // Total de clientes
+    const total = await this.clientsRepository.count({
       where: { tenantId },
     });
 
-    const clientsWithConsents = await this.clientsRepository.count({
-      where: { tenantId },
-      // @ts-ignore
-      where: { tenantId, consentsCount: { $gt: 0 } },
-    });
+    // Clientes nuevos este mes
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
 
-    const recentClients = await this.clientsRepository.count({
+    const newThisMonth = await this.clientsRepository.count({
       where: {
         tenantId,
-        // Clientes creados en los últimos 30 días
+        createdAt: MoreThanOrEqual(startOfMonth),
       },
     });
 
+    // Clientes nuevos esta semana
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const newThisWeek = await this.clientsRepository.count({
+      where: {
+        tenantId,
+        createdAt: MoreThanOrEqual(startOfWeek),
+      },
+    });
+
+    // Clientes recientes
+    const recent = await this.clientsRepository.find({
+      where: { tenantId },
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
+
     return {
-      totalClients,
-      clientsWithConsents,
-      recentClients,
+      total,
+      newThisMonth,
+      newThisWeek,
+      recent: recent.map(client => ({
+        id: client.id,
+        fullName: client.fullName,
+        documentNumber: client.documentNumber,
+        email: client.email,
+        createdAt: client.createdAt,
+      })),
     };
   }
 }

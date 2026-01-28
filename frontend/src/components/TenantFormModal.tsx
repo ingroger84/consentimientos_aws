@@ -30,6 +30,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
     maxUsers: 2,
     maxBranches: 1,
     maxConsents: 50,
+    maxMedicalRecords: 5,
+    maxMRConsentTemplates: 3,
+    maxConsentTemplates: 5,
     maxServices: 3,
     maxQuestions: 5,
     storageLimitMb: 100,
@@ -64,6 +67,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
         maxUsers: tenant.maxUsers,
         maxBranches: tenant.maxBranches,
         maxConsents: tenant.maxConsents,
+        maxMedicalRecords: tenant.maxMedicalRecords || 5,
+        maxMRConsentTemplates: tenant.maxMRConsentTemplates || 3,
+        maxConsentTemplates: tenant.maxConsentTemplates || 5,
         maxServices: tenant.maxServices || 3,
         maxQuestions: tenant.maxQuestions || 5,
         storageLimitMb: tenant.storageLimitMb || 100,
@@ -89,6 +95,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
           tenant.maxUsers !== plan.limits.users ||
           tenant.maxBranches !== plan.limits.branches ||
           tenant.maxConsents !== plan.limits.consents ||
+          tenant.maxMedicalRecords !== plan.limits.medicalRecords ||
+          tenant.maxMRConsentTemplates !== plan.limits.mrConsentTemplates ||
+          tenant.maxConsentTemplates !== plan.limits.consentTemplates ||
           tenant.maxServices !== plan.limits.services ||
           tenant.maxQuestions !== plan.limits.questions ||
           tenant.storageLimitMb !== plan.limits.storageMb;
@@ -124,6 +133,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
         maxUsers: plan.limits.users,
         maxBranches: plan.limits.branches,
         maxConsents: plan.limits.consents,
+        maxMedicalRecords: plan.limits.medicalRecords,
+        maxMRConsentTemplates: plan.limits.mrConsentTemplates,
+        maxConsentTemplates: plan.limits.consentTemplates,
         maxServices: plan.limits.services,
         maxQuestions: plan.limits.questions,
         storageLimitMb: plan.limits.storageMb,
@@ -147,6 +159,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
         maxUsers: selectedPlan.limits.users,
         maxBranches: selectedPlan.limits.branches,
         maxConsents: selectedPlan.limits.consents,
+        maxMedicalRecords: selectedPlan.limits.medicalRecords,
+        maxMRConsentTemplates: selectedPlan.limits.mrConsentTemplates,
+        maxConsentTemplates: selectedPlan.limits.consentTemplates,
         maxServices: selectedPlan.limits.services,
         maxQuestions: selectedPlan.limits.questions,
         storageLimitMb: selectedPlan.limits.storageMb,
@@ -439,6 +454,18 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
                   </div>
                   <div className="flex items-center gap-2">
                     <Check className="w-4 h-4 text-green-600" />
+                    <span>{selectedPlan.limits.medicalRecords === -1 ? 'HC ilimitadas' : `${selectedPlan.limits.medicalRecords} HC`}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>{selectedPlan.limits.mrConsentTemplates === -1 ? 'Plantillas HC ilimitadas' : `${selectedPlan.limits.mrConsentTemplates} plantillas HC`}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span>{selectedPlan.limits.consentTemplates === -1 ? 'Plantillas CN ilimitadas' : `${selectedPlan.limits.consentTemplates} plantillas CN`}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-600" />
                     <span>{selectedPlan.limits.services} servicios</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -617,6 +644,9 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
                       <div>Usuarios: {selectedPlan.limits.users}</div>
                       <div>Sedes: {selectedPlan.limits.branches}</div>
                       <div>Consentimientos: {selectedPlan.limits.consents}</div>
+                      <div>HC: {selectedPlan.limits.medicalRecords === -1 ? 'Ilimitadas' : selectedPlan.limits.medicalRecords}</div>
+                      <div>Plantillas HC: {selectedPlan.limits.mrConsentTemplates === -1 ? 'Ilimitadas' : selectedPlan.limits.mrConsentTemplates}</div>
+                      <div>Plantillas CN: {selectedPlan.limits.consentTemplates === -1 ? 'Ilimitadas' : selectedPlan.limits.consentTemplates}</div>
                       <div>Servicios: {selectedPlan.limits.services}</div>
                       <div>Preguntas: {selectedPlan.limits.questions}</div>
                       <div>Storage: {selectedPlan.limits.storageMb} MB</div>
@@ -695,6 +725,72 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
                   disabled={!customizeLimits}
                   className={`input ${!customizeLimits ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Historias Clínicas
+                  {selectedPlan && !customizeLimits && (
+                    <span className="ml-1 text-xs text-gray-500">
+                      (Plan: {selectedPlan.limits.medicalRecords === -1 ? 'Ilimitadas' : selectedPlan.limits.medicalRecords})
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="number"
+                  name="maxMedicalRecords"
+                  value={formData.maxMedicalRecords}
+                  onChange={handleChange}
+                  min="-1"
+                  max="1000000"
+                  disabled={!customizeLimits}
+                  className={`input ${!customizeLimits ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                />
+                <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Plantillas HC
+                  {selectedPlan && !customizeLimits && (
+                    <span className="ml-1 text-xs text-gray-500">
+                      (Plan: {selectedPlan.limits.mrConsentTemplates === -1 ? 'Ilimitadas' : selectedPlan.limits.mrConsentTemplates})
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="number"
+                  name="maxMRConsentTemplates"
+                  value={formData.maxMRConsentTemplates}
+                  onChange={handleChange}
+                  min="-1"
+                  max="1000"
+                  disabled={!customizeLimits}
+                  className={`input ${!customizeLimits ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                />
+                <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Plantillas CN
+                  {selectedPlan && !customizeLimits && (
+                    <span className="ml-1 text-xs text-gray-500">
+                      (Plan: {selectedPlan.limits.consentTemplates === -1 ? 'Ilimitadas' : selectedPlan.limits.consentTemplates})
+                    </span>
+                  )}
+                </label>
+                <input
+                  type="number"
+                  name="maxConsentTemplates"
+                  value={formData.maxConsentTemplates}
+                  onChange={handleChange}
+                  min="-1"
+                  max="1000"
+                  disabled={!customizeLimits}
+                  className={`input ${!customizeLimits ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                />
+                <p className="text-xs text-gray-500 mt-1">-1 = ilimitadas</p>
               </div>
 
               <div>

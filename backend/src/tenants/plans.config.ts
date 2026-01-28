@@ -8,6 +8,9 @@ export interface PlanConfig {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;           // Límite de Historias Clínicas
+    mrConsentTemplates: number;       // Límite de Plantillas de HC
+    consentTemplates: number;         // Límite de Plantillas de CN
     services: number;
     questions: number;
     storageMb: number;
@@ -18,6 +21,7 @@ export interface PlanConfig {
     prioritySupport: boolean;
     customDomain: boolean;
     whiteLabel: boolean;
+    apiAccess: boolean;               // Acceso a API
     backup: 'none' | 'weekly' | 'daily';
     supportResponseTime: string;
   };
@@ -34,10 +38,13 @@ export const PLANS: Record<string, PlanConfig> = {
     "limits": {
       "users": 1,
       "branches": 1,
-      "consents": 50,
+      "consents": 20,
+      "medicalRecords": 5,
+      "mrConsentTemplates": 2,
+      "consentTemplates": 3,
       "services": 3,
       "questions": 6,
-      "storageMb": 100
+      "storageMb": 200
     },
     "features": {
       "customization": false,
@@ -45,6 +52,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "prioritySupport": false,
       "customDomain": false,
       "whiteLabel": false,
+      "apiAccess": false,
       "backup": "none",
       "supportResponseTime": "48h"
     }
@@ -52,16 +60,19 @@ export const PLANS: Record<string, PlanConfig> = {
   "basic": {
     "id": "basic",
     "name": "Básico",
-    "description": "Para pequeñas clínicas, consultorios, spa, espeticas etc",
+    "description": "Para pequeñas clínicas, consultorios, spa, estéticas etc",
     "priceMonthly": 89900,
     "priceAnnual": 895404,
     "limits": {
-      "users": 1,
+      "users": 2,
       "branches": 1,
-      "consents": 50,
+      "consents": 100,
+      "medicalRecords": 30,
+      "mrConsentTemplates": 5,
+      "consentTemplates": 10,
       "services": 5,
       "questions": 10,
-      "storageMb": 100
+      "storageMb": 500
     },
     "features": {
       "customization": true,
@@ -69,6 +80,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "prioritySupport": false,
       "customDomain": false,
       "whiteLabel": false,
+      "apiAccess": false,
       "backup": "none",
       "supportResponseTime": "24h"
     }
@@ -80,12 +92,15 @@ export const PLANS: Record<string, PlanConfig> = {
     "priceMonthly": 119900,
     "priceAnnual": 1194202,
     "limits": {
-      "users": 3,
-      "branches": 2,
-      "consents": 80,
-      "services": 10,
-      "questions": 20,
-      "storageMb": 200
+      "users": 5,
+      "branches": 3,
+      "consents": 300,
+      "medicalRecords": 100,
+      "mrConsentTemplates": 10,
+      "consentTemplates": 20,
+      "services": 15,
+      "questions": 30,
+      "storageMb": 2000
     },
     "features": {
       "customization": true,
@@ -93,6 +108,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "prioritySupport": true,
       "customDomain": false,
       "whiteLabel": false,
+      "apiAccess": false,
       "backup": "weekly",
       "supportResponseTime": "12h"
     },
@@ -105,12 +121,15 @@ export const PLANS: Record<string, PlanConfig> = {
     "priceMonthly": 149900,
     "priceAnnual": 1493004,
     "limits": {
-      "users": 5,
-      "branches": 4,
-      "consents": 100,
-      "services": 20,
-      "questions": 40,
-      "storageMb": 300
+      "users": 10,
+      "branches": 5,
+      "consents": 500,
+      "medicalRecords": 300,
+      "mrConsentTemplates": 20,
+      "consentTemplates": 30,
+      "services": 30,
+      "questions": 50,
+      "storageMb": 5000
     },
     "features": {
       "customization": true,
@@ -118,6 +137,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "prioritySupport": true,
       "customDomain": true,
       "whiteLabel": false,
+      "apiAccess": false,
       "backup": "daily",
       "supportResponseTime": "4h"
     }
@@ -129,12 +149,15 @@ export const PLANS: Record<string, PlanConfig> = {
     "priceMonthly": 189900,
     "priceAnnual": 1891404,
     "limits": {
-      "users": 11,
-      "branches": 10,
-      "consents": 500,
-      "services": 50,
-      "questions": 100,
-      "storageMb": 600
+      "users": -1,
+      "branches": -1,
+      "consents": -1,
+      "medicalRecords": -1,
+      "mrConsentTemplates": -1,
+      "consentTemplates": -1,
+      "services": -1,
+      "questions": -1,
+      "storageMb": 10000
     },
     "features": {
       "customization": true,
@@ -142,6 +165,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "prioritySupport": true,
       "customDomain": true,
       "whiteLabel": true,
+      "apiAccess": true,
       "backup": "daily",
       "supportResponseTime": "24/7"
     }

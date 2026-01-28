@@ -139,11 +139,23 @@ export default function ConsentTemplatesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Plantillas de Consentimiento</h1>
-        <p className="text-gray-600 mt-1">
-          Gestiona las plantillas de texto para los consentimientos
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Plantillas de Consentimiento</h1>
+          <p className="text-gray-600 mt-1">
+            Gestiona las plantillas de texto para los consentimientos
+          </p>
+        </div>
+        
+        {hasPermission('create_templates') && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Plantilla
+          </button>
+        )}
       </div>
 
       {/* Filter */}
@@ -189,27 +201,16 @@ export default function ConsentTemplatesPage() {
           <p className="text-gray-600 mb-6">
             Crea plantillas personalizadas o inicializa las plantillas predeterminadas con contenido legal estándar
           </p>
-          <div className="flex gap-4 justify-center">
-            {hasPermission('create_templates') && (
-              <>
-                <button
-                  onClick={handleInitializeDefaults}
-                  disabled={initializing}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <RefreshCw className={`w-5 h-5 ${initializing ? 'animate-spin' : ''}`} />
-                  {initializing ? 'Creando...' : 'Crear Plantillas Predeterminadas'}
-                </button>
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  <Plus className="w-5 h-5" />
-                  Nueva Plantilla Personalizada
-                </button>
-              </>
-            )}
-          </div>
+          {hasPermission('create_templates') && (
+            <button
+              onClick={handleInitializeDefaults}
+              disabled={initializing}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
+            >
+              <RefreshCw className={`w-5 h-5 ${initializing ? 'animate-spin' : ''}`} />
+              {initializing ? 'Creando...' : 'Crear Plantillas Predeterminadas'}
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-6">

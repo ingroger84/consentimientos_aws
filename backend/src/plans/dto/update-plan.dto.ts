@@ -3,27 +3,42 @@ import { IsString, IsNumber, IsBoolean, IsOptional, IsObject, Min } from 'class-
 class LimitsDto {
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(-1)
   users?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(-1)
   branches?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(-1)
   consents?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(-1)
+  medicalRecords?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  mrConsentTemplates?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
+  consentTemplates?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(-1)
   services?: number;
 
   @IsOptional()
   @IsNumber()
-  @Min(1)
+  @Min(-1)
   questions?: number;
 
   @IsOptional()
@@ -52,6 +67,10 @@ class FeaturesDto {
   @IsOptional()
   @IsBoolean()
   whiteLabel?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  apiAccess?: boolean;
 
   @IsOptional()
   @IsString()

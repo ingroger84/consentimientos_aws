@@ -132,18 +132,20 @@ export class PlansService {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;
+    mrConsentTemplates: number;
+    consentTemplates: number;
     services: number;
     questions: number;
     storageMb: number;
   };
   features: {
-    watermark: boolean;
     customization: boolean;
     advancedReports: boolean;
-    apiAccess: boolean;
     prioritySupport: boolean;
     customDomain: boolean;
     whiteLabel: boolean;
+    apiAccess: boolean;
     backup: 'none' | 'weekly' | 'daily';
     supportResponseTime: string;
   };
@@ -152,12 +154,42 @@ export class PlansService {
 
 export const PLANS: Record<string, PlanConfig> = ${plansJson};
 
+/**
+ * Carga los planes desde el archivo JSON si existe, sino usa la configuración estática
+ */
+function loadPlansFromJson(): Record<string, PlanConfig> | null {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const jsonPath = path.join(__dirname, './plans.json');
+    
+    if (fs.existsSync(jsonPath)) {
+      const jsonContent = fs.readFileSync(jsonPath, 'utf-8');
+      const plans = JSON.parse(jsonContent);
+      console.log('[PlansConfig] Planes cargados desde plans.json');
+      return plans;
+    }
+  } catch (error) {
+    console.error('[PlansConfig] Error al cargar plans.json:', error.message);
+  }
+  
+  return null;
+}
+
 export function getPlanConfig(planId: string): PlanConfig | null {
-  return PLANS[planId] || null;
+  // Intentar cargar desde JSON primero
+  const dynamicPlans = loadPlansFromJson();
+  const plansSource = dynamicPlans || PLANS;
+  
+  return plansSource[planId] || null;
 }
 
 export function getAllPlans(): PlanConfig[] {
-  return Object.values(PLANS);
+  // Intentar cargar desde JSON primero
+  const dynamicPlans = loadPlansFromJson();
+  const plansSource = dynamicPlans || PLANS;
+  
+  return Object.values(plansSource);
 }
 
 export function calculatePrice(planId: string, billingCycle: 'monthly' | 'annual'): number {

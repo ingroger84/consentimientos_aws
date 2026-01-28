@@ -40,11 +40,16 @@ export class SettingsService {
     });
 
     const result = {
-      // Logos
+      // Logos CN (Consentimientos tradicionales)
       logoUrl: settingsMap['logoUrl'] || null,
       footerLogoUrl: settingsMap['footerLogoUrl'] || null,
       watermarkLogoUrl: settingsMap['watermarkLogoUrl'] || null,
       faviconUrl: settingsMap['faviconUrl'] || null,
+      
+      // Logos HC (Historias Clínicas)
+      hcLogoUrl: settingsMap['hcLogoUrl'] || null,
+      hcFooterLogoUrl: settingsMap['hcFooterLogoUrl'] || null,
+      hcWatermarkLogoUrl: settingsMap['hcWatermarkLogoUrl'] || null,
       
       // Colores principales
       primaryColor: settingsMap['primaryColor'] || '#3B82F6',
@@ -165,6 +170,50 @@ export class SettingsService {
     await this.updateSettings({ faviconUrl: faviconUrl }, tenantId);
     
     return { faviconUrl: faviconUrl };
+  }
+
+  // ==================== MÉTODOS PARA LOGOS HC ====================
+
+  async uploadHCLogo(file: Express.Multer.File, tenantId?: string) {
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `hc-logo-${tenantId || 'global'}-${Date.now()}.${ext}`;
+    
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
+    
+    // Actualizar configuración
+    await this.updateSettings({ hcLogoUrl: logoUrl }, tenantId);
+    
+    return { hcLogoUrl: logoUrl };
+  }
+
+  async uploadHCFooterLogo(file: Express.Multer.File, tenantId?: string) {
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `hc-footer-logo-${tenantId || 'global'}-${Date.now()}.${ext}`;
+    
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
+    
+    // Actualizar configuración
+    await this.updateSettings({ hcFooterLogoUrl: logoUrl }, tenantId);
+    
+    return { hcFooterLogoUrl: logoUrl };
+  }
+
+  async uploadHCWatermarkLogo(file: Express.Multer.File, tenantId?: string) {
+    // Generar nombre único para el archivo
+    const ext = file.originalname.split('.').pop();
+    const filename = `hc-watermark-${tenantId || 'global'}-${Date.now()}.${ext}`;
+    
+    // Subir a S3 o almacenamiento local
+    const logoUrl = await this.storageService.uploadFile(file, 'logo', filename);
+    
+    // Actualizar configuración
+    await this.updateSettings({ hcWatermarkLogoUrl: logoUrl }, tenantId);
+    
+    return { hcWatermarkLogoUrl: logoUrl };
   }
 
   /**

@@ -194,7 +194,7 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
       {/* Limits & Usage */}
       <div className="pt-4 border-t border-gray-200">
         <p className="text-xs font-medium text-gray-700 mb-3">Consumo de Recursos</p>
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {/* Usuarios */}
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -203,20 +203,20 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
                 <span className="text-xs text-gray-600">Usuarios</span>
               </div>
               <span className="text-xs font-semibold text-gray-900">
-                {tenant.users?.length || 0} / {tenant.maxUsers}
+                {tenant.users?.filter((u: any) => !u.deletedAt).length || 0} / {tenant.maxUsers}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  ((tenant.users?.length || 0) / tenant.maxUsers) * 100 >= 90
+                  ((tenant.users?.filter((u: any) => !u.deletedAt).length || 0) / tenant.maxUsers) * 100 >= 100
                     ? 'bg-red-500'
-                    : ((tenant.users?.length || 0) / tenant.maxUsers) * 100 >= 70
+                    : ((tenant.users?.filter((u: any) => !u.deletedAt).length || 0) / tenant.maxUsers) * 100 >= 80
                     ? 'bg-yellow-500'
                     : 'bg-green-500'
                 }`}
                 style={{
-                  width: `${Math.min(((tenant.users?.length || 0) / tenant.maxUsers) * 100, 100)}%`,
+                  width: `${Math.min(((tenant.users?.filter((u: any) => !u.deletedAt).length || 0) / tenant.maxUsers) * 100, 100)}%`,
                 }}
               />
             </div>
@@ -230,20 +230,20 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
                 <span className="text-xs text-gray-600">Sedes</span>
               </div>
               <span className="text-xs font-semibold text-gray-900">
-                {tenant.branches?.length || 0} / {tenant.maxBranches}
+                {tenant.branches?.filter((b: any) => !b.deletedAt).length || 0} / {tenant.maxBranches}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  ((tenant.branches?.length || 0) / tenant.maxBranches) * 100 >= 90
+                  ((tenant.branches?.filter((b: any) => !b.deletedAt).length || 0) / tenant.maxBranches) * 100 >= 100
                     ? 'bg-red-500'
-                    : ((tenant.branches?.length || 0) / tenant.maxBranches) * 100 >= 70
+                    : ((tenant.branches?.filter((b: any) => !b.deletedAt).length || 0) / tenant.maxBranches) * 100 >= 80
                     ? 'bg-yellow-500'
                     : 'bg-green-500'
                 }`}
                 style={{
-                  width: `${Math.min(((tenant.branches?.length || 0) / tenant.maxBranches) * 100, 100)}%`,
+                  width: `${Math.min(((tenant.branches?.filter((b: any) => !b.deletedAt).length || 0) / tenant.maxBranches) * 100, 100)}%`,
                 }}
               />
             </div>
@@ -257,9 +257,25 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
                 <span className="text-xs text-gray-600">Servicios</span>
               </div>
               <span className="text-xs font-semibold text-gray-900">
-                {tenant.services?.length || 0}
+                {tenant.services?.filter((s: any) => !s.deletedAt).length || 0} / {tenant.maxServices || '∞'}
               </span>
             </div>
+            {tenant.maxServices && (
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    ((tenant.services?.filter((s: any) => !s.deletedAt).length || 0) / tenant.maxServices) * 100 >= 100
+                      ? 'bg-red-500'
+                      : ((tenant.services?.filter((s: any) => !s.deletedAt).length || 0) / tenant.maxServices) * 100 >= 80
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'
+                  }`}
+                  style={{
+                    width: `${Math.min(((tenant.services?.filter((s: any) => !s.deletedAt).length || 0) / tenant.maxServices) * 100, 100)}%`,
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Consentimientos */}
@@ -270,22 +286,64 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
                 <span className="text-xs text-gray-600">Consentimientos</span>
               </div>
               <span className="text-xs font-semibold text-gray-900">
-                {tenant.consents?.length || 0} / {tenant.maxConsents}
+                {tenant.consents?.filter((c: any) => !c.deletedAt).length || 0} / {tenant.maxConsents}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
-                  ((tenant.consents?.length || 0) / tenant.maxConsents) * 100 >= 90
+                  ((tenant.consents?.filter((c: any) => !c.deletedAt).length || 0) / tenant.maxConsents) * 100 >= 100
                     ? 'bg-red-500'
-                    : ((tenant.consents?.length || 0) / tenant.maxConsents) * 100 >= 70
+                    : ((tenant.consents?.filter((c: any) => !c.deletedAt).length || 0) / tenant.maxConsents) * 100 >= 80
                     ? 'bg-yellow-500'
                     : 'bg-green-500'
                 }`}
                 style={{
-                  width: `${Math.min(((tenant.consents?.length || 0) / tenant.maxConsents) * 100, 100)}%`,
+                  width: `${Math.min(((tenant.consents?.filter((c: any) => !c.deletedAt).length || 0) / tenant.maxConsents) * 100, 100)}%`,
                 }}
               />
+            </div>
+          </div>
+
+          {/* Historias Clínicas */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-600">Historias Clínicas</span>
+              </div>
+              <span className="text-xs font-semibold text-gray-900">
+                {tenant.medicalRecords?.length || 0} / {tenant.maxMedicalRecords || '∞'}
+              </span>
+            </div>
+            {tenant.maxMedicalRecords && (
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    ((tenant.medicalRecords?.length || 0) / tenant.maxMedicalRecords) * 100 >= 100
+                      ? 'bg-red-500'
+                      : ((tenant.medicalRecords?.length || 0) / tenant.maxMedicalRecords) * 100 >= 80
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'
+                  }`}
+                  style={{
+                    width: `${Math.min(((tenant.medicalRecords?.length || 0) / tenant.maxMedicalRecords) * 100, 100)}%`,
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Consentimientos HC */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-600">Consentimientos HC</span>
+              </div>
+              <span className="text-xs font-semibold text-gray-900">
+                {tenant.medicalRecordConsentsCount || 0}
+              </span>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsHexColor, IsNumber, IsIn } from 'class-validator';
 
 export class UpdateSettingsDto {
-  // Logos
+  // Logos CN (Consentimientos tradicionales)
   @IsOptional()
   @IsString()
   logoUrl?: string;
@@ -17,6 +17,19 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   faviconUrl?: string;
+
+  // Logos HC (Historias Clínicas)
+  @IsOptional()
+  @IsString()
+  hcLogoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  hcFooterLogoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  hcWatermarkLogoUrl?: string;
 
   // Colores principales
   @IsOptional()

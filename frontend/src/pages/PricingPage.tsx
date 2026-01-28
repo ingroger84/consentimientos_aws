@@ -16,6 +16,9 @@ interface Plan {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;
+    mrConsentTemplates: number;
+    consentTemplates: number;
     services: number;
     questions: number;
     storageMb: number;
@@ -247,19 +250,45 @@ export default function PricingPage() {
                   <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Usuarios</span>
-                      <span className="font-semibold text-gray-900">{plan.limits.users}</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.users === -1 ? '∞' : plan.limits.users}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Sedes</span>
-                      <span className="font-semibold text-gray-900">{plan.limits.branches}</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.branches === -1 ? '∞' : plan.limits.branches}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Consentimientos/mes</span>
-                      <span className="font-semibold text-gray-900">{plan.limits.consents.toLocaleString()}</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.consents === -1 ? '∞' : plan.limits.consents.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Historias Clínicas/mes</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.medicalRecords === -1 ? '∞' : plan.limits.medicalRecords.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Plantillas CN</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.consentTemplates === -1 ? '∞' : plan.limits.consentTemplates}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Plantillas HC</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.mrConsentTemplates === -1 ? '∞' : plan.limits.mrConsentTemplates}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Servicios</span>
-                      <span className="font-semibold text-gray-900">{plan.limits.services}</span>
+                      <span className="font-semibold text-gray-900">
+                        {plan.limits.services === -1 ? '∞' : plan.limits.services}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-600">Almacenamiento</span>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico de Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #3B82F6;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3B82F6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success {
+            border-left-color: #10B981;
+            background: #f0fdf4;
+        }
+        .error {
+            border-left-color: #EF4444;
+            background: #fef2f2;
+        }
+        .warning {
+            border-left-color: #F59E0B;
+            background: #fffbeb;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status.ok {
+            background: #10B981;
+            color: white;
+        }
+        .status.fail {
+            background: #EF4444;
+            color: white;
+        }
+        .status.pending {
+            background: #F59E0B;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico de Login Personalizado</h1>
+        
+        <div class="info-box">
+            <strong>Propósito:</strong> Este diagnóstico verifica por qué no se muestra el login personalizado del tenant.
+        </div>
+
+        <h2>1. Información del Navegador</h2>
+        <div id="browser-info"></div>
+
+        <h2>2. Detección de Tenant</h2>
+        <div id="tenant-info"></div>
+
+        <h2>3. Conectividad con Backend</h2>
+        <div id="backend-info"></div>
+        <button onclick="testBackend()">🔄 Probar Conexión Backend</button>
+
+        <h2>4. Endpoint de Settings Públicos</h2>
+        <div id="settings-info"></div>
+        <button onclick="testPublicSettings()">🔄 Probar Settings Públicos</button>
+
+        <h2>5. Endpoint de Settings Autenticados</h2>
+        <div id="auth-settings-info"></div>
+        <button onclick="testAuthSettings()">🔄 Probar Settings Autenticados</button>
+
+        <h2>6. LocalStorage y SessionStorage</h2>
+        <div id="storage-info"></div>
+
+        <h2>7. Soluciones Recomendadas</h2>
+        <div id="solutions"></div>
+    </div>
+
+    <script>
+        // Función para obtener tenant slug
+        function getTenantSlug() {
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+                return null;
+            }
+            
+            if (parts.length === 2 && parts[1] === 'localhost') {
+                const subdomain = parts[0];
+                if (subdomain === 'admin') return null;
+                return subdomain;
+            }
+            
+            if (parts.length >= 3) {
+                const subdomain = parts[0];
+                if (subdomain === 'admin' || subdomain === 'www') return null;
+                return subdomain;
+            }
+            
+            return null;
+        }
+
+        // Función para obtener API base URL
+        function getApiBaseUrl() {
+            const currentHost = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            if (currentHost.includes('localhost') || currentHost === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            
+            const parts = currentHost.split('.');
+            if (parts.length >= 3 && parts[0] === 'admin') {
+                const baseDomain = parts.slice(1).join('.');
+                return `${protocol}//${baseDomain}`;
+            }
+            
+            return `${protocol}//${currentHost}`;
+        }
+
+        // 1. Información del navegador
+        function showBrowserInfo() {
+            const info = `
+                <div class="info-box">
+                    <strong>URL Actual:</strong> ${window.location.href}<br>
+                    <strong>Hostname:</strong> ${window.location.hostname}<br>
+                    <strong>Protocolo:</strong> ${window.location.protocol}<br>
+                    <strong>Puerto:</strong> ${window.location.port}<br>
+                    <strong>User Agent:</strong> ${navigator.userAgent}
+                </div>
+            `;
+            document.getElementById('browser-info').innerHTML = info;
+        }
+
+        // 2. Detección de tenant
+        function showTenantInfo() {
+            const tenantSlug = getTenantSlug();
+            const apiUrl = getApiBaseUrl();
+            
+            const info = `
+                <div class="info-box ${tenantSlug ? 'success' : 'warning'}">
+                    <strong>Tenant Detectado:</strong> ${tenantSlug || 'NULL (Super Admin)'}<br>
+                    <strong>API Base URL:</strong> ${apiUrl}<br>
+                    <strong>Header X-Tenant-Slug:</strong> ${tenantSlug || 'No se enviará'}
+                </div>
+            `;
+            document.getElementById('tenant-info').innerHTML = info;
+        }
+
+        // 3. Test backend
+        async function testBackend() {
+            const apiUrl = getApiBaseUrl();
+            const resultDiv = document.getElementById('backend-info');
+            resultDiv.innerHTML = '<div class="info-box"><span class="status pending">PROBANDO...</span> Conectando con backend...</div>';
+            
+            try {
+                const response = await fetch(`${apiUrl}/api/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="info-box success">
+                            <span class="status ok">✓ CONECTADO</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/health<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Respuesta:</strong><br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="info-box error">
+                            <span class="status fail">✗ ERROR</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/health<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Error:</strong> ${response.statusText}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="info-box error">
+                        <span class="status fail">✗ NO CONECTA</span><br>
+                        <strong>URL:</strong> ${apiUrl}/api/health<br>
+                        <strong>Error:</strong> ${error.message}<br>
+                        <strong>Posible causa:</strong> Backend no está corriendo en puerto 3000
+                    </div>
+                `;
+            }
+        }
+
+        // 4. Test public settings
+        async function testPublicSettings() {
+            const apiUrl = getApiBaseUrl();
+            const tenantSlug = getTenantSlug();
+            const resultDiv = document.getElementById('settings-info');
+            resultDiv.innerHTML = '<div class="info-box"><span class="status pending">PROBANDO...</span> Obteniendo settings públicos...</div>';
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (tenantSlug) {
+                    headers['X-Tenant-Slug'] = tenantSlug;
+                }
+                
+                const response = await fetch(`${apiUrl}/api/settings/public`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="info-box success">
+                            <span class="status ok">✓ ÉXITO</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/settings/public<br>
+                            <strong>Header X-Tenant-Slug:</strong> ${tenantSlug || 'No enviado'}<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Settings Recibidos:</strong><br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="info-box error">
+                            <span class="status fail">✗ ERROR</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/settings/public<br>
+                            <strong>Header X-Tenant-Slug:</strong> ${tenantSlug || 'No enviado'}<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Error:</strong><br>
+                            <pre>${errorText}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="info-box error">
+                        <span class="status fail">✗ NO CONECTA</span><br>
+                        <strong>URL:</strong> ${apiUrl}/api/settings/public<br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 5. Test auth settings
+        async function testAuthSettings() {
+            const apiUrl = getApiBaseUrl();
+            const tenantSlug = getTenantSlug();
+            const token = localStorage.getItem('token');
+            const resultDiv = document.getElementById('auth-settings-info');
+            
+            if (!token) {
+                resultDiv.innerHTML = `
+                    <div class="info-box warning">
+                        <span class="status pending">⚠ SIN TOKEN</span><br>
+                        No hay token en localStorage. Inicia sesión primero.
+                    </div>
+                `;
+                return;
+            }
+            
+            resultDiv.innerHTML = '<div class="info-box"><span class="status pending">PROBANDO...</span> Obteniendo settings autenticados...</div>';
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                };
+                
+                if (tenantSlug) {
+                    headers['X-Tenant-Slug'] = tenantSlug;
+                }
+                
+                const response = await fetch(`${apiUrl}/api/settings`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="info-box success">
+                            <span class="status ok">✓ ÉXITO</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/settings<br>
+                            <strong>Header X-Tenant-Slug:</strong> ${tenantSlug || 'No enviado'}<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Settings Recibidos:</strong><br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <div class="info-box error">
+                            <span class="status fail">✗ ERROR</span><br>
+                            <strong>URL:</strong> ${apiUrl}/api/settings<br>
+                            <strong>Header X-Tenant-Slug:</strong> ${tenantSlug || 'No enviado'}<br>
+                            <strong>Status:</strong> ${response.status}<br>
+                            <strong>Error:</strong><br>
+                            <pre>${errorText}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="info-box error">
+                        <span class="status fail">✗ NO CONECTA</span><br>
+                        <strong>URL:</strong> ${apiUrl}/api/settings<br>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // 6. Storage info
+        function showStorageInfo() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            let sessionKeys = [];
+            for (let i = 0; i < sessionStorage.length; i++) {
+                sessionKeys.push(sessionStorage.key(i));
+            }
+            
+            const info = `
+                <div class="info-box">
+                    <strong>LocalStorage:</strong><br>
+                    - Token: ${token ? '✓ Presente (' + token.substring(0, 20) + '...)' : '✗ No presente'}<br>
+                    - User: ${user ? '✓ Presente' : '✗ No presente'}<br>
+                    <br>
+                    <strong>SessionStorage:</strong><br>
+                    ${sessionKeys.length > 0 ? sessionKeys.map(k => `- ${k}: ${sessionStorage.getItem(k)?.substring(0, 50)}...`).join('<br>') : '- Vacío'}
+                </div>
+            `;
+            document.getElementById('storage-info').innerHTML = info;
+        }
+
+        // 7. Soluciones
+        function showSolutions() {
+            const tenantSlug = getTenantSlug();
+            
+            let solutions = '<div class="info-box warning">';
+            solutions += '<strong>Pasos para solucionar:</strong><br><br>';
+            
+            solutions += '1. <strong>Verificar que el backend esté corriendo:</strong><br>';
+            solutions += '   <code>cd backend && npm run start:dev</code><br><br>';
+            
+            solutions += '2. <strong>Verificar que el backend responda en puerto 3000:</strong><br>';
+            solutions += '   Hacer clic en "Probar Conexión Backend" arriba<br><br>';
+            
+            solutions += '3. <strong>Verificar que el endpoint de settings públicos funcione:</strong><br>';
+            solutions += '   Hacer clic en "Probar Settings Públicos" arriba<br><br>';
+            
+            if (tenantSlug) {
+                solutions += `4. <strong>Verificar que el tenant "${tenantSlug}" exista en la base de datos:</strong><br>`;
+                solutions += '   <code>SELECT * FROM tenants WHERE slug = \'' + tenantSlug + '\';</code><br><br>';
+            }
+            
+            solutions += '5. <strong>Limpiar caché del navegador:</strong><br>';
+            solutions += '   Presionar Ctrl + Shift + R (o Cmd + Shift + R en Mac)<br><br>';
+            
+            solutions += '6. <strong>Verificar archivo hosts (si usas subdominios locales):</strong><br>';
+            solutions += '   Windows: <code>C:\\Windows\\System32\\drivers\\etc\\hosts</code><br>';
+            solutions += '   Mac/Linux: <code>/etc/hosts</code><br>';
+            solutions += '   Debe contener: <code>127.0.0.1 ' + (tenantSlug || 'admin') + '.localhost</code><br>';
+            
+            solutions += '</div>';
+            
+            document.getElementById('solutions').innerHTML = solutions;
+        }
+
+        // Ejecutar al cargar
+        window.onload = function() {
+            showBrowserInfo();
+            showTenantInfo();
+            showStorageInfo();
+            showSolutions();
+            
+            // Auto-test backend
+            testBackend();
+        };
+    </script>
+</body>
+</html>

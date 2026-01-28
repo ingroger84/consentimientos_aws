@@ -1,10 +1,13 @@
 /**
- * Obtiene la URL base del API manteniendo el subdominio
+ * Obtiene la URL base del API
+ * IMPORTANTE: En desarrollo local, SIEMPRE usar localhost:3000 (sin subdominio)
+ * El tenant se identifica mediante el header X-Tenant-Slug
+ * 
  * Ejemplos:
- * - cliente-demo.localhost:5173 -> http://cliente-demo.localhost:3000
- * - admin.localhost:5173 -> http://admin.localhost:3000
+ * - cliente-demo.localhost:5173 -> http://localhost:3000 (+ header X-Tenant-Slug: cliente-demo)
+ * - admin.localhost:5173 -> http://localhost:3000 (+ header X-Tenant-Slug: null)
  * - localhost:5173 -> http://localhost:3000
- * - admin.archivoenlinea.com -> https://admin.archivoenlinea.com
+ * - admin.archivoenlinea.com -> https://archivoenlinea.com (producción)
  */
 export function getApiBaseUrl(): string {
   // Si hay variable de entorno, usarla (sin /api)
@@ -20,22 +23,26 @@ export function getApiBaseUrl(): string {
   console.log('[API-URL] Hostname detectado:', currentHost);
   console.log('[API-URL] Protocolo detectado:', protocol);
   
-  // Si es EXACTAMENTE localhost o 127.0.0.1 (sin subdominio), usar localhost:3000
-  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-    console.log('[API-URL] Es localhost puro, usando: http://localhost:3000');
+  // DESARROLLO LOCAL: SIEMPRE usar localhost:3000
+  // El tenant se identifica mediante el header X-Tenant-Slug
+  if (currentHost.includes('localhost') || currentHost === '127.0.0.1') {
+    console.log('[API-URL] Desarrollo local detectado, usando: http://localhost:3000');
     return 'http://localhost:3000';
   }
   
-  // Si es un dominio de producción (no localhost), usar el mismo protocolo sin puerto
-  if (!currentHost.includes('localhost') && !currentHost.includes('127.0.0.1')) {
-    const apiUrl = `${protocol}//${currentHost}`;
-    console.log('[API-URL] Producción detectada, usando:', apiUrl);
+  // PRODUCCIÓN: Usar el dominio actual
+  // Si es admin.dominio.com, usar solo dominio.com (sin admin)
+  const parts = currentHost.split('.');
+  if (parts.length >= 3 && parts[0] === 'admin') {
+    const baseDomain = parts.slice(1).join('.');
+    const apiUrl = `${protocol}//${baseDomain}`;
+    console.log('[API-URL] Admin en producción, usando dominio base:', apiUrl);
     return apiUrl;
   }
   
-  // Para desarrollo con subdominios locales
-  const apiUrl = `http://${currentHost}:3000`;
-  console.log('[API-URL] Desarrollo con subdominio, usando:', apiUrl);
+  // Para otros subdominios o dominio base en producción, usar tal cual
+  const apiUrl = `${protocol}//${currentHost}`;
+  console.log('[API-URL] Producción detectada, usando:', apiUrl);
   return apiUrl;
 }
 

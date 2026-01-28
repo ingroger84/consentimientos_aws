@@ -50,6 +50,21 @@ export class AuthController {
     };
   }
 
+  @Post('refresh-token')
+  @UseGuards(AuthGuard('jwt'))
+  @AllowAnyTenant()
+  @SkipSessionCheck()
+  async refreshToken(@Request() req: any, @TenantSlug() tenantSlug: string | null) {
+    // Obtener el usuario actualizado con sus permisos actuales
+    const user = await this.authService.getUserById(req.user.sub);
+    
+    // Generar un nuevo token con los permisos actualizados
+    const userAgent = req.headers['user-agent'];
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    
+    return this.authService.login(user, tenantSlug, userAgent, ipAddress);
+  }
+
   @Post('forgot-password')
   @AllowAnyTenant()
   @SkipSessionCheck()

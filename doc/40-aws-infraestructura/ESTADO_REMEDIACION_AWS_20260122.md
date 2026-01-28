@@ -16,7 +16,7 @@
 
 ### Credenciales en Uso (servidor de producción):
 - **Usuario IAM:** `datagree-s3-app-user`
-- **Access Key:** `AKIA42IJAAWUHIHRZM4L`
+- **Access Key:** Ver CREDENCIALES.md
 - **Estado:** ✅ Seguras y funcionando correctamente
 
 ---
@@ -86,12 +86,12 @@ Tienes 3 usuarios IAM en tu cuenta AWS:
 - **Acción:** 🔴 DESACTIVAR INMEDIATAMENTE
 
 ### 2. `datagree-s3-app-user` (EN USO - SEGURO)
-- **Access Key:** `AKIA42IJAAWUHIHRZM4L`
+- **Access Key:** Ver CREDENCIALES.md
 - **Estado:** ✅ Seguro y en uso en producción
 - **Acción:** ✅ Mantener activo
 
 ### 3. `datagree-lightsail-admin`
-- **Access Key:** `AKIA42IJAAWUIDUW4WFL`
+- **Access Key:** Ver CREDENCIALES.md
 - **Estado:** ✅ Seguro (para gestión de Lightsail)
 - **Acción:** ✅ Mantener activo
 

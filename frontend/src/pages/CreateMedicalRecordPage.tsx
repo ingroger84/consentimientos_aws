@@ -3,20 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft } from 'lucide-react';
 import { medicalRecordsService } from '../services/medical-records.service';
-import { clientsService } from '../services/clients.service';
-import { branchesService } from '../services/branches.service';
+import { branchesService, Branch } from '../services/branches.service';
 import { CreateMedicalRecordDto } from '../types/medical-record';
-import { Client } from '../types';
-import { Branch } from '../types';
+import { Client, ClientDocumentType } from '../types/client';
+import ClientSearchForm from '../components/consents/ClientSearchForm';
 import { useToast } from '../hooks/useToast';
 
 export default function CreateMedicalRecordPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientData, setClientData] = useState({
+    clientName: '',
+    clientId: '',
+    clientEmail: '',
+    clientPhone: '',
+    documentType: ClientDocumentType.CC,
+  });
 
   const {
     register,
@@ -31,11 +37,7 @@ export default function CreateMedicalRecordPage() {
   const loadData = async () => {
     try {
       setLoadingData(true);
-      const [clientsData, branchesData] = await Promise.all([
-        clientsService.getAll(),
-        branchesService.getAll(),
-      ]);
-      setClients(clientsData);
+      const branchesData = await branchesService.getAll();
       setBranches(branchesData);
     } catch (error: any) {
       toast.error('Error al cargar datos', error.response?.data?.message);
@@ -44,10 +46,52 @@ export default function CreateMedicalRecordPage() {
     }
   };
 
+  const handleClientSelected = (client: Client | null) => {
+    setSelectedClient(client);
+  };
+
+  const handleClientDataChange = (data: {
+    clientName: string;
+    clientId: string;
+    clientEmail: string;
+    clientPhone: string;
+    documentType: ClientDocumentType;
+  }) => {
+    setClientData(data);
+  };
+
   const onSubmit = async (data: CreateMedicalRecordDto) => {
+    // Validar que se haya seleccionado o ingresado un cliente
+    if (!selectedClient && !clientData.clientName) {
+      toast.error('Error', 'Debe seleccionar o crear un cliente');
+      return;
+    }
+
     try {
       setLoading(true);
-      const record = await medicalRecordsService.create(data);
+      
+      // Preparar datos para enviar
+      const recordData: any = {
+        admissionDate: data.admissionDate,
+        admissionType: data.admissionType,
+        branchId: data.branchId || undefined,
+      };
+
+      // Si hay un cliente seleccionado, usar su ID
+      if (selectedClient) {
+        recordData.clientId = selectedClient.id;
+      } else {
+        // Si no, enviar datos para crear nuevo cliente
+        recordData.clientData = {
+          fullName: clientData.clientName,
+          documentType: clientData.documentType,
+          documentNumber: clientData.clientId,
+          email: clientData.clientEmail || undefined,
+          phone: clientData.clientPhone || undefined,
+        };
+      }
+
+      const record = await medicalRecordsService.create(recordData);
       toast.success('Historia clínica creada', 'La historia clínica fue creada exitosamente');
       navigate(`/medical-records/${record.id}`);
     } catch (error: any) {
@@ -86,26 +130,11 @@ export default function CreateMedicalRecordPage() {
       {/* Form */}
       <div className="bg-white rounded-lg shadow p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Cliente */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Paciente *
-            </label>
-            <select
-              {...register('clientId', { required: 'El paciente es requerido' })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Seleccionar paciente...</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name} - {client.documentType} {client.documentNumber}
-                </option>
-              ))}
-            </select>
-            {errors.clientId && (
-              <p className="mt-1 text-sm text-red-600">{errors.clientId.message}</p>
-            )}
-          </div>
+          {/* Búsqueda/Creación de Cliente */}
+          <ClientSearchForm
+            onClientSelected={handleClientSelected}
+            onClientDataChange={handleClientDataChange}
+          />
 
           {/* Sede */}
           <div>

@@ -186,6 +186,71 @@ export class SettingsController {
     return this.settingsService.uploadFavicon(file, tenantId);
   }
 
+  // ==================== ENDPOINTS PARA LOGOS HC ====================
+
+  @Post('hc-logo')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+          return cb(new Error('Solo se permiten imágenes'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  uploadHCLogo(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.uploadHCLogo(file, tenantId);
+  }
+
+  @Post('hc-footer-logo')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+          return cb(new Error('Solo se permiten imágenes'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  uploadHCFooterLogo(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.uploadHCFooterLogo(file, tenantId);
+  }
+
+  @Post('hc-watermark-logo')
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.EDIT_SETTINGS)
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+          return cb(new Error('Solo se permiten imágenes'), false);
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  uploadHCWatermarkLogo(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: User) {
+    const tenantId = user.tenant?.id;
+    return this.settingsService.uploadHCWatermarkLogo(file, tenantId);
+  }
+
   @Get('email-config')
   @UseGuards(JwtAuthGuard, PermissionsGuard)
   @RequirePermissions(PERMISSIONS.CONFIGURE_EMAIL)

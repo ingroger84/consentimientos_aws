@@ -3,12 +3,12 @@ import {
   Users, 
   Building2, 
   FileText, 
-  TrendingUp, 
   AlertTriangle,
   CheckCircle,
   Activity,
   BarChart3,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  FileHeart
 } from 'lucide-react';
 import {
   BarChart,
@@ -30,7 +30,6 @@ import { GlobalStats } from '@/types/tenant';
 import TenantStatsCard from '@/components/dashboard/TenantStatsCard';
 import TenantAlertsSection from '@/components/dashboard/TenantAlertsSection';
 import TenantTableSection from '@/components/dashboard/TenantTableSection';
-import TopPerformersSection from '@/components/dashboard/TopPerformersSection';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
@@ -62,6 +61,15 @@ export default function SuperAdminDashboard() {
         totalBranches: 0,
         totalServices: 0,
         totalConsents: 0,
+        totalMedicalRecords: 0,
+        activeMedicalRecords: 0,
+        closedMedicalRecords: 0,
+        totalClients: 0,
+        newClientsThisMonth: 0,
+        totalConsentTemplates: 0,
+        activeConsentTemplates: 0,
+        totalMRConsentTemplates: 0,
+        activeMRConsentTemplates: 0,
         tenantsNearLimit: 0,
         tenantsAtLimit: 0,
         planDistribution: {
@@ -73,6 +81,8 @@ export default function SuperAdminDashboard() {
         tenantsByPlan: [],
         growthData: [],
         topTenants: [],
+        topTenantsByMedicalRecords: [],
+        topTenantsByClients: [],
       });
     } finally {
       setLoading(false);
@@ -110,7 +120,7 @@ export default function SuperAdminDashboard() {
       subtitle: `${stats.activeTenants} activos`,
       icon: Building2,
       color: 'bg-blue-500',
-      trend: '+12%',
+      trend: `${stats.activeTenants} / ${stats.totalTenants}`,
     },
     {
       title: 'Total Usuarios',
@@ -118,22 +128,30 @@ export default function SuperAdminDashboard() {
       subtitle: 'En todos los tenants',
       icon: Users,
       color: 'bg-green-500',
-      trend: '+8%',
+      trend: `${Math.round(stats.totalUsers / (stats.totalTenants || 1))} promedio`,
     },
     {
-      title: 'Total Consentimientos',
+      title: 'Consentimientos CN',
       value: stats.totalConsents,
       subtitle: 'Generados',
       icon: FileText,
       color: 'bg-purple-500',
-      trend: '+15%',
+      trend: `${Math.round(stats.totalConsents / (stats.totalTenants || 1))} promedio`,
+    },
+    {
+      title: 'Historias Clínicas',
+      value: stats.totalMedicalRecords || 0,
+      subtitle: `${stats.activeMedicalRecords || 0} activas`,
+      icon: FileHeart,
+      color: 'bg-indigo-500',
+      trend: `${stats.closedMedicalRecords || 0} cerradas`,
     },
     {
       title: 'Tenants con Alertas',
       value: stats.tenantsNearLimit + stats.tenantsAtLimit,
       subtitle: `${stats.tenantsAtLimit} en límite`,
       icon: AlertTriangle,
-      color: 'bg-orange-500',
+      color: 'bg-red-500',
       trend: stats.tenantsAtLimit > 0 ? 'Atención' : 'OK',
     },
   ];
@@ -145,7 +163,7 @@ export default function SuperAdminDashboard() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard Super Admin</h1>
           <p className="text-gray-600 mt-2">
-            Vista global del sistema multi-tenant
+            Vista global del sistema multi-tenant con métricas completas
           </p>
         </div>
         
@@ -204,7 +222,7 @@ export default function SuperAdminDashboard() {
             suspendedTenants={stats.suspendedTenants}
           />
 
-          {/* Charts Row */}
+          {/* Charts Row 1: Distribución y Crecimiento */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tenants by Plan */}
             <div className="card">
@@ -263,8 +281,115 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
 
-          {/* Top Performers */}
-          <TopPerformersSection topTenants={stats.topTenants} />
+          {/* Charts Row 2: Historias Clínicas y Clientes */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Medical Records Growth */}
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Crecimiento de Historias Clínicas
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={stats.growthData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="medicalRecords"
+                    stroke="#6366F1"
+                    strokeWidth={2}
+                    name="Historias Clínicas"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Clients Growth */}
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Crecimiento de Clientes
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={stats.growthData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="clients"
+                    stroke="#EC4899"
+                    strokeWidth={2}
+                    name="Clientes"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Performers Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Top by Consents */}
+            <div className="card">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Top 5 por Consentimientos
+              </h3>
+              <div className="space-y-3">
+                {stats.topTenants && stats.topTenants.length > 0 ? (
+                  stats.topTenants.slice(0, 5).map((tenant, index) => (
+                    <div key={tenant.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{tenant.name}</p>
+                          <p className="text-xs text-gray-500">{tenant.plan}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">{tenant.consentsCount}</p>
+                        <p className="text-xs text-gray-500">consentimientos</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-sm text-center py-4">No hay datos disponibles</p>
+                )}
+              </div>
+            </div>
+
+            {/* Top by Medical Records */}
+            {stats.topTenantsByMedicalRecords && stats.topTenantsByMedicalRecords.length > 0 && (
+              <div className="card">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Top 5 por Historias Clínicas
+                </h3>
+                <div className="space-y-3">
+                  {stats.topTenantsByMedicalRecords.slice(0, 5).map((tenant, index) => (
+                    <div key={tenant.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-500 text-white flex items-center justify-center font-bold">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{tenant.name}</p>
+                          <p className="text-xs text-gray-500">{tenant.branchesCount} sedes</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-900">{tenant.medicalRecordsCount}</p>
+                        <p className="text-xs text-gray-500">historias</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </>
       )}
 
@@ -294,11 +419,13 @@ export default function SuperAdminDashboard() {
             <div className="card bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-blue-100 text-sm">Crecimiento Mensual</p>
-                  <p className="text-3xl font-bold mt-2">+12%</p>
-                  <p className="text-blue-100 text-xs mt-1">Promedio últimos 6 meses</p>
+                  <p className="text-blue-100 text-sm">Tenants Activos</p>
+                  <p className="text-3xl font-bold mt-2">{stats.activeTenants}</p>
+                  <p className="text-blue-100 text-xs mt-1">
+                    {Math.round((stats.activeTenants / stats.totalTenants) * 100)}% del total
+                  </p>
                 </div>
-                <TrendingUp className="w-12 h-12 opacity-50" />
+                <Building2 className="w-12 h-12 opacity-50" />
               </div>
             </div>
 
@@ -306,7 +433,9 @@ export default function SuperAdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100 text-sm">Tasa de Retención</p>
-                  <p className="text-3xl font-bold mt-2">94%</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {Math.round((stats.activeTenants / stats.totalTenants) * 100)}%
+                  </p>
                   <p className="text-green-100 text-xs mt-1">Tenants activos</p>
                 </div>
                 <CheckCircle className="w-12 h-12 opacity-50" />
@@ -316,13 +445,35 @@ export default function SuperAdminDashboard() {
             <div className="card bg-gradient-to-br from-purple-500 to-purple-600 text-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-purple-100 text-sm">Adopción Promedio</p>
-                  <p className="text-3xl font-bold mt-2">87%</p>
-                  <p className="text-purple-100 text-xs mt-1">Uso de recursos</p>
+                  <p className="text-purple-100 text-sm">Promedio Consents/Tenant</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {Math.round(stats.totalConsents / (stats.totalTenants || 1))}
+                  </p>
+                  <p className="text-purple-100 text-xs mt-1">Consentimientos</p>
                 </div>
                 <Activity className="w-12 h-12 opacity-50" />
               </div>
             </div>
+          </div>
+
+          {/* Comparative Growth */}
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Comparativa de Crecimiento
+            </h3>
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={stats.growthData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="tenants" stroke="#3B82F6" strokeWidth={2} name="Tenants" />
+                <Line type="monotone" dataKey="consents" stroke="#10B981" strokeWidth={2} name="Consentimientos" />
+                <Line type="monotone" dataKey="medicalRecords" stroke="#6366F1" strokeWidth={2} name="HC" />
+                <Line type="monotone" dataKey="clients" stroke="#EC4899" strokeWidth={2} name="Clientes" />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}
@@ -366,8 +517,10 @@ export default function SuperAdminDashboard() {
                 <Pie
                   data={[
                     { name: 'Activos', value: stats.activeTenants },
+                    { name: 'Trial', value: stats.trialTenants },
                     { name: 'Suspendidos', value: stats.suspendedTenants },
-                  ]}
+                    { name: 'Expirados', value: stats.expiredTenants },
+                  ].filter(item => item.value > 0)}
                   cx="50%"
                   cy="50%"
                   labelLine={true}
@@ -377,7 +530,9 @@ export default function SuperAdminDashboard() {
                   dataKey="value"
                 >
                   <Cell fill="#10B981" />
+                  <Cell fill="#F59E0B" />
                   <Cell fill="#EF4444" />
+                  <Cell fill="#6B7280" />
                 </Pie>
                 <Tooltip />
                 <Legend />
@@ -385,10 +540,10 @@ export default function SuperAdminDashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Resource Usage */}
+          {/* Resource Usage by Top Tenants */}
           <div className="card lg:col-span-2">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Uso de Recursos por Tenant
+              Uso de Recursos por Top 10 Tenants
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={stats.topTenants.slice(0, 10)}>
@@ -401,6 +556,28 @@ export default function SuperAdminDashboard() {
                 <Bar dataKey="consentsCount" fill="#10B981" name="Consentimientos" />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Medical Records Distribution */}
+          <div className="card lg:col-span-2">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Distribución de Historias Clínicas por Top 10 Tenants
+            </h3>
+            {stats.topTenantsByMedicalRecords && stats.topTenantsByMedicalRecords.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={stats.topTenantsByMedicalRecords.slice(0, 10)}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="medicalRecordsCount" fill="#6366F1" name="Historias Clínicas" />
+                  <Bar dataKey="branchesCount" fill="#EC4899" name="Sedes" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-gray-500 text-center py-8">No hay datos disponibles</p>
+            )}
           </div>
         </div>
       )}

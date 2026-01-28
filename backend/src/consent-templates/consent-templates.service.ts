@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConsentTemplate, TemplateType } from './entities/consent-template.entity';
 import { CreateConsentTemplateDto } from './dto/create-consent-template.dto';
 import { UpdateConsentTemplateDto } from './dto/update-consent-template.dto';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { TenantsService } from '../tenants/tenants.service';
+import { getPlanConfig } from '../tenants/plans.config';
 
 @Injectable()
 export class ConsentTemplatesService {
@@ -13,6 +15,8 @@ export class ConsentTemplatesService {
     private templatesRepository: Repository<ConsentTemplate>,
     @InjectRepository(Tenant)
     private tenantsRepository: Repository<Tenant>,
+    @Inject(forwardRef(() => TenantsService))
+    private tenantsService: TenantsService,
   ) {}
 
   /**
@@ -39,6 +43,11 @@ export class ConsentTemplatesService {
     tenantSlug?: string,
   ): Promise<ConsentTemplate> {
     const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+
+    // Validar límite de plantillas CN si es un tenant
+    if (tenantId) {
+      await this.checkTemplatesLimit(tenantId);
+    }
 
     // Si se marca como default, desactivar otros defaults del mismo tipo
     if (createDto.isDefault) {
@@ -358,6 +367,67 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
     return {
       message: `Se crearon ${createdTemplates.length} plantillas predeterminadas exitosamente`,
       count: createdTemplates.length,
+    };
+  }
+
+  /**
+   * Valida que el tenant no haya excedido el límite de plantillas CN de su plan
+   */
+  private async checkTemplatesLimit(tenantId: string): Promise<void> {
+    const tenant = await this.tenantsService.findOne(tenantId);
+    const plan = getPlanConfig(tenant.plan);
+    
+    if (!plan) {
+      throw new BadRequestException('Plan no encontrado');
+    }
+
+    // Si el límite es -1, es ilimitado
+    if (plan.limits.consentTemplates === -1) {
+      return;
+    }
+    
+    // Contar plantillas CN del tenant
+    const count = await this.templatesRepository.count({
+      where: { tenantId }
+    });
+    
+    if (count >= plan.limits.consentTemplates) {
+      throw new BadRequestException(
+        `Has alcanzado el límite de ${plan.limits.consentTemplates} plantillas de consentimientos de tu plan ${plan.name}. Actualiza tu plan para crear más.`
+      );
+    }
+  }
+
+  /**
+   * Obtener estadísticas de plantillas de consentimientos convencionales
+   */
+  async getStatistics(tenantId: string) {
+    // Total de plantillas CN
+    const total = await this.templatesRepository.count({
+      where: { tenantId },
+    });
+
+    // Plantillas activas
+    const active = await this.templatesRepository.count({
+      where: { tenantId, isActive: true },
+    });
+
+    // Plantillas por categoría
+    const byCategory = await this.templatesRepository
+      .createQueryBuilder('template')
+      .select('template.category', 'category')
+      .addSelect('COUNT(*)', 'count')
+      .where('template.tenantId = :tenantId', { tenantId })
+      .groupBy('template.category')
+      .getRawMany();
+
+    return {
+      total,
+      active,
+      byCategory: byCategory.map(item => ({
+        category: item.category || 'Sin categoría',
+        count: parseInt(item.count),
+      })),
     };
   }
 }

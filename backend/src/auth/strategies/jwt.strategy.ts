@@ -22,6 +22,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user || !user.isActive) {
       throw new UnauthorizedException();
     }
-    return user;
+    
+    // Retornar el usuario completo con el rol cargado (que incluye permissions)
+    // NO sobrescribir user.role con payload.role porque perdemos los permisos
+    return {
+      ...user,
+      sub: payload.sub,
+      tenantId: payload.tenantId,
+      tenantSlug: payload.tenantSlug,
+      // role: payload.role, // ❌ NO hacer esto, sobrescribe el objeto role con un string
+    };
   }
 }

@@ -34,7 +34,7 @@ Impacto:      🟢 NINGUNO (servidor no las usa)
 ### Credenciales en Producción (Seguras):
 ```
 Usuario IAM:  datagree-s3-app-user
-Access Key:   AKIA42IJAAWUHIHRZM4L
+Access Key:   Ver CREDENCIALES.md
 Estado:       ✅ Seguras y funcionando
 Ubicación:    /home/ubuntu/consentimientos_aws/backend/.env
 Impacto:      ✅ Sistema funcionando correctamente

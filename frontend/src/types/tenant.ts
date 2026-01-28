@@ -50,6 +50,9 @@ export interface Tenant {
   maxBranches: number;
   maxServices?: number;
   maxQuestions?: number;
+  maxMedicalRecords?: number;
+  maxMRConsentTemplates?: number;
+  maxConsentTemplates?: number;
   storageLimitMb?: number;
   features?: PlanFeatures;
   trialEndsAt: string | null;
@@ -64,6 +67,9 @@ export interface Tenant {
   branches?: any[];
   services?: any[];
   consents?: any[];
+  clients?: any[];
+  medicalRecords?: any[];
+  medicalRecordConsentsCount?: number; // Conteo de consentimientos HC
 }
 
 export interface TenantStats {
@@ -95,6 +101,15 @@ export interface GlobalStats {
   totalBranches: number;
   totalServices: number;
   totalConsents: number;
+  totalMedicalRecords: number;
+  activeMedicalRecords: number;
+  closedMedicalRecords: number;
+  totalClients: number;
+  newClientsThisMonth: number;
+  totalConsentTemplates: number;
+  activeConsentTemplates: number;
+  totalMRConsentTemplates: number;
+  activeMRConsentTemplates: number;
   tenantsNearLimit: number;
   tenantsAtLimit: number;
   planDistribution: {
@@ -103,7 +118,14 @@ export interface GlobalStats {
     professional: number;
     enterprise: number;
   };
-  growthData: Array<{ month: string; tenants: number; users: number; consents: number }>;
+  growthData: Array<{ 
+    month: string; 
+    tenants: number; 
+    users: number; 
+    consents: number;
+    medicalRecords: number;
+    clients: number;
+  }>;
   tenantsByPlan: Array<{ plan: string; count: number }>;
   topTenants: Array<{
     id: string;
@@ -112,6 +134,33 @@ export interface GlobalStats {
     consentsCount: number;
     usersCount: number;
     lastActivity: string;
+  }>;
+  topTenantsByMedicalRecords: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    medicalRecordsCount: number;
+    branchesCount: number;
+  }>;
+  topTenantsByClients: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    clientsCount: number;
+  }>;
+  // Deprecated - mantener por compatibilidad
+  medicalRecordsByTenant?: Array<{
+    tenantId: string;
+    tenantName: string;
+    tenantSlug: string;
+    totalRecords: number;
+    activeRecords: number;
+    closedRecords: number;
+    recordsByBranch: Array<{
+      branchId: string;
+      branchName: string;
+      recordCount: number;
+    }>;
   }>;
 }
 
@@ -139,6 +188,9 @@ export interface CreateTenantDto {
   maxBranches?: number;
   maxServices?: number;
   maxQuestions?: number;
+  maxMedicalRecords?: number;
+  maxMRConsentTemplates?: number;
+  maxConsentTemplates?: number;
   storageLimitMb?: number;
   features?: PlanFeatures;
   trialEndsAt?: string;

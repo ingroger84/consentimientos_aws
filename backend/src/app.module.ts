@@ -24,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ClientsModule } from './clients/clients.module';
 import { ConsentTemplatesModule } from './consent-templates/consent-templates.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
+import { MRConsentTemplatesModule } from './medical-record-consent-templates/mr-consent-templates.module';
 import { CommonModule } from './common/common.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
@@ -48,6 +49,8 @@ import { PhysicalExam } from './medical-records/entities/physical-exam.entity';
 import { Diagnosis } from './medical-records/entities/diagnosis.entity';
 import { Evolution } from './medical-records/entities/evolution.entity';
 import { MedicalRecordAudit } from './medical-records/entities/medical-record-audit.entity';
+import { MedicalRecordConsent } from './medical-records/entities/medical-record-consent.entity';
+import { MRConsentTemplate } from './medical-record-consent-templates/entities/mr-consent-template.entity';
 import { UserSession } from './auth/entities/user-session.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
@@ -96,6 +99,8 @@ import { SessionGuard } from './auth/guards/session.guard';
           Diagnosis,
           Evolution,
           MedicalRecordAudit,
+          MedicalRecordConsent,
+          MRConsentTemplate,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
@@ -138,6 +143,7 @@ import { SessionGuard } from './auth/guards/session.guard';
     ClientsModule,
     ConsentTemplatesModule,
     MedicalRecordsModule,
+    MRConsentTemplatesModule,
 
     // Serve static files
     ServeStaticModule.forRoot({
@@ -151,11 +157,12 @@ import { SessionGuard } from './auth/guards/session.guard';
       provide: APP_GUARD,
       useClass: TenantGuard,
     },
+    // TEMPORALMENTE DESACTIVADO - Para resolver problema de sesión única
     // Registrar SessionGuard globalmente (después del JwtAuthGuard)
-    {
-      provide: APP_GUARD,
-      useClass: SessionGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: SessionGuard,
+    // },
   ],
 })
 export class AppModule implements NestModule {

@@ -99,6 +99,24 @@ export class CreateTenantDto {
 
   @IsInt()
   @Min(1)
+  @Max(10000)
+  @IsOptional()
+  maxMedicalRecords?: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  @IsOptional()
+  maxMRConsentTemplates?: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  @IsOptional()
+  maxConsentTemplates?: number;
+
+  @IsInt()
+  @Min(1)
   @Max(999999)
   @IsOptional()
   storageLimitMb?: number;
