@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 20.0.1
+## Versión Actual: 20.0.3
 **Fecha:** 2026-01-28
 **Tipo de Cambio:** PATCH
 
@@ -18,13 +18,11 @@
 
 ## Historial de Versiones
 
-### 20.0.1 - 2026-01-28 [PATCH]
-- Mejoras y correcciones generales
+### 20.0.3 - 2026-01-28 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
-### 20.0.0 - 2026-01-28 [MAJOR]
-- Backend: 27 archivo(s) modificado(s)
-- Frontend: 13 archivo(s) modificado(s)
-- Documentación: 33 archivo(s) modificado(s)
+### 20.0.2 - 2026-01-28 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
