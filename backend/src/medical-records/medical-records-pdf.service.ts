@@ -107,7 +107,7 @@ export class MedicalRecordsPdfService {
     // Generar páginas para cada plantilla
     for (let i = 0; i < templates.length; i++) {
       const template = templates[i];
-      const page = pdfDoc.addPage([612, 792]); // Letter size
+      let page = pdfDoc.addPage([612, 792]); // Letter size - usar let en lugar de const
       const { width, height } = page.getSize();
       const margin = 50;
 
@@ -181,7 +181,7 @@ export class MedicalRecordsPdfService {
         // Agregar espacio adicional antes de la firma para evitar sobreposición
         yPosition -= 40;
         
-        yPosition = await this.addSignatureSection(
+        const signatureResult = await this.addSignatureSection(
           page,
           pdfDoc,
           options,
@@ -191,17 +191,32 @@ export class MedicalRecordsPdfService {
           width,
           yPosition,
         );
+        
+        yPosition = signatureResult.yPosition;
+        page = signatureResult.page; // Puede ser una nueva página
+        
+        // Footer dinámico debajo de la firma
+        this.addFooter(
+          page,
+          footerLogoImage,
+          options.footerText || 'Documento generado electrónicamente',
+          font,
+          margin,
+          width,
+          yPosition, // Posición dinámica
+        );
+      } else {
+        // Footer fijo en páginas sin firma
+        this.addFooter(
+          page,
+          footerLogoImage,
+          options.footerText || 'Documento generado electrónicamente',
+          font,
+          margin,
+          width,
+          null, // Posición fija
+        );
       }
-
-      // Footer
-      this.addFooter(
-        page,
-        footerLogoImage,
-        options.footerText || 'Documento generado electrónicamente',
-        font,
-        margin,
-        width,
-      );
     }
 
     return Buffer.from(await pdfDoc.save());
@@ -520,7 +535,8 @@ export class MedicalRecordsPdfService {
   }
 
   /**
-   * Agrega sección de firma digital
+   * Agrega sección de firma digital - POSICIONAMIENTO DINÁMICO
+   * Retorna objeto con la página (puede ser nueva) y la posición Y final
    */
   private async addSignatureSection(
     page: any,
@@ -531,19 +547,38 @@ export class MedicalRecordsPdfService {
     margin: number,
     width: number,
     yPosition: number,
-  ): Promise<number> {
-    // Asegurar espacio suficiente - AUMENTADO SIGNIFICATIVAMENTE
-    // La firma debe estar mucho más arriba para dejar espacio al footer
-    // Necesitamos: etiquetas (20) + cajas (120) + espacio footer (100) = 240 puntos mínimo
-    if (yPosition < 250) {
-      yPosition = 250;
-    }
-
-    // Espacio antes de las cajas de firma (sin título)
-    yPosition -= 30;
-
+  ): Promise<{ page: any; yPosition: number }> {
     const boxSize = 120;
     const spacing = 40;
+    const labelHeight = 20;
+    const footerSpace = 60; // Espacio para el footer dinámico
+    
+    // Calcular espacio total necesario para la sección de firma
+    const totalHeightNeeded = labelHeight + boxSize + footerSpace + 40; // 40 = espacios adicionales
+    
+    // Si no hay suficiente espacio en la página actual, crear una nueva página
+    if (yPosition < totalHeightNeeded) {
+      console.log('⚠️  No hay suficiente espacio para firma, creando nueva página');
+      const newPage = pdfDoc.addPage([612, 792]);
+      
+      // Copiar marca de agua si existe
+      if (options.watermarkLogoUrl) {
+        try {
+          const watermarkImage = await this.loadImage(pdfDoc, options.watermarkLogoUrl);
+          this.addWatermark(newPage, watermarkImage, width, 792);
+        } catch (error) {
+          console.error('Error al agregar marca de agua en nueva página:', error);
+        }
+      }
+      
+      // Usar la nueva página para la firma
+      page = newPage;
+      yPosition = 792 - margin - 50; // Empezar desde arriba en la nueva página
+    }
+
+    // Espacio antes de las cajas de firma
+    yPosition -= 40;
+
     const totalWidth = (boxSize * 2) + spacing;
     const startX = (width - totalWidth) / 2;
 
@@ -574,7 +609,7 @@ export class MedicalRecordsPdfService {
     }
 
     // Bajar posición para las cajas (20 puntos debajo de las etiquetas)
-    yPosition -= 20;
+    yPosition -= labelHeight;
 
     // Columna izquierda: Firma capturada
     if (options.signatureData) {
@@ -662,13 +697,17 @@ export class MedicalRecordsPdfService {
       }
     }
 
-    // Retornar posición debajo de las cajas de firma/foto
-    // Dejando MUCHO más espacio para el footer (100 puntos)
-    return yPosition - boxSize - 100;
+    // Retornar página (puede ser nueva) y posición debajo de las cajas de firma/foto
+    return {
+      page: page,
+      yPosition: yPosition - boxSize - 20,
+    };
   }
 
   /**
-   * Agrega footer centrado debajo de la firma con buen espaciado
+   * Agrega footer - POSICIONAMIENTO DINÁMICO O FIJO
+   * Si yPosition es null, usa posición fija (50 desde abajo)
+   * Si yPosition tiene valor, lo posiciona dinámicamente debajo de la firma
    */
   private addFooter(
     page: any,
@@ -677,10 +716,19 @@ export class MedicalRecordsPdfService {
     font: any,
     margin: number,
     width: number,
+    yPosition: number | null = null,
   ): void {
-    // Posición del footer bien separada de la firma
-    // Se coloca a 50 puntos desde abajo para dar buen espacio
-    const footerY = 50;
+    // Determinar posición Y del footer
+    let footerY: number;
+    
+    if (yPosition !== null) {
+      // Posición dinámica: debajo de la firma con espacio de 30 puntos
+      footerY = yPosition - 30;
+      console.log('Footer dinámico en posición Y:', footerY);
+    } else {
+      // Posición fija: 50 puntos desde abajo
+      footerY = 50;
+    }
 
     // Calcular ancho del texto para centrarlo
     const textWidth = font.widthOfTextAtSize(footerText, 9);

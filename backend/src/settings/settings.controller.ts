@@ -65,6 +65,18 @@ export class SettingsController {
     return this.settingsService.getSettings(tenantId);
   }
 
+  @Get('logo')
+  async getLogo() {
+    // Endpoint público para obtener el logo del super admin
+    // Usado en la landing page
+    const settings = await this.settingsService.getSettings(undefined);
+    return {
+      logoUrl: settings.logoUrl || null,
+      logoSize: settings.logoSize || 60,
+      logoPosition: settings.logoPosition || 'left',
+    };
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   getSettings(@CurrentUser() user: User) {

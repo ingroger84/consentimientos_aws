@@ -14,6 +14,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SuspendedAccountPage from './pages/SuspendedAccountPage';
 import PublicLandingPage from './pages/PublicLandingPage';
+import SystemStatusPage from './pages/SystemStatusPage';
 
 // Lazy loading para páginas secundarias (mejor performance)
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -134,6 +135,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/suspended" element={<SuspendedAccountPage />} />
+            <Route path="/status" element={<SystemStatusPage />} />
             
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />

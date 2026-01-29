@@ -16,54 +16,44 @@ export class Anamnesis {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'medical_record_id' })
   medicalRecordId: string;
 
   @ManyToOne(() => MedicalRecord, (record) => record.anamnesis)
-  @JoinColumn({ name: 'medicalRecordId' })
+  @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
   // Motivo de consulta
-  @Column('text')
+  @Column({ name: 'chief_complaint', type: 'text' })
   chiefComplaint: string;
 
-  @Column('text', { nullable: true })
+  @Column({ name: 'current_illness', type: 'text', nullable: true })
   currentIllness: string;
 
-  // Antecedentes (JSONB)
-  @Column('jsonb', { default: {} })
-  personalHistory: Record<string, any>;
+  // Antecedentes (texto simple, no JSONB)
+  @Column({ name: 'personal_history', type: 'text', nullable: true })
+  personalHistory: string;
 
-  @Column('jsonb', { default: {} })
-  familyHistory: Record<string, any>;
+  @Column({ name: 'family_history', type: 'text', nullable: true })
+  familyHistory: string;
 
-  @Column('jsonb', { default: {} })
-  habits: Record<string, any>;
+  @Column({ name: 'allergies', type: 'text', nullable: true })
+  allergies: string;
 
-  @Column('jsonb', { nullable: true })
-  gynecologicalHistory: Record<string, any>;
-
-  @Column('jsonb', { default: {} })
-  systemsReview: Record<string, any>;
+  @Column({ name: 'current_medications', type: 'text', nullable: true })
+  currentMedications: string;
 
   // Auditoría
-  @Column()
-  createdBy: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
-  creator: User;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

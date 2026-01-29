@@ -17,8 +17,6 @@ export default function AddAnamnesisModal({ medicalRecordId, onClose, onSuccess 
     currentIllness: '',
     personalHistory: '',
     familyHistory: '',
-    habits: '',
-    systemsReview: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,14 +29,25 @@ export default function AddAnamnesisModal({ medicalRecordId, onClose, onSuccess 
 
     try {
       setLoading(true);
-      await medicalRecordsService.addAnamnesis(medicalRecordId, {
+      
+      // Construir el objeto solo con los campos que tienen valor
+      const payload: any = {
         chiefComplaint: formData.chiefComplaint,
-        currentIllness: formData.currentIllness || undefined,
-        personalHistory: formData.personalHistory ? { notes: formData.personalHistory } : undefined,
-        familyHistory: formData.familyHistory ? { notes: formData.familyHistory } : undefined,
-        habits: formData.habits ? { notes: formData.habits } : undefined,
-        systemsReview: formData.systemsReview ? { notes: formData.systemsReview } : undefined,
-      });
+      };
+      
+      if (formData.currentIllness) {
+        payload.currentIllness = formData.currentIllness;
+      }
+      
+      if (formData.personalHistory) {
+        payload.personalHistory = formData.personalHistory;
+      }
+      
+      if (formData.familyHistory) {
+        payload.familyHistory = formData.familyHistory;
+      }
+      
+      await medicalRecordsService.addAnamnesis(medicalRecordId, payload);
       toast.success('Anamnesis agregada exitosamente');
       onSuccess();
       onClose();
@@ -113,32 +122,6 @@ export default function AddAnamnesisModal({ medicalRecordId, onClose, onSuccess 
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enfermedades hereditarias en la familia"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Hábitos
-            </label>
-            <textarea
-              value={formData.habits}
-              onChange={(e) => setFormData({ ...formData, habits: e.target.value })}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Tabaco, alcohol, drogas, ejercicio, alimentación"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Revisión por Sistemas
-            </label>
-            <textarea
-              value={formData.systemsReview}
-              onChange={(e) => setFormData({ ...formData, systemsReview: e.target.value })}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Cardiovascular, respiratorio, digestivo, neurológico, etc."
             />
           </div>
 

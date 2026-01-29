@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Mi Plan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .plan-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .plan-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+        }
+        .plan-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        .plan-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .plan-card .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            transition: width 0.3s ease;
+        }
+        .progress-fill.warning {
+            background: #ff9800;
+        }
+        .progress-fill.danger {
+            background: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test - Mi Plan</h1>
+        <p>Este test verifica que el endpoint <code>/api/tenants/usage</code> funciona correctamente.</p>
+        <button onclick="testMiPlan()">Probar Endpoint Mi Plan</button>
+        <button onclick="clearResult()">Limpiar</button>
+    </div>
+
+    <div id="result-container" style="display:none;">
+        <div class="container">
+            <h2>Resultado del Test</h2>
+            <div id="result" class="result"></div>
+        </div>
+
+        <div id="plan-display" class="container" style="display:none;">
+            <h2>Información del Plan</h2>
+            <div id="plan-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://archivoenlinea.com/api';
+        const TENANT_SLUG = 'demo-estetica';
+        
+        let authToken = '';
+
+        async function getAuthToken() {
+            if (authToken) return authToken;
+            
+            const email = prompt('Email del usuario:');
+            const password = prompt('Contraseña:');
+            
+            if (!email || !password) {
+                throw new Error('Se requiere email y contraseña');
+            }
+
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Tenant-Slug': TENANT_SLUG
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al autenticar');
+            }
+
+            const data = await response.json();
+            authToken = data.access_token;
+            return authToken;
+        }
+
+        async function testMiPlan() {
+            const resultContainer = document.getElementById('result-container');
+            const resultDiv = document.getElementById('result');
+            const planDisplay = document.getElementById('plan-display');
+            const planContent = document.getElementById('plan-content');
+            
+            resultContainer.style.display = 'block';
+            planDisplay.style.display = 'none';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ Ejecutando test...\n\nObteniendo token de autenticación...';
+
+            try {
+                const token = await getAuthToken();
+                resultDiv.textContent += '\n✅ Token obtenido\n\nConsultando endpoint /api/tenants/usage...';
+                
+                const response = await fetch(`${API_URL}/tenants/usage`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-Slug': TENANT_SLUG
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ TEST EXITOSO\n\n' + 
+                        'Endpoint: /api/tenants/usage\n' +
+                        'Status: ' + response.status + '\n' +
+                        'Tenant: ' + TENANT_SLUG + '\n\n' +
+                        'Respuesta completa:\n' +
+                        JSON.stringify(data, null, 2);
+
+                    // Mostrar información del plan de forma visual
+                    displayPlanInfo(data);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ TEST FALLIDO\n\n' + 
+                        'Status: ' + response.status + '\n' +
+                        'Error: ' + (data.message || 'Error desconocido') + '\n\n' +
+                        'Respuesta completa:\n' +
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN TEST\n\n' + 
+                    'Error: ' + error.message + '\n\n' +
+                    'Stack: ' + error.stack;
+            }
+        }
+
+        function displayPlanInfo(data) {
+            const planDisplay = document.getElementById('plan-display');
+            const planContent = document.getElementById('plan-content');
+            
+            planDisplay.style.display = 'block';
+
+            const resources = data.resources || {};
+            
+            let html = '<div class="plan-info">';
+            
+            // Plan info
+            html += `
+                <div class="plan-card">
+                    <h3>Plan Actual</h3>
+                    <div class="value">${data.plan?.name || 'N/A'}</div>
+                    <div class="label">Estado: ${data.plan?.status || 'N/A'}</div>
+                </div>
+            `;
+
+            // Usuarios
+            if (resources.users) {
+                const percentage = resources.users.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Usuarios</h3>
+                        <div class="value">${resources.users.current} / ${resources.users.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Sedes
+            if (resources.branches) {
+                const percentage = resources.branches.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Sedes</h3>
+                        <div class="value">${resources.branches.current} / ${resources.branches.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Consentimientos
+            if (resources.consents) {
+                const percentage = resources.consents.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Consentimientos</h3>
+                        <div class="value">${resources.consents.current} / ${resources.consents.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Historias Clínicas
+            if (resources.medicalRecords) {
+                const percentage = resources.medicalRecords.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Historias Clínicas</h3>
+                        <div class="value">${resources.medicalRecords.current} / ${resources.medicalRecords.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Plantillas CN
+            if (resources.consentTemplates) {
+                const percentage = resources.consentTemplates.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Plantillas CN</h3>
+                        <div class="value">${resources.consentTemplates.current} / ${resources.consentTemplates.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Plantillas HC
+            if (resources.mrConsentTemplates) {
+                const percentage = resources.mrConsentTemplates.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Plantillas HC</h3>
+                        <div class="value">${resources.mrConsentTemplates.current} / ${resources.mrConsentTemplates.max}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            // Almacenamiento
+            if (resources.storage) {
+                const percentage = resources.storage.percentage || 0;
+                const statusClass = percentage >= 90 ? 'danger' : percentage >= 80 ? 'warning' : '';
+                html += `
+                    <div class="plan-card">
+                        <h3>Almacenamiento</h3>
+                        <div class="value">${resources.storage.current} / ${resources.storage.max} MB</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${statusClass}" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="label">${percentage}% utilizado</div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+
+            // Alertas
+            if (data.alerts && data.alerts.length > 0) {
+                html += '<h3 style="margin-top: 20px;">⚠️ Alertas</h3>';
+                html += '<div style="margin-top: 10px;">';
+                data.alerts.forEach(alert => {
+                    const alertClass = alert.type === 'critical' ? 'error' : 'info';
+                    html += `<div class="result ${alertClass}" style="margin-bottom: 10px;">${alert.message}</div>`;
+                });
+                html += '</div>';
+            }
+
+            planContent.innerHTML = html;
+        }
+
+        function clearResult() {
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('result').textContent = '';
+            document.getElementById('plan-display').style.display = 'none';
+            document.getElementById('plan-content').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

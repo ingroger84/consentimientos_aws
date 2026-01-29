@@ -16,22 +16,22 @@ export class Evolution {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'medical_record_id' })
   medicalRecordId: string;
 
   @ManyToOne(() => MedicalRecord, (record) => record.evolutions)
-  @JoinColumn({ name: 'medicalRecordId' })
+  @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
   // Contenido SOAP
-  @Column()
+  @Column({ name: 'evolution_date' })
   evolutionDate: Date;
 
   @Column('text', { nullable: true })
@@ -46,35 +46,17 @@ export class Evolution {
   @Column('text', { nullable: true })
   plan: string; // P - Plan
 
-  // Tipo de nota
-  @Column({ default: 'evolution' })
-  noteType: string; // evolution, interconsulta, epicrisis
-
-  // Firma digital
-  @Column({ nullable: true })
-  signedBy: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'signedBy' })
-  signer: User;
-
-  @Column({ nullable: true })
-  signedAt: Date;
-
-  @Column({ nullable: true })
-  signatureHash: string;
-
   // Auditoría
-  @Column()
+  @Column({ name: 'created_by' })
   createdBy: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
+  @JoinColumn({ name: 'created_by' })
   creator: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

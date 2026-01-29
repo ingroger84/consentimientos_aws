@@ -402,6 +402,12 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
    * Obtener estadísticas de plantillas de consentimientos convencionales
    */
   async getStatistics(tenantId: string) {
+    // Validar que tenantId sea un UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(tenantId)) {
+      throw new BadRequestException('El tenantId debe ser un UUID válido');
+    }
+
     // Total de plantillas CN
     const total = await this.templatesRepository.count({
       where: { tenantId },
@@ -417,7 +423,7 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
       .createQueryBuilder('template')
       .select('template.category', 'category')
       .addSelect('COUNT(*)', 'count')
-      .where('template.tenantId = :tenantId', { tenantId })
+      .where('template."tenantId" = :tenantId', { tenantId })
       .groupBy('template.category')
       .getRawMany();
 

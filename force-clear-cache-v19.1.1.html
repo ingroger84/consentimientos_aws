@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpiar Caché - v19.1.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .alert {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .alert-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .steps {
+            list-style: none;
+            counter-reset: step;
+        }
+        .steps li {
+            counter-increment: step;
+            margin: 15px 0;
+            padding-left: 40px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 20px 10px 10px 0;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .button.secondary {
+            background: #10b981;
+        }
+        .button.secondary:hover {
+            background: #059669;
+        }
+        .code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+        .success.show {
+            display: block;
+        }
+        .keyboard {
+            display: inline-block;
+            background: #f3f4f6;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-family: monospace;
+            font-weight: 600;
+            margin: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Limpiar Caché del Navegador</h1>
+        <p style="color: #666; margin-bottom: 20px;">
+            Para ver la versión 19.1.1 con las correcciones de los formularios de historias clínicas, necesitas limpiar el caché de tu navegador.
+        </p>
+
+        <div class="alert">
+            <div class="alert-title">⚠️ Importante</div>
+            El navegador tiene cacheada una versión antigua de los archivos JavaScript. Sigue estos pasos para forzar la actualización.
+        </div>
+
+        <h2 style="margin-top: 30px; color: #333;">Método 1: Recarga Forzada (Más Rápido)</h2>
+        <ol class="steps">
+            <li>Cierra todas las pestañas de <strong>archivoenlinea.com</strong></li>
+            <li>Abre una nueva pestaña y ve a: <strong>https://archivoenlinea.com</strong></li>
+            <li>Presiona:
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span> (Windows/Linux)</li>
+                    <li><span class="keyboard">Cmd</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span> (Mac)</li>
+                </ul>
+            </li>
+            <li>Espera a que la página cargue completamente</li>
+            <li>Verifica que en el footer aparezca: <strong>v19.1.1</strong></li>
+        </ol>
+
+        <h2 style="margin-top: 30px; color: #333;">Método 2: Limpiar Caché Completo</h2>
+        <ol class="steps">
+            <li>Presiona <span class="keyboard">F12</span> para abrir DevTools</li>
+            <li>Haz clic derecho en el botón de recargar (🔄) del navegador</li>
+            <li>Selecciona <strong>"Vaciar caché y volver a cargar de manera forzada"</strong></li>
+            <li>Espera a que la página cargue</li>
+            <li>Cierra DevTools (F12)</li>
+        </ol>
+
+        <h2 style="margin-top: 30px; color: #333;">Método 3: Modo Incógnito</h2>
+        <ol class="steps">
+            <li>Abre una ventana de incógnito:
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li><span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">N</span> (Chrome/Edge)</li>
+                    <li><span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">P</span> (Firefox)</li>
+                </ul>
+            </li>
+            <li>Ve a: <strong>https://archivoenlinea.com</strong></li>
+            <li>Inicia sesión normalmente</li>
+            <li>Prueba los formularios de historias clínicas</li>
+        </ol>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="button" onclick="clearAndReload()">
+                🔄 Limpiar Caché y Recargar
+            </button>
+            <a href="https://archivoenlinea.com" class="button secondary" target="_blank">
+                🚀 Ir a la Aplicación
+            </a>
+        </div>
+
+        <div class="success" id="success">
+            <strong>✅ Caché limpiado!</strong><br>
+            La página se recargará en 2 segundos...
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+            <h3 style="color: #333; margin-bottom: 10px;">🔍 Cómo Verificar que Funcionó</h3>
+            <ul style="margin-left: 20px; line-height: 1.8; color: #666;">
+                <li>El footer debe mostrar: <strong>v19.1.1</strong></li>
+                <li>Los formularios de HC NO deben mostrar errores 400</li>
+                <li>Puedes agregar anamnesis, exámenes, diagnósticos y evoluciones sin problemas</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+            <strong style="color: #1e40af;">💡 Nota Técnica:</strong><br>
+            <span style="color: #666;">
+                El servidor ya está sirviendo la versión correcta (19.1.1) sin caché. El problema es que tu navegador tiene guardada la versión antigua. Una vez que limpies el caché, verás la versión actualizada.
+            </span>
+        </div>
+    </div>
+
+    <script>
+        function clearAndReload() {
+            // Mostrar mensaje de éxito
+            document.getElementById('success').classList.add('show');
+            
+            // Intentar limpiar el caché usando Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Limpiar localStorage y sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Recargar después de 2 segundos
+            setTimeout(function() {
+                window.location.href = 'https://archivoenlinea.com?v=' + Date.now();
+            }, 2000);
+        }
+
+        // Detectar si ya estamos en la versión correcta
+        window.addEventListener('load', function() {
+            const currentVersion = '19.1.1';
+            const storedVersion = localStorage.getItem('app_version');
+            
+            if (storedVersion && storedVersion !== currentVersion) {
+                console.log('Versión desactualizada detectada:', storedVersion);
+                console.log('Versión actual:', currentVersion);
+            }
+        });
+    </script>
+</body>
+</html>

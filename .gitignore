@@ -77,6 +77,9 @@ deployment_*.txt
 install.sh
 deploy-server.sh
 
+# PM2 ecosystem with credentials (use ecosystem.config.example.js instead)
+# ecosystem.config.js should be configured on server with environment variables
+
 # Scripts con credenciales (no subir)
 scripts/deploy-aws-auto.ps1
 scripts/deploy-direct.ps1
@@ -84,6 +87,30 @@ scripts/deploy-production-complete.ps1
 scripts/setup-production-server.ps1
 scripts/simple-deploy.ps1
 scripts/deploy-wildcard-*.ps1
+
+# Archivos de solución y corrección temporal (no subir)
+SOLUCION_*.md
+SOLUCION_*.html
+CORRECCION_*.md
+INSTRUCCIONES_*.md
+RESUMEN_*.md
+VERIFICACION_*.md
+verificacion-*.md
+cache-verification.html
+force-cache-clear*.html
+force-clear-cache*.html
+test-*.html
+test-*.json
+temp-*.html
+temp-*.js
+check-*.sql
+check-*.html
+update-permissions.*
+load-consent-templates.sql
+seed-*.sql
+create-medical-records-clean.sql
+copy-mr-templates-to-tenants.sql
+nginx-default.conf
 
 # Test files
 test-*.js

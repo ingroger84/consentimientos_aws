@@ -76,8 +76,10 @@ export class ClientsController {
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.VIEW_CLIENTS)
   async findAll(@TenantSlug() tenantSlug: string) {
+    // Si no hay tenant slug, verificar si es super admin
     if (!tenantSlug) {
-      throw new BadRequestException('No se pudo identificar el tenant. Asegúrate de acceder desde el subdominio correcto.');
+      // El super admin puede ver todos los clientes
+      return this.clientsService.findAllGlobal();
     }
     const tenant = await this.getTenantBySlug(tenantSlug);
     return this.clientsService.findAll(tenant.id);

@@ -128,10 +128,10 @@ export class MedicalRecordsService {
       .leftJoinAndSelect('mr.client', 'client')
       .leftJoinAndSelect('mr.branch', 'branch')
       .leftJoinAndSelect('mr.creator', 'creator')
-      .where('mr.tenantId = :tenantId', { tenantId });
+      .where('mr.tenant_id = :tenantId', { tenantId });
 
     if (filters?.clientId) {
-      query.andWhere('mr.clientId = :clientId', { clientId: filters.clientId });
+      query.andWhere('mr.client_id = :clientId', { clientId: filters.clientId });
     }
 
     if (filters?.status) {
@@ -147,7 +147,7 @@ export class MedicalRecordsService {
     }
 
     if (filters?.branchId) {
-      query.andWhere('mr.branchId = :branchId', { branchId: filters.branchId });
+      query.andWhere('mr.branch_id = :branchId', { branchId: filters.branchId });
     }
 
     return query
@@ -171,14 +171,10 @@ export class MedicalRecordsService {
         'branch',
         'creator',
         'anamnesis',
-        'anamnesis.creator',
         'physicalExams',
-        'physicalExams.creator',
         'diagnoses',
-        'diagnoses.creator',
         'evolutions',
         'evolutions.creator',
-        'evolutions.signer',
         'consents',
         'consents.creator',
       ],
@@ -542,7 +538,7 @@ export class MedicalRecordsService {
       diagnosisCode: dto.diagnosisCode || null,
       diagnosisDescription: dto.diagnosisDescription || null,
       notes: dto.notes || null,
-      createdBy: userId,
+      createdBy: userId, // Agregar el usuario que creó el consentimiento
     });
 
     console.log('medicalRecordConsent antes de guardar:', medicalRecordConsent);
@@ -632,7 +628,7 @@ export class MedicalRecordsService {
     // No cargar la relación 'consent' porque puede ser un placeholder temporal
     return await this.medicalRecordConsentsRepository.find({
       where: { medicalRecordId },
-      relations: ['creator', 'evolution'],
+      relations: ['evolution'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -762,7 +758,25 @@ export class MedicalRecordsService {
     ipAddress?: string;
     userAgent?: string;
   }): Promise<void> {
-    const audit = this.auditRepository.create(data);
+    // Combinar oldValues y newValues en un solo objeto changes
+    const changes: any = {};
+    if (data.oldValues) {
+      changes.oldValues = data.oldValues;
+    }
+    if (data.newValues) {
+      changes.newValues = data.newValues;
+    }
+
+    const audit = this.auditRepository.create({
+      action: data.action,
+      entityType: data.entityType,
+      entityId: data.entityId,
+      medicalRecordId: data.medicalRecordId,
+      tenantId: data.tenantId,
+      performedBy: data.userId,
+      changes: Object.keys(changes).length > 0 ? changes : null,
+    });
+    
     await this.auditRepository.save(audit);
   }
 
@@ -821,7 +835,7 @@ export class MedicalRecordsService {
       .createQueryBuilder('mr')
       .select('DATE(mr."created_at")', 'date')
       .addSelect('COUNT(*)', 'count')
-      .where('mr."tenantId" = :tenantId', { tenantId })
+      .where('mr."tenant_id" = :tenantId', { tenantId })
       .andWhere('mr."created_at" >= :date', { date: thirtyDaysAgo })
       .groupBy('DATE(mr."created_at")')
       .orderBy('DATE(mr."created_at")', 'ASC')
@@ -833,7 +847,7 @@ export class MedicalRecordsService {
       .leftJoin('mr.branch', 'branch')
       .select('branch.name', 'name')
       .addSelect('COUNT(*)', 'count')
-      .where('mr.tenantId = :tenantId', { tenantId })
+      .where('mr."tenant_id" = :tenantId', { tenantId })
       .groupBy('branch.id')
       .getRawMany();
 
@@ -841,7 +855,7 @@ export class MedicalRecordsService {
     const totalConsents = await this.medicalRecordConsentsRepository
       .createQueryBuilder('consent')
       .innerJoin('consent.medicalRecord', 'mr')
-      .where('mr.tenantId = :tenantId', { tenantId })
+      .where('mr.tenant_id = :tenantId', { tenantId })
       .getCount();
 
     // Historias clínicas recientes

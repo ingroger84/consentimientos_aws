@@ -15,59 +15,43 @@ export class MedicalRecordAudit {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'medical_record_id', nullable: false })
   medicalRecordId: string;
 
   @ManyToOne(() => MedicalRecord)
-  @JoinColumn({ name: 'medicalRecordId' })
+  @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
   // Acción
   @Column()
   action: string; // create, update, view, delete, sign
 
-  @Column()
+  @Column({ name: 'entity_type' })
   entityType: string; // medical_record, evolution, prescription, etc
 
-  @Column({ nullable: true })
+  @Column({ name: 'entity_id', nullable: true })
   entityId: string;
 
-  // Cambios
-  @Column('jsonb', { nullable: true })
-  oldValues: Record<string, any>;
-
-  @Column('jsonb', { nullable: true })
-  newValues: Record<string, any>;
+  // Cambios (la BD usa una sola columna 'changes')
+  @Column({ name: 'changes', type: 'jsonb', nullable: true })
+  changes: Record<string, any>;
 
   // Usuario
-  @Column()
-  userId: string;
+  @Column({ name: 'performed_by' })
+  performedBy: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'performed_by' })
   user: User;
 
-  @Column({ nullable: true })
-  userName: string;
-
-  @Column({ nullable: true })
-  userRole: string;
-
-  // Contexto
-  @Column({ nullable: true })
-  ipAddress: string;
-
-  @Column('text', { nullable: true })
-  userAgent: string;
-
   // Timestamp
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({ name: 'performed_at' })
+  performedAt: Date;
 }

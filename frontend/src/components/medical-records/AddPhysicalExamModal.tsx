@@ -30,18 +30,33 @@ export default function AddPhysicalExamModal({ medicalRecordId, onClose, onSucce
 
     try {
       setLoading(true);
-      await medicalRecordsService.addPhysicalExam(medicalRecordId, {
-        bloodPressureSystolic: formData.bloodPressureSystolic ? Number(formData.bloodPressureSystolic) : undefined,
-        bloodPressureDiastolic: formData.bloodPressureDiastolic ? Number(formData.bloodPressureDiastolic) : undefined,
-        heartRate: formData.heartRate ? Number(formData.heartRate) : undefined,
-        respiratoryRate: formData.respiratoryRate ? Number(formData.respiratoryRate) : undefined,
-        temperature: formData.temperature ? Number(formData.temperature) : undefined,
-        oxygenSaturation: formData.oxygenSaturation ? Number(formData.oxygenSaturation) : undefined,
-        weight: formData.weight ? Number(formData.weight) : undefined,
-        height: formData.height ? Number(formData.height) : undefined,
-        generalAppearance: formData.generalAppearance || undefined,
-        otherFindings: formData.otherFindings || undefined,
-      });
+      
+      // Construir vitalSigns solo con los campos que tienen valor
+      const vitalSigns: Record<string, any> = {};
+      if (formData.bloodPressureSystolic) vitalSigns.bloodPressureSystolic = Number(formData.bloodPressureSystolic);
+      if (formData.bloodPressureDiastolic) vitalSigns.bloodPressureDiastolic = Number(formData.bloodPressureDiastolic);
+      if (formData.heartRate) vitalSigns.heartRate = Number(formData.heartRate);
+      if (formData.respiratoryRate) vitalSigns.respiratoryRate = Number(formData.respiratoryRate);
+      if (formData.temperature) vitalSigns.temperature = Number(formData.temperature);
+      if (formData.oxygenSaturation) vitalSigns.oxygenSaturation = Number(formData.oxygenSaturation);
+      if (formData.weight) vitalSigns.weight = Number(formData.weight);
+      if (formData.height) vitalSigns.height = Number(formData.height);
+      
+      const payload: any = {};
+      
+      if (Object.keys(vitalSigns).length > 0) {
+        payload.vitalSigns = vitalSigns;
+      }
+      
+      if (formData.generalAppearance) {
+        payload.generalAppearance = formData.generalAppearance;
+      }
+      
+      if (formData.otherFindings) {
+        payload.findings = formData.otherFindings;
+      }
+      
+      await medicalRecordsService.addPhysicalExam(medicalRecordId, payload);
       toast.success('Examen físico agregado exitosamente');
       onSuccess();
       onClose();

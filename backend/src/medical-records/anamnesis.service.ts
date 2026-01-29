@@ -24,7 +24,6 @@ export class AnamnesisService {
       ...createDto,
       medicalRecordId,
       tenantId,
-      createdBy: userId,
     });
 
     const saved = await this.anamnesisRepository.save(anamnesis);
@@ -34,7 +33,7 @@ export class AnamnesisService {
       entityType: 'anamnesis',
       entityId: saved.id,
       medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       newValues: saved,
     });
@@ -45,7 +44,6 @@ export class AnamnesisService {
   async findByMedicalRecord(medicalRecordId: string, tenantId: string): Promise<Anamnesis[]> {
     return this.anamnesisRepository.find({
       where: { medicalRecordId, tenantId },
-      relations: ['creator'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -73,7 +71,7 @@ export class AnamnesisService {
       entityType: 'anamnesis',
       entityId: id,
       medicalRecordId: anamnesis.medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       oldValues,
       newValues: updated,

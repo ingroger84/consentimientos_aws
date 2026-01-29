@@ -26,6 +26,7 @@ import { ConsentTemplatesModule } from './consent-templates/consent-templates.mo
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { MRConsentTemplatesModule } from './medical-record-consent-templates/mr-consent-templates.module';
 import { CommonModule } from './common/common.module';
+import { HealthModule } from './health/health.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
 import { Branch } from './branches/entities/branch.entity';
@@ -144,6 +145,7 @@ import { SessionGuard } from './auth/guards/session.guard';
     ConsentTemplatesModule,
     MedicalRecordsModule,
     MRConsentTemplatesModule,
+    HealthModule,
 
     // Serve static files
     ServeStaticModule.forRoot({

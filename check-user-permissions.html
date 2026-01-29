@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Permisos de Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #3B82F6;
+        }
+        .success {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .error {
+            color: #EF4444;
+            font-weight: bold;
+        }
+        .warning {
+            color: #F59E0B;
+            font-weight: bold;
+        }
+        pre {
+            background: #1F2937;
+            color: #F3F4F6;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        button.danger {
+            background: #EF4444;
+        }
+        button.danger:hover {
+            background: #DC2626;
+        }
+        .permission-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .permission-item {
+            background: #E0F2FE;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Permisos de Usuario</h1>
+        
+        <div class="section">
+            <h2>Usuario en LocalStorage</h2>
+            <div id="localStorage-user"></div>
+        </div>
+
+        <div class="section">
+            <h2>Usuario desde API</h2>
+            <button onclick="fetchUserFromAPI()">Obtener Usuario Actual</button>
+            <div id="api-user"></div>
+        </div>
+
+        <div class="section">
+            <h2>Comparación de Permisos</h2>
+            <div id="comparison"></div>
+        </div>
+
+        <div class="section">
+            <h2>Acciones</h2>
+            <button onclick="forceLogout()">Cerrar Sesión y Limpiar</button>
+            <button onclick="refreshToken()">Refrescar Token</button>
+            <button class="danger" onclick="clearAllData()">Limpiar Todo y Recargar</button>
+        </div>
+    </div>
+
+    <script>
+        function getApiBaseUrl() {
+            const currentHost = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            if (currentHost.includes('localhost') || currentHost === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            
+            const parts = currentHost.split('.');
+            if (parts.length >= 3 && parts[0] === 'admin') {
+                const baseDomain = parts.slice(1).join('.');
+                return `${protocol}//${baseDomain}`;
+            }
+            
+            return `${protocol}//${currentHost}`;
+        }
+
+        function showLocalStorageUser() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (!userStr) {
+                document.getElementById('localStorage-user').innerHTML = '<p class="error">No hay usuario en localStorage</p>';
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userStr);
+                const permissions = user.role?.permissions || [];
+                
+                let html = `
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Nombre:</strong> ${user.name}</p>
+                    <p><strong>Rol:</strong> ${user.role?.name} (${user.role?.type})</p>
+                    <p><strong>Token presente:</strong> ${token ? 'Sí' : 'No'}</p>
+                    <p><strong>Permisos:</strong> ${Array.isArray(permissions) ? permissions.length : 'No es un array'}</p>
+                `;
+                
+                if (Array.isArray(permissions)) {
+                    html += '<div class="permission-list">';
+                    permissions.slice(0, 20).forEach(perm => {
+                        html += `<div class="permission-item">${perm}</div>`;
+                    });
+                    if (permissions.length > 20) {
+                        html += `<div class="permission-item">... y ${permissions.length - 20} más</div>`;
+                    }
+                    html += '</div>';
+                } else {
+                    html += `<p class="error">Los permisos no son un array: ${typeof permissions}</p>`;
+                    html += `<pre>${JSON.stringify(permissions, null, 2)}</pre>`;
+                }
+                
+                document.getElementById('localStorage-user').innerHTML = html;
+            } catch (error) {
+                document.getElementById('localStorage-user').innerHTML = `<p class="error">Error al parsear usuario: ${error.message}</p>`;
+            }
+        }
+
+        async function fetchUserFromAPI() {
+            const resultDiv = document.getElementById('api-user');
+            resultDiv.innerHTML = '<p class="warning">⏳ Cargando...</p>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultDiv.innerHTML = '<p class="error">No hay token en localStorage</p>';
+                    return;
+                }
+                
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const user = await response.json();
+                const permissions = user.role?.permissions || [];
+                
+                let html = `
+                    <p class="success">✓ Usuario obtenido correctamente</p>
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Nombre:</strong> ${user.name}</p>
+                    <p><strong>Rol:</strong> ${user.role?.name} (${user.role?.type})</p>
+                    <p><strong>Permisos:</strong> ${Array.isArray(permissions) ? permissions.length : 'No es un array'}</p>
+                `;
+                
+                if (Array.isArray(permissions)) {
+                    html += '<div class="permission-list">';
+                    permissions.slice(0, 20).forEach(perm => {
+                        html += `<div class="permission-item">${perm}</div>`;
+                    });
+                    if (permissions.length > 20) {
+                        html += `<div class="permission-item">... y ${permissions.length - 20} más</div>`;
+                    }
+                    html += '</div>';
+                    
+                    // Guardar el usuario actualizado
+                    localStorage.setItem('user', JSON.stringify(user));
+                    html += '<p class="success">✓ Usuario actualizado en localStorage</p>';
+                } else {
+                    html += `<p class="error">Los permisos no son un array: ${typeof permissions}</p>`;
+                }
+                
+                resultDiv.innerHTML = html;
+                
+                // Actualizar comparación
+                comparePermissions();
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+
+        function comparePermissions() {
+            const userStr = localStorage.getItem('user');
+            if (!userStr) return;
+            
+            try {
+                const user = JSON.parse(userStr);
+                const permissions = user.role?.permissions || [];
+                
+                const comparisonDiv = document.getElementById('comparison');
+                
+                if (!Array.isArray(permissions)) {
+                    comparisonDiv.innerHTML = '<p class="error">Los permisos no son un array. Necesitas refrescar el token.</p>';
+                    return;
+                }
+                
+                const hasViewDashboard = permissions.includes('view_dashboard');
+                const hasManageTenants = permissions.includes('manage_tenants');
+                const hasViewMedicalRecords = permissions.includes('view_medical_records');
+                
+                let html = `
+                    <p><strong>Total de permisos:</strong> ${permissions.length}</p>
+                    <p><strong>view_dashboard:</strong> ${hasViewDashboard ? '✓ Sí' : '✗ No'}</p>
+                    <p><strong>manage_tenants:</strong> ${hasManageTenants ? '✓ Sí' : '✗ No'}</p>
+                    <p><strong>view_medical_records:</strong> ${hasViewMedicalRecords ? '✓ Sí' : '✗ No'}</p>
+                `;
+                
+                if (permissions.length < 10) {
+                    html += '<p class="error">⚠ Tienes muy pocos permisos. Deberías tener al menos 12 permisos.</p>';
+                } else if (permissions.length >= 50) {
+                    html += '<p class="success">✓ Tienes la cantidad correcta de permisos.</p>';
+                } else {
+                    html += '<p class="warning">⚠ Tienes algunos permisos, pero podrían estar desactualizados.</p>';
+                }
+                
+                comparisonDiv.innerHTML = html;
+            } catch (error) {
+                document.getElementById('comparison').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function refreshToken() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('No hay token para refrescar');
+                    return;
+                }
+                
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/api/auth/refresh-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                alert('Token refrescado correctamente. La página se recargará.');
+                window.location.reload();
+            } catch (error) {
+                alert(`Error al refrescar token: ${error.message}`);
+            }
+        }
+
+        function forceLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('current_subdomain');
+            alert('Sesión cerrada. Serás redirigido al login.');
+            window.location.href = '/login';
+        }
+
+        function clearAllData() {
+            if (!confirm('¿Estás seguro? Esto eliminará todos los datos y recargará la página.')) {
+                return;
+            }
+            
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            alert('Datos limpiados. La página se recargará.');
+            window.location.href = '/login';
+        }
+
+        // Inicializar
+        window.onload = function() {
+            showLocalStorageUser();
+            comparePermissions();
+        };
+    </script>
+</body>
+</html>

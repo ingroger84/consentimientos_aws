@@ -28,7 +28,7 @@ export class MRConsentTemplate {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ type: 'jsonb', default: [] })
+  @Column({ name: 'available_variables', type: 'jsonb', default: [] })
   availableVariables: string[];
 
   @Column({ name: 'is_active', default: true })

@@ -24,7 +24,6 @@ export class DiagnosisService {
       ...createDto,
       medicalRecordId,
       tenantId,
-      createdBy: userId,
     });
 
     const saved = await this.diagnosisRepository.save(diagnosis);
@@ -34,7 +33,7 @@ export class DiagnosisService {
       entityType: 'diagnosis',
       entityId: saved.id,
       medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       newValues: saved,
     });
@@ -45,7 +44,6 @@ export class DiagnosisService {
   async findByMedicalRecord(medicalRecordId: string, tenantId: string): Promise<Diagnosis[]> {
     return this.diagnosisRepository.find({
       where: { medicalRecordId, tenantId },
-      relations: ['creator'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -73,7 +71,7 @@ export class DiagnosisService {
       entityType: 'diagnosis',
       entityId: id,
       medicalRecordId: diagnosis.medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       oldValues,
       newValues: updated,

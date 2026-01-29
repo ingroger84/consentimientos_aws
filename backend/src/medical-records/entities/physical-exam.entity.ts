@@ -16,69 +16,40 @@ export class PhysicalExam {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'medical_record_id' })
   medicalRecordId: string;
 
   @ManyToOne(() => MedicalRecord, (record) => record.physicalExams)
-  @JoinColumn({ name: 'medicalRecordId' })
+  @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
-  // Signos vitales
-  @Column({ nullable: true })
-  bloodPressureSystolic: number;
+  // Signos vitales (JSONB)
+  @Column('jsonb', { name: 'vital_signs', nullable: true })
+  vitalSigns: Record<string, any>;
 
-  @Column({ nullable: true })
-  bloodPressureDiastolic: number;
-
-  @Column({ nullable: true })
-  heartRate: number;
-
-  @Column({ nullable: true })
-  respiratoryRate: number;
-
-  @Column('decimal', { precision: 4, scale: 1, nullable: true })
-  temperature: number;
-
-  @Column({ nullable: true })
-  oxygenSaturation: number;
-
-  @Column('decimal', { precision: 5, scale: 2, nullable: true })
-  weight: number;
-
-  @Column('decimal', { precision: 5, scale: 2, nullable: true })
-  height: number;
-
-  @Column('decimal', { precision: 5, scale: 2, nullable: true })
-  bmi: number;
-
-  // Examen físico
-  @Column('text', { nullable: true })
+  // Apariencia general
+  @Column('text', { name: 'general_appearance', nullable: true })
   generalAppearance: string;
 
-  @Column('jsonb', { default: {} })
-  physicalExamData: Record<string, any>;
+  // Revisión por sistemas (JSONB)
+  @Column('jsonb', { name: 'systems_review', nullable: true })
+  systemsReview: Record<string, any>;
 
+  // Hallazgos
   @Column('text', { nullable: true })
-  otherFindings: string;
+  findings: string;
 
   // Auditoría
-  @Column()
-  createdBy: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
-  creator: User;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

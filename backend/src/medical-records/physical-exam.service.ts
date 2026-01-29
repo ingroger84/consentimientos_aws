@@ -24,7 +24,6 @@ export class PhysicalExamService {
       ...createDto,
       medicalRecordId,
       tenantId,
-      createdBy: userId,
     });
 
     const saved = await this.physicalExamRepository.save(physicalExam);
@@ -34,7 +33,7 @@ export class PhysicalExamService {
       entityType: 'physical_exam',
       entityId: saved.id,
       medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       newValues: saved,
     });
@@ -45,7 +44,6 @@ export class PhysicalExamService {
   async findByMedicalRecord(medicalRecordId: string, tenantId: string): Promise<PhysicalExam[]> {
     return this.physicalExamRepository.find({
       where: { medicalRecordId, tenantId },
-      relations: ['creator'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -73,7 +71,7 @@ export class PhysicalExamService {
       entityType: 'physical_exam',
       entityId: id,
       medicalRecordId: physicalExam.medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       oldValues,
       newValues: updated,

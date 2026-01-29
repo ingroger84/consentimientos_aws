@@ -14,7 +14,6 @@ export default function AddEvolutionModal({ medicalRecordId, onClose, onSuccess 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     evolutionDate: new Date().toISOString().slice(0, 16),
-    noteType: 'evolution',
     subjective: '',
     objective: '',
     assessment: '',
@@ -26,14 +25,28 @@ export default function AddEvolutionModal({ medicalRecordId, onClose, onSuccess 
 
     try {
       setLoading(true);
-      await medicalRecordsService.addEvolution(medicalRecordId, {
+      
+      const payload: any = {
         evolutionDate: formData.evolutionDate,
-        noteType: formData.noteType as 'evolution' | 'interconsulta' | 'epicrisis',
-        subjective: formData.subjective || undefined,
-        objective: formData.objective || undefined,
-        assessment: formData.assessment || undefined,
-        plan: formData.plan || undefined,
-      });
+      };
+      
+      if (formData.subjective) {
+        payload.subjective = formData.subjective;
+      }
+      
+      if (formData.objective) {
+        payload.objective = formData.objective;
+      }
+      
+      if (formData.assessment) {
+        payload.assessment = formData.assessment;
+      }
+      
+      if (formData.plan) {
+        payload.plan = formData.plan;
+      }
+      
+      await medicalRecordsService.addEvolution(medicalRecordId, payload);
       toast.success('Evolución agregada exitosamente');
       onSuccess();
       onClose();
@@ -58,34 +71,17 @@ export default function AddEvolutionModal({ medicalRecordId, onClose, onSuccess 
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha y Hora <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.evolutionDate}
-                onChange={(e) => setFormData({ ...formData, evolutionDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de Nota
-              </label>
-              <select
-                value={formData.noteType}
-                onChange={(e) => setFormData({ ...formData, noteType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="evolution">Evolución</option>
-                <option value="interconsulta">Interconsulta</option>
-                <option value="epicrisis">Epicrisis</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fecha y Hora <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.evolutionDate}
+              onChange={(e) => setFormData({ ...formData, evolutionDate: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

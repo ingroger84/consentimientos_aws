@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Endpoint Tenants</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #3B82F6;
+        }
+        .success {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .error {
+            color: #EF4444;
+            font-weight: bold;
+        }
+        .warning {
+            color: #F59E0B;
+            font-weight: bold;
+        }
+        pre {
+            background: #1F2937;
+            color: #F3F4F6;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .tenant-card {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test Endpoint de Tenants</h1>
+        
+        <div class="section">
+            <h2>1. Verificar Token y Usuario</h2>
+            <div id="user-info"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Probar Endpoint /api/tenants</h2>
+            <button onclick="testTenantsEndpoint()">Probar Endpoint</button>
+            <div id="endpoint-result"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Verificar Permisos</h2>
+            <div id="permissions-check"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Acciones</h2>
+            <button onclick="refreshToken()">Refrescar Token</button>
+            <button onclick="forceLogout()">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <script>
+        function getApiBaseUrl() {
+            const currentHost = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            if (currentHost.includes('localhost') || currentHost === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            
+            const parts = currentHost.split('.');
+            if (parts.length >= 3 && parts[0] === 'admin') {
+                const baseDomain = parts.slice(1).join('.');
+                return `${protocol}//${baseDomain}`;
+            }
+            
+            return `${protocol}//${currentHost}`;
+        }
+
+        function showUserInfo() {
+            const userStr = localStorage.getItem('user');
+            const token = localStorage.getItem('token');
+            
+            if (!userStr || !token) {
+                document.getElementById('user-info').innerHTML = '<p class="error">No hay usuario o token en localStorage</p>';
+                return;
+            }
+            
+            try {
+                const user = JSON.parse(userStr);
+                const permissions = user.role?.permissions || [];
+                const hasManageTenants = Array.isArray(permissions) && permissions.includes('manage_tenants');
+                
+                let html = `
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>Nombre:</strong> ${user.name}</p>
+                    <p><strong>Rol:</strong> ${user.role?.name} (${user.role?.type})</p>
+                    <p><strong>Token presente:</strong> ${token ? 'Sí' : 'No'}</p>
+                    <p><strong>Permisos:</strong> ${Array.isArray(permissions) ? permissions.length : 'No es un array'}</p>
+                    <p><strong>Tiene manage_tenants:</strong> ${hasManageTenants ? '<span class="success">✓ SÍ</span>' : '<span class="error">✗ NO</span>'}</p>
+                `;
+                
+                document.getElementById('user-info').innerHTML = html;
+                
+                // Verificar permisos
+                checkPermissions(permissions, hasManageTenants);
+            } catch (error) {
+                document.getElementById('user-info').innerHTML = `<p class="error">Error al parsear usuario: ${error.message}</p>`;
+            }
+        }
+
+        function checkPermissions(permissions, hasManageTenants) {
+            let html = '';
+            
+            if (!Array.isArray(permissions)) {
+                html = '<p class="error">⚠ Los permisos no son un array. Necesitas refrescar el token.</p>';
+            } else if (!hasManageTenants) {
+                html = '<p class="error">⚠ No tienes el permiso "manage_tenants". Necesitas refrescar el token.</p>';
+            } else if (permissions.length < 50) {
+                html = '<p class="warning">⚠ Tienes pocos permisos (' + permissions.length + '). Deberías tener al menos 52.</p>';
+            } else {
+                html = '<p class="success">✓ Tienes los permisos correctos (' + permissions.length + ' permisos)</p>';
+            }
+            
+            document.getElementById('permissions-check').innerHTML = html;
+        }
+
+        async function testTenantsEndpoint() {
+            const resultDiv = document.getElementById('endpoint-result');
+            resultDiv.innerHTML = '<p class="warning">⏳ Probando endpoint...</p>';
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    resultDiv.innerHTML = '<p class="error">No hay token en localStorage</p>';
+                    return;
+                }
+                
+                const apiUrl = getApiBaseUrl();
+                console.log('[TEST] API URL:', apiUrl);
+                console.log('[TEST] Token:', token.substring(0, 20) + '...');
+                
+                const response = await fetch(`${apiUrl}/api/tenants`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('[TEST] Response status:', response.status);
+                console.log('[TEST] Response headers:', response.headers);
+                
+                const responseText = await response.text();
+                console.log('[TEST] Response text:', responseText);
+                
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = JSON.parse(responseText);
+                    } catch {
+                        errorData = { message: responseText };
+                    }
+                    
+                    let html = `
+                        <p class="error">✗ Error ${response.status}: ${response.statusText}</p>
+                        <p><strong>Mensaje:</strong> ${errorData.message || 'Sin mensaje'}</p>
+                    `;
+                    
+                    if (response.status === 401) {
+                        html += '<p class="warning">⚠ Token inválido o expirado. Intenta refrescar el token.</p>';
+                    } else if (response.status === 403) {
+                        html += '<p class="warning">⚠ No tienes permisos. Necesitas el permiso "manage_tenants".</p>';
+                    }
+                    
+                    html += `<pre>${JSON.stringify(errorData, null, 2)}</pre>`;
+                    resultDiv.innerHTML = html;
+                    return;
+                }
+                
+                const data = JSON.parse(responseText);
+                console.log('[TEST] Data received:', data);
+                
+                if (!Array.isArray(data)) {
+                    resultDiv.innerHTML = `<p class="error">✗ La respuesta no es un array</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    return;
+                }
+                
+                let html = `
+                    <p class="success">✓ Endpoint funcionando correctamente</p>
+                    <p><strong>Total de tenants:</strong> ${data.length}</p>
+                `;
+                
+                if (data.length === 0) {
+                    html += '<p class="warning">⚠ No hay tenants en la respuesta (pero deberían existir en la BD)</p>';
+                } else {
+                    html += '<h3>Tenants encontrados:</h3>';
+                    data.forEach(tenant => {
+                        html += `
+                            <div class="tenant-card">
+                                <p><strong>Nombre:</strong> ${tenant.name}</p>
+                                <p><strong>Slug:</strong> ${tenant.slug}</p>
+                                <p><strong>Plan:</strong> ${tenant.plan}</p>
+                                <p><strong>Estado:</strong> ${tenant.status}</p>
+                                <p><strong>Usuarios:</strong> ${tenant.users?.length || 0}</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `<h3>Respuesta completa:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('[TEST] Error:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">✗ Error al probar endpoint</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <pre>${error.stack || 'No stack trace'}</pre>
+                `;
+            }
+        }
+
+        async function refreshToken() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('No hay token para refrescar');
+                    return;
+                }
+                
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/api/auth/refresh-token`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                alert('Token refrescado correctamente. La página se recargará.');
+                window.location.reload();
+            } catch (error) {
+                alert(`Error al refrescar token: ${error.message}`);
+            }
+        }
+
+        function forceLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('current_subdomain');
+            alert('Sesión cerrada. Serás redirigido al login.');
+            window.location.href = '/login';
+        }
+
+        // Inicializar
+        window.onload = function() {
+            showUserInfo();
+        };
+    </script>
+</body>
+</html>

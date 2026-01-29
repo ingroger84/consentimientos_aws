@@ -34,7 +34,7 @@ export class EvolutionService {
       entityType: 'evolution',
       entityId: saved.id,
       medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       newValues: saved,
     });
@@ -73,7 +73,7 @@ export class EvolutionService {
       entityType: 'evolution',
       entityId: id,
       medicalRecordId: evolution.medicalRecordId,
-      userId,
+      performedBy: userId,
       tenantId,
       oldValues,
       newValues: updated,

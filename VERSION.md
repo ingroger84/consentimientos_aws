@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 19.0.0
-**Fecha:** 2026-01-27
-**Tipo de Cambio:** MAJOR
+## Versión Actual: 20.0.1
+**Fecha:** 2026-01-28
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,14 +18,13 @@
 
 ## Historial de Versiones
 
-### 19.0.0 - 2026-01-27 [MAJOR]
-- Documentación: 4 archivo(s) modificado(s)
+### 20.0.1 - 2026-01-28 [PATCH]
+- Mejoras y correcciones generales
 
-### 18.0.0 - 2026-01-27 [MAJOR]
-- Backend: 68 archivo(s) modificado(s)
-- Frontend: 45 archivo(s) modificado(s)
-- Documentación: 205 archivo(s) modificado(s)
-- Scripts: 11 archivo(s) modificado(s)
+### 20.0.0 - 2026-01-28 [MAJOR]
+- Backend: 27 archivo(s) modificado(s)
+- Frontend: 13 archivo(s) modificado(s)
+- Documentación: 33 archivo(s) modificado(s)
 
 ---
 

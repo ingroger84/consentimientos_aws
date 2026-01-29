@@ -130,6 +130,25 @@ export class ClientsService {
   }
 
   /**
+   * Obtener todos los clientes de todos los tenants (solo para super admin)
+   */
+  async findAllGlobal(): Promise<any[]> {
+    const clients = await this.clientsRepository
+      .createQueryBuilder('client')
+      .leftJoinAndSelect('client.tenant', 'tenant')
+      .orderBy('tenant.name', 'ASC')
+      .addOrderBy('client.fullName', 'ASC')
+      .getMany();
+
+    // Formatear la respuesta para incluir información del tenant
+    return clients.map(client => ({
+      ...client,
+      tenantName: client.tenant?.name || 'Sin tenant',
+      tenantSlug: client.tenant?.slug || null,
+    }));
+  }
+
+  /**
    * Obtener un cliente por ID
    */
   async findOne(id: string, tenantId: string): Promise<Client> {

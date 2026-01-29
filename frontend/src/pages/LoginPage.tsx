@@ -158,7 +158,7 @@ export default function LoginPage() {
                 <img
                   src={getResourceUrl(settings.logoUrl)}
                   alt={settings.companyName}
-                  className="h-16 sm:h-20 object-contain"
+                  className="h-24 sm:h-24 object-contain"
                 />
               </div>
             ) : (

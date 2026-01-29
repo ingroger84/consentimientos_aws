@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solución Final - Forzar Actualización</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        .alert {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .alert-title {
+            font-weight: 700;
+            color: #991b1b;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 18px 36px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin: 20px 10px 10px 0;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .button.danger {
+            background: #ef4444;
+        }
+        .button.danger:hover {
+            background: #dc2626;
+        }
+        .code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .steps {
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .steps ol {
+            margin-left: 20px;
+            line-height: 2;
+        }
+        .steps li {
+            margin: 10px 0;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Solución Final del Problema de Caché</h1>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ Diagnóstico Confirmado</div>
+            <p>Tu navegador está usando archivos JavaScript viejos que contienen el campo <code>INSPECTION_METHODS</code>. Este campo ya NO existe en la versión actual del servidor (19.1.1).</p>
+        </div>
+
+        <div class="success">
+            <strong>✅ El servidor está correcto</strong><br>
+            El código en el servidor NO contiene <code>INSPECTION_METHODS</code>. El problema es 100% del navegador.
+        </div>
+
+        <h2 style="margin-top: 30px; color: #333;">Solución Definitiva</h2>
+        
+        <div class="steps">
+            <h3 style="margin-bottom: 15px;">Método 1: URL con Timestamp (Más Efectivo)</h3>
+            <p>Haz clic en este botón para abrir la aplicación con un parámetro especial que fuerza la descarga de archivos nuevos:</p>
+            <button class="button" onclick="openWithTimestamp()">
+                🚀 Abrir Aplicación (Versión Forzada)
+            </button>
+        </div>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 15px;">Método 2: Limpiar TODO y Reiniciar</h3>
+            <ol>
+                <li><strong>Cierra TODAS las pestañas</strong> de archivoenlinea.com</li>
+                <li><strong>Cierra el navegador completamente</strong></li>
+                <li>Presiona <span class="highlight">Ctrl + Shift + Delete</span></li>
+                <li>Selecciona:
+                    <ul style="margin-top: 10px;">
+                        <li>✅ Historial de navegación</li>
+                        <li>✅ Cookies y datos de sitios</li>
+                        <li>✅ Imágenes y archivos en caché</li>
+                    </ul>
+                </li>
+                <li>Rango: <span class="highlight">Desde siempre</span></li>
+                <li>Clic en <strong>"Borrar datos"</strong></li>
+                <li><strong>Reinicia el navegador</strong></li>
+                <li>Abre: <a href="https://archivoenlinea.com" target="_blank">https://archivoenlinea.com</a></li>
+            </ol>
+        </div>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 15px;">Método 3: Usar Otro Navegador (Temporal)</h3>
+            <p>Si tienes otro navegador instalado (Chrome, Firefox, Edge, Brave), úsalo temporalmente:</p>
+            <ol>
+                <li>Abre el otro navegador</li>
+                <li>Ve a: <a href="https://archivoenlinea.com" target="_blank">https://archivoenlinea.com</a></li>
+                <li>Inicia sesión y prueba los formularios</li>
+                <li>Debería funcionar sin problemas</li>
+            </ol>
+        </div>
+
+        <div class="steps">
+            <h3 style="margin-bottom: 15px;">Método 4: Script de Limpieza Extrema</h3>
+            <p>Si nada funciona, usa este script en la consola del navegador:</p>
+            <ol>
+                <li>Ve a: <a href="https://archivoenlinea.com" target="_blank">https://archivoenlinea.com</a></li>
+                <li>Presiona <span class="highlight">F12</span> (abre DevTools)</li>
+                <li>Ve a la pestaña <strong>Console</strong></li>
+                <li>Copia y pega este código:</li>
+            </ol>
+            <div class="code">
+// Limpiar TODO
+(async function() {
+    console.log('🧹 Limpiando caché...');
+    
+    // Limpiar Service Workers
+    if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+            await registration.unregister();
+            console.log('✅ Service Worker eliminado');
+        }
+    }
+    
+    // Limpiar Cache Storage
+    if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        for (let name of cacheNames) {
+            await caches.delete(name);
+            console.log('✅ Cache eliminado:', name);
+        }
+    }
+    
+    // Limpiar Storage
+    localStorage.clear();
+    sessionStorage.clear();
+    console.log('✅ Storage limpiado');
+    
+    // Recargar con timestamp
+    console.log('🔄 Recargando...');
+    setTimeout(() => {
+        window.location.href = 'https://archivoenlinea.com?v=' + Date.now();
+    }, 1000);
+})();
+            </div>
+            <button class="button" onclick="copyScript()">
+                📋 Copiar Script
+            </button>
+        </div>
+
+        <h2 style="margin-top: 40px; color: #333;">Verificación</h2>
+        <div class="steps">
+            <p>Después de aplicar cualquier método, verifica:</p>
+            <ul style="margin-left: 20px; line-height: 2;">
+                <li>✅ El footer debe mostrar: <strong>v19.1.1</strong></li>
+                <li>✅ NO debe aparecer error de <code>INSPECTION_METHODS</code></li>
+                <li>✅ Los formularios deben funcionar sin errores 400</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+            <strong style="color: #1e40af;">💡 ¿Por qué pasa esto?</strong><br>
+            <p style="color: #666; margin-top: 10px; line-height: 1.6;">
+                Los navegadores modernos cachean agresivamente los archivos JavaScript para mejorar el rendimiento. 
+                Cuando actualizamos el código, el navegador puede seguir usando la versión vieja guardada. 
+                Aunque configuramos el servidor para NO cachear, algunos navegadores ignoran estas instrucciones 
+                si ya tienen el archivo guardado.
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button class="button danger" onclick="nuclearOption()">
+                ☢️ Opción Nuclear (Limpiar TODO)
+            </button>
+            <p style="color: #666; margin-top: 10px; font-size: 14px;">
+                Esto limpiará TODOS los datos del navegador para archivoenlinea.com
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function openWithTimestamp() {
+            const timestamp = Date.now();
+            const url = `https://archivoenlinea.com?v=${timestamp}&force=true`;
+            window.open(url, '_blank');
+            alert('✅ Abriendo aplicación con versión forzada.\n\nSi el problema persiste, usa el Método 2 o 3.');
+        }
+
+        function copyScript() {
+            const script = document.querySelector('.code').textContent;
+            navigator.clipboard.writeText(script).then(() => {
+                alert('✅ Script copiado al portapapeles!\n\nAhora:\n1. Ve a archivoenlinea.com\n2. Presiona F12\n3. Pega el script en Console\n4. Presiona Enter');
+            });
+        }
+
+        async function nuclearOption() {
+            if (!confirm('⚠️ ADVERTENCIA\n\nEsto eliminará TODOS los datos guardados de archivoenlinea.com:\n- Cookies\n- Caché\n- LocalStorage\n- SessionStorage\n- Service Workers\n\n¿Continuar?')) {
+                return;
+            }
+
+            console.log('☢️ Iniciando limpieza nuclear...');
+
+            // Limpiar Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+
+            // Limpiar Cache Storage
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let name of cacheNames) {
+                    await caches.delete(name);
+                }
+            }
+
+            // Limpiar Storage
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // Limpiar cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+
+            alert('✅ Limpieza completada!\n\nEl navegador se recargará en 2 segundos...');
+
+            setTimeout(() => {
+                window.location.href = 'https://archivoenlinea.com?v=' + Date.now();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Settings Load - Archivo en Linea</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #3B82F6;
+        }
+        .success {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .error {
+            color: #EF4444;
+            font-weight: bold;
+        }
+        .info {
+            color: #3B82F6;
+        }
+        pre {
+            background: #1F2937;
+            color: #F3F4F6;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3B82F6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563EB;
+        }
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test de Carga de Settings - Archivo en Linea</h1>
+        
+        <div class="test-section">
+            <h2>Información del Entorno</h2>
+            <div id="env-info"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test de Endpoint Público</h2>
+            <button onclick="testPublicEndpoint()">Probar /api/settings/public</button>
+            <div id="public-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test de Detección de Tenant</h2>
+            <div id="tenant-detection"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test de API URL</h2>
+            <div id="api-url-test"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>Acciones</h2>
+            <button onclick="clearCache()">Limpiar Caché del Navegador</button>
+            <button onclick="location.reload(true)">Recargar Página (Hard Refresh)</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para obtener la URL base del API (copiada del código)
+        function getApiBaseUrl() {
+            const currentHost = window.location.hostname;
+            const protocol = window.location.protocol;
+            
+            console.log('[API-URL] Hostname:', currentHost);
+            console.log('[API-URL] Protocol:', protocol);
+            
+            if (currentHost.includes('localhost') || currentHost === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            
+            const parts = currentHost.split('.');
+            if (parts.length >= 3 && parts[0] === 'admin') {
+                const baseDomain = parts.slice(1).join('.');
+                return `${protocol}//${baseDomain}`;
+            }
+            
+            return `${protocol}//${currentHost}`;
+        }
+
+        // Función para detectar tenant slug
+        function getTenantSlug() {
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            if (hostname === 'localhost' || hostname === '127.0.0.1' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+                return null;
+            }
+            
+            if (parts.length === 2 && parts[1] === 'localhost') {
+                const subdomain = parts[0];
+                if (subdomain === 'admin') return null;
+                return subdomain;
+            }
+            
+            if (parts.length >= 3) {
+                const subdomain = parts[0];
+                if (subdomain === 'admin' || subdomain === 'www') return null;
+                return subdomain;
+            }
+            
+            return null;
+        }
+
+        // Mostrar información del entorno
+        function showEnvInfo() {
+            const apiUrl = getApiBaseUrl();
+            const tenantSlug = getTenantSlug();
+            const hostname = window.location.hostname;
+            
+            document.getElementById('env-info').innerHTML = `
+                <p><strong>Hostname:</strong> ${hostname}</p>
+                <p><strong>URL Completa:</strong> ${window.location.href}</p>
+                <p><strong>API Base URL:</strong> <span class="info">${apiUrl}</span></p>
+                <p><strong>Tenant Slug:</strong> <span class="info">${tenantSlug || 'null (Super Admin)'}</span></p>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+            `;
+        }
+
+        // Test de detección de tenant
+        function showTenantDetection() {
+            const tenantSlug = getTenantSlug();
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            document.getElementById('tenant-detection').innerHTML = `
+                <p><strong>Hostname:</strong> ${hostname}</p>
+                <p><strong>Parts:</strong> ${JSON.stringify(parts)}</p>
+                <p><strong>Tenant Detectado:</strong> <span class="${tenantSlug ? 'info' : 'success'}">${tenantSlug || 'null (Super Admin)'}</span></p>
+                <p><strong>Interpretación:</strong> ${tenantSlug ? `Tenant "${tenantSlug}"` : 'Super Admin (sin tenant)'}</p>
+            `;
+        }
+
+        // Test de API URL
+        function showApiUrlTest() {
+            const apiUrl = getApiBaseUrl();
+            const publicEndpoint = `${apiUrl}/api/settings/public`;
+            
+            document.getElementById('api-url-test').innerHTML = `
+                <p><strong>API Base URL:</strong> ${apiUrl}</p>
+                <p><strong>Endpoint Público:</strong> ${publicEndpoint}</p>
+                <p><strong>Protocolo:</strong> ${window.location.protocol}</p>
+            `;
+        }
+
+        // Test del endpoint público
+        async function testPublicEndpoint() {
+            const resultDiv = document.getElementById('public-result');
+            resultDiv.innerHTML = '<p class="info">⏳ Cargando...</p>';
+            
+            try {
+                const apiUrl = getApiBaseUrl();
+                const tenantSlug = getTenantSlug();
+                const endpoint = `${apiUrl}/api/settings/public`;
+                
+                console.log('[TEST] Llamando a:', endpoint);
+                console.log('[TEST] Tenant Slug:', tenantSlug);
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (tenantSlug) {
+                    headers['X-Tenant-Slug'] = tenantSlug;
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                console.log('[TEST] Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('[TEST] Data received:', data);
+                
+                let html = `
+                    <p class="success">✓ Endpoint funcionando correctamente</p>
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Company Name:</strong> ${data.companyName}</p>
+                    <p><strong>Primary Color:</strong> <span style="color: ${data.primaryColor}">${data.primaryColor}</span></p>
+                `;
+                
+                if (data.logoUrl) {
+                    html += `
+                        <p><strong>Logo URL:</strong> ${data.logoUrl}</p>
+                        <img src="${data.logoUrl}" class="logo-preview" alt="Logo" onerror="this.style.display='none'">
+                    `;
+                }
+                
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('[TEST] Error:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">✗ Error al cargar settings</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <pre>${error.stack || 'No stack trace'}</pre>
+                `;
+            }
+        }
+
+        // Limpiar caché
+        function clearCache() {
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            alert('Caché limpiado. La página se recargará.');
+            location.reload(true);
+        }
+
+        // Inicializar al cargar
+        window.onload = function() {
+            showEnvInfo();
+            showTenantDetection();
+            showApiUrlTest();
+            
+            // Auto-ejecutar test del endpoint
+            setTimeout(testPublicEndpoint, 500);
+        };
+    </script>
+</body>
+</html>

@@ -16,48 +16,40 @@ export class Diagnosis {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ name: 'medical_record_id' })
   medicalRecordId: string;
 
   @ManyToOne(() => MedicalRecord, (record) => record.diagnoses)
-  @JoinColumn({ name: 'medicalRecordId' })
+  @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
-  // Diagnóstico
-  @Column()
-  cie10Code: string;
+  // Tipo de diagnóstico
+  @Column({ name: 'diagnosis_type' })
+  diagnosisType: string; // principal, relacionado, complicacion
 
+  // Código CIE-10
+  @Column({ nullable: true })
+  code: string;
+
+  // Descripción
   @Column('text')
-  cie10Description: string;
+  description: string;
 
-  @Column({ default: 'principal' })
-  diagnosisType: string; // principal, relacionado, complicación
-
-  // Clasificación
-  @Column({ default: false })
-  isConfirmed: boolean;
-
-  @Column({ default: true })
-  isPresumptive: boolean;
+  // Notas adicionales
+  @Column('text', { nullable: true })
+  notes: string;
 
   // Auditoría
-  @Column()
-  createdBy: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
-  creator: User;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

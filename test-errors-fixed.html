@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Verificar Errores Corregidos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #666;
+            margin-top: 20px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .loading {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .test-group {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test - Verificar Errores Corregidos</h1>
+        <p>Este test verifica que los errores identificados en los logs de Chrome han sido corregidos.</p>
+    </div>
+
+    <div class="container test-group">
+        <h2>1. Test: Estadísticas de Plantillas CN (ConsentTemplatesService.getStatistics)</h2>
+        <p><strong>Error anterior:</strong> <code>invalid input syntax for type uuid: "demo-estetica"</code></p>
+        <p><strong>Corrección:</strong> Validar que tenantId sea UUID válido antes de ejecutar queries</p>
+        <button onclick="testConsentTemplatesStats()">Ejecutar Test</button>
+        <div id="result1" class="result info" style="display:none;"></div>
+    </div>
+
+    <div class="container test-group">
+        <h2>2. Test: Estadísticas de Historias Clínicas (MedicalRecordsService.getStatistics)</h2>
+        <p><strong>Error anterior:</strong> <code>column mr.tenantId does not exist</code></p>
+        <p><strong>Corrección:</strong> Usar <code>mr."tenant_id"</code> en lugar de <code>mr.tenantId</code></p>
+        <button onclick="testMedicalRecordsStats()">Ejecutar Test</button>
+        <div id="result2" class="result info" style="display:none;"></div>
+    </div>
+
+    <div class="container test-group">
+        <h2>3. Test: Uso del Plan (TenantsService.getUsage)</h2>
+        <p><strong>Error anterior:</strong> <code>Property "tenant_id" was not found in "MedicalRecord"</code></p>
+        <p><strong>Corrección:</strong> Usar <code>tenantId</code> (propiedad de la entidad) en lugar de <code>tenant_id</code></p>
+        <button onclick="testTenantUsage()">Ejecutar Test</button>
+        <div id="result3" class="result info" style="display:none;"></div>
+    </div>
+
+    <div class="container test-group">
+        <h2>4. Test Completo: Cargar Dashboard</h2>
+        <p>Simula la carga completa del dashboard que dispara todos los endpoints problemáticos</p>
+        <button onclick="testFullDashboard()">Ejecutar Test Completo</button>
+        <div id="result4" class="result info" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://archivoenlinea.com/api';
+        const TENANT_SLUG = 'demo-estetica';
+        
+        // Token de autenticación (reemplazar con token válido)
+        let authToken = '';
+
+        // Función para obtener token
+        async function getAuthToken() {
+            if (authToken) return authToken;
+            
+            const email = prompt('Email del usuario:');
+            const password = prompt('Contraseña:');
+            
+            if (!email || !password) {
+                throw new Error('Se requiere email y contraseña');
+            }
+
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Tenant-Slug': TENANT_SLUG
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Error al autenticar');
+            }
+
+            const data = await response.json();
+            authToken = data.access_token;
+            return authToken;
+        }
+
+        async function testConsentTemplatesStats() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ Ejecutando test...';
+
+            try {
+                const token = await getAuthToken();
+                
+                const response = await fetch(`${API_URL}/consent-templates/stats/overview`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-Slug': TENANT_SLUG
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ TEST EXITOSO\n\n' + 
+                        'Estadísticas de Plantillas CN:\n' +
+                        JSON.stringify(data, null, 2);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ TEST FALLIDO\n\n' + 
+                        'Error: ' + (data.message || 'Error desconocido') + '\n\n' +
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN TEST\n\n' + error.message;
+            }
+        }
+
+        async function testMedicalRecordsStats() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ Ejecutando test...';
+
+            try {
+                const token = await getAuthToken();
+                
+                const response = await fetch(`${API_URL}/medical-records/stats/overview`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-Slug': TENANT_SLUG
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ TEST EXITOSO\n\n' + 
+                        'Estadísticas de Historias Clínicas:\n' +
+                        JSON.stringify(data, null, 2);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ TEST FALLIDO\n\n' + 
+                        'Error: ' + (data.message || 'Error desconocido') + '\n\n' +
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN TEST\n\n' + error.message;
+            }
+        }
+
+        async function testTenantUsage() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ Ejecutando test...';
+
+            try {
+                const token = await getAuthToken();
+                
+                const response = await fetch(`${API_URL}/tenants/usage`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Tenant-Slug': TENANT_SLUG
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ TEST EXITOSO\n\n' + 
+                        'Uso del Plan:\n' +
+                        JSON.stringify(data, null, 2);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '❌ TEST FALLIDO\n\n' + 
+                        'Error: ' + (data.message || 'Error desconocido') + '\n\n' +
+                        JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN TEST\n\n' + error.message;
+            }
+        }
+
+        async function testFullDashboard() {
+            const resultDiv = document.getElementById('result4');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = '⏳ Ejecutando test completo...\n\n';
+
+            const tests = [
+                { name: 'Estadísticas CN', url: '/consent-templates/stats/overview' },
+                { name: 'Estadísticas HC', url: '/medical-records/stats/overview' },
+                { name: 'Uso del Plan', url: '/tenants/usage' },
+                { name: 'Lista de Tenants', url: '/tenants' },
+                { name: 'Lista de HC', url: '/medical-records' }
+            ];
+
+            let results = [];
+            let allPassed = true;
+
+            try {
+                const token = await getAuthToken();
+
+                for (const test of tests) {
+                    resultDiv.textContent += `\n🔄 Probando: ${test.name}...`;
+                    
+                    try {
+                        const response = await fetch(`${API_URL}${test.url}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'X-Tenant-Slug': TENANT_SLUG
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            results.push(`✅ ${test.name}: OK`);
+                        } else {
+                            results.push(`❌ ${test.name}: ${data.message || 'Error'}`);
+                            allPassed = false;
+                        }
+                    } catch (error) {
+                        results.push(`❌ ${test.name}: ${error.message}`);
+                        allPassed = false;
+                    }
+                }
+
+                resultDiv.className = allPassed ? 'result success' : 'result error';
+                resultDiv.textContent = (allPassed ? '✅ TODOS LOS TESTS PASARON' : '⚠️ ALGUNOS TESTS FALLARON') + '\n\n' +
+                    results.join('\n') + '\n\n' +
+                    (allPassed ? '🎉 ¡Todos los errores han sido corregidos!' : '⚠️ Revisa los errores arriba');
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ ERROR EN TEST COMPLETO\n\n' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

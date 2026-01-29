@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Limpieza de Caché - Archivo en Linea</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .icon {
+            font-size: 64px;
+            margin: 20px 0;
+        }
+        .message {
+            font-size: 18px;
+            color: #666;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .success {
+            color: #10B981;
+            font-weight: bold;
+            font-size: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .step {
+            text-align: left;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .step.completed {
+            border-left-color: #10B981;
+            background: #f0fdf4;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .step-detail {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔄</div>
+        <h1>Limpieza de Caché del Sistema</h1>
+        <p class="message">
+            Esta herramienta limpiará completamente el caché de tu navegador para asegurar 
+            que veas la versión más reciente del sistema con todos los cambios aplicados.
+        </p>
+
+        <div class="progress">
+            <div class="progress-bar" id="progress">0%</div>
+        </div>
+
+        <div id="steps"></div>
+
+        <div id="result"></div>
+
+        <button id="clearBtn" onclick="startClearCache()">Iniciar Limpieza</button>
+        <button id="reloadBtn" onclick="goToLogin()" style="display:none;">Ir al Login</button>
+    </div>
+
+    <script>
+        const steps = [
+            { title: 'Limpiando localStorage', action: () => localStorage.clear() },
+            { title: 'Limpiando sessionStorage', action: () => sessionStorage.clear() },
+            { title: 'Limpiando cookies', action: clearCookies },
+            { title: 'Limpiando caché del navegador', action: clearBrowserCache },
+            { title: 'Limpiando Service Workers', action: clearServiceWorkers },
+            { title: 'Finalizando', action: () => new Promise(resolve => setTimeout(resolve, 500)) }
+        ];
+
+        function clearCookies() {
+            return new Promise(resolve => {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i];
+                    const eqPos = cookie.indexOf("=");
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                }
+                resolve();
+            });
+        }
+
+        async function clearBrowserCache() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+            }
+        }
+
+        async function clearServiceWorkers() {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(
+                    registrations.map(registration => registration.unregister())
+                );
+            }
+        }
+
+        async function startClearCache() {
+            const btn = document.getElementById('clearBtn');
+            const stepsDiv = document.getElementById('steps');
+            const resultDiv = document.getElementById('result');
+            const progressBar = document.getElementById('progress');
+            
+            btn.disabled = true;
+            stepsDiv.innerHTML = '';
+            resultDiv.innerHTML = '';
+
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                const progress = Math.round(((i + 1) / steps.length) * 100);
+                
+                // Crear elemento de paso
+                const stepEl = document.createElement('div');
+                stepEl.className = 'step';
+                stepEl.id = `step-${i}`;
+                stepEl.innerHTML = `
+                    <div class="step-title">${step.title}...</div>
+                    <div class="step-detail">En progreso</div>
+                `;
+                stepsDiv.appendChild(stepEl);
+
+                // Actualizar barra de progreso
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+
+                try {
+                    // Ejecutar acción
+                    await step.action();
+                    
+                    // Marcar como completado
+                    stepEl.className = 'step completed';
+                    stepEl.querySelector('.step-detail').textContent = '✓ Completado';
+                    
+                    // Pequeña pausa para que se vea el progreso
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (error) {
+                    console.error(`Error en paso ${i}:`, error);
+                    stepEl.querySelector('.step-detail').textContent = '⚠ Error (continuando)';
+                }
+            }
+
+            // Mostrar resultado
+            resultDiv.innerHTML = `
+                <div class="success">
+                    ✓ Limpieza completada exitosamente
+                </div>
+                <p class="message">
+                    El caché ha sido limpiado. Haz clic en el botón de abajo para ir al login 
+                    y ver los cambios aplicados.
+                </p>
+            `;
+
+            document.getElementById('reloadBtn').style.display = 'inline-block';
+        }
+
+        function goToLogin() {
+            // Forzar recarga completa sin caché
+            window.location.href = '/?t=' + Date.now();
+        }
+    </script>
+</body>
+</html>

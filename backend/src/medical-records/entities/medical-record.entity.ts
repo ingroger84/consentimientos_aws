@@ -25,42 +25,42 @@ export class MedicalRecord {
   id: string;
 
   // Relaciones
-  @Column()
+  @Column({ name: 'tenant_id' })
   tenantId: string;
 
   @ManyToOne(() => Tenant)
-  @JoinColumn({ name: 'tenantId' })
+  @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
-  @Column()
+  @Column({ name: 'client_id' })
   clientId: string;
 
   @ManyToOne(() => Client)
-  @JoinColumn({ name: 'clientId' })
+  @JoinColumn({ name: 'client_id' })
   client: Client;
 
-  @Column({ nullable: true })
+  @Column({ name: 'branch_id', nullable: true })
   branchId: string;
 
   @ManyToOne(() => Branch)
-  @JoinColumn({ name: 'branchId' })
+  @JoinColumn({ name: 'branch_id' })
   branch: Branch;
 
   // Datos básicos
-  @Column({ unique: true })
+  @Column({ name: 'record_number', unique: true })
   recordNumber: string;
 
-  @Column()
+  @Column({ name: 'admission_date' })
   admissionDate: Date;
 
-  @Column()
+  @Column({ name: 'admission_type' })
   admissionType: string; // consulta, urgencia, hospitalización
 
   // Estado
-  @Column({ default: 'active' })
+  @Column({ name: 'status', default: 'active' })
   status: string; // active, closed, archived
 
-  @Column({ default: false })
+  @Column({ name: 'is_locked', default: false })
   isLocked: boolean;
 
   // Relaciones con componentes de la HC
@@ -90,27 +90,27 @@ export class MedicalRecord {
   consents: MedicalRecordConsent[];
 
   // Auditoría
-  @Column()
+  @Column({ name: 'created_by' })
   createdBy: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'createdBy' })
+  @JoinColumn({ name: 'created_by' })
   creator: User;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ name: 'closed_at', nullable: true })
   closedAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ name: 'closed_by', nullable: true })
   closedBy: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'closedBy' })
+  @JoinColumn({ name: 'closed_by' })
   closer: User;
 
   // Validaciones

@@ -13,29 +13,37 @@ export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess 
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    cie10Code: '',
-    cie10Description: '',
+    code: '',
+    description: '',
     diagnosisType: 'principal',
-    isConfirmed: true,
+    notes: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.cie10Code.trim() || !formData.cie10Description.trim()) {
-      toast.error('El código CIE-10 y la descripción son requeridos');
+    if (!formData.description.trim()) {
+      toast.error('La descripción del diagnóstico es requerida');
       return;
     }
 
     try {
       setLoading(true);
-      await medicalRecordsService.addDiagnosis(medicalRecordId, {
-        cie10Code: formData.cie10Code,
-        cie10Description: formData.cie10Description,
-        diagnosisType: formData.diagnosisType as 'principal' | 'relacionado' | 'complicacion',
-        isConfirmed: formData.isConfirmed,
-        isPresumptive: !formData.isConfirmed,
-      });
+      
+      const payload: any = {
+        diagnosisType: formData.diagnosisType,
+        description: formData.description,
+      };
+      
+      if (formData.code) {
+        payload.code = formData.code;
+      }
+      
+      if (formData.notes) {
+        payload.notes = formData.notes;
+      }
+      
+      await medicalRecordsService.addDiagnosis(medicalRecordId, payload);
       toast.success('Diagnóstico agregado exitosamente');
       onSuccess();
       onClose();
@@ -62,15 +70,14 @@ export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Código CIE-10 <span className="text-red-500">*</span>
+              Código CIE-10
             </label>
             <input
               type="text"
-              value={formData.cie10Code}
-              onChange={(e) => setFormData({ ...formData, cie10Code: e.target.value.toUpperCase() })}
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: J00, K29.7, I10"
-              required
             />
             <p className="text-xs text-gray-500 mt-1">
               Ingresa el código de la Clasificación Internacional de Enfermedades
@@ -82,8 +89,8 @@ export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess 
               Descripción del Diagnóstico <span className="text-red-500">*</span>
             </label>
             <textarea
-              value={formData.cie10Description}
-              onChange={(e) => setFormData({ ...formData, cie10Description: e.target.value })}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Ej: Rinofaringitis aguda (resfriado común)"
@@ -107,18 +114,16 @@ export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess 
           </div>
 
           <div>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isConfirmed}
-                onChange={(e) => setFormData({ ...formData, isConfirmed: e.target.checked })}
-                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">Diagnóstico confirmado</span>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Notas Adicionales
             </label>
-            <p className="text-xs text-gray-500 mt-1 ml-6">
-              Si no está marcado, se considerará como diagnóstico presuntivo
-            </p>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Observaciones o detalles adicionales"
+            />
           </div>
 
           <div className="flex gap-3 pt-4">

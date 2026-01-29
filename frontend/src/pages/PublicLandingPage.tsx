@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   FileText, Users, Building2, Shield, CheckCircle, Clock, Mail, Cloud,
-  BarChart3, Lock, Zap, ArrowRight, Check, Menu, X, Star,
+  BarChart3, Lock, Zap, Check, Menu, X, Star,
   Smartphone, Globe, HeadphonesIcon, ClipboardList
 } from 'lucide-react';
 import PricingSection from '@/components/landing/PricingSection';
@@ -11,6 +11,19 @@ export default function PublicLandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [logoUrl, setLogoUrl] = useState<string>('');
+
+  // Cargar logo del super admin
+  useState(() => {
+    fetch('https://archivoenlinea.com/api/settings/logo')
+      .then(res => res.json())
+      .then(data => {
+        if (data.logoUrl) {
+          setLogoUrl(data.logoUrl);
+        }
+      })
+      .catch(err => console.error('Error cargando logo:', err));
+  });
 
   const handleSelectPlan = (plan: any) => {
     setSelectedPlan(plan);
@@ -151,7 +164,19 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="Archivo en Línea" 
+                  className="h-24 w-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.classList.remove('hidden');
+                  }}
+                />
+              ) : null}
+              <span className={logoUrl ? 'hidden' : 'text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent'}>
                 Archivo en Línea
               </span>
             </div>
@@ -638,7 +663,7 @@ export default function PublicLandingPage() {
                 <li><a href="#" className="hover:text-white transition">Documentación</a></li>
                 <li><a href="mailto:soporte@archivoenlinea.com" className="hover:text-white transition">Contacto</a></li>
                 <li><a href="#" className="hover:text-white transition">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition">Estado del Sistema</a></li>
+                <li><a href="/status" className="hover:text-white transition">Estado del Sistema</a></li>
               </ul>
             </div>
             <div>

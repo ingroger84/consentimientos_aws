@@ -14,62 +14,30 @@ export class CreateAnamnesisDto {
   @IsOptional()
   currentIllness?: string;
 
-  @IsObject()
+  @IsString()
   @IsOptional()
-  personalHistory?: Record<string, any>;
+  personalHistory?: string;
 
-  @IsObject()
+  @IsString()
   @IsOptional()
-  familyHistory?: Record<string, any>;
+  familyHistory?: string;
 
-  @IsObject()
+  @IsString()
   @IsOptional()
-  habits?: Record<string, any>;
+  allergies?: string;
 
-  @IsObject()
+  @IsString()
   @IsOptional()
-  gynecologicalHistory?: Record<string, any>;
-
-  @IsObject()
-  @IsOptional()
-  systemsReview?: Record<string, any>;
+  currentMedications?: string;
 }
 
 export class UpdateAnamnesisDto extends PartialType(CreateAnamnesisDto) {}
 
 // Physical Exam DTOs
 export class CreatePhysicalExamDto {
-  @IsNumber()
+  @IsObject()
   @IsOptional()
-  bloodPressureSystolic?: number;
-
-  @IsNumber()
-  @IsOptional()
-  bloodPressureDiastolic?: number;
-
-  @IsNumber()
-  @IsOptional()
-  heartRate?: number;
-
-  @IsNumber()
-  @IsOptional()
-  respiratoryRate?: number;
-
-  @IsNumber()
-  @IsOptional()
-  temperature?: number;
-
-  @IsNumber()
-  @IsOptional()
-  oxygenSaturation?: number;
-
-  @IsNumber()
-  @IsOptional()
-  weight?: number;
-
-  @IsNumber()
-  @IsOptional()
-  height?: number;
+  vitalSigns?: Record<string, any>;
 
   @IsString()
   @IsOptional()
@@ -77,11 +45,11 @@ export class CreatePhysicalExamDto {
 
   @IsObject()
   @IsOptional()
-  physicalExamData?: Record<string, any>;
+  systemsReview?: Record<string, any>;
 
   @IsString()
   @IsOptional()
-  otherFindings?: string;
+  findings?: string;
 }
 
 export class UpdatePhysicalExamDto extends PartialType(CreatePhysicalExamDto) {}
@@ -89,23 +57,19 @@ export class UpdatePhysicalExamDto extends PartialType(CreatePhysicalExamDto) {}
 // Diagnosis DTOs
 export class CreateDiagnosisDto {
   @IsString()
-  cie10Code: string;
-
-  @IsString()
-  cie10Description: string;
-
-  @IsString()
-  @IsOptional()
   @IsIn(['principal', 'relacionado', 'complicacion'])
-  diagnosisType?: string;
+  diagnosisType: string;
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  isConfirmed?: boolean;
+  code?: string;
 
-  @IsBoolean()
+  @IsString()
+  description: string;
+
+  @IsString()
   @IsOptional()
-  isPresumptive?: boolean;
+  notes?: string;
 }
 
 export class UpdateDiagnosisDto extends PartialType(CreateDiagnosisDto) {}
@@ -130,11 +94,6 @@ export class CreateEvolutionDto {
   @IsString()
   @IsOptional()
   plan?: string;
-
-  @IsString()
-  @IsOptional()
-  @IsIn(['evolution', 'interconsulta', 'epicrisis'])
-  noteType?: string;
 }
 
 export class UpdateEvolutionDto extends PartialType(CreateEvolutionDto) {}

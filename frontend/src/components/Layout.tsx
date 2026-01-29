@@ -351,7 +351,7 @@ export default function Layout() {
               <img
                 src={getResourceUrl(settings.logoUrl)}
                 alt={settings.companyName}
-                className="h-8 object-contain"
+                className="h-16 object-contain"
               />
             ) : (
               <h1 className="text-lg font-bold text-white">{settings.companyName}</h1>
@@ -396,7 +396,7 @@ export default function Layout() {
               <img
                 src={getResourceUrl(settings.logoUrl)}
                 alt={settings.companyName}
-                className="h-10 object-contain"
+                className="h-16 object-contain"
               />
             ) : (
               <h1 className="text-xl font-bold text-white">{settings.companyName}</h1>
