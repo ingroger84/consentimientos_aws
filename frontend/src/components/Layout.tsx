@@ -407,9 +407,6 @@ export default function Layout() {
           <nav className="flex-1 px-4 py-6 space-y-4 overflow-y-auto">
             {filteredSections.map((section) => {
               const isSectionCollapsed = collapsedSections[section.title] ?? !section.defaultOpen;
-              const hasActiveItem = section.items.some(item => 
-                location.pathname === item.href || location.pathname.startsWith(item.href + '/')
-              );
 
               return (
                 <div key={section.title} className="space-y-1">

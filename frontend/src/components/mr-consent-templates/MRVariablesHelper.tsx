@@ -29,7 +29,7 @@ export default function MRVariablesHelper({ onInsertVariable }: MRVariablesHelpe
   const loadVariables = async () => {
     try {
       const data = await mrConsentTemplateService.getAvailableVariables();
-      setVariables(data);
+      setVariables(data as unknown as GroupedVariables);
     } catch (error) {
       console.error('Error al cargar variables:', error);
     } finally {

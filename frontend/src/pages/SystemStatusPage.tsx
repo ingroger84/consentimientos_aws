@@ -112,18 +112,18 @@ export default function SystemStatusPage() {
     }
   };
 
-  const formatUptime = (seconds: number) => {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor((seconds % 86400) / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+  // const formatUptime = (seconds: number) => {
+  //   const days = Math.floor(seconds / 86400);
+  //   const hours = Math.floor((seconds % 86400) / 3600);
+  //   const minutes = Math.floor((seconds % 3600) / 60);
     
-    const parts = [];
-    if (days > 0) parts.push(`${days} día${days > 1 ? 's' : ''}`);
-    if (hours > 0) parts.push(`${hours} hora${hours > 1 ? 's' : ''}`);
-    if (minutes > 0) parts.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
+  //   const parts = [];
+  //   if (days > 0) parts.push(`${days} día${days > 1 ? 's' : ''}`);
+  //   if (hours > 0) parts.push(`${hours} hora${hours > 1 ? 's' : ''}`);
+  //   if (minutes > 0) parts.push(`${minutes} minuto${minutes > 1 ? 's' : ''}`);
     
-    return parts.join(', ') || 'Menos de 1 minuto';
-  };
+  //   return parts.join(', ') || 'Menos de 1 minuto';
+  // };
 
   const calculateUptime = (seconds: number) => {
     const percentage = Math.min(99.99, (seconds / (30 * 24 * 60 * 60)) * 100);

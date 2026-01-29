@@ -25,7 +25,6 @@ interface ConsentFormData {
 
 export default function GenerateConsentModal({
   medicalRecordId,
-  clientId,
   clientName,
   onClose,
   onSuccess,

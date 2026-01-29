@@ -79,6 +79,7 @@ deploy-server.sh
 
 # PM2 ecosystem with credentials (use ecosystem.config.example.js instead)
 # ecosystem.config.js should be configured on server with environment variables
+ecosystem.config.production.js
 
 # Scripts con credenciales (no subir)
 scripts/deploy-aws-auto.ps1
