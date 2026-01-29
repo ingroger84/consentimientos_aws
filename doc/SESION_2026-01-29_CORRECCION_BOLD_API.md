@@ -27,30 +27,26 @@ Sin embargo, este formato estaba causando el error "Invalid key=value pair".
 
 **Archivo**: `backend/src/payments/bold.service.ts`
 
-**Cambio realizado**:
+**Formato CORRECTO según documentación oficial de Bold**:
 ```typescript
-// ANTES (incorrecto)
 this.apiClient = axios.create({
   baseURL: apiUrl,
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `x-api-key ${this.apiKey}`,
-  },
-  timeout: 30000,
-});
-
-// DESPUÉS (correcto)
-this.apiClient = axios.create({
-  baseURL: apiUrl,
-  headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': this.apiKey, // Bold usa x-api-key como header separado
+    'Authorization': `x-api-key ${this.apiKey}`, // Bold usa "Authorization: x-api-key <llave>"
   },
   timeout: 30000,
 });
 ```
 
-**Explicación**: En lugar de usar `Authorization: x-api-key <llave>`, se usa directamente `x-api-key: <llave>` como un header separado.
+**Explicación**: Según la documentación oficial de Bold en https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion#autenticaci%C3%B3n-de-peticionesLa, el formato correcto es:
+
+```
+Llave: Authorization
+Valor: x-api-key <llave_de_identidad>
+```
+
+Esto significa que el header `Authorization` debe contener el valor `x-api-key` seguido de un espacio y la llave de identidad. **NO** es un header separado llamado `x-api-key`.
 
 ### 2. Corrección de URLs de Callback
 
@@ -77,12 +73,13 @@ Se agregó `ecosystem.config.production.js` al `.gitignore` para evitar que las 
 
 ## Pasos de Implementación
 
-1. ✅ Modificar `bold.service.ts` para usar `x-api-key` como header separado
-2. ✅ Actualizar URLs de callback en `ecosystem.config.production.js`
-3. ✅ Agregar `ecosystem.config.production.js` al `.gitignore`
-4. ✅ Compilar backend: `NODE_OPTIONS='--max-old-space-size=2048' npm run build`
-5. ✅ Reiniciar PM2: `pm2 restart datagree`
-6. ✅ Actualizar GitHub (versión 22.0.0)
+1. ✅ Revisar documentación oficial de Bold
+2. ✅ Corregir formato de autenticación en `bold.service.ts` a `Authorization: x-api-key <llave>`
+3. ✅ Actualizar URLs de callback en `ecosystem.config.js` (en servidor)
+4. ✅ Agregar `ecosystem.config.production.js` al `.gitignore`
+5. ✅ Compilar backend: `NODE_OPTIONS='--max-old-space-size=2048' npm run build`
+6. ✅ Reiniciar PM2: `pm2 restart datagree --update-env`
+7. ✅ Actualizar GitHub (versión 22.0.1)
 
 ## Configuración de Bold
 
@@ -108,17 +105,19 @@ BOLD_API_URL: 'https://api.online.payments.bold.co'
 ## Notas Técnicas
 
 ### Formato de Autenticación Bold
-Según la documentación oficial de Bold, el formato debería ser:
+Según la documentación oficial de Bold (https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion#autenticaci%C3%B3n-de-peticionesLa), el formato correcto es:
+
 ```
-Authorization: x-api-key <llave_de_identidad>
+Header: Authorization
+Valor: x-api-key <llave_de_identidad>
 ```
 
-Sin embargo, en la práctica, Bold (que usa AWS API Gateway) requiere:
+Ejemplo con la llave `DZSkDqh2iWmpYQg204C2fLigQerhPGXAcm5WyujxwYH`:
 ```
-x-api-key: <llave_de_identidad>
+Authorization: x-api-key DZSkDqh2iWmpYQg204C2fLigQerhPGXAcm5WyujxwYH
 ```
 
-Este es un header separado, no parte del header `Authorization`.
+**Importante**: Es el header `Authorization` con el valor `x-api-key <llave>`, NO un header separado llamado `x-api-key`.
 
 ### Problema del callback_url
 En los logs se observó que el `callback_url` se está enviando como "undefined":
@@ -132,11 +131,11 @@ Esto indica que falta configurar la variable de entorno `BOLD_SUCCESS_URL` corre
 
 ## Versión
 - **Versión anterior**: 20.0.3
-- **Versión actual**: 22.0.0
-- **Tipo de cambio**: MAJOR (cambio en autenticación de API externa)
+- **Versión actual**: 22.0.1
+- **Tipo de cambio**: PATCH (corrección de formato de autenticación)
 
 ## Estado
-🟡 **EN PRUEBAS** - Cambios implementados, pendiente prueba de pago real
+🟢 **LISTO PARA PRUEBAS** - Formato de autenticación corregido según documentación oficial de Bold
 
 ## Referencias
 - [Documentación Bold API](https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion)

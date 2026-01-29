@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 22.0.1
+## Versión Actual: 22.0.2
 **Fecha:** 2026-01-28
 **Tipo de Cambio:** PATCH
 
@@ -18,13 +18,11 @@
 
 ## Historial de Versiones
 
+### 22.0.2 - 2026-01-28 [PATCH]
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 22.0.1 - 2026-01-28 [PATCH]
 - Backend: 1 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
-
-### 22.0.0 - 2026-01-28 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
 ---
