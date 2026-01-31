@@ -32,34 +32,34 @@ export default function PublicLandingPage() {
 
   const features = [
     {
-      icon: ClipboardList,
-      title: 'Historias Clínicas Electrónicas',
-      description: 'Sistema completo de HC digitales con anamnesis, exámenes físicos, diagnósticos CIE-10 y evoluciones SOAP.',
-      color: 'text-blue-600',
-      badge: 'NUEVO'
-    },
-    {
       icon: FileText,
-      title: 'Consentimientos Informados',
-      description: 'Crea, gestiona y envía consentimientos informados de forma digital con firma electrónica y validez legal.',
+      title: 'Consentimientos Digitales',
+      description: 'Crea, gestiona y envía consentimientos informados de forma digital con firma electrónica y validez legal para cualquier tipo de negocio.',
       color: 'text-green-600'
     },
     {
+      icon: ClipboardList,
+      title: 'Historias Clínicas Electrónicas',
+      description: 'Sistema completo de HC digitales con anamnesis, exámenes físicos, diagnósticos CIE-10 y evoluciones SOAP para el sector salud.',
+      color: 'text-blue-600',
+      badge: 'SECTOR SALUD'
+    },
+    {
       icon: Users,
-      title: 'Gestión de Pacientes',
-      description: 'Base de datos centralizada de pacientes con historial completo, búsqueda avanzada y trazabilidad total.',
+      title: 'Gestión de Clientes',
+      description: 'Base de datos centralizada de clientes con historial completo, búsqueda avanzada y trazabilidad total de documentos.',
       color: 'text-purple-600'
     },
     {
       icon: Building2,
       title: 'Multi-Sede',
-      description: 'Gestiona múltiples sedes o sucursales desde una sola plataforma con asignación de usuarios por sede.',
+      description: 'Gestiona múltiples sedes o sucursales desde una sola plataforma con asignación de usuarios por ubicación.',
       color: 'text-orange-600'
     },
     {
       icon: Lock,
       title: 'Firma Digital',
-      description: 'Captura de firma digital integrada en HC y consentimientos con validación legal y trazabilidad.',
+      description: 'Captura de firma digital integrada con validación legal, trazabilidad completa y cumplimiento normativo.',
       color: 'text-pink-600'
     },
     {
@@ -70,26 +70,27 @@ export default function PublicLandingPage() {
     },
     {
       icon: BarChart3,
-      title: 'Reportes Avanzados',
-      description: 'Visualiza métricas y estadísticas de HC, consentimientos y pacientes en tiempo real con dashboards.',
+      title: 'Reportes y Estadísticas',
+      description: 'Visualiza métricas y estadísticas de consentimientos, clientes y documentos en tiempo real con dashboards.',
       color: 'text-indigo-600'
     },
     {
       icon: Shield,
-      title: 'Cumplimiento Normativo',
-      description: 'Cumple con normativas de salud digital, protección de datos y consentimientos informados automáticamente.',
+      title: 'Cumplimiento Legal',
+      description: 'Cumple con normativas de protección de datos, consentimientos informados y documentación legal automáticamente.',
       color: 'text-emerald-600'
     }
   ];
 
   const benefits = [
-    'Historias clínicas y consentimientos en un solo lugar',
+    'Consentimientos digitales para cualquier tipo de negocio',
+    'Módulo especializado de historias clínicas para sector salud',
     'Elimina el uso de papel y archivos físicos',
     'Reduce hasta 80% el tiempo de gestión administrativa',
     'Acceso desde cualquier dispositivo con internet',
     'Búsqueda rápida de documentos en segundos',
-    'Trazabilidad completa de HC y consentimientos',
-    'Cumplimiento normativo garantizado',
+    'Trazabilidad completa de consentimientos y documentos',
+    'Cumplimiento normativo y legal garantizado',
     'Personalización con tu marca corporativa',
     'Soporte técnico especializado 24/7'
   ];
@@ -103,33 +104,33 @@ export default function PublicLandingPage() {
     },
     {
       title: 'Centros de Estética y Belleza',
-      description: 'Administra historias clínicas estéticas, consentimientos para tratamientos y procedimientos, uso de imagen y seguimiento de evolución.',
+      description: 'Gestiona consentimientos de tratamientos estéticos, procedimientos, uso de imagen y seguimiento de clientes con historias clínicas estéticas.',
       icon: '💆',
-      examples: ['HC estéticas', 'Consentimientos de procedimientos', 'Fotografías de evolución', 'Seguimiento de tratamientos']
-    },
-    {
-      title: 'Clínicas Dentales',
-      description: 'Gestiona historias clínicas odontológicas completas, consentimientos de tratamientos dentales, ortodoncias y cirugías bucales.',
-      icon: '🦷',
-      examples: ['HC odontológicas', 'Tratamientos dentales', 'Ortodoncias', 'Cirugías bucales']
+      examples: ['Consentimientos de procedimientos', 'HC estéticas opcionales', 'Fotografías de evolución', 'Seguimiento de tratamientos']
     },
     {
       title: 'Gimnasios y Centros Deportivos',
-      description: 'Controla historias clínicas deportivas, consentimientos de responsabilidad, evaluaciones físicas y programas de entrenamiento.',
+      description: 'Administra consentimientos de responsabilidad, evaluaciones físicas, programas de entrenamiento y documentación legal de miembros.',
       icon: '🏋️',
-      examples: ['Evaluaciones físicas', 'Consentimientos deportivos', 'Programas de entrenamiento', 'Seguimiento de lesiones']
+      examples: ['Consentimientos deportivos', 'Evaluaciones físicas', 'Programas de entrenamiento', 'Liberación de responsabilidad']
     },
     {
       title: 'Spas y Centros de Bienestar',
-      description: 'Gestiona historias clínicas de bienestar, consentimientos de servicios, tratamientos terapéuticos y políticas de privacidad.',
+      description: 'Gestiona consentimientos de servicios, tratamientos terapéuticos, políticas de privacidad y documentación de clientes.',
       icon: '🧘',
-      examples: ['HC de bienestar', 'Tratamientos de spa', 'Terapias alternativas', 'Políticas de privacidad']
+      examples: ['Consentimientos de servicios', 'Tratamientos de spa', 'Terapias alternativas', 'Políticas de privacidad']
     },
     {
-      title: 'Centros de Fisioterapia',
-      description: 'Administra historias clínicas de rehabilitación, consentimientos de tratamientos, evoluciones y planes terapéuticos.',
-      icon: '🩺',
-      examples: ['HC de rehabilitación', 'Planes terapéuticos', 'Evoluciones', 'Seguimiento de progreso']
+      title: 'Empresas y Negocios',
+      description: 'Administra consentimientos de uso de datos, políticas de privacidad, acuerdos comerciales y documentación legal con clientes.',
+      icon: '🏢',
+      examples: ['Consentimientos de datos', 'Políticas de privacidad', 'Acuerdos comerciales', 'Documentación legal']
+    },
+    {
+      title: 'Centros Educativos',
+      description: 'Gestiona consentimientos de padres, autorizaciones de actividades, uso de imagen y documentación de estudiantes.',
+      icon: '🎓',
+      examples: ['Autorizaciones de padres', 'Uso de imagen', 'Actividades extracurriculares', 'Políticas del centro']
     }
   ];
 
@@ -228,30 +229,34 @@ export default function PublicLandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <Zap className="w-4 h-4" />
-                <span>Plataforma Integral de Gestión Clínica Digital</span>
+                <span>Plataforma de Gestión de Consentimientos Digitales</span>
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                Historias Clínicas +
-                <span className="text-primary-600"> Consentimientos</span>
+                Consentimientos Digitales
+                <span className="text-primary-600"> para tu Negocio</span>
               </h1>
               <p className="text-xl text-gray-600 mb-6">
-                La plataforma SaaS completa para gestionar historias clínicas electrónicas, consentimientos informados y pacientes. 
-                Todo en un solo lugar, 100% digital y seguro.
+                La plataforma SaaS completa para gestionar consentimientos informados de forma digital. 
+                Ideal para cualquier negocio que requiera documentación legal con clientes.
+                <span className="block mt-2 font-semibold text-primary-700">
+                  + Módulo especializado de Historias Clínicas para el sector salud
+                </span>
               </p>
               
               {/* Pills de módulos */}
               <div className="flex flex-wrap gap-3 mb-8">
-                <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
-                  <ClipboardList className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-900">Historias Clínicas</span>
-                </div>
                 <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
                   <FileText className="w-5 h-5 text-green-600" />
                   <span className="text-sm font-medium text-green-900">Consentimientos</span>
                 </div>
+                <div className="flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
+                  <ClipboardList className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Historias Clínicas</span>
+                  <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">Salud</span>
+                </div>
                 <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-full border border-purple-200">
                   <Users className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-900">Gestión de Pacientes</span>
+                  <span className="text-sm font-medium text-purple-900">Gestión de Clientes</span>
                 </div>
               </div>
 
@@ -322,7 +327,7 @@ export default function PublicLandingPage() {
             </div>
             <div>
               <p className="text-4xl font-bold mb-2">100K+</p>
-              <p className="text-primary-100">HC y CN Gestionados</p>
+              <p className="text-primary-100">Consentimientos Gestionados</p>
             </div>
             <div>
               <p className="text-4xl font-bold mb-2">99.9%</p>
@@ -336,67 +341,32 @@ export default function PublicLandingPage() {
         </div>
       </section>
 
-      {/* Modules Section - NUEVO */}
+      {/* Modules Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              3 Módulos Integrados en 1 Plataforma
+              2 Tipos de Consentimientos + Módulo de Salud
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Todo lo que necesitas para gestionar tu clínica de forma profesional y eficiente
+              Elige el tipo de consentimiento que necesitas según tu negocio. Para el sector salud, incluimos un módulo completo de historias clínicas.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Módulo 1: Historias Clínicas */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
-                <ClipboardList className="w-8 h-8 text-white" />
-              </div>
-              <div className="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
-                NUEVO
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Historias Clínicas Electrónicas
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Sistema completo de historias clínicas digitales con todos los componentes necesarios para una gestión profesional.
-              </p>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Anamnesis completa con antecedentes</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Exámenes físicos y signos vitales</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Diagnósticos con códigos CIE-10</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Evoluciones en formato SOAP</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Firma digital integrada</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Módulo 2: Consentimientos */}
+            {/* Módulo 1: Consentimientos Convencionales */}
             <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-green-200">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
                 <FileText className="w-8 h-8 text-white" />
               </div>
+              <div className="inline-block bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                PARA TODOS
+              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Consentimientos Informados
+                Consentimientos Convencionales
               </h3>
               <p className="text-gray-600 mb-6">
-                Gestión completa de consentimientos con firma digital, PDFs profesionales y validez legal garantizada.
+                Ideal para cualquier negocio o empresa que requiera que sus clientes firmen consentimientos, acuerdos o documentación legal.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
@@ -417,44 +387,133 @@ export default function PublicLandingPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Trazabilidad completa</span>
+                  <span className="text-sm text-gray-700">Gestión de clientes</span>
                 </li>
               </ul>
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 font-medium mb-2">Ideal para:</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Gimnasios</span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Spas</span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Empresas</span>
+                  <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Educación</span>
+                </div>
+              </div>
             </div>
 
-            {/* Módulo 3: Gestión de Pacientes */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-purple-200">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
-                <Users className="w-8 h-8 text-white" />
+            {/* Módulo 2: Consentimientos de HC */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-blue-300 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                  SECTOR SALUD
+                </span>
+              </div>
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <FileText className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Gestión de Pacientes
+                Consentimientos de Historias Clínicas
               </h3>
               <p className="text-gray-600 mb-6">
-                Base de datos centralizada de pacientes con historial completo y búsqueda avanzada para una gestión eficiente.
+                Consentimientos especializados vinculados a historias clínicas. Incluye firma digital, logos personalizados y generación automática de PDFs.
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Registro completo de datos</span>
+                  <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Vinculados a historias clínicas</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Búsqueda avanzada y filtros</span>
+                  <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Plantillas especializadas</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Historial de HC y CN</span>
+                  <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Logos personalizados por HC</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Gestión multi-sede</span>
+                  <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Firma digital integrada</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Reportes y estadísticas</span>
+                  <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">PDFs con formato médico</span>
                 </li>
               </ul>
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 font-medium mb-2">Ideal para:</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Clínicas</span>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Consultorios</span>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Estética</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Módulo 3: Historias Clínicas */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-purple-200">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg">
+                <ClipboardList className="w-8 h-8 text-white" />
+              </div>
+              <div className="inline-block bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                PLUS SALUD
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Historias Clínicas Electrónicas
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Módulo completo de historias clínicas digitales con todos los componentes necesarios para una gestión profesional del sector salud.
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Anamnesis completa</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Exámenes físicos y signos vitales</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Diagnósticos CIE-10</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Evoluciones SOAP</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm text-gray-700">Gestión de pacientes</span>
+                </li>
+              </ul>
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 font-medium mb-2">Incluido en planes:</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Profesional</span>
+                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Empresarial</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Nota informativa */}
+          <div className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-2">
+                  ¿Qué tipo de consentimiento necesito?
+                </h4>
+                <p className="text-gray-700 mb-3">
+                  <strong>Consentimientos Convencionales:</strong> Para cualquier negocio que requiera que sus clientes firmen documentos legales, acuerdos o autorizaciones.
+                </p>
+                <p className="text-gray-700">
+                  <strong>Consentimientos de HC + Historias Clínicas:</strong> Para clínicas, consultorios médicos, centros de estética o cualquier negocio del sector salud que necesite gestionar historias clínicas completas además de consentimientos.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -465,10 +524,10 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Características Completas para tu Clínica
+              Características Completas para tu Negocio
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Archivo en Línea incluye todas las herramientas necesarias para gestionar historias clínicas, consentimientos y pacientes de forma profesional
+              Archivo en Línea incluye todas las herramientas necesarias para gestionar consentimientos digitales de forma profesional, con módulo especializado para el sector salud
             </p>
           </div>
 
@@ -500,7 +559,8 @@ export default function PublicLandingPage() {
                 ¿Por qué elegir Archivo en Línea?
               </h2>
               <p className="text-lg text-gray-600 mb-8">
-                Transforma la gestión de tu clínica con nuestra plataforma integral que combina historias clínicas, consentimientos y gestión de pacientes en un solo lugar.
+                Transforma la gestión de tu negocio con nuestra plataforma integral de consentimientos digitales. 
+                Ideal para cualquier empresa, con módulo especializado para el sector salud.
               </p>
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
@@ -525,7 +585,7 @@ export default function PublicLandingPage() {
               <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
                 <Shield className="w-10 h-10 text-green-500 mb-3" />
                 <h3 className="text-2xl font-bold text-gray-900 mb-1">100%</h3>
-                <p className="text-gray-600">Cumplimiento normativo</p>
+                <p className="text-gray-600">Cumplimiento legal</p>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
                 <Cloud className="w-10 h-10 text-purple-500 mb-3" />
@@ -542,10 +602,10 @@ export default function PublicLandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Ideal para cualquier tipo de clínica o centro de salud
+              Soluciones para Múltiples Industrias
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Archivo en Línea se adapta perfectamente a las necesidades de diferentes especialidades médicas y centros de salud
+              Archivo en Línea se adapta a las necesidades de cualquier negocio que requiera gestionar consentimientos digitales, desde empresas hasta el sector salud
             </p>
           </div>
 
@@ -621,14 +681,17 @@ export default function PublicLandingPage() {
       <section className="py-20 px-4 bg-gradient-to-r from-primary-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            ¿Listo para digitalizar tu clínica?
+            ¿Listo para digitalizar tu negocio?
           </h2>
           <p className="text-xl text-primary-100 mb-8">
-            Únete a cientos de clínicas que ya confían en Archivo en Línea para gestionar sus historias clínicas, consentimientos y pacientes de forma profesional
+            Únete a cientos de empresas que ya confían en Archivo en Línea para gestionar sus consentimientos digitales de forma profesional. Prueba gratis por 7 días.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="#pricing" className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg">
-              Ver Planes y Precios
+              Comenzar Prueba Gratis
+            </a>
+            <a href="#features" className="btn bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg">
+              Ver Características
             </a>
           </div>
         </div>
@@ -641,7 +704,7 @@ export default function PublicLandingPage() {
             <div>
               <h3 className="text-white text-xl font-bold mb-4">Archivo en Línea</h3>
               <p className="text-sm mb-4">
-                La plataforma líder en gestión de consentimientos digitales para empresas de todos los tamaños.
+                Plataforma SaaS completa para gestión de consentimientos digitales. Ideal para cualquier negocio, con módulo especializado para el sector salud.
               </p>
               <div className="flex gap-4">
                 <Globe className="w-5 h-5" />

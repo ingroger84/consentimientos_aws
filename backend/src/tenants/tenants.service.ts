@@ -66,12 +66,18 @@ export class TenantsService {
       }
 
       // Establecer fecha de fin de trial según el plan
-      if (!createTenantDto.trialEndsAt && createTenantDto.status === TenantStatus.TRIAL) {
+      if (!createTenantDto.trialEndsAt) {
+        // Si no se proporciona trialEndsAt, establecerla según el plan
         // Plan gratuito: 7 días de trial
         // Otros planes: 30 días de trial
         const trialDays = createTenantDto.plan === 'free' ? 7 : 30;
         createTenantDto.trialEndsAt = new Date();
         createTenantDto.trialEndsAt.setDate(createTenantDto.trialEndsAt.getDate() + trialDays);
+        
+        // Si no se especifica status, establecer como TRIAL
+        if (!createTenantDto.status) {
+          createTenantDto.status = TenantStatus.TRIAL;
+        }
       }
 
       // Establecer día de facturación (día actual si no se especifica)
@@ -168,6 +174,8 @@ export class TenantsService {
       }
 
       // CREAR NOTIFICACIÓN EN EL SISTEMA
+      // DESHABILITADO: La tabla notifications no tiene la columna userId
+      /*
       try {
         await this.notificationsService.createNewAccountNotification(savedTenant);
         console.log('[TenantsService] Notificación creada en el sistema');
@@ -175,6 +183,7 @@ export class TenantsService {
         // No fallar la creación del tenant si la notificación falla
         console.error('[TenantsService] Error al crear notificación en el sistema:', notificationError.message);
       }
+      */
 
       return savedTenant;
     } catch (error) {

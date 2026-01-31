@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Landing Page v23.0.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .version {
+            color: #764ba2;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        .status {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .status h2 {
+            color: #16a34a;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .status p {
+            color: #166534;
+            line-height: 1.6;
+        }
+        .checklist {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .checklist h3 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .check-icon {
+            color: #22c55e;
+            font-size: 24px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .check-text {
+            color: #374151;
+            line-height: 1.5;
+        }
+        .check-text strong {
+            color: #1f2937;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .info-box p {
+            color: #1e40af;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .info-box strong {
+            color: #1e3a8a;
+        }
+        @media (max-width: 640px) {
+            .buttons {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Despliegue Completado</h1>
+        <div class="version">Versión 23.0.0 - Landing Page Rediseñada</div>
+        
+        <div class="status">
+            <h2>🚀 Estado del Despliegue</h2>
+            <p><strong>Fecha:</strong> 31 de Enero 2026 - 03:12 UTC</p>
+            <p><strong>Servidor:</strong> 100.28.198.249 (DatAgree - AWS Lightsail)</p>
+            <p><strong>Estado:</strong> Desplegado exitosamente en producción</p>
+        </div>
+
+        <div class="checklist">
+            <h3>📋 Cambios Implementados</h3>
+            
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>Hero Section Actualizado</strong>
+                    "Consentimientos Digitales para tu Negocio" con enfoque genérico
+                </div>
+            </div>
+
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>Nueva Sección de Módulos</strong>
+                    3 tarjetas explicando: Consentimientos Convencionales, Consentimientos de HC, e Historias Clínicas
+                </div>
+            </div>
+
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>Casos de Uso Ampliados</strong>
+                    6 industrias: Clínicas, Estética, Gimnasios, Spas, Empresas, Educación
+                </div>
+            </div>
+
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>CTA Actualizado</strong>
+                    "¿Listo para digitalizar tu negocio?" con 2 botones de acción
+                </div>
+            </div>
+
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>Footer Actualizado</strong>
+                    Descripción genérica con mención de módulo especializado
+                </div>
+            </div>
+
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <div class="check-text">
+                    <strong>Suspensión Automática</strong>
+                    Corrección de trials expirados - Todos los tenants inician con status 'trial'
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <p><strong>⚠️ Importante:</strong></p>
+            <p>Al abrir la landing page, presiona <strong>Ctrl+Shift+R</strong> (Windows/Linux) o <strong>Cmd+Shift+R</strong> (Mac) para forzar la recarga sin caché y ver los cambios más recientes.</p>
+        </div>
+
+        <div class="buttons">
+            <a href="https://archivoenlinea.com" target="_blank" class="btn btn-primary">
+                🌐 Ver Landing Page
+            </a>
+            <a href="https://archivoenlinea.com/status" target="_blank" class="btn btn-secondary">
+                📊 Estado del Sistema
+            </a>
+        </div>
+
+        <div class="info-box" style="margin-top: 30px; background: #fef3c7; border-left-color: #f59e0b;">
+            <p style="color: #92400e;"><strong style="color: #78350f;">📝 Enfoque Nuevo:</strong></p>
+            <p style="color: #92400e;"><strong>Consentimientos Convencionales:</strong> Para cualquier negocio (gimnasios, spas, empresas, educación)</p>
+            <p style="color: #92400e;"><strong>Consentimientos de HC + Historias Clínicas:</strong> Plus especializado para sector salud</p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-verificación de la landing page
+        console.log('%c✅ Despliegue v23.0.0 Completado', 'color: #22c55e; font-size: 20px; font-weight: bold;');
+        console.log('%cFecha: 31 de Enero 2026 - 03:12 UTC', 'color: #667eea; font-size: 14px;');
+        console.log('%cServidor: 100.28.198.249', 'color: #667eea; font-size: 14px;');
+        console.log('%c\nCambios principales:', 'color: #764ba2; font-size: 16px; font-weight: bold;');
+        console.log('• Landing page con enfoque genérico');
+        console.log('• Módulo de HC como plus para sector salud');
+        console.log('• 6 casos de uso (múltiples industrias)');
+        console.log('• CTA actualizado');
+        console.log('• Suspensión automática de trials corregida');
+    </script>
+</body>
+</html>

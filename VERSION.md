@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 23.0.0
-**Fecha:** 2026-01-28
-**Tipo de Cambio:** MAJOR
+## Versión Actual: 23.1.0
+**Fecha:** 2026-01-30
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,13 @@
 
 ## Historial de Versiones
 
-### 23.0.0 - 2026-01-28 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
+### 23.1.0 - 2026-01-30 [MINOR]
+- Backend: 3 archivo(s) modificado(s)
+- Frontend: 3 archivo(s) modificado(s)
+- Documentación: 7 archivo(s) modificado(s)
+- Scripts: 2 archivo(s) modificado(s)
 
-### 22.0.3 - 2026-01-28 [PATCH]
-- Mejoras y correcciones generales
+
 
 ---
 

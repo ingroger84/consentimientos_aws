@@ -101,7 +101,7 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
         plan: selectedPlan.id,
         planPrice: price,
         billingCycle: selectedPlan.billingCycle,
-        status: selectedPlan.id === 'free' ? 'active' : 'trial',
+        status: 'trial', // Todos los planes inician en trial
         adminUser: {
           name: formData.adminName,
           email: formData.adminEmail,
