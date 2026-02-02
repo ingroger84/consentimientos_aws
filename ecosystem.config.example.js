@@ -1,23 +1,3 @@
-/**
- * PM2 Ecosystem Configuration - EXAMPLE
- * 
- * IMPORTANTE: Este es un archivo de ejemplo. Para usar en producción:
- * 
- * 1. Copiar este archivo a ecosystem.config.js
- * 2. Configurar las variables de entorno en el servidor:
- *    export DB_PASSWORD="tu-password-seguro"
- *    export JWT_SECRET="tu-jwt-secret-seguro"
- *    export AWS_ACCESS_KEY_ID="tu-aws-access-key"
- *    export AWS_SECRET_ACCESS_KEY="tu-aws-secret-key"
- *    export SMTP_PASSWORD="tu-smtp-password"
- *    export BOLD_API_KEY="tu-bold-api-key"
- *    export BOLD_SECRET_KEY="tu-bold-secret-key"
- *    export BOLD_WEBHOOK_SECRET="tu-bold-webhook-secret"
- * 
- * 3. O crear un archivo .env en el servidor con estas variables
- * 4. Reiniciar PM2: pm2 restart datagree
- */
-
 module.exports = {
   apps: [
     {
@@ -30,53 +10,55 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3000,
         API_PREFIX: 'api',
-        BASE_DOMAIN: 'archivoenlinea.com',
+        BASE_DOMAIN: 'your-domain.com',
         
-        // Database
+        // Database Configuration
         DB_HOST: 'localhost',
         DB_PORT: 5432,
-        DB_USERNAME: 'datagree_admin',
-        DB_PASSWORD: process.env.DB_PASSWORD || 'change-this-password',
-        DB_DATABASE: 'consentimientos',
+        DB_USERNAME: 'your_db_user',
+        DB_PASSWORD: 'your_secure_db_password',
+        DB_DATABASE: 'your_database_name',
         
-        // JWT
-        JWT_SECRET: process.env.JWT_SECRET || 'change-this-jwt-secret',
+        // JWT Configuration
+        JWT_SECRET: 'your-jwt-secret-key-change-this-to-random-string',
         JWT_EXPIRATION: '7d',
         
-        // AWS S3
-        AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-        AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+        // AWS S3 Configuration
+        AWS_ACCESS_KEY_ID: 'your_aws_access_key',
+        AWS_SECRET_ACCESS_KEY: 'your_aws_secret_key',
         AWS_REGION: 'us-east-1',
-        AWS_S3_BUCKET: 'datagree-uploads',
+        AWS_S3_BUCKET: 'your-s3-bucket-name',
         USE_S3: 'true',
         
-        // SMTP
+        // SMTP Configuration
         SMTP_HOST: 'smtp.gmail.com',
         SMTP_PORT: 587,
         SMTP_SECURE: 'false',
-        SMTP_USER: process.env.SMTP_USER || 'info@innovasystems.com.co',
-        SMTP_PASSWORD: process.env.SMTP_PASSWORD,
-        SMTP_FROM: process.env.SMTP_FROM || 'info@innovasystems.com.co',
-        SMTP_FROM_NAME: 'Archivo en Línea',
+        SMTP_USER: 'your-email@domain.com',
+        SMTP_PASSWORD: 'your-smtp-app-password',
+        SMTP_FROM: 'your-email@domain.com',
+        SMTP_FROM_NAME: 'Your Company Name',
         
-        // Security
+        // Security Configuration
         BCRYPT_ROUNDS: 10,
         RATE_LIMIT_TTL: 60,
         RATE_LIMIT_MAX: 100,
-        CORS_ORIGIN: 'https://archivoenlinea.com,https://admin.archivoenlinea.com,https://*.archivoenlinea.com',
+        CORS_ORIGIN: 'https://your-domain.com,https://admin.your-domain.com,https://*.your-domain.com',
         
-        // Bold Payment Gateway
-        BOLD_API_KEY: process.env.BOLD_API_KEY,
-        BOLD_SECRET_KEY: process.env.BOLD_SECRET_KEY,
-        BOLD_MERCHANT_ID: process.env.BOLD_MERCHANT_ID || '2M0MTRAD37',
+        // Bold Payment Gateway Configuration
+        BOLD_API_KEY: 'your_bold_api_key',
+        BOLD_SECRET_KEY: 'your_bold_secret_key',
+        BOLD_MERCHANT_ID: 'your_merchant_id',
         BOLD_API_URL: 'https://api.online.payments.bold.co',
-        BOLD_WEBHOOK_SECRET: process.env.BOLD_WEBHOOK_SECRET,
-        BOLD_SUCCESS_URL: 'https://datagree.net/payment/success',
-        BOLD_FAILURE_URL: 'https://datagree.net/payment/failure',
-        BOLD_WEBHOOK_URL: 'https://datagree.net/api/webhooks/bold',
+        BOLD_SUCCESS_URL: 'https://your-domain.com/payment/success',
+        BOLD_FAILURE_URL: 'https://your-domain.com/payment/failure',
+        BOLD_WEBHOOK_URL: 'https://your-domain.com/api/webhooks/bold',
         
-        // Super Admin
-        SUPER_ADMIN_EMAIL: 'rcaraballo@innovasystems.com.co',
+        // Frontend URL
+        FRONTEND_URL: 'https://your-domain.com',
+        
+        // Super Admin Email
+        SUPER_ADMIN_EMAIL: 'admin@your-domain.com',
       },
       error_file: './logs/backend-err.log',
       out_file: './logs/backend-out.log',

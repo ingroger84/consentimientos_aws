@@ -1,7 +1,7 @@
 # Versión del Sistema
 
-## Versión Actual: 23.1.0
-**Fecha:** 2026-01-30
+## Versión Actual: 23.2.0
+**Fecha:** 2026-02-01
 **Tipo de Cambio:** MINOR
 
 ---
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
+### 23.2.0 - 2026-02-01 [MINOR]
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 23.1.0 - 2026-01-30 [MINOR]
 - Backend: 3 archivo(s) modificado(s)
 - Frontend: 3 archivo(s) modificado(s)
 - Documentación: 7 archivo(s) modificado(s)
 - Scripts: 2 archivo(s) modificado(s)
-
-
 
 ---
 

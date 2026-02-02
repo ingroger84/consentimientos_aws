@@ -1,124 +1,186 @@
-# Dependencies
+# ============================================
+# SECURITY - NEVER COMMIT THESE FILES
+# ============================================
+
+# Environment variables (CRITICAL)
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# SSH Keys and Certificates (CRITICAL)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+keys/
+.ssh/
+
+# PM2 Configuration with credentials (CRITICAL)
+ecosystem.config.js
+ecosystem.config.production.js
+!ecosystem.config.example.js
+
+# Credentials files (CRITICAL)
+credentials*.txt
+*credentials*.txt
+*password*.txt
+*secret*.txt
+server_credentials*
+deployment_credentials*
+
+# AWS Credentials (CRITICAL)
+.aws/
+aws-credentials*
+
+# ============================================
+# DEPENDENCIES
+# ============================================
 node_modules/
 .pnp
 .pnp.js
+package-lock.json.backup
 
-# Testing
-coverage/
-*.log
-
-# Production
+# ============================================
+# BUILD OUTPUT
+# ============================================
 dist/
 build/
 backend/dist/
 frontend/dist/
 frontend/build/
+*.tsbuildinfo
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+*.lcov
 
-# Backend environment
-backend/.env
-backend/.env.local
-backend/.env.development.local
-backend/.env.test.local
-backend/.env.production.local
-
-# Frontend environment
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Uploads and temporary files
-uploads/
-temp/
-backend/uploads/
-frontend/uploads/
-
-# Keys (SSH, certificates, etc.)
-keys/
-*.pem
-*.key
-*.crt
-
-# Database
-*.sqlite
-*.db
-
-# Logs
+# ============================================
+# LOGS
+# ============================================
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
 
-# Deployment credentials and sensitive files
-credentials_*.txt
-server_credentials_*.txt
-deployment_*.txt
-*.tar.gz
-install.sh
+# ============================================
+# IDE / EDITOR
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OPERATING SYSTEM
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# UPLOADS & TEMPORARY FILES
+# ============================================
+uploads/
+temp/
+tmp/
+backend/uploads/
+frontend/uploads/
+*.tmp
+
+# ============================================
+# DATABASE
+# ============================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ============================================
+# DEPLOYMENT SCRIPTS (May contain credentials)
+# ============================================
 deploy-server.sh
-
-# PM2 ecosystem with credentials (use ecosystem.config.example.js instead)
-# ecosystem.config.js should be configured on server with environment variables
-ecosystem.config.production.js
-
-# Scripts con credenciales (no subir)
+install.sh
 scripts/deploy-aws-auto.ps1
 scripts/deploy-direct.ps1
 scripts/deploy-production-complete.ps1
 scripts/setup-production-server.ps1
 scripts/simple-deploy.ps1
 scripts/deploy-wildcard-*.ps1
+scripts/upload-and-deploy.ps1
+scripts/clean-aws-credentials.ps1
 
-# Archivos de solución y corrección temporal (no subir)
+# ============================================
+# TEMPORARY DOCUMENTATION (Not for repo)
+# ============================================
 SOLUCION_*.md
 SOLUCION_*.html
 CORRECCION_*.md
 INSTRUCCIONES_*.md
 RESUMEN_*.md
 VERIFICACION_*.md
+ACTUALIZACION_*.md
 verificacion-*.md
+verificacion-*.html
 cache-verification.html
 force-cache-clear*.html
 force-clear-cache*.html
+
+# ============================================
+# TEST FILES (Temporary)
+# ============================================
 test-*.html
 test-*.json
+test-*.bin
+test-output.txt
 temp-*.html
 temp-*.js
+temp-*.ts
+
+# ============================================
+# SQL SCRIPTS (May contain sensitive data)
+# ============================================
 check-*.sql
-check-*.html
 update-permissions.*
 load-consent-templates.sql
 seed-*.sql
+!seed.sql
 create-medical-records-clean.sql
 copy-mr-templates-to-tenants.sql
+
+# ============================================
+# NGINX CONFIGURATION (May contain server info)
+# ============================================
 nginx-default.conf
+nginx.conf
+!nginx.conf.example
 
-# Test files
-test-*.js
-test-*.bin
-test-output.txt
-
-# Migration and fix scripts (temporal)
+# ============================================
+# BACKEND MIGRATION/FIX SCRIPTS (Temporary)
+# ============================================
 backend/add-*.js
 backend/add-*.sql
 backend/apply-*.js
@@ -154,3 +216,23 @@ backend/update-*.js
 backend/update-*.sql
 backend/verify-*.js
 backend/verify-*.ps1
+backend/test-*.js
+!backend/test/**/*.js
+
+# ============================================
+# ARCHIVES
+# ============================================
+*.tar.gz
+*.zip
+*.rar
+*.7z
+dist_backup_*
+
+# ============================================
+# CACHE
+# ============================================
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
