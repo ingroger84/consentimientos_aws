@@ -27,6 +27,16 @@ class MedicalRecordsService {
     return response.data;
   }
 
+  async archive(id: string): Promise<MedicalRecord> {
+    const response = await api.post(`/medical-records/${id}/archive`);
+    return response.data;
+  }
+
+  async reopen(id: string): Promise<MedicalRecord> {
+    const response = await api.post(`/medical-records/${id}/reopen`);
+    return response.data;
+  }
+
   // Anamnesis
   async addAnamnesis(medicalRecordId: string, data: CreateAnamnesisDto): Promise<Anamnesis> {
     const response = await api.post(`/medical-records/${medicalRecordId}/anamnesis`, data);

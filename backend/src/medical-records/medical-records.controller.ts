@@ -114,8 +114,36 @@ export class MedicalRecordsController {
   }
 
   @Post(':id/close')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.CLOSE_MEDICAL_RECORDS)
   async close(@Param('id') id: string, @Request() req: any) {
     return this.medicalRecordsService.close(
+      id,
+      req.user.sub,
+      req.user.tenantId,
+      req.ip,
+      req.headers['user-agent'],
+    );
+  }
+
+  @Post(':id/archive')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.ARCHIVE_MEDICAL_RECORDS)
+  async archive(@Param('id') id: string, @Request() req: any) {
+    return this.medicalRecordsService.archive(
+      id,
+      req.user.sub,
+      req.user.tenantId,
+      req.ip,
+      req.headers['user-agent'],
+    );
+  }
+
+  @Post(':id/reopen')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.REOPEN_MEDICAL_RECORDS)
+  async reopen(@Param('id') id: string, @Request() req: any) {
+    return this.medicalRecordsService.reopen(
       id,
       req.user.sub,
       req.user.tenantId,

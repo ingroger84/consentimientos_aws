@@ -338,6 +338,20 @@ export class BillingService {
           },
         });
 
+        // Enviar email de suspensión al tenant
+        try {
+          await this.mailService.sendTrialExpiredEmail(tenant);
+        } catch (emailError) {
+          console.error(`[BillingService] Error al enviar email de suspensión al tenant:`, emailError);
+        }
+
+        // Enviar notificación al Super Admin
+        try {
+          await this.mailService.sendTrialExpiredNotificationToAdmin(tenant);
+        } catch (emailError) {
+          console.error(`[BillingService] Error al enviar notificación al Super Admin:`, emailError);
+        }
+
         suspended++;
         console.log(`[BillingService] Tenant ${tenant.name} (${tenant.slug}) suspendido - Trial expirado`);
       } catch (error) {

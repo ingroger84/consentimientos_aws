@@ -133,6 +133,12 @@ export default function Layout() {
         icon: ClipboardList,
         permission: 'view_global_stats'
       });
+      clinicalItems.push({
+        name: 'Consentimientos',
+        href: '/super-admin/consents',
+        icon: FileText,
+        permission: 'view_global_stats'
+      });
     } else {
       clinicalItems.push({
         name: 'Historias Clínicas',
@@ -140,14 +146,13 @@ export default function Layout() {
         icon: ClipboardList,
         permission: 'view_medical_records'
       });
+      clinicalItems.push({
+        name: 'Consentimientos',
+        href: '/consents',
+        icon: FileText,
+        permission: 'view_consents'
+      });
     }
-    
-    clinicalItems.push({
-      name: 'Consentimientos',
-      href: '/consents',
-      icon: FileText,
-      permission: 'view_consents'
-    });
 
     if (clinicalItems.length > 0) {
       sections.push({

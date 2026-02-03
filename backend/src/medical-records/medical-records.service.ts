@@ -170,6 +170,7 @@ export class MedicalRecordsService {
         'client',
         'branch',
         'creator',
+        'closer',
         'anamnesis',
         'physicalExams',
         'diagnoses',
@@ -260,6 +261,10 @@ export class MedicalRecordsService {
       throw new NotFoundException('Historia clínica no encontrada');
     }
 
+    if (medicalRecord.status === 'closed') {
+      throw new BadRequestException('La historia clínica ya está cerrada');
+    }
+
     medicalRecord.status = 'closed';
     medicalRecord.closedAt = new Date();
     medicalRecord.closedBy = userId;
@@ -283,6 +288,92 @@ export class MedicalRecordsService {
     return this.findOne(id, tenantId, userId);
   }
 
+  async archive(
+    id: string,
+    userId: string,
+    tenantId: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<MedicalRecord> {
+    const medicalRecord = await this.medicalRecordsRepository.findOne({
+      where: { id, tenantId },
+    });
+
+    if (!medicalRecord) {
+      throw new NotFoundException('Historia clínica no encontrada');
+    }
+
+    if (medicalRecord.status === 'archived') {
+      throw new BadRequestException('La historia clínica ya está archivada');
+    }
+
+    const oldStatus = medicalRecord.status;
+    medicalRecord.status = 'archived';
+    medicalRecord.isLocked = true;
+
+    const updated = await this.medicalRecordsRepository.save(medicalRecord);
+
+    // Auditoría
+    await this.logAudit({
+      action: 'archive',
+      entityType: 'medical_record',
+      entityId: id,
+      medicalRecordId: id,
+      userId,
+      tenantId,
+      oldValues: { status: oldStatus },
+      newValues: { status: 'archived' },
+      ipAddress,
+      userAgent,
+    });
+
+    return this.findOne(id, tenantId, userId);
+  }
+
+  async reopen(
+    id: string,
+    userId: string,
+    tenantId: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<MedicalRecord> {
+    const medicalRecord = await this.medicalRecordsRepository.findOne({
+      where: { id, tenantId },
+    });
+
+    if (!medicalRecord) {
+      throw new NotFoundException('Historia clínica no encontrada');
+    }
+
+    if (medicalRecord.status === 'active') {
+      throw new BadRequestException('La historia clínica ya está activa');
+    }
+
+    const oldStatus = medicalRecord.status;
+    medicalRecord.status = 'active';
+    medicalRecord.isLocked = false;
+    medicalRecord.closedAt = null;
+    medicalRecord.closedBy = null;
+
+    const updated = await this.medicalRecordsRepository.save(medicalRecord);
+
+    // Auditoría
+    await this.logAudit({
+      action: 'reopen',
+      entityType: 'medical_record',
+      entityId: id,
+      medicalRecordId: id,
+      userId,
+      tenantId,
+      oldValues: { status: oldStatus },
+      newValues: { status: 'active', isLocked: false },
+      ipAddress,
+      userAgent,
+    });
+
+    return this.findOne(id, tenantId, userId);
+  }
+
   private async generateRecordNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.medicalRecordsRepository.count({
@@ -295,7 +386,7 @@ export class MedicalRecordsService {
   // Método para Super Admin: obtener todas las historias clínicas agrupadas por tenant
   async getAllGroupedByTenant() {
     const allRecords = await this.medicalRecordsRepository.find({
-      relations: ['tenant', 'client', 'branch', 'creator'],
+      relations: ['tenant', 'client', 'branch', 'creator', 'closer'],
       order: {
         createdAt: 'DESC',
       },

@@ -33,6 +33,9 @@ export default function ViewMedicalRecordPage() {
 
   // Permisos
   const canDeleteConsents = user?.role?.permissions?.includes('delete_mr_consents') || false;
+  const canCloseRecords = user?.role?.permissions?.includes('close_medical_records') || false;
+  const canArchiveRecords = user?.role?.permissions?.includes('archive_medical_records') || false;
+  const canReopenRecords = user?.role?.permissions?.includes('reopen_medical_records') || false;
 
   useEffect(() => {
     if (id) {
@@ -98,6 +101,66 @@ export default function ViewMedicalRecordPage() {
     }
   };
 
+  const handleClose = async () => {
+    const confirmed = await confirm({
+      type: 'warning',
+      title: '¿Cerrar historia clínica?',
+      message: 'Al cerrar la historia clínica, quedará bloqueada y no se podrá modificar. Esta acción es importante para mantener la integridad de los registros médicos. ¿Desea continuar?',
+      confirmText: 'Cerrar HC',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await medicalRecordsService.close(id!);
+      toast.success('Historia clínica cerrada exitosamente');
+      loadRecord();
+    } catch (error: any) {
+      toast.error('Error al cerrar historia clínica', error.response?.data?.message);
+    }
+  };
+
+  const handleArchive = async () => {
+    const confirmed = await confirm({
+      type: 'info',
+      title: '¿Archivar historia clínica?',
+      message: 'La historia clínica será archivada y bloqueada para modificaciones. Podrá reabrirla si es necesario. ¿Desea continuar?',
+      confirmText: 'Archivar',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await medicalRecordsService.archive(id!);
+      toast.success('Historia clínica archivada exitosamente');
+      loadRecord();
+    } catch (error: any) {
+      toast.error('Error al archivar historia clínica', error.response?.data?.message);
+    }
+  };
+
+  const handleReopen = async () => {
+    const confirmed = await confirm({
+      type: 'warning',
+      title: '¿Reabrir historia clínica?',
+      message: 'La historia clínica será reactivada y se podrá modificar nuevamente. Esta acción debe realizarse solo cuando sea necesario. ¿Desea continuar?',
+      confirmText: 'Reabrir HC',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await medicalRecordsService.reopen(id!);
+      toast.success('Historia clínica reabierta exitosamente');
+      loadRecord();
+    } catch (error: any) {
+      toast.error('Error al reabrir historia clínica', error.response?.data?.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -135,24 +198,101 @@ export default function ViewMedicalRecordPage() {
             <span className={`px-3 py-1 text-sm font-medium rounded ${getStatusColor(record.status)}`}>
               {record.status === 'active' ? 'Activa' : record.status === 'closed' ? 'Cerrada' : 'Archivada'}
             </span>
+            {record.isLocked && (
+              <span className="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800">
+                🔒 Bloqueada
+              </span>
+            )}
           </div>
           <p className="text-gray-600 mt-1">
             Historia clínica de {record.client?.name || record.client?.fullName || 'Sin nombre'}
           </p>
+          {record.status === 'closed' && record.closedAt && (
+            <p className="text-sm text-gray-500 mt-1">
+              Cerrada el {new Date(record.closedAt).toLocaleString('es-CO')}
+              {record.closer?.name && ` por ${record.closer.name}`}
+            </p>
+          )}
         </div>
-        {record.status === 'active' && (
-          <button
-            onClick={() => setShowConsentModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <FileText className="w-4 h-4" />
-            Generar Consentimiento
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {record.status === 'active' && (
+            <>
+              <button
+                onClick={() => setShowConsentModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FileText className="w-4 h-4" />
+                Generar Consentimiento
+              </button>
+              {canArchiveRecords && (
+                <button
+                  onClick={handleArchive}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Archivar
+                </button>
+              )}
+              {canCloseRecords && (
+                <button
+                  onClick={handleClose}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Cerrar HC
+                </button>
+              )}
+            </>
+          )}
+          {(record.status === 'closed' || record.status === 'archived') && canReopenRecords && (
+            <button
+              onClick={handleReopen}
+              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              Reabrir HC
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Patient Info Card */}
       <div className="bg-white rounded-lg shadow p-6">
+        {/* Alerta de estado */}
+        {record.status === 'closed' && (
+          <div className="mb-6 p-4 bg-gray-50 border-l-4 border-gray-500 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-gray-800">Historia Clínica Cerrada</h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  Esta historia clínica ha sido cerrada y no se pueden realizar modificaciones. 
+                  {record.closedAt && ` Cerrada el ${new Date(record.closedAt).toLocaleString('es-CO')}`}
+                  {record.closer?.name && ` por ${record.closer.name}`}.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        {record.status === 'archived' && (
+          <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">Historia Clínica Archivada</h3>
+                <p className="mt-1 text-sm text-blue-600">
+                  Esta historia clínica ha sido archivada y está bloqueada para modificaciones. Puede reabrirla si necesita realizar cambios.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Información del Paciente</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="flex items-start gap-3">
@@ -255,13 +395,15 @@ export default function ViewMedicalRecordPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Anamnesis</h3>
-                <button
-                  onClick={() => setShowAnamnesisModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Anamnesis
-                </button>
+                {record.status === 'active' && (
+                  <button
+                    onClick={() => setShowAnamnesisModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar Anamnesis
+                  </button>
+                )}
               </div>
               {record.anamnesis && record.anamnesis.length > 0 ? (
                 <div className="space-y-4">
@@ -295,13 +437,15 @@ export default function ViewMedicalRecordPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Exámenes Físicos</h3>
-                <button
-                  onClick={() => setShowPhysicalExamModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Examen
-                </button>
+                {record.status === 'active' && (
+                  <button
+                    onClick={() => setShowPhysicalExamModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar Examen
+                  </button>
+                )}
               </div>
               {record.physicalExams && record.physicalExams.length > 0 ? (
                 <div className="space-y-4">
@@ -349,13 +493,15 @@ export default function ViewMedicalRecordPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Diagnósticos</h3>
-                <button
-                  onClick={() => setShowDiagnosisModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Diagnóstico
-                </button>
+                {record.status === 'active' && (
+                  <button
+                    onClick={() => setShowDiagnosisModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar Diagnóstico
+                  </button>
+                )}
               </div>
               {record.diagnoses && record.diagnoses.length > 0 ? (
                 <div className="space-y-2">
@@ -385,13 +531,15 @@ export default function ViewMedicalRecordPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Evoluciones</h3>
-                <button
-                  onClick={() => setShowEvolutionModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  Agregar Evolución
-                </button>
+                {record.status === 'active' && (
+                  <button
+                    onClick={() => setShowEvolutionModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Agregar Evolución
+                  </button>
+                )}
               </div>
               {record.evolutions && record.evolutions.length > 0 ? (
                 <div className="space-y-4">

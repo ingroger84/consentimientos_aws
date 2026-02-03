@@ -1,142 +1,121 @@
-# Sesión 2026-01-29: Corrección de Autenticación Bold API
-
-## Fecha
-29 de enero de 2026
+# Sesión 2026-01-29: Corrección Integración Bold Payment Gateway
 
 ## Problema Identificado
 
-### Error en Integración Bold
-Al intentar realizar un pago a través de Bold, se presentaban los siguientes errores:
-
-1. **Error inicial**: "Missing Authentication Token"
-2. **Error después del primer intento**: "Invalid key=value pair (missing equal-sign) in Authorization header"
-
-### Análisis del Problema
-
-El error sugería que Bold está usando AWS API Gateway, que interpreta los headers de autenticación de manera específica. La documentación de Bold indica:
-
+La integración con Bold Colombia está fallando con el error:
 ```
-Authorization: x-api-key <llave_de_identidad>
+"Invalid key=value pair (missing equal-sign) in Authorization header (hashed with SHA-256 and encoded with Base64): 'Qqm1lWKN0Dm4/4GF/mKO4XIJ4s5tpXme/lz40NVd3ZQ='."
 ```
 
-Sin embargo, este formato estaba causando el error "Invalid key=value pair".
+## Cambios Realizados
 
-## Solución Implementada
+### 1. Corrección del `callback_url`
+- **Problema**: El `callback_url` aparecía como `"undefined/invoices/..."`
+- **Causa**: `process.env.FRONTEND_URL` no se estaba leyendo correctamente en PM2
+- **Solución**: 
+  - Agregado `FRONTEND_URL: 'https://archivoenlinea.com'` a `ecosystem.config.js`
+  - Modificado `invoices.service.ts` para usar `ConfigService` en lugar de `process.env`
+- **Estado**: ✅ CORREGIDO - El callback_url ahora muestra correctamente `https://archivoenlinea.com/invoices/...`
 
-### 1. Cambio en el Header de Autenticación
+### 2. Corrección del Endpoint
+- **Problema**: Estábamos usando `/payment-intent` (singular)
+- **Solución**: Cambiado a `/payment-intents` (plural) según documentación de Bold
+- **Estado**: ✅ CORREGIDO
 
-**Archivo**: `backend/src/payments/bold.service.ts`
+### 3. Formato del Header de Autenticación
+- **Documentación Bold**: `Authorization: x-api-key <llave_de_identidad>`
+- **Implementación actual**: `'Authorization': 'x-api-key ${this.apiKey}'`
+- **Estado**: ❌ RECHAZADO POR BOLD
 
-**Formato CORRECTO según documentación oficial de Bold**:
-```typescript
-this.apiClient = axios.create({
-  baseURL: apiUrl,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `x-api-key ${this.apiKey}`, // Bold usa "Authorization: x-api-key <llave>"
-  },
-  timeout: 30000,
-});
-```
+## Configuración Actual
 
-**Explicación**: Según la documentación oficial de Bold en https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion#autenticaci%C3%B3n-de-peticionesLa, el formato correcto es:
-
-```
-Llave: Authorization
-Valor: x-api-key <llave_de_identidad>
-```
-
-Esto significa que el header `Authorization` debe contener el valor `x-api-key` seguido de un espacio y la llave de identidad. **NO** es un header separado llamado `x-api-key`.
-
-### 2. Corrección de URLs de Callback
-
-**Archivo**: `ecosystem.config.production.js`
-
-**Cambio realizado**:
-```javascript
-// ANTES
-BOLD_SUCCESS_URL: 'https://datagree.net/payment/success',
-BOLD_FAILURE_URL: 'https://datagree.net/payment/failure',
-BOLD_WEBHOOK_URL: 'https://datagree.net/api/webhooks/bold',
-
-// DESPUÉS
-BOLD_SUCCESS_URL: 'https://archivoenlinea.com/payment/success',
-BOLD_FAILURE_URL: 'https://archivoenlinea.com/payment/failure',
-BOLD_WEBHOOK_URL: 'https://archivoenlinea.com/api/webhooks/bold',
-```
-
-### 3. Protección de Credenciales
-
-**Archivo**: `.gitignore`
-
-Se agregó `ecosystem.config.production.js` al `.gitignore` para evitar que las credenciales de AWS y Bold se suban a GitHub.
-
-## Pasos de Implementación
-
-1. ✅ Revisar documentación oficial de Bold
-2. ✅ Corregir formato de autenticación en `bold.service.ts` a `Authorization: x-api-key <llave>`
-3. ✅ Actualizar URLs de callback en `ecosystem.config.js` (en servidor)
-4. ✅ Agregar `ecosystem.config.production.js` al `.gitignore`
-5. ✅ Compilar backend: `NODE_OPTIONS='--max-old-space-size=2048' npm run build`
-6. ✅ Reiniciar PM2: `pm2 restart datagree --update-env`
-7. ✅ Actualizar GitHub (versión 22.0.1)
-
-## Configuración de Bold
-
-### Credenciales (en servidor)
+### Variables de Entorno (ecosystem.config.js)
 ```javascript
 BOLD_API_KEY: '1XVOAZHZ87fuDLuWzKAQmG_0RRGYO_eo8YhJHmugf68'
 BOLD_SECRET_KEY: 'IKi1koNT7pUK1uTRf4vYOQ'
 BOLD_MERCHANT_ID: '2M0MTRAD37'
 BOLD_API_URL: 'https://api.online.payments.bold.co'
+BOLD_WEBHOOK_SECRET: 'g72LcD8iISN-PjURFfTq8UQU_2aizz5VclkaAfMdOuE'
+BOLD_SUCCESS_URL: 'https://archivoenlinea.com/payment/success'
+BOLD_FAILURE_URL: 'https://archivoenlinea.com/payment/failure'
+BOLD_WEBHOOK_URL: 'https://archivoenlinea.com/api/webhooks/bold'
+FRONTEND_URL: 'https://archivoenlinea.com'
 ```
 
-### Endpoints Utilizados
-- **Crear intención de pago**: `POST /payment-intent`
-- **Consultar estado**: `GET /transactions/{transactionId}`
-
-## Próximos Pasos
-
-1. ⏳ Probar el flujo completo de pago con Bold
-2. ⏳ Verificar que el callback_url se esté enviando correctamente (actualmente aparece como "undefined")
-3. ⏳ Implementar el manejo de webhooks de Bold
-4. ⏳ Probar el flujo 3D Secure si es requerido
-
-## Notas Técnicas
-
-### Formato de Autenticación Bold
-Según la documentación oficial de Bold (https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion#autenticaci%C3%B3n-de-peticionesLa), el formato correcto es:
-
-```
-Header: Authorization
-Valor: x-api-key <llave_de_identidad>
-```
-
-Ejemplo con la llave `DZSkDqh2iWmpYQg204C2fLigQerhPGXAcm5WyujxwYH`:
-```
-Authorization: x-api-key DZSkDqh2iWmpYQg204C2fLigQerhPGXAcm5WyujxwYH
-```
-
-**Importante**: Es el header `Authorization` con el valor `x-api-key <llave>`, NO un header separado llamado `x-api-key`.
-
-### Problema del callback_url
-En los logs se observó que el `callback_url` se está enviando como "undefined":
+### Payload Enviado a Bold
 ```json
 {
-  "callback_url": "undefined/invoices/9970661d-9e56-4974-a1cc-f8f1a1280b44/payment-success"
+  "reference_id": "INV-INV-202601-1723-1769669609358",
+  "amount": {
+    "currency": "COP",
+    "total_amount": 119900
+  },
+  "description": "Factura INV-202601-1723 - Demo Estetica",
+  "callback_url": "https://archivoenlinea.com/invoices/9970661d-9e56-4974-a1cc-f8f1a1280b44/payment-success",
+  "customer": {
+    "name": "Demo Estetica",
+    "email": "roger.caraballo@gmail.com"
+  }
 }
 ```
 
-Esto indica que falta configurar la variable de entorno `BOLD_SUCCESS_URL` correctamente o que el código no está leyendo correctamente esta variable.
+## Problema Actual
 
-## Versión
-- **Versión anterior**: 20.0.3
-- **Versión actual**: 22.0.1
-- **Tipo de cambio**: PATCH (corrección de formato de autenticación)
+El error persiste: **"Invalid key=value pair (missing equal-sign) in Authorization header"**
 
-## Estado
-🟢 **LISTO PARA PRUEBAS** - Formato de autenticación corregido según documentación oficial de Bold
+### Posibles Causas
 
-## Referencias
-- [Documentación Bold API](https://developers.bold.co/pagos-en-linea/api-de-pagos-en-linea/integracion)
-- [AWS API Gateway Authentication](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html)
+1. **API Key Incorrecta**: La API Key proporcionada puede no ser válida o puede ser de sandbox cuando se necesita producción
+2. **Formato del Header**: Aunque seguimos la documentación, Bold puede estar esperando un formato diferente
+3. **Ambiente**: Puede que estemos usando credenciales de sandbox contra el endpoint de producción o viceversa
+
+### Próximos Pasos Recomendados
+
+1. **Verificar con Bold**:
+   - Confirmar que la API Key `1XVOAZHZ87fuDLuWzKAQmG_0RRGYO_eo8YhJHmugf68` es válida
+   - Confirmar si es de sandbox o producción
+   - Verificar que el Merchant ID `2M0MTRAD37` está activo
+
+2. **Probar Formato Alternativo del Header**:
+   - Intentar con header `x-api-key` directamente (sin Authorization)
+   - Intentar con `Bearer` token
+   - Intentar con Basic Auth
+
+3. **Revisar Documentación Actualizada**:
+   - La documentación de Bold puede haber cambiado
+   - Contactar soporte técnico de Bold para confirmar formato correcto
+
+## Archivos Modificados
+
+- `backend/src/payments/bold.service.ts` - Formato de autenticación y endpoint
+- `backend/src/invoices/invoices.service.ts` - Uso de ConfigService para FRONTEND_URL
+- `ecosystem.config.js` - Agregada variable FRONTEND_URL
+
+## Estado Final
+
+- ✅ callback_url corregido
+- ✅ Endpoint corregido a `/payment-intents`
+- ✅ Header corregido a `x-api-key` (enviado en cada petición)
+- ✅ Secret Key actualizado a `KVwpsp4WlWny3apOYoGWvg`
+- ❌ Error de autenticación persiste: "Missing Authentication Token"
+
+## Problema Actual
+
+Bold sigue rechazando la autenticación con el error "Missing Authentication Token" a pesar de que:
+1. El header `x-api-key` se está enviando correctamente
+2. La API Key es la correcta: `1XVOAZHZ87fuDLuWzKAQmG_0RRGYO_eo8YhJHmugf68`
+3. El formato del header es correcto según la documentación
+
+**Posible causa**: La API Key proporcionada puede ser de **sandbox** pero estamos usando el endpoint de **producción** (`https://api.online.payments.bold.co`).
+
+## Recomendación Final
+
+Verificar con Bold si:
+1. La API Key `1XVOAZHZ87fuDLuWzKAQmG_0RRGYO_eo8YhJHmugf68` es de sandbox o producción
+2. Si es de sandbox, cambiar el endpoint a `https://sandbox.api.online.payments.bold.co`
+3. Si es de producción, verificar que la API Key esté activa y tenga permisos para crear intenciones de pago
+
+## Timestamp
+
+- Inicio: 2026-01-29 06:36 AM
+- Última actualización: 2026-01-29 07:14 AM

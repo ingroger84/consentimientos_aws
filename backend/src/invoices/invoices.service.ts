@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Invoice, InvoiceStatus } from './entities/invoice.entity';
 import { TaxConfig } from './entities/tax-config.entity';
 import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
@@ -27,6 +28,7 @@ export class InvoicesService {
     private taxConfigService: TaxConfigService,
     private mailService: MailService,
     private boldService: BoldService,
+    private configService: ConfigService,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
@@ -426,7 +428,7 @@ export class InvoicesService {
       reference,
       customerEmail: invoice.tenant.contactEmail,
       customerName: invoice.tenant.name,
-      redirectUrl: `${process.env.FRONTEND_URL}/invoices/${invoice.id}/payment-success`,
+      redirectUrl: `${this.configService.get('FRONTEND_URL')}/invoices/${invoice.id}/payment-success`,
       expirationDate: invoice.dueDate,
     });
 

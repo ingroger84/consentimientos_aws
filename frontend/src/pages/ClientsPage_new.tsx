@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Plus, User, Phone, Mail, FileText, Edit, Trash2, Building2, ChevronDown, ChevronRight, Users as UsersIcon, List } from 'lucide-react';
+import { Search, Plus, User, Phone, Mail, FileText, Edit, Trash2, Building2, ChevronDown, ChevronRight, List } from 'lucide-react';
 import { clientService } from '../services/client.service';
 import { Client, DOCUMENT_TYPE_LABELS } from '../types/client';
 import { useDebounce } from '../hooks/useDebounce';

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Users, MapPin, Briefcase, FileText, TrendingUp, AlertCircle } from 'lucide-react';
+import { X, Users, MapPin, Briefcase, FileText, TrendingUp, AlertCircle, Heart, FileCheck } from 'lucide-react';
 import { tenantsService } from '../services/tenants';
 import { Tenant, TenantStats } from '../types/tenant';
 import { getPlanName } from '@/utils/plan-names';
@@ -87,7 +87,7 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
           ) : stats ? (
             <div className="space-y-6">
               {/* Resumen General */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <Users className="w-8 h-8 text-blue-600" />
@@ -123,7 +123,10 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
                     {stats.totalServices}
                   </p>
                 </div>
+              </div>
 
+              {/* Consentimientos y HC */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-orange-50 rounded-lg p-4">
                   <div className="flex items-center justify-between">
                     <FileText className="w-8 h-8 text-orange-600" />
@@ -134,6 +137,48 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
                   <p className="text-sm text-gray-600 mt-2">Consentimientos</p>
                   <p className="text-2xl font-bold text-gray-900 mt-1">
                     {stats.totalConsents} / {stats.maxConsents}
+                  </p>
+                </div>
+
+                <div className="bg-pink-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <Heart className="w-8 h-8 text-pink-600" />
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUsageColor(stats.usagePercentage.medicalRecords)}`}>
+                      {stats.usagePercentage.medicalRecords.toFixed(0)}%
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">Historias Clínicas</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {stats.totalMedicalRecords} / {stats.maxMedicalRecords}
+                  </p>
+                </div>
+              </div>
+
+              {/* Plantillas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-indigo-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <FileCheck className="w-8 h-8 text-indigo-600" />
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUsageColor(stats.usagePercentage.consentTemplates)}`}>
+                      {stats.usagePercentage.consentTemplates.toFixed(0)}%
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">Plantillas CN</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {stats.totalConsentTemplates} / {stats.maxConsentTemplates}
+                  </p>
+                </div>
+
+                <div className="bg-teal-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <FileCheck className="w-8 h-8 text-teal-600" />
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUsageColor(stats.usagePercentage.mrConsentTemplates)}`}>
+                      {stats.usagePercentage.mrConsentTemplates.toFixed(0)}%
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2">Plantillas HC</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {stats.totalMRConsentTemplates} / {stats.maxMRConsentTemplates}
                   </p>
                 </div>
               </div>
@@ -192,12 +237,63 @@ export default function TenantStatsModal({ tenant, onClose }: TenantStatsModalPr
                     />
                   </div>
                 </div>
+
+                {/* Historias Clínicas */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Historias Clínicas</span>
+                    <span className="text-sm text-gray-600">
+                      {stats.totalMedicalRecords} de {stats.maxMedicalRecords} ({stats.usagePercentage.medicalRecords.toFixed(1)}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all ${getProgressColor(stats.usagePercentage.medicalRecords)}`}
+                      style={{ width: `${Math.min(stats.usagePercentage.medicalRecords, 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Plantillas de Consentimientos */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Plantillas de Consentimientos</span>
+                    <span className="text-sm text-gray-600">
+                      {stats.totalConsentTemplates} de {stats.maxConsentTemplates} ({stats.usagePercentage.consentTemplates.toFixed(1)}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all ${getProgressColor(stats.usagePercentage.consentTemplates)}`}
+                      style={{ width: `${Math.min(stats.usagePercentage.consentTemplates, 100)}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Plantillas de HC */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Plantillas de HC</span>
+                    <span className="text-sm text-gray-600">
+                      {stats.totalMRConsentTemplates} de {stats.maxMRConsentTemplates} ({stats.usagePercentage.mrConsentTemplates.toFixed(1)}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all ${getProgressColor(stats.usagePercentage.mrConsentTemplates)}`}
+                      style={{ width: `${Math.min(stats.usagePercentage.mrConsentTemplates, 100)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Alertas */}
               {(stats.usagePercentage.users >= 90 || 
                 stats.usagePercentage.branches >= 90 || 
-                stats.usagePercentage.consents >= 90) && (
+                stats.usagePercentage.consents >= 90 ||
+                stats.usagePercentage.medicalRecords >= 90 ||
+                stats.usagePercentage.consentTemplates >= 90 ||
+                stats.usagePercentage.mrConsentTemplates >= 90) && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start">
                     <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3" />

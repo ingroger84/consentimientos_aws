@@ -177,10 +177,8 @@ export class ConsentsService {
     // MULTI-TENANT: Filtrar por tenant del usuario
     if (user?.tenant) {
       queryBuilder.andWhere('consent.tenantId = :tenantId', { tenantId: user.tenant.id });
-    } else if (user && !user.tenant) {
-      // Super Admin: ver solo consentimientos sin tenant (si los hay)
-      queryBuilder.andWhere('consent.tenantId IS NULL');
     }
+    // Super Admin: ver TODOS los consentimientos (sin filtro de tenant)
 
     if (search) {
       queryBuilder.andWhere(
@@ -190,6 +188,81 @@ export class ConsentsService {
     }
 
     return queryBuilder.getMany();
+  }
+
+  async getAllGroupedByTenant(user?: User) {
+    // Solo Super Admin puede ver consentimientos agrupados
+    if (user?.tenant) {
+      throw new ForbiddenException('No tienes permisos para ver esta información');
+    }
+
+    // Obtener todos los consentimientos con sus relaciones
+    const consents = await this.consentsRepository
+      .createQueryBuilder('consent')
+      .leftJoinAndSelect('consent.service', 'service')
+      .leftJoinAndSelect('consent.branch', 'branch')
+      .leftJoinAndSelect('consent.tenant', 'tenant')
+      .orderBy('consent.createdAt', 'DESC')
+      .getMany();
+
+    // Agrupar por tenant
+    const grouped = consents.reduce((acc, consent) => {
+      const tenantId = consent.tenant?.id || 'no-tenant';
+      const tenantName = consent.tenant?.name || 'Sin Cuenta';
+      const tenantSlug = consent.tenant?.slug || 'sin-cuenta';
+
+      if (!acc[tenantId]) {
+        acc[tenantId] = {
+          tenantId: tenantId === 'no-tenant' ? null : tenantId,
+          tenantName,
+          tenantSlug,
+          totalConsents: 0,
+          draftConsents: 0,
+          signedConsents: 0,
+          sentConsents: 0,
+          failedConsents: 0,
+          consents: [],
+        };
+      }
+
+      acc[tenantId].totalConsents++;
+      
+      switch (consent.status) {
+        case ConsentStatus.DRAFT:
+          acc[tenantId].draftConsents++;
+          break;
+        case ConsentStatus.SIGNED:
+          acc[tenantId].signedConsents++;
+          break;
+        case ConsentStatus.SENT:
+          acc[tenantId].sentConsents++;
+          break;
+        case ConsentStatus.FAILED:
+          acc[tenantId].failedConsents++;
+          break;
+      }
+
+      acc[tenantId].consents.push({
+        id: consent.id,
+        clientName: consent.clientName,
+        clientId: consent.clientId,
+        clientEmail: consent.clientEmail,
+        clientPhone: consent.clientPhone,
+        serviceName: consent.service?.name || 'Sin servicio',
+        branchName: consent.branch?.name || 'Sin sede',
+        status: consent.status,
+        signedAt: consent.signedAt,
+        emailSentAt: consent.emailSentAt,
+        createdAt: consent.createdAt,
+        tenantName,
+        tenantSlug,
+      });
+
+      return acc;
+    }, {});
+
+    // Convertir a array y ordenar por total de consentimientos
+    return Object.values(grouped).sort((a: any, b: any) => b.totalConsents - a.totalConsents);
   }
 
   async findOne(id: string): Promise<Consent> {

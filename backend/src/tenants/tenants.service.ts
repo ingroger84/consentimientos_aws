@@ -326,18 +326,53 @@ export class TenantsService {
   async getStats(id: string) {
     const tenant = await this.findOne(id);
 
+    // Obtener conteos de historias clínicas
+    let totalMedicalRecords = 0;
+    let totalConsentTemplates = 0;
+    let totalMRConsentTemplates = 0;
+
+    try {
+      const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
+      totalMedicalRecords = await medicalRecordsRepo.count({ where: { tenantId: id } });
+    } catch (error) {
+      console.log('Error counting medical records:', error.message);
+    }
+
+    try {
+      const consentTemplatesRepo = this.dataSource.getRepository('ConsentTemplate');
+      totalConsentTemplates = await consentTemplatesRepo.count({ where: { tenantId: id } });
+    } catch (error) {
+      console.log('Error counting consent templates:', error.message);
+    }
+
+    try {
+      const mrConsentTemplatesRepo = this.dataSource.getRepository('MRConsentTemplate');
+      totalMRConsentTemplates = await mrConsentTemplatesRepo.count({ where: { tenantId: id } });
+    } catch (error) {
+      console.log('Error counting MR consent templates:', error.message);
+    }
+
     const stats = {
       totalUsers: tenant.users?.length || 0,
       totalBranches: tenant.branches?.length || 0,
       totalServices: tenant.services?.length || 0,
       totalConsents: tenant.consents?.length || 0,
+      totalMedicalRecords,
+      totalConsentTemplates,
+      totalMRConsentTemplates,
       maxUsers: tenant.maxUsers,
       maxBranches: tenant.maxBranches,
       maxConsents: tenant.maxConsents,
+      maxMedicalRecords: tenant.maxMedicalRecords || 0,
+      maxConsentTemplates: tenant.maxConsentTemplates || 0,
+      maxMRConsentTemplates: tenant.maxMRConsentTemplates || 0,
       usagePercentage: {
         users: ((tenant.users?.length || 0) / tenant.maxUsers) * 100,
         branches: ((tenant.branches?.length || 0) / tenant.maxBranches) * 100,
         consents: ((tenant.consents?.length || 0) / tenant.maxConsents) * 100,
+        medicalRecords: tenant.maxMedicalRecords > 0 ? (totalMedicalRecords / tenant.maxMedicalRecords) * 100 : 0,
+        consentTemplates: tenant.maxConsentTemplates > 0 ? (totalConsentTemplates / tenant.maxConsentTemplates) * 100 : 0,
+        mrConsentTemplates: tenant.maxMRConsentTemplates > 0 ? (totalMRConsentTemplates / tenant.maxMRConsentTemplates) * 100 : 0,
       },
       status: tenant.status,
       plan: tenant.plan,

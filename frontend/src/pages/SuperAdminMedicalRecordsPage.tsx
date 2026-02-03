@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter } from 'lucide-react';
+import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter, Lock, Archive, CheckCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
+import { useToast } from '@/hooks/useToast';
+import { useConfirm } from '@/hooks/useConfirm';
+import { medicalRecordsService } from '@/services/medical-records.service';
 
 interface MedicalRecord {
   id: string;
@@ -35,7 +38,10 @@ export default function SuperAdminMedicalRecordsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const navigate = useNavigate();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   useEffect(() => {
     loadMedicalRecords();
@@ -51,6 +57,67 @@ export default function SuperAdminMedicalRecordsPage() {
       setGroupedRecords([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangeStatus = async (recordId: string, newStatus: 'active' | 'closed' | 'archived', currentStatus: string) => {
+    // Validar que el estado sea diferente
+    if (currentStatus === newStatus) {
+      toast.info('Estado sin cambios', 'La historia clínica ya está en ese estado');
+      return;
+    }
+
+    // Mensajes de confirmación según el estado
+    const confirmMessages: Record<string, { title: string; message: string; type: 'warning' | 'info' }> = {
+      closed: {
+        type: 'warning',
+        title: '¿Cerrar historia clínica?',
+        message: 'Al cerrar la historia clínica, quedará bloqueada y no se podrá modificar. Esta acción es importante para mantener la integridad de los registros médicos. ¿Desea continuar?',
+      },
+      archived: {
+        type: 'info',
+        title: '¿Archivar historia clínica?',
+        message: 'La historia clínica será archivada y bloqueada para modificaciones. Podrá reabrirla si es necesario. ¿Desea continuar?',
+      },
+      active: {
+        type: 'warning',
+        title: '¿Reabrir historia clínica?',
+        message: 'La historia clínica será reactivada y se podrá modificar nuevamente. Esta acción debe realizarse solo cuando sea necesario. ¿Desea continuar?',
+      },
+    };
+
+    const confirmConfig = confirmMessages[newStatus];
+    const confirmed = await confirm({
+      type: confirmConfig.type,
+      title: confirmConfig.title,
+      message: confirmConfig.message,
+      confirmText: newStatus === 'active' ? 'Reabrir' : newStatus === 'closed' ? 'Cerrar' : 'Archivar',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setUpdatingStatus(recordId);
+      
+      // Llamar al endpoint correspondiente
+      if (newStatus === 'closed') {
+        await medicalRecordsService.close(recordId);
+        toast.success('Historia clínica cerrada exitosamente');
+      } else if (newStatus === 'archived') {
+        await medicalRecordsService.archive(recordId);
+        toast.success('Historia clínica archivada exitosamente');
+      } else if (newStatus === 'active') {
+        await medicalRecordsService.reopen(recordId);
+        toast.success('Historia clínica reabierta exitosamente');
+      }
+
+      // Recargar la lista
+      await loadMedicalRecords();
+    } catch (error: any) {
+      toast.error('Error al cambiar estado', error.response?.data?.message || error.message);
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -262,8 +329,7 @@ export default function SuperAdminMedicalRecordsPage() {
                       {group.records.map((record) => (
                         <div
                           key={record.id}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                          onClick={() => navigate(`/${group.tenantSlug}/medical-records/${record.id}`)}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex items-center gap-4 flex-1">
                             <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
@@ -289,7 +355,78 @@ export default function SuperAdminMedicalRecordsPage() {
                               </div>
                             </div>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          
+                          {/* Botones de gestión de estados */}
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                            {updatingStatus === record.id ? (
+                              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                            ) : (
+                              <>
+                                {/* Botón Activa */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleChangeStatus(record.id, 'active', record.status);
+                                  }}
+                                  disabled={record.status === 'active'}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    record.status === 'active'
+                                      ? 'bg-green-100 text-green-600 cursor-default'
+                                      : 'text-green-600 hover:text-green-700 hover:bg-green-50'
+                                  }`}
+                                  title={record.status === 'active' ? 'Activa' : 'Reabrir'}
+                                >
+                                  <CheckCircle className="w-5 h-5" />
+                                </button>
+
+                                {/* Botón Archivada */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleChangeStatus(record.id, 'archived', record.status);
+                                  }}
+                                  disabled={record.status === 'archived'}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    record.status === 'archived'
+                                      ? 'bg-blue-100 text-blue-600 cursor-default'
+                                      : 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                                  }`}
+                                  title={record.status === 'archived' ? 'Archivada' : 'Archivar'}
+                                >
+                                  <Archive className="w-5 h-5" />
+                                </button>
+
+                                {/* Botón Cerrada */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleChangeStatus(record.id, 'closed', record.status);
+                                  }}
+                                  disabled={record.status === 'closed'}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    record.status === 'closed'
+                                      ? 'bg-gray-100 text-gray-600 cursor-default'
+                                      : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
+                                  }`}
+                                  title={record.status === 'closed' ? 'Cerrada' : 'Cerrar'}
+                                >
+                                  <Lock className="w-5 h-5" />
+                                </button>
+                              </>
+                            )}
+                            
+                            {/* Botón Ver detalles */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/${group.tenantSlug}/medical-records/${record.id}`);
+                              }}
+                              className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                              title="Ver detalles"
+                            >
+                              <ChevronRight className="w-5 h-5" />
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>

@@ -41,6 +41,7 @@ const ConsentTemplatesPage = lazy(() => import('./pages/ConsentTemplatesPage'));
 const MRConsentTemplatesPage = lazy(() => import('./pages/MRConsentTemplatesPage'));
 const MedicalRecordsPage = lazy(() => import('./pages/MedicalRecordsPage'));
 const SuperAdminMedicalRecordsPage = lazy(() => import('./pages/SuperAdminMedicalRecordsPage'));
+const SuperAdminConsentsPage = lazy(() => import('./pages/SuperAdminConsentsPage'));
 const CreateMedicalRecordPage = lazy(() => import('./pages/CreateMedicalRecordPage'));
 const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage'));
 
@@ -147,6 +148,7 @@ function App() {
               <Route path="/mr-consent-templates" element={<MRConsentTemplatesPage />} />
               <Route path="/medical-records" element={<MedicalRecordsPage />} />
               <Route path="/super-admin/medical-records" element={<SuperAdminMedicalRecordsPage />} />
+              <Route path="/super-admin/consents" element={<SuperAdminConsentsPage />} />
               <Route path="/medical-records/new" element={<CreateMedicalRecordPage />} />
               <Route path="/medical-records/:id" element={<ViewMedicalRecordPage />} />
               <Route path="/users" element={<UsersPage />} />

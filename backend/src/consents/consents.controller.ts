@@ -46,6 +46,13 @@ export class ConsentsController {
     return this.consentsService.getStatistics(user);
   }
 
+  @Get('all/grouped')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
+  getAllGrouped(@CurrentUser() user?: User) {
+    return this.consentsService.getAllGroupedByTenant(user);
+  }
+
   @Get()
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)

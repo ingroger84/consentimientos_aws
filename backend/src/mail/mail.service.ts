@@ -1370,7 +1370,7 @@ export class MailService {
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: superAdminEmail,
-        subject: '🎉 Nueva Cuenta Creada - Archivo en Línea',
+        subject: 'Nueva Cuenta Creada - Archivo en Linea',
         html: this.getNewAccountNotificationTemplate(tenant, adminUser, tenantUrl),
       };
 
@@ -1383,12 +1383,63 @@ export class MailService {
   }
 
   /**
+   * Enviar email de trial expirado al tenant
+   */
+  async sendTrialExpiredEmail(tenant: any): Promise<void> {
+    try {
+      const baseDomain = this.configService.get('BASE_DOMAIN');
+      const tenantUrl = baseDomain === 'localhost' 
+        ? `http://${tenant.slug}.localhost:5173`
+        : `https://${tenant.slug}.${baseDomain}`;
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: tenant.contactEmail,
+        subject: 'Periodo de Prueba Expirado - Archivo en Linea',
+        html: this.getTrialExpiredTemplate(tenant, tenantUrl),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Trial expired email sent to ${tenant.contactEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending trial expired email to ${tenant.contactEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar notificación al Super Admin sobre trial expirado
+   */
+  async sendTrialExpiredNotificationToAdmin(tenant: any): Promise<void> {
+    try {
+      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || 'admin@archivoenlinea.com';
+      
+      const daysExpired = tenant.trialEndsAt 
+        ? Math.floor((new Date().getTime() - new Date(tenant.trialEndsAt).getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: superAdminEmail,
+        subject: `Trial Expirado - ${tenant.name} Suspendido`,
+        html: this.getTrialExpiredAdminNotificationTemplate(tenant, daysExpired),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Trial expired notification sent to Super Admin: ${superAdminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending trial expired notification to admin:`, error);
+      // No lanzar error para no bloquear la suspensión
+    }
+  }
+
+  /**
    * Template de notificación de nueva cuenta para Super Admin
    */
   private getNewAccountNotificationTemplate(tenant: any, adminUser: any, tenantUrl: string): string {
     const planNames = {
-      free: 'Gratuito (7 días)',
-      basic: 'Básico',
+      free: 'Gratuito (7 dias)',
+      basic: 'Basico',
       professional: 'Emprendedor',
       enterprise: 'Plus',
       custom: 'Empresarial',
@@ -1470,45 +1521,12 @@ export class MailService {
             font-size: 14px;
             margin: 10px 0;
           }
-          .action-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            margin: 20px 0;
-            text-align: center;
-          }
           .footer {
             background-color: #f8f9fa;
             padding: 20px;
             text-align: center;
             color: #6b7280;
             font-size: 14px;
-          }
-          .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-          }
-          .stat-card {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-          }
-          .stat-card .number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #10b981;
-          }
-          .stat-card .label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 5px;
           }
         </style>
       </head>
@@ -1518,20 +1536,20 @@ export class MailService {
             <div class="emoji">🎉</div>
             <h1>Nueva Cuenta Creada</h1>
             <p style="margin: 10px 0 0 0; opacity: 0.9;">
-              Un nuevo cliente se ha registrado en Archivo en Línea
+              Un nuevo cliente se ha registrado en Archivo en Linea
             </p>
           </div>
 
           <div class="content">
             <p style="font-size: 16px; color: #374151;">
-              ¡Hola Super Admin! 👋
+              Hola Super Admin!
             </p>
             <p style="font-size: 16px; color: #374151;">
               Te informamos que se ha creado una nueva cuenta en la plataforma desde la landing page.
             </p>
 
             <div class="info-box">
-              <h3>📊 Información de la Empresa</h3>
+              <h3>Informacion de la Empresa</h3>
               <div class="info-item">
                 <strong>Nombre:</strong> ${tenant.name}
               </div>
@@ -1545,12 +1563,12 @@ export class MailService {
                 <strong>Email:</strong> ${tenant.contactEmail || 'N/A'}
               </div>
               <div class="info-item">
-                <strong>Teléfono:</strong> ${tenant.contactPhone || 'N/A'}
+                <strong>Telefono:</strong> ${tenant.contactPhone || 'N/A'}
               </div>
             </div>
 
             <div class="info-box">
-              <h3>👤 Administrador de la Cuenta</h3>
+              <h3>Administrador de la Cuenta</h3>
               <div class="info-item">
                 <strong>Nombre:</strong> ${adminUser.name}
               </div>
@@ -1560,10 +1578,10 @@ export class MailService {
             </div>
 
             <div class="info-box">
-              <h3>💳 Plan Seleccionado</h3>
+              <h3>Plan Seleccionado</h3>
               <div class="plan-badge">${planName}</div>
               <div class="info-item">
-                <strong>Estado:</strong> ${tenant.status === 'trial' ? 'Período de Prueba' : 'Activo'}
+                <strong>Estado:</strong> ${tenant.status === 'trial' ? 'Periodo de Prueba' : 'Activo'}
               </div>
               ${tenant.trialEndsAt ? `
               <div class="info-item">
@@ -1572,25 +1590,265 @@ export class MailService {
               ` : ''}
             </div>
 
-              <div class="stat-card">
-                <div class="number">${tenant.storageLimitMb} MB</div>
-                <div class="label">Almacenamiento</div>
-              </div>
-            </div>
-
             <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
               <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                <strong>💡 Acción recomendada:</strong> Puedes revisar la cuenta desde el panel de administración y contactar al cliente si es necesario.
+                <strong>Accion recomendada:</strong> Puedes revisar la cuenta desde el panel de administracion y contactar al cliente si es necesario.
               </p>
             </div>
           </div>
 
           <div class="footer">
             <p style="margin: 0 0 10px 0;">
-              <strong>Archivo en Línea</strong> - Sistema de Gestión de Consentimientos
+              <strong>Archivo en Linea</strong> - Sistema de Gestion de Consentimientos
             </p>
             <p style="margin: 0; font-size: 12px;">
-              Este es un correo automático. No responder a este mensaje.
+              Este es un correo automatico. No responder a este mensaje.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Template de trial expirado para el tenant
+   */
+  private getTrialExpiredTemplate(tenant: any, tenantUrl: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+          }
+          .content {
+            padding: 40px 30px;
+          }
+          .alert-box {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          .button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            margin: 20px 0;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Periodo de Prueba Expirado</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">
+              Tu cuenta ha sido suspendida
+            </p>
+          </div>
+
+          <div class="content">
+            <p>Hola ${tenant.contactName || 'Estimado cliente'},</p>
+            
+            <p>Te informamos que el periodo de prueba de 7 dias de tu cuenta <strong>${tenant.name}</strong> ha expirado.</p>
+
+            <div class="alert-box">
+              <h3 style="margin-top: 0; color: #92400e;">Que significa esto?</h3>
+              <ul style="margin: 10px 0; color: #92400e;">
+                <li>Tu cuenta ha sido suspendida temporalmente</li>
+                <li>No podras acceder al sistema</li>
+                <li>Tus datos estan seguros y no se perderan</li>
+              </ul>
+            </div>
+
+            <h3>Como reactivar tu cuenta?</h3>
+            <p>Para continuar usando Archivo en Linea, necesitas seleccionar un plan de pago:</p>
+            
+            <ul>
+              <li><strong>Plan Basico:</strong> Ideal para empezar</li>
+              <li><strong>Plan Emprendedor:</strong> Para negocios en crecimiento</li>
+              <li><strong>Plan Plus:</strong> Funcionalidades avanzadas</li>
+              <li><strong>Plan Empresarial:</strong> Solucion completa</li>
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${tenantUrl}/pricing" class="button">Ver Planes y Precios</a>
+            </div>
+
+            <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+            
+            <p>Saludos cordiales,<br><strong>Equipo de Archivo en Linea</strong></p>
+          </div>
+
+          ${this.BRANDING_FOOTER}
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Template de notificación de trial expirado para Super Admin
+   */
+  private getTrialExpiredAdminNotificationTemplate(tenant: any, daysExpired: number): string {
+    const trialEndsAt = tenant.trialEndsAt ? new Date(tenant.trialEndsAt).toLocaleDateString('es-ES') : 'N/A';
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+          }
+          .content {
+            padding: 40px 30px;
+          }
+          .info-box {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+          }
+          .info-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: white;
+            border-radius: 4px;
+          }
+          .info-item strong {
+            color: #ef4444;
+            display: inline-block;
+            min-width: 150px;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Trial Expirado - Cuenta Suspendida</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">
+              Notificacion automatica del sistema
+            </p>
+          </div>
+
+          <div class="content">
+            <p>Hola Super Admin,</p>
+            
+            <p>Te informamos que una cuenta con periodo de prueba ha expirado y ha sido suspendida automaticamente.</p>
+
+            <div class="info-box">
+              <h3 style="margin-top: 0; color: #dc2626;">Detalles de la Cuenta</h3>
+              <div class="info-item">
+                <strong>Nombre:</strong> ${tenant.name}
+              </div>
+              <div class="info-item">
+                <strong>Subdominio:</strong> ${tenant.slug}.archivoenlinea.com
+              </div>
+              <div class="info-item">
+                <strong>Email:</strong> ${tenant.contactEmail || 'N/A'}
+              </div>
+              <div class="info-item">
+                <strong>Telefono:</strong> ${tenant.contactPhone || 'N/A'}
+              </div>
+              <div class="info-item">
+                <strong>Trial expiro:</strong> ${trialEndsAt}
+              </div>
+              <div class="info-item">
+                <strong>Dias vencido:</strong> ${daysExpired} dia(s)
+              </div>
+              <div class="info-item">
+                <strong>Estado actual:</strong> Suspendido
+              </div>
+            </div>
+
+            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+              <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                <strong>Accion realizada:</strong> Se ha enviado un correo al cliente informandole sobre la suspension y los pasos para reactivar su cuenta.
+              </p>
+            </div>
+
+            <p>Puedes contactar al cliente si consideras necesario hacer seguimiento comercial.</p>
+          </div>
+
+          <div class="footer">
+            <p style="margin: 0 0 10px 0;">
+              <strong>Archivo en Linea</strong> - Sistema de Gestion de Consentimientos
+            </p>
+            <p style="margin: 0; font-size: 12px;">
+              Este es un correo automatico. No responder a este mensaje.
             </p>
           </div>
         </div>

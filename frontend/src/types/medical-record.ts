@@ -34,6 +34,10 @@ export interface MedicalRecord {
     id: string;
     name: string;
   };
+  closer?: {
+    id: string;
+    name: string;
+  };
   anamnesis?: Anamnesis[];
   physicalExams?: PhysicalExam[];
   diagnoses?: Diagnosis[];

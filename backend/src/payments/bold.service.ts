@@ -64,7 +64,7 @@ export class BoldService {
       baseURL: apiUrl,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `x-api-key ${this.apiKey}`, // Bold usa "Authorization: x-api-key <llave>"
+        'Authorization': `x-api-key ${this.apiKey}`, // Bold: Authorization con "x-api-key <llave>"
       },
       timeout: 30000,
     });
@@ -99,7 +99,13 @@ export class BoldService {
 
       this.logger.log(`Payload para Bold:`, JSON.stringify(payload, null, 2));
 
-      const response = await this.apiClient.post('/payment-intent', payload);
+      // Log headers para debugging
+      this.logger.log(`Headers enviados a Bold:`, {
+        'Content-Type': 'application/json',
+        'Authorization': `x-api-key ${this.apiKey?.substring(0, 20)}...`,
+      });
+
+      const response = await this.apiClient.post('/payment-intents', payload);
 
       // Bold devuelve la intención de pago con reference_id
       const referenceId = response.data.reference_id;

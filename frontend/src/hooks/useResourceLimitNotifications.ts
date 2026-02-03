@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
+import { getApiBaseUrl } from '@/utils/api-url';
 
 interface ResourceLimits {
   users: { current: number; max: number };
@@ -33,7 +34,7 @@ export function useResourceLimitNotifications() {
   const fetchResourceLimits = async () => {
     try {
       // Obtener información del tenant con sus recursos
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const apiUrl = `${getApiBaseUrl()}/api`;
       const response = await fetch(`${apiUrl}/tenants/${user?.tenant?.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,

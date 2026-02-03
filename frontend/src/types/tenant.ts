@@ -77,13 +77,22 @@ export interface TenantStats {
   totalBranches: number;
   totalServices: number;
   totalConsents: number;
+  totalMedicalRecords: number;
+  totalMRConsentTemplates: number;
+  totalConsentTemplates: number;
   maxUsers: number;
   maxBranches: number;
   maxConsents: number;
+  maxMedicalRecords: number;
+  maxMRConsentTemplates: number;
+  maxConsentTemplates: number;
   usagePercentage: {
     users: number;
     branches: number;
     consents: number;
+    medicalRecords: number;
+    mrConsentTemplates: number;
+    consentTemplates: number;
   };
   status: TenantStatus;
   plan: TenantPlan;
