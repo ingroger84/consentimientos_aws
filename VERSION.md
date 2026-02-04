@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 24.0.1
+## Versión Actual: 24.0.2
 **Fecha:** 2026-02-03
 **Tipo de Cambio:** PATCH
 
@@ -18,15 +18,13 @@
 
 ## Historial de Versiones
 
+### 24.0.2 - 2026-02-03 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
+
 ### 24.0.1 - 2026-02-03 [PATCH]
 - Frontend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
-
-### 24.0.0 - 2026-02-03 [MAJOR]
-- Backend: 14 archivo(s) modificado(s)
-- Frontend: 11 archivo(s) modificado(s)
-- Documentación: 24 archivo(s) modificado(s)
-- Scripts: 5 archivo(s) modificado(s)
 
 ---
 
