@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 24.0.0
+## Versión Actual: 24.0.1
 **Fecha:** 2026-02-03
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,23 +18,15 @@
 
 ## Historial de Versiones
 
+### 24.0.1 - 2026-02-03 [PATCH]
+- Frontend: 1 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 24.0.0 - 2026-02-03 [MAJOR]
 - Backend: 14 archivo(s) modificado(s)
 - Frontend: 11 archivo(s) modificado(s)
 - Documentación: 24 archivo(s) modificado(s)
 - Scripts: 5 archivo(s) modificado(s)
-
-### 23.2.0 - 2026-02-01 [MINOR]
-- Backend: 9 archivo(s) modificado(s)
-  - Nuevos permisos de gestión de estados de HC
-  - Sistema de notificaciones por email
-  - Corrección de suspensión de trials
-  - Corrección de estados inconsistentes
-  - Estadísticas de HC por tenant
-- Frontend: 8 archivo(s) modificado(s) (desplegados previamente)
-- Documentación: 5 archivo(s) modificado(s)
-- Scripts: 2 script(s) de despliegue creado(s)
-- **Estado**: ✅ Desplegado en producción (03/02/2026)
 
 ---
 

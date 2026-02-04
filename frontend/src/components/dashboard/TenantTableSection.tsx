@@ -40,7 +40,7 @@ export default function TenantTableSection() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'suspended'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'trial' | 'suspended' | 'expired'>('all');
   const [filterType, setFilterType] = useState<'all' | 'at-limit' | 'near-limit' | 'suspended' | 'tenant-id'>('all');
   const [filterTenantId, setFilterTenantId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -128,7 +128,33 @@ export default function TenantTableSection() {
   };
 
   const getStatusColor = (status: string) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'trial':
+        return 'bg-blue-100 text-blue-800';
+      case 'suspended':
+        return 'bg-red-100 text-red-800';
+      case 'expired':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'Activo';
+      case 'trial':
+        return 'Trial';
+      case 'suspended':
+        return 'Suspendido';
+      case 'expired':
+        return 'Expirado';
+      default:
+        return status;
+    }
   };
 
   const handleEdit = (tenant: Tenant) => {
@@ -222,7 +248,9 @@ export default function TenantTableSection() {
             >
               <option value="all">Todos</option>
               <option value="active">Activos</option>
+              <option value="trial">Trial</option>
               <option value="suspended">Suspendidos</option>
+              <option value="expired">Expirados</option>
             </select>
           </div>
         </div>
@@ -284,7 +312,7 @@ export default function TenantTableSection() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(tenant.status)}`}>
-                        {tenant.status === 'active' ? 'Activo' : 'Suspendido'}
+                        {getStatusLabel(tenant.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
