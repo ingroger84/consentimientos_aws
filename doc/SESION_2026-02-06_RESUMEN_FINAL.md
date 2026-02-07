@@ -53,6 +53,22 @@ Continuación de la implementación del cumplimiento normativo colombiano para H
 ## 🚀 Próximos Pasos
 
 ### 1. Despliegue en AWS (CRÍTICO)
+
+#### Opción A: Despliegue Directo (SIN GitHub) - RECOMENDADO
+```powershell
+# Ejecutar script de despliegue directo
+.\scripts\deploy-direct-aws-v26.ps1
+```
+
+Este script:
+- ✅ Compila backend y frontend localmente
+- ✅ Transfiere archivos por SCP
+- ✅ Ejecuta migraciones automáticamente
+- ✅ Actualiza permisos
+- ✅ Reinicia PM2
+- ✅ No requiere GitHub
+
+#### Opción B: Despliegue Manual
 ```bash
 # 1. Conectar a servidor
 ssh ubuntu@100.28.198.249 -i keys/AWS-ISSABEL.pem
@@ -78,13 +94,18 @@ pm2 restart ecosystem.config.production.js
 pm2 save
 ```
 
-### 2. Resolver GitHub Push (BLOQUEANTE)
+### 2. Resolver GitHub Push (OPCIONAL)
 **Problema**: GitHub detectó credenciales AWS en historial de commits
 
+**Solución Rápida**:
+Ver archivo `INSTRUCCIONES_PUSH_GITHUB.md` para instrucciones detalladas.
+
 **Opciones**:
-1. **Usar URL de GitHub para permitir el secreto** (más rápido)
+1. **Permitir secretos en GitHub** (2 minutos) - Ver URLs en `INSTRUCCIONES_PUSH_GITHUB.md`
 2. **Reescribir historial** con BFG Repo-Cleaner (más limpio)
 3. **Crear nuevo repositorio** (última opción)
+
+**Nota**: El despliegue puede hacerse sin resolver esto usando la Opción A.
 
 ### 3. Desarrollo Frontend
 - Crear interfaces para nuevas entidades
@@ -106,6 +127,12 @@ backend/src/medical-records/epicrisis.service.ts
 backend/src/medical-records/medical-orders.service.ts
 backend/src/medical-records/medical-record-documents.service.ts
 backend/run-complete-migration.js (nuevo)
+backend/package.json (versión actualizada)
+```
+
+### Scripts
+```
+scripts/deploy-direct-aws-v26.ps1 (nuevo)
 ```
 
 ### Documentación
@@ -113,13 +140,16 @@ backend/run-complete-migration.js (nuevo)
 doc/SESION_2026-02-06_RESUMEN_FINAL.md (este archivo)
 IMPLEMENTACION_CUMPLIMIENTO_NORMATIVO_COMPLETADA.md
 DESPLIEGUE_VERSION_24.0.0_INSTRUCCIONES.md
+INSTRUCCIONES_PUSH_GITHUB.md (nuevo)
+VERSION.md (actualizado a v26.0.0)
 ```
 
 ## 🎯 Cumplimiento Normativo
 
 ### Estado Actual
 - **Cumplimiento**: 100% (implementación backend completa)
-- **Versión**: 25.1.0 (local), 23.2.0 (producción - pendiente actualizar)
+- **Versión Local**: 26.0.0
+- **Versión Producción**: 23.2.0 (pendiente actualizar a 26.0.0)
 
 ### Funcionalidades Implementadas
 1. ✅ HC única por paciente
@@ -154,11 +184,20 @@ DESPLIEGUE_VERSION_24.0.0_INSTRUCCIONES.md
 - ✅ Backend compilando sin errores
 - ✅ Sistema de permisos completo y documentado
 - ✅ Scripts de migración listos para despliegue
-- ✅ Documentación actualizada
+- ✅ Script de despliegue directo a AWS (sin GitHub)
+- ✅ Documentación completa actualizada
+- ✅ Versión actualizada a 26.0.0
+
+## 🚀 Comando de Despliegue
+
+```powershell
+# Despliegue directo a AWS (recomendado)
+.\scripts\deploy-direct-aws-v26.ps1
+```
 
 ---
 
 **Fecha**: 2026-02-06  
-**Versión Backend**: 25.1.0  
-**Versión Producción**: 23.2.0  
-**Estado**: Backend completo, pendiente despliegue y frontend
+**Versión Local**: 26.0.0  
+**Versión Producción**: 23.2.0 → 26.0.0 (pendiente)  
+**Estado**: Backend completo, listo para despliegue

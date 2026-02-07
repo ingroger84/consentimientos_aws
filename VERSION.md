@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 26.0.0
+## Versión Actual: 26.0.1
 **Fecha:** 2026-02-06
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,12 +18,13 @@
 
 ## Historial de Versiones
 
+### 26.0.1 - 2026-02-06 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
+
 ### 26.0.0 - 2026-02-06 [MAJOR]
 - Backend: 5 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
-
-### 25.1.0 - 2026-02-06 [MINOR]
-- Documentación: 4 archivo(s) modificado(s)
 
 ---
 
