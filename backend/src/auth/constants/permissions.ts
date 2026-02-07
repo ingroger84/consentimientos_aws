@@ -356,6 +356,35 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   [PERMISSIONS.SIGN_MEDICAL_RECORDS]: 'Firmar historias clínicas',
   [PERMISSIONS.EXPORT_MEDICAL_RECORDS]: 'Exportar historias clínicas',
   
+  [PERMISSIONS.VIEW_MEDICAL_ORDERS]: 'Ver órdenes médicas',
+  [PERMISSIONS.CREATE_MEDICAL_ORDERS]: 'Crear órdenes médicas',
+  [PERMISSIONS.EDIT_MEDICAL_ORDERS]: 'Editar órdenes médicas',
+  [PERMISSIONS.DELETE_MEDICAL_ORDERS]: 'Eliminar órdenes médicas',
+  [PERMISSIONS.COMPLETE_MEDICAL_ORDERS]: 'Completar órdenes médicas',
+  
+  [PERMISSIONS.VIEW_PRESCRIPTIONS]: 'Ver prescripciones',
+  [PERMISSIONS.CREATE_PRESCRIPTIONS]: 'Crear prescripciones',
+  [PERMISSIONS.EDIT_PRESCRIPTIONS]: 'Editar prescripciones',
+  [PERMISSIONS.SUSPEND_PRESCRIPTIONS]: 'Suspender prescripciones',
+  
+  [PERMISSIONS.VIEW_PROCEDURES]: 'Ver procedimientos',
+  [PERMISSIONS.CREATE_PROCEDURES]: 'Crear procedimientos',
+  [PERMISSIONS.EDIT_PROCEDURES]: 'Editar procedimientos',
+  [PERMISSIONS.PERFORM_PROCEDURES]: 'Realizar procedimientos',
+  
+  [PERMISSIONS.VIEW_TREATMENT_PLANS]: 'Ver planes de tratamiento',
+  [PERMISSIONS.CREATE_TREATMENT_PLANS]: 'Crear planes de tratamiento',
+  [PERMISSIONS.EDIT_TREATMENT_PLANS]: 'Editar planes de tratamiento',
+  
+  [PERMISSIONS.VIEW_EPICRISIS]: 'Ver epicrisis',
+  [PERMISSIONS.CREATE_EPICRISIS]: 'Crear epicrisis',
+  [PERMISSIONS.EDIT_EPICRISIS]: 'Editar epicrisis',
+  
+  [PERMISSIONS.VIEW_MR_DOCUMENTS]: 'Ver documentos de HC',
+  [PERMISSIONS.UPLOAD_MR_DOCUMENTS]: 'Subir documentos a HC',
+  [PERMISSIONS.DELETE_MR_DOCUMENTS]: 'Eliminar documentos de HC',
+  [PERMISSIONS.DOWNLOAD_MR_DOCUMENTS]: 'Descargar documentos de HC',
+  
   [PERMISSIONS.VIEW_SETTINGS]: 'Ver configuración',
   [PERMISSIONS.EDIT_SETTINGS]: 'Editar configuración',
   [PERMISSIONS.CONFIGURE_EMAIL]: 'Configurar correo electrónico',
@@ -474,6 +503,59 @@ export const PERMISSION_CATEGORIES = {
       PERMISSIONS.REOPEN_MEDICAL_RECORDS,
       PERMISSIONS.SIGN_MEDICAL_RECORDS,
       PERMISSIONS.EXPORT_MEDICAL_RECORDS,
+    ],
+  },
+  medical_orders: {
+    name: 'Órdenes Médicas',
+    permissions: [
+      PERMISSIONS.VIEW_MEDICAL_ORDERS,
+      PERMISSIONS.CREATE_MEDICAL_ORDERS,
+      PERMISSIONS.EDIT_MEDICAL_ORDERS,
+      PERMISSIONS.DELETE_MEDICAL_ORDERS,
+      PERMISSIONS.COMPLETE_MEDICAL_ORDERS,
+    ],
+  },
+  prescriptions: {
+    name: 'Prescripciones',
+    permissions: [
+      PERMISSIONS.VIEW_PRESCRIPTIONS,
+      PERMISSIONS.CREATE_PRESCRIPTIONS,
+      PERMISSIONS.EDIT_PRESCRIPTIONS,
+      PERMISSIONS.SUSPEND_PRESCRIPTIONS,
+    ],
+  },
+  procedures: {
+    name: 'Procedimientos',
+    permissions: [
+      PERMISSIONS.VIEW_PROCEDURES,
+      PERMISSIONS.CREATE_PROCEDURES,
+      PERMISSIONS.EDIT_PROCEDURES,
+      PERMISSIONS.PERFORM_PROCEDURES,
+    ],
+  },
+  treatment_plans: {
+    name: 'Planes de Tratamiento',
+    permissions: [
+      PERMISSIONS.VIEW_TREATMENT_PLANS,
+      PERMISSIONS.CREATE_TREATMENT_PLANS,
+      PERMISSIONS.EDIT_TREATMENT_PLANS,
+    ],
+  },
+  epicrisis: {
+    name: 'Epicrisis',
+    permissions: [
+      PERMISSIONS.VIEW_EPICRISIS,
+      PERMISSIONS.CREATE_EPICRISIS,
+      PERMISSIONS.EDIT_EPICRISIS,
+    ],
+  },
+  mr_documents: {
+    name: 'Documentos de HC',
+    permissions: [
+      PERMISSIONS.VIEW_MR_DOCUMENTS,
+      PERMISSIONS.UPLOAD_MR_DOCUMENTS,
+      PERMISSIONS.DELETE_MR_DOCUMENTS,
+      PERMISSIONS.DOWNLOAD_MR_DOCUMENTS,
     ],
   },
   settings: {

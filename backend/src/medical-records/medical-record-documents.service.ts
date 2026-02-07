@@ -42,6 +42,7 @@ export class MedicalRecordDocumentsService {
 
     const document = this.documentsRepository.create({
       ...uploadDto,
+      documentType: uploadDto.documentType as 'lab_result' | 'imaging' | 'epicrisis' | 'consent' | 'prescription' | 'other',
       medicalRecordId,
       tenantId,
       fileName: file.originalname,

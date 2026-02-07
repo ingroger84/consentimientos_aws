@@ -35,10 +35,11 @@ export class MedicalOrdersService {
 
     const order = this.medicalOrdersRepository.create({
       ...createDto,
+      orderType: createDto.orderType as 'laboratory' | 'imaging' | 'procedure' | 'other',
+      priority: (createDto.priority || 'routine') as 'routine' | 'urgent' | 'stat',
       medicalRecordId,
       tenantId,
       orderedBy: userId,
-      priority: createDto.priority || 'routine',
     });
 
     return this.medicalOrdersRepository.save(order);

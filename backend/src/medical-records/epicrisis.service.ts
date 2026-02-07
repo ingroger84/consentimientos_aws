@@ -39,6 +39,7 @@ export class EpicrisisService {
 
     const epicrisis = this.epicrisisRepository.create({
       ...createDto,
+      dischargeType: createDto.dischargeType as 'home' | 'transfer' | 'death' | 'voluntary' | 'other',
       medicalRecordId,
       tenantId,
       createdBy: userId,
