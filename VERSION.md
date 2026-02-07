@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 27.0.0
+## Versión Actual: 28.0.0
 **Fecha:** 2026-02-07
 **Tipo de Cambio:** MAJOR
 
@@ -18,30 +18,14 @@
 
 ## Historial de Versiones
 
-### 27.0.0 - 2026-02-07 [MAJOR]
-- Backend: 5 archivo(s) modificado(s)
-- Frontend: 6 archivo(s) modificado(s)
-- Documentación: 4 archivo(s) modificado(s)
+### 28.0.0 - 2026-02-07 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 21 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
 
-### 26.0.3 - 2026-02-07 [PATCH]
-**Correcciones Críticas:**
-- ✓ Eliminado React.StrictMode que causaba errores de DOM en producción
-- ✓ Implementado botón eliminar historias clínicas con permisos
-- ✓ Corregida auditoría antes de eliminación (evita error FK constraint)
-- ✓ Validaciones: no se pueden eliminar HC cerradas
-- ✓ Eliminación en cascada de consentimientos asociados
-
-**Backend:**
-- Endpoint DELETE /medical-records/:id implementado
-- Método delete() en medical-records.service.ts con validaciones
-- Auditoría registrada antes de eliminación
-- Permiso delete_medical_records verificado
-
-**Frontend:**
-- Botón eliminar agregado en MedicalRecordsPage.tsx
-- Verificación de permiso con usePermissions hook
-- Confirmación de usuario antes de eliminar
-- Soporte en vista tabla y tarjetas
+### 27.1.0 - 2026-02-07 [MINOR]
+- Mejoras y correcciones generales
 
 ---
 

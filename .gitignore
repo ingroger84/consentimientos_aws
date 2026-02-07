@@ -150,6 +150,17 @@ force-cache-clear*.html
 force-clear-cache*.html
 
 # ============================================
+# DOCUMENTATION WITH EXPOSED CREDENTIALS
+# ============================================
+ACCIONES_PENDIENTES_URGENTES.md
+doc/SESION_2026-01-31_AUDITORIA_SEGURIDAD.md
+doc/SESION_2026-01-31_RESUMEN_FINAL.md
+doc/SESION_2026-02-03_SINCRONIZACION_COMPLETA.md
+doc/40-aws-infraestructura/
+scripts/rotate-credentials.md
+INSTRUCCIONES_PUSH_GITHUB.md
+
+# ============================================
 # TEST FILES (Temporary)
 # ============================================
 test-*.html
