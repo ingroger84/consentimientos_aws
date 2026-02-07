@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Search, Eye, LayoutGrid, List, User, Calendar, Building2 } from 'lucide-react';
+import { Plus, FileText, Search, Eye, LayoutGrid, List, User, Calendar, Building2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { medicalRecordsService } from '../services/medical-records.service';
 import { MedicalRecord } from '../types/medical-record';
@@ -30,6 +30,22 @@ export default function MedicalRecordsPage() {
       toast.error('Error al cargar historias clínicas', error.response?.data?.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, recordNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!confirm(`¿Estás seguro de eliminar la historia clínica ${recordNumber}? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    try {
+      await medicalRecordsService.delete(id);
+      toast.success('Historia clínica eliminada correctamente');
+      loadRecords();
+    } catch (error: any) {
+      toast.error('Error al eliminar historia clínica', error.response?.data?.message);
     }
   };
 
@@ -254,16 +270,27 @@ export default function MedicalRecordsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/medical-records/${record.id}`);
-                        }}
-                        className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
-                        title="Ver detalles"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/medical-records/${record.id}`);
+                          }}
+                          className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
+                          title="Ver detalles"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        {hasPermission('delete_medical_records') && (
+                          <button
+                            onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                            className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -320,16 +347,27 @@ export default function MedicalRecordsPage() {
                 <span className="text-xs text-gray-500">
                   Creada: {new Date(record.createdAt).toLocaleDateString('es-CO')}
                 </span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/medical-records/${record.id}`);
-                  }}
-                  className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm"
-                >
-                  <Eye className="w-4 h-4" />
-                  Ver
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/medical-records/${record.id}`);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Ver
+                  </button>
+                  {hasPermission('delete_medical_records') && (
+                    <button
+                      onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                      className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}

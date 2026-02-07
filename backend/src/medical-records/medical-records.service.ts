@@ -420,6 +420,55 @@ export class MedicalRecordsService {
     return this.findOne(id, tenantId, userId);
   }
 
+  async delete(
+    id: string,
+    tenantId: string,
+    userId: string,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<void> {
+    const medicalRecord = await this.medicalRecordsRepository.findOne({
+      where: { id, tenantId },
+      relations: ['consents'],
+    });
+
+    if (!medicalRecord) {
+      throw new NotFoundException('Historia clínica no encontrada');
+    }
+
+    // Validar que la HC no esté cerrada (solo se pueden eliminar HC activas o archivadas)
+    if (medicalRecord.status === 'closed') {
+      throw new ForbiddenException(
+        'No se puede eliminar una historia clínica cerrada. Debe archivarla en su lugar.',
+      );
+    }
+
+    // Guardar datos para auditoría antes de eliminar
+    const oldValues = { ...medicalRecord };
+
+    // Eliminar consentimientos asociados primero
+    // Auditoría ANTES de eliminar (para evitar error de foreign key)
+    await this.logAudit({
+      action: 'delete',
+      entityType: 'medical_record',
+      entityId: id,
+      medicalRecordId: id,
+      userId,
+      tenantId,
+      oldValues,
+      ipAddress,
+      userAgent,
+    });
+
+    // Eliminar consentimientos asociados
+    if (medicalRecord.consents && medicalRecord.consents.length > 0) {
+      await this.medicalRecordConsentsRepository.remove(medicalRecord.consents);
+    }
+
+    // Eliminar la historia clínica
+    await this.medicalRecordsRepository.remove(medicalRecord);
+  }
+
   private async generateRecordNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
     const count = await this.medicalRecordsRepository.count({

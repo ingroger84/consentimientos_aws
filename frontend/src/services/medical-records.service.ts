@@ -104,6 +104,10 @@ class MedicalRecordsService {
   async deleteConsent(medicalRecordId: string, consentId: string): Promise<void> {
     await api.delete(`/medical-records/${medicalRecordId}/consents/${consentId}`);
   }
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`/medical-records/${id}`);
+  }
 }
 
 export const medicalRecordsService = new MedicalRecordsService();

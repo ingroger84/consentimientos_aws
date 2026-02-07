@@ -178,6 +178,20 @@ export class MedicalRecordsController {
     );
   }
 
+  @Delete(':id')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.DELETE_MEDICAL_RECORDS)
+  async delete(@Param('id') id: string, @Request() req: any) {
+    await this.medicalRecordsService.delete(
+      id,
+      req.user.tenantId,
+      req.user.sub,
+      req.ip,
+      req.headers['user-agent'],
+    );
+    return { message: 'Historia clínica eliminada exitosamente' };
+  }
+
   // Anamnesis endpoints
   @Post(':id/anamnesis')
   async createAnamnesis(

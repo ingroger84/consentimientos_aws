@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter, Lock, Archive, CheckCircle, Loader2 } from 'lucide-react';
+import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter, Lock, Archive, CheckCircle, Loader2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
 import { medicalRecordsService } from '@/services/medical-records.service';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface MedicalRecord {
   id: string;
@@ -33,6 +34,7 @@ interface GroupedRecords {
 }
 
 export default function SuperAdminMedicalRecordsPage() {
+  const { hasPermission } = usePermissions();
   const [loading, setLoading] = useState(true);
   const [groupedRecords, setGroupedRecords] = useState<GroupedRecords[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -116,6 +118,31 @@ export default function SuperAdminMedicalRecordsPage() {
       await loadMedicalRecords();
     } catch (error: any) {
       toast.error('Error al cambiar estado', error.response?.data?.message || error.message);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handleDelete = async (recordId: string, recordNumber: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const confirmed = await confirm({
+      type: 'warning',
+      title: '¿Eliminar historia clínica?',
+      message: `¿Estás seguro de eliminar la historia clínica ${recordNumber}? Esta acción no se puede deshacer y eliminará todos los datos asociados.`,
+      confirmText: 'Eliminar',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      setUpdatingStatus(recordId);
+      await medicalRecordsService.delete(recordId);
+      toast.success('Historia clínica eliminada correctamente');
+      await loadMedicalRecords();
+    } catch (error: any) {
+      toast.error('Error al eliminar historia clínica', error.response?.data?.message || error.message);
     } finally {
       setUpdatingStatus(null);
     }
@@ -412,6 +439,17 @@ export default function SuperAdminMedicalRecordsPage() {
                                 >
                                   <Lock className="w-5 h-5" />
                                 </button>
+
+                                {/* Botón Eliminar */}
+                                {hasPermission('delete_medical_records') && record.status !== 'closed' && (
+                                  <button
+                                    onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Eliminar"
+                                  >
+                                    <Trash2 className="w-5 h-5" />
+                                  </button>
+                                )}
                               </>
                             )}
                             
