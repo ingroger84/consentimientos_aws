@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { MedicalRecord } from './entities/medical-record.entity';
 import { MedicalRecordAudit } from './entities/medical-record-audit.entity';
 import { MedicalRecordConsent } from './entities/medical-record-consent.entity';
@@ -88,6 +88,41 @@ export class MedicalRecordsService {
       throw new BadRequestException('Debe proporcionar clientId o clientData');
     }
 
+    // ⚠️ VALIDACIÓN CRÍTICA: Verificar que el paciente NO tenga ya una HC activa
+    // Normativa colombiana: Una historia clínica por paciente por IPS
+    const existingActiveHC = await this.medicalRecordsRepository.findOne({
+      where: { 
+        clientId, 
+        tenantId, 
+        status: In(['active']) 
+      }
+    });
+
+    if (existingActiveHC) {
+      throw new BadRequestException(
+        `El paciente ya tiene una historia clínica activa: ${existingActiveHC.recordNumber}. ` +
+        `No se puede crear una nueva HC mientras exista una activa. ` +
+        `Si desea continuar la atención, use la HC existente o ciérrela primero.`
+      );
+    }
+
+    // Verificar si tiene HC cerradas (informar al usuario)
+    const existingClosedHC = await this.medicalRecordsRepository.findOne({
+      where: { 
+        clientId, 
+        tenantId, 
+        status: 'closed' 
+      },
+      order: { closedAt: 'DESC' }
+    });
+
+    if (existingClosedHC) {
+      console.log(
+        `INFO: El paciente tiene una HC cerrada: ${existingClosedHC.recordNumber}. ` +
+        `Considere reabrirla en lugar de crear una nueva.`
+      );
+    }
+
     // Generar número único de HC
     const recordNumber = await this.generateRecordNumber(tenantId);
 
@@ -117,6 +152,17 @@ export class MedicalRecordsService {
     });
 
     return this.findOne(saved.id, tenantId, userId);
+  }
+
+  async findByClient(
+    clientId: string,
+    tenantId: string,
+  ): Promise<MedicalRecord[]> {
+    return this.medicalRecordsRepository.find({
+      where: { clientId, tenantId },
+      relations: ['client', 'branch', 'creator', 'closer'],
+      order: { createdAt: 'DESC' },
+    });
   }
 
   async findAll(

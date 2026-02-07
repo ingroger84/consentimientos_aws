@@ -38,6 +38,6 @@ export class CreateMedicalRecordDto {
   admissionDate: string;
 
   @IsString()
-  @IsIn(['consulta', 'urgencia', 'hospitalizacion', 'control'])
+  @IsIn(['consulta', 'urgencia', 'hospitalizacion', 'control', 'telemedicina'])
   admissionType: string;
 }

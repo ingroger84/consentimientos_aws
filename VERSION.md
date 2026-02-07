@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 24.0.2
-**Fecha:** 2026-02-03
-**Tipo de Cambio:** PATCH
+## Versión Actual: 25.0.0
+**Fecha:** 2026-02-06
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,13 +18,46 @@
 
 ## Historial de Versiones
 
-### 24.0.2 - 2026-02-03 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
+### 25.0.0 - 2026-02-06 [MAJOR]
+- Backend: 26 archivo(s) modificado(s)
+- Documentación: 6 archivo(s) modificado(s)
 
-### 24.0.1 - 2026-02-03 [PATCH]
-- Frontend: 1 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
+### v25.0.0 (2026-02-06) - CUMPLIMIENTO NORMATIVO HC 100%
+
+**Tipo:** MAJOR Release
+
+**Resumen:** Implementación completa de todas las funcionalidades necesarias para cumplir 100% con la normativa colombiana de historias clínicas.
+
+**Nuevas Funcionalidades:**
+- ✅ Órdenes médicas (laboratorio, imágenes, procedimientos)
+- ✅ Prescripciones/Fórmulas médicas estructuradas
+- ✅ Procedimientos programados y realizados
+- ✅ Planes de tratamiento estructurados
+- ✅ Epicrisis (resumen al egreso)
+- ✅ Gestión documental completa con S3
+- ✅ Foto de paciente para validación de identidad
+- ✅ Tipo de admisión "telemedicina"
+
+**Correcciones Críticas:**
+- ✅ Validación de HC única por paciente (normativa colombiana)
+
+**Base de Datos:**
+- 6 nuevas tablas
+- 24 nuevos índices
+- 2 campos nuevos en tabla clients
+
+**API:**
+- 61 nuevos endpoints
+
+**Permisos:**
+- 20 nuevos permisos
+
+**Cumplimiento Normativo:** 77% → 100% ✅
+
+**Documentación:**
+- `doc/ANALISIS_FLUJO_HC_VS_NORMATIVA_COLOMBIANA.md`
+- `IMPLEMENTACION_CUMPLIMIENTO_NORMATIVO_COMPLETADA.md`
+- `DESPLIEGUE_VERSION_24.0.0_INSTRUCCIONES.md`
 
 ---
 

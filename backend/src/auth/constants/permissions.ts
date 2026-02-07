@@ -79,6 +79,41 @@ export const PERMISSIONS = {
   SIGN_MEDICAL_RECORDS: 'sign_medical_records',
   EXPORT_MEDICAL_RECORDS: 'export_medical_records',
 
+  // Órdenes Médicas
+  VIEW_MEDICAL_ORDERS: 'view_medical_orders',
+  CREATE_MEDICAL_ORDERS: 'create_medical_orders',
+  EDIT_MEDICAL_ORDERS: 'edit_medical_orders',
+  DELETE_MEDICAL_ORDERS: 'delete_medical_orders',
+  COMPLETE_MEDICAL_ORDERS: 'complete_medical_orders',
+
+  // Prescripciones
+  VIEW_PRESCRIPTIONS: 'view_prescriptions',
+  CREATE_PRESCRIPTIONS: 'create_prescriptions',
+  EDIT_PRESCRIPTIONS: 'edit_prescriptions',
+  SUSPEND_PRESCRIPTIONS: 'suspend_prescriptions',
+
+  // Procedimientos
+  VIEW_PROCEDURES: 'view_procedures',
+  CREATE_PROCEDURES: 'create_procedures',
+  EDIT_PROCEDURES: 'edit_procedures',
+  PERFORM_PROCEDURES: 'perform_procedures',
+
+  // Planes de Tratamiento
+  VIEW_TREATMENT_PLANS: 'view_treatment_plans',
+  CREATE_TREATMENT_PLANS: 'create_treatment_plans',
+  EDIT_TREATMENT_PLANS: 'edit_treatment_plans',
+
+  // Epicrisis
+  VIEW_EPICRISIS: 'view_epicrisis',
+  CREATE_EPICRISIS: 'create_epicrisis',
+  EDIT_EPICRISIS: 'edit_epicrisis',
+
+  // Documentos de HC
+  VIEW_MR_DOCUMENTS: 'view_mr_documents',
+  UPLOAD_MR_DOCUMENTS: 'upload_mr_documents',
+  DELETE_MR_DOCUMENTS: 'delete_mr_documents',
+  DOWNLOAD_MR_DOCUMENTS: 'download_mr_documents',
+
   // Configuración
   VIEW_SETTINGS: 'view_settings',
   EDIT_SETTINGS: 'edit_settings',

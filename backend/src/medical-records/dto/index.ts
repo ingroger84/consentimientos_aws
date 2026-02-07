@@ -97,3 +97,21 @@ export class CreateEvolutionDto {
 }
 
 export class UpdateEvolutionDto extends PartialType(CreateEvolutionDto) {}
+
+// Medical Orders DTOs
+export { CreateMedicalOrderDto, UpdateMedicalOrderDto } from './medical-order.dto';
+
+// Prescriptions DTOs
+export { CreatePrescriptionDto, UpdatePrescriptionDto } from './prescription.dto';
+
+// Procedures DTOs
+export { CreateProcedureDto, UpdateProcedureDto } from './procedure.dto';
+
+// Treatment Plans DTOs
+export { CreateTreatmentPlanDto, UpdateTreatmentPlanDto } from './treatment-plan.dto';
+
+// Epicrisis DTOs
+export { CreateEpicrisisDto, UpdateEpicrisisDto } from './epicrisis.dto';
+
+// Medical Record Documents DTOs
+export { UploadDocumentDto } from './medical-record-document.dto';

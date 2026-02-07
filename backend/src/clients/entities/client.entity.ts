@@ -58,6 +58,13 @@ export class Client extends BaseEntity {
   @Column({ name: 'emergency_contact_phone', nullable: true })
   emergencyContactPhone: string;
 
+  // Foto del paciente (para validación de identidad)
+  @Column({ name: 'photo_url', nullable: true })
+  photoUrl: string;
+
+  @Column({ name: 'photo_captured_at', nullable: true })
+  photoCapturedAt: Date;
+
   // Notas
   @Column({ type: 'text', nullable: true })
   notes: string;

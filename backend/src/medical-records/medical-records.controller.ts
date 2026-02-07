@@ -10,8 +10,11 @@ import {
   UseGuards,
   Request,
   Res,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/permissions.decorator';
@@ -21,6 +24,12 @@ import { AnamnesisService } from './anamnesis.service';
 import { PhysicalExamService } from './physical-exam.service';
 import { DiagnosisService } from './diagnosis.service';
 import { EvolutionService } from './evolution.service';
+import { MedicalOrdersService } from './medical-orders.service';
+import { PrescriptionsService } from './prescriptions.service';
+import { ProceduresService } from './procedures.service';
+import { TreatmentPlansService } from './treatment-plans.service';
+import { EpicrisisService } from './epicrisis.service';
+import { MedicalRecordDocumentsService } from './medical-record-documents.service';
 import { StorageService } from '../common/services/storage.service';
 import {
   CreateMedicalRecordDto,
@@ -33,6 +42,17 @@ import {
   UpdateDiagnosisDto,
   CreateEvolutionDto,
   UpdateEvolutionDto,
+  CreateMedicalOrderDto,
+  UpdateMedicalOrderDto,
+  CreatePrescriptionDto,
+  UpdatePrescriptionDto,
+  CreateProcedureDto,
+  UpdateProcedureDto,
+  CreateTreatmentPlanDto,
+  UpdateTreatmentPlanDto,
+  CreateEpicrisisDto,
+  UpdateEpicrisisDto,
+  UploadDocumentDto,
 } from './dto';
 
 @Controller('medical-records')
@@ -44,6 +64,12 @@ export class MedicalRecordsController {
     private readonly physicalExamService: PhysicalExamService,
     private readonly diagnosisService: DiagnosisService,
     private readonly evolutionService: EvolutionService,
+    private readonly medicalOrdersService: MedicalOrdersService,
+    private readonly prescriptionsService: PrescriptionsService,
+    private readonly proceduresService: ProceduresService,
+    private readonly treatmentPlansService: TreatmentPlansService,
+    private readonly epicrisisService: EpicrisisService,
+    private readonly medicalRecordDocumentsService: MedicalRecordDocumentsService,
     private readonly storageService: StorageService,
   ) {}
 
@@ -411,6 +437,270 @@ export class MedicalRecordsController {
       console.error('Error al servir PDF:', error);
       return res.status(500).json({ message: 'Error al cargar el PDF' });
     }
+  }
+
+  // ==================== ENDPOINTS DE ÓRDENES MÉDICAS ====================
+
+  @Post(':id/orders')
+  async createOrder(
+    @Param('id') id: string,
+    @Body() createDto: CreateMedicalOrderDto,
+    @Request() req: any,
+  ) {
+    return this.medicalOrdersService.create(
+      id,
+      createDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/orders')
+  async getOrders(@Param('id') id: string, @Request() req: any) {
+    return this.medicalOrdersService.findByMedicalRecord(id, req.user.tenantId);
+  }
+
+  @Put(':id/orders/:orderId')
+  async updateOrder(
+    @Param('orderId') orderId: string,
+    @Body() updateDto: UpdateMedicalOrderDto,
+    @Request() req: any,
+  ) {
+    return this.medicalOrdersService.update(
+      orderId,
+      updateDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Delete(':id/orders/:orderId')
+  async deleteOrder(
+    @Param('orderId') orderId: string,
+    @Request() req: any,
+  ) {
+    await this.medicalOrdersService.delete(orderId, req.user.tenantId);
+    return { message: 'Orden eliminada exitosamente' };
+  }
+
+  // ==================== ENDPOINTS DE PRESCRIPCIONES ====================
+
+  @Post(':id/prescriptions')
+  async createPrescription(
+    @Param('id') id: string,
+    @Body() createDto: CreatePrescriptionDto,
+    @Request() req: any,
+  ) {
+    return this.prescriptionsService.create(
+      id,
+      createDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/prescriptions')
+  async getPrescriptions(@Param('id') id: string, @Request() req: any) {
+    return this.prescriptionsService.findByMedicalRecord(id, req.user.tenantId);
+  }
+
+  @Put(':id/prescriptions/:prescriptionId')
+  async updatePrescription(
+    @Param('prescriptionId') prescriptionId: string,
+    @Body() updateDto: UpdatePrescriptionDto,
+    @Request() req: any,
+  ) {
+    return this.prescriptionsService.update(
+      prescriptionId,
+      updateDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  // ==================== ENDPOINTS DE PROCEDIMIENTOS ====================
+
+  @Post(':id/procedures')
+  async createProcedure(
+    @Param('id') id: string,
+    @Body() createDto: CreateProcedureDto,
+    @Request() req: any,
+  ) {
+    return this.proceduresService.create(
+      id,
+      createDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/procedures')
+  async getProcedures(@Param('id') id: string, @Request() req: any) {
+    return this.proceduresService.findByMedicalRecord(id, req.user.tenantId);
+  }
+
+  @Put(':id/procedures/:procedureId')
+  async updateProcedure(
+    @Param('procedureId') procedureId: string,
+    @Body() updateDto: UpdateProcedureDto,
+    @Request() req: any,
+  ) {
+    return this.proceduresService.update(
+      procedureId,
+      updateDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  // ==================== ENDPOINTS DE PLANES DE TRATAMIENTO ====================
+
+  @Post(':id/treatment-plans')
+  async createTreatmentPlan(
+    @Param('id') id: string,
+    @Body() createDto: CreateTreatmentPlanDto,
+    @Request() req: any,
+  ) {
+    return this.treatmentPlansService.create(
+      id,
+      createDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/treatment-plans')
+  async getTreatmentPlans(@Param('id') id: string, @Request() req: any) {
+    return this.treatmentPlansService.findByMedicalRecord(id, req.user.tenantId);
+  }
+
+  @Put(':id/treatment-plans/:planId')
+  async updateTreatmentPlan(
+    @Param('planId') planId: string,
+    @Body() updateDto: UpdateTreatmentPlanDto,
+    @Request() req: any,
+  ) {
+    return this.treatmentPlansService.update(
+      planId,
+      updateDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  // ==================== ENDPOINTS DE EPICRISIS ====================
+
+  @Post(':id/epicrisis')
+  async createEpicrisis(
+    @Param('id') id: string,
+    @Body() createDto: CreateEpicrisisDto,
+    @Request() req: any,
+  ) {
+    return this.epicrisisService.create(
+      id,
+      createDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/epicrisis')
+  async getEpicrisis(@Param('id') id: string, @Request() req: any) {
+    return this.epicrisisService.findByMedicalRecord(id, req.user.tenantId);
+  }
+
+  @Put(':id/epicrisis/:epicrisisId')
+  async updateEpicrisis(
+    @Param('epicrisisId') epicrisisId: string,
+    @Body() updateDto: UpdateEpicrisisDto,
+    @Request() req: any,
+  ) {
+    return this.epicrisisService.update(
+      epicrisisId,
+      updateDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  // ==================== ENDPOINTS DE DOCUMENTOS ====================
+
+  @Post(':id/documents')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadDocument(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadDto: UploadDocumentDto,
+    @Request() req: any,
+  ) {
+    return this.medicalRecordDocumentsService.upload(
+      id,
+      file,
+      uploadDto,
+      req.user.sub,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/documents')
+  async getDocuments(@Param('id') id: string, @Request() req: any) {
+    return this.medicalRecordDocumentsService.findByMedicalRecord(
+      id,
+      req.user.tenantId,
+    );
+  }
+
+  @Get(':id/documents/:documentId/download')
+  async downloadDocument(
+    @Param('id') id: string,
+    @Param('documentId') documentId: string,
+    @Request() req: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const document = await this.medicalRecordDocumentsService.findOne(
+        documentId,
+        req.user.tenantId,
+      );
+
+      const fileBuffer = await this.medicalRecordDocumentsService.downloadFile(
+        document.fileUrl,
+      );
+
+      res.setHeader('Content-Type', document.mimeType);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${document.fileName}"`,
+      );
+      res.setHeader('Content-Length', fileBuffer.length.toString());
+
+      return res.send(fileBuffer);
+    } catch (error) {
+      console.error('Error al descargar documento:', error);
+      return res.status(500).json({ message: 'Error al descargar el documento' });
+    }
+  }
+
+  @Delete(':id/documents/:documentId')
+  async deleteDocument(
+    @Param('documentId') documentId: string,
+    @Request() req: any,
+  ) {
+    await this.medicalRecordDocumentsService.delete(
+      documentId,
+      req.user.tenantId,
+    );
+    return { message: 'Documento eliminado exitosamente' };
+  }
+
+  // ==================== ENDPOINT PARA BUSCAR HC POR CLIENTE ====================
+
+  @Get('client/:clientId')
+  async findByClient(
+    @Param('clientId') clientId: string,
+    @Request() req: any,
+  ) {
+    return this.medicalRecordsService.findByClient(clientId, req.user.tenantId);
   }
 }
 
