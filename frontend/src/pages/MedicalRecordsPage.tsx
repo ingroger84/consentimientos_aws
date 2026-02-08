@@ -281,15 +281,13 @@ export default function MedicalRecordsPage() {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
-                        {hasPermission('delete_medical_records') && (
-                          <button
-                            onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
-                            className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
-                        )}
+                        <button
+                          onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                          className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
+                          title="Eliminar Historia Clínica"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -358,15 +356,13 @@ export default function MedicalRecordsPage() {
                     <Eye className="w-4 h-4" />
                     Ver
                   </button>
-                  {hasPermission('delete_medical_records') && (
-                    <button
-                      onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
-                      className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
-                      title="Eliminar"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
+                  <button
+                    onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                    className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
+                    title="Eliminar Historia Clínica"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>

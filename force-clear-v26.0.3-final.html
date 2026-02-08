@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ACTUALIZACIÓN CRÍTICA - Botón Eliminar HC</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .content {
+            padding: 40px;
+        }
+        .alert {
+            background: #fee2e2;
+            border-left: 6px solid #dc2626;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .alert h2 {
+            color: #991b1b;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+        .alert p {
+            color: #7f1d1d;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .step {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc2626;
+        }
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        .step h3 {
+            display: inline-block;
+            color: #1f2937;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .step p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-left: 55px;
+            font-size: 16px;
+        }
+        .keyboard-shortcut {
+            display: inline-block;
+            background: #1f2937;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 20px;
+            margin: 30px 0;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(220, 38, 38, 0.4);
+        }
+        .success-box {
+            background: #d1fae5;
+            border: 3px solid #10b981;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        .success-box h3 {
+            color: #065f46;
+            margin-bottom: 10px;
+            font-size: 22px;
+        }
+        .icon {
+            font-size: 64px;
+            margin: 20px 0;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 25px;
+            text-align: center;
+            border-top: 3px solid #e5e7eb;
+        }
+        .timestamp {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🚨</div>
+            <h1>ACTUALIZACIÓN CRÍTICA</h1>
+            <p style="font-size: 18px;">Botón Eliminar HC - Versión 26.0.3</p>
+        </div>
+        
+        <div class="content">
+            <div class="alert">
+                <h2>⚠️ ACCIÓN REQUERIDA INMEDIATAMENTE</h2>
+                <p><strong>El código ha sido actualizado en el servidor.</strong></p>
+                <p style="margin-top: 10px;">Debes limpiar el caché de tu navegador AHORA para ver el botón de eliminar en Historias Clínicas.</p>
+            </div>
+            
+            <div class="timestamp">
+                <div style="font-size: 14px; margin-bottom: 5px;">Última actualización del servidor:</div>
+                <div style="font-size: 20px;" id="timestamp"></div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>CERRAR TODAS LAS PESTAÑAS</h3>
+                <p>Cierra TODAS las pestañas del sistema que tengas abiertas.</p>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>LIMPIAR CACHÉ FORZADO</h3>
+                <p style="margin-bottom: 20px;">Presiona estas teclas AL MISMO TIEMPO:</p>
+                <p style="text-align: center; margin-top: 20px;">
+                    <span class="keyboard-shortcut">Ctrl</span> + 
+                    <span class="keyboard-shortcut">Shift</span> + 
+                    <span class="keyboard-shortcut">Delete</span>
+                </p>
+                <p style="margin-top: 20px;">Luego selecciona:</p>
+                <p style="margin-top: 10px;">✅ Imágenes y archivos en caché</p>
+                <p>✅ Cookies y otros datos de sitios</p>
+                <p style="margin-top: 10px;">Rango de tiempo: <strong>Desde siempre</strong></p>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>CERRAR Y REABRIR NAVEGADOR</h3>
+                <p>Cierra completamente el navegador y ábrelo de nuevo.</p>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>ACCEDER AL SISTEMA</h3>
+                <p>Ve a: <strong>http://100.28.198.249</strong></p>
+                <p style="margin-top: 10px;">Inicia sesión con tu usuario Super Admin.</p>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">5</span>
+                <h3>VERIFICAR EL BOTÓN</h3>
+                <p>Ve a "Historias Clínicas" y verifica que el botón de eliminar (🗑️) aparezca.</p>
+            </div>
+            
+            <button class="button" onclick="clearAndRedirect()">
+                🔄 LIMPIAR CACHÉ Y ABRIR SISTEMA
+            </button>
+            
+            <div class="success-box">
+                <div class="icon">✅</div>
+                <h3>Archivos Actualizados en el Servidor</h3>
+                <p style="color: #047857; font-size: 16px; line-height: 1.6;">
+                    ✅ SuperAdminMedicalRecordsPage-CYsAnUkL.js<br>
+                    ✅ MedicalRecordsPage-XSJAN9XX.js<br>
+                    ✅ index.html<br>
+                    <strong style="display: block; margin-top: 10px;">El botón de eliminar ESTÁ en el servidor</strong>
+                </p>
+            </div>
+            
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin-top: 20px; border-radius: 8px;">
+                <h3 style="color: #92400e; margin-bottom: 10px;">📝 Importante</h3>
+                <p style="color: #78350f; line-height: 1.6;">
+                    El botón solo aparece en historias clínicas <strong>"Activas"</strong> o <strong>"Archivadas"</strong>.<br>
+                    Las historias <strong>"Cerradas"</strong> NO se pueden eliminar por seguridad.
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p style="font-size: 16px; font-weight: bold; color: #dc2626; margin-bottom: 10px;">
+                VERSIÓN 26.0.3 - ACTUALIZACIÓN FINAL
+            </p>
+            <p style="font-size: 14px; color: #6b7280;">
+                Sistema de Consentimientos - Archivo en Línea
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Mostrar timestamp actual
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        function clearAndRedirect() {
+            // Limpiar todo
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Mostrar instrucciones
+            if (confirm('Se limpiará el caché local.\n\nDespués:\n1. Presiona Ctrl + Shift + Delete\n2. Limpia "Imágenes y archivos en caché"\n3. Cierra y reabre el navegador\n4. Vuelve a iniciar sesión\n\n¿Continuar?')) {
+                // Abrir el sistema en nueva pestaña
+                window.open('http://100.28.198.249', '_blank');
+                
+                // Recargar esta página
+                location.reload(true);
+            }
+        }
+        
+        // Cache buster
+        console.log('Cache buster:', Date.now());
+        console.log('Archivos actualizados:', [
+            'SuperAdminMedicalRecordsPage-CYsAnUkL.js',
+            'MedicalRecordsPage-XSJAN9XX.js',
+            'index.html'
+        ]);
+    </script>
+</body>
+</html>

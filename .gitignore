@@ -247,3 +247,10 @@ dist_backup_*
 .next/
 .nuxt/
 .vuepress/dist
+
+
+# Archivos con credenciales sensibles
+ACCIONES_PENDIENTES_URGENTES.md
+INSTRUCCIONES_PUSH_GITHUB.md
+INSTRUCCIONES_PUSH_GITHUB_SECRETOS.md
+credentials*.txt

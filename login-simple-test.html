@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Simple - Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+        }
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #3c3;
+        }
+        .info {
+            background: #eef;
+            border: 1px solid #ccf;
+            color: #33c;
+        }
+        .log {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+        .log-info { background: #e3f2fd; }
+        .log-success { background: #e8f5e9; }
+        .log-error { background: #ffebee; }
+        .log-warn { background: #fff3e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Login Simple - Test</h1>
+        
+        <div id="message"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    value="rcaraballo@innovasystems.com.co"
+                    required
+                />
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    required
+                />
+            </div>
+            
+            <button type="submit" id="submitBtn">Iniciar Sesión</button>
+        </form>
+        
+        <div class="log" id="log">
+            <strong>📝 Log de Eventos:</strong>
+            <div id="logEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        const logEntries = document.getElementById('logEntries');
+        const messageDiv = document.getElementById('message');
+        
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEntries.appendChild(entry);
+            logEntries.scrollTop = logEntries.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function showMessage(message, type = 'info') {
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            
+            log('=== INICIO DE LOGIN ===', 'info');
+            log(`Email: ${email}`, 'info');
+            log(`URL actual: ${window.location.href}`, 'info');
+            log(`Hostname: ${window.location.hostname}`, 'info');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Iniciando sesión...';
+            showMessage('Iniciando sesión...', 'info');
+            
+            try {
+                // Paso 1: Login
+                log('Paso 1: Enviando petición de login...', 'info');
+                const loginResponse = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+                
+                log(`Status: ${loginResponse.status}`, loginResponse.ok ? 'success' : 'error');
+                
+                if (!loginResponse.ok) {
+                    const errorData = await loginResponse.json();
+                    throw new Error(errorData.message || 'Error en el login');
+                }
+                
+                const loginData = await loginResponse.json();
+                log('✅ Login exitoso', 'success');
+                log(`Token recibido: ${loginData.access_token.substring(0, 20)}...`, 'success');
+                log(`Usuario: ${loginData.user.name} (${loginData.user.email})`, 'success');
+                log(`Rol: ${loginData.user.role}`, 'success');
+                
+                // Paso 2: Guardar en localStorage
+                log('Paso 2: Guardando en localStorage...', 'info');
+                localStorage.setItem('token', loginData.access_token);
+                localStorage.setItem('user', JSON.stringify(loginData.user));
+                log('✅ Datos guardados en localStorage', 'success');
+                
+                // Paso 3: Verificar que se guardó
+                log('Paso 3: Verificando localStorage...', 'info');
+                const savedToken = localStorage.getItem('token');
+                const savedUser = localStorage.getItem('user');
+                log(`Token guardado: ${savedToken ? 'SÍ' : 'NO'}`, savedToken ? 'success' : 'error');
+                log(`Usuario guardado: ${savedUser ? 'SÍ' : 'NO'}`, savedUser ? 'success' : 'error');
+                
+                // Paso 4: Cargar settings
+                log('Paso 4: Cargando settings...', 'info');
+                const settingsResponse = await fetch('/api/settings', {
+                    headers: {
+                        'Authorization': `Bearer ${loginData.access_token}`
+                    }
+                });
+                
+                if (settingsResponse.ok) {
+                    const settings = await settingsResponse.json();
+                    log('✅ Settings cargados correctamente', 'success');
+                    log(`Empresa: ${settings.companyName}`, 'success');
+                } else {
+                    log('⚠️ Error al cargar settings', 'warn');
+                }
+                
+                // Paso 5: Verificar permisos
+                log('Paso 5: Verificando permisos...', 'info');
+                if (loginData.user.permissions && loginData.user.permissions.length > 0) {
+                    log(`✅ ${loginData.user.permissions.length} permisos cargados`, 'success');
+                } else {
+                    log('⚠️ No hay permisos cargados', 'warn');
+                }
+                
+                // Paso 6: Redirigir
+                log('Paso 6: Preparando redirección...', 'info');
+                showMessage('✅ Login exitoso! Redirigiendo...', 'success');
+                
+                setTimeout(() => {
+                    log('Redirigiendo a /dashboard...', 'info');
+                    window.location.href = '/dashboard';
+                }, 2000);
+                
+            } catch (error) {
+                log(`❌ ERROR: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+                showMessage(`❌ Error: ${error.message}`, 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reintentar';
+            }
+        });
+        
+        // Log inicial
+        log('Página cargada', 'info');
+        log(`Versión: 26.0.2.1`, 'info');
+        log(`Navegador: ${navigator.userAgent}`, 'info');
+        
+        // Verificar si hay token existente
+        const existingToken = localStorage.getItem('token');
+        if (existingToken) {
+            log('⚠️ Ya hay un token en localStorage', 'warn');
+            log('Si quieres probar de nuevo, limpia el localStorage primero', 'warn');
+        }
+    </script>
+</body>
+</html>

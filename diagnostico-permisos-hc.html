@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Permisos HC</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+        .warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
+        .info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+        .permission-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f8fafc;
+            border-left: 3px solid #cbd5e1;
+            border-radius: 4px;
+        }
+        .permission-item.found {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-error { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico de Permisos - Historias Clínicas</h1>
+        
+        <div class="info">
+            <strong>📋 Objetivo:</strong> Verificar por qué no aparece el botón de eliminar en Historias Clínicas
+        </div>
+
+        <button onclick="runDiagnostic()">🚀 Ejecutar Diagnóstico</button>
+        <button onclick="clearAndReload()">🗑️ Limpiar Caché y Recargar</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function runDiagnostic() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Ejecutando diagnóstico...</h2>';
+
+            let html = '';
+
+            // 1. Verificar autenticación
+            html += '<h2>1️⃣ Verificación de Autenticación</h2>';
+            
+            const token = localStorage.getItem('token');
+            if (token) {
+                html += '<div class="status success">✅ Token encontrado en localStorage</div>';
+                
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    html += '<pre>' + JSON.stringify(payload, null, 2) + '</pre>';
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al decodificar token: ' + e.message + '</div>';
+                }
+            } else {
+                html += '<div class="status error">❌ No hay token en localStorage</div>';
+                html += '<div class="warning">⚠️ Debes iniciar sesión primero</div>';
+                results.innerHTML = html;
+                return;
+            }
+
+            // 2. Verificar usuario en store
+            html += '<h2>2️⃣ Verificación de Usuario en Store</h2>';
+            
+            const authStore = localStorage.getItem('auth-storage');
+            if (authStore) {
+                try {
+                    const store = JSON.parse(authStore);
+                    html += '<div class="status success">✅ Store de autenticación encontrado</div>';
+                    
+                    if (store.state && store.state.user) {
+                        const user = store.state.user;
+                        html += '<table>';
+                        html += '<tr><th>Campo</th><th>Valor</th></tr>';
+                        html += `<tr><td>Nombre</td><td>${user.name || 'N/A'}</td></tr>`;
+                        html += `<tr><td>Email</td><td>${user.email || 'N/A'}</td></tr>`;
+                        html += `<tr><td>Rol</td><td>${user.role?.name || 'N/A'}</td></tr>`;
+                        html += `<tr><td>Tipo de Rol</td><td>${user.role?.type || 'N/A'}</td></tr>`;
+                        html += '</table>';
+
+                        // 3. Verificar permisos
+                        html += '<h2>3️⃣ Verificación de Permisos</h2>';
+                        
+                        if (user.role && user.role.permissions) {
+                            const permissions = user.role.permissions;
+                            html += `<div class="status info">📊 Total de permisos: ${permissions.length}</div>`;
+                            
+                            const hasDeletePermission = permissions.includes('delete_medical_records');
+                            
+                            if (hasDeletePermission) {
+                                html += '<div class="status success">✅ El usuario TIENE el permiso delete_medical_records</div>';
+                                html += `<div class="info">📍 Posición en el array: ${permissions.indexOf('delete_medical_records')}</div>`;
+                            } else {
+                                html += '<div class="status error">❌ El usuario NO TIENE el permiso delete_medical_records</div>';
+                            }
+
+                            // Buscar permisos relacionados con HC
+                            html += '<h3>Permisos relacionados con Historias Clínicas:</h3>';
+                            const hcPermissions = permissions.filter(p => p.includes('medical_record'));
+                            
+                            if (hcPermissions.length > 0) {
+                                hcPermissions.forEach(perm => {
+                                    const isDelete = perm === 'delete_medical_records';
+                                    html += `<div class="permission-item ${isDelete ? 'found' : ''}">${isDelete ? '✅' : '•'} ${perm}</div>`;
+                                });
+                            } else {
+                                html += '<div class="warning">⚠️ No se encontraron permisos de historias clínicas</div>';
+                            }
+
+                            // Mostrar todos los permisos (colapsado)
+                            html += '<details style="margin-top: 20px;">';
+                            html += '<summary style="cursor: pointer; font-weight: bold;">Ver todos los permisos (' + permissions.length + ')</summary>';
+                            html += '<pre>' + JSON.stringify(permissions, null, 2) + '</pre>';
+                            html += '</details>';
+
+                        } else {
+                            html += '<div class="status error">❌ No se encontraron permisos en el rol</div>';
+                        }
+
+                    } else {
+                        html += '<div class="status error">❌ No hay usuario en el store</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al parsear store: ' + e.message + '</div>';
+                }
+            } else {
+                html += '<div class="status error">❌ No hay store de autenticación</div>';
+            }
+
+            // 4. Verificar versión del frontend
+            html += '<h2>4️⃣ Verificación de Versión</h2>';
+            
+            try {
+                const response = await fetch('/assets/MedicalRecordsPage-Bb54mhqb.js', { method: 'HEAD' });
+                if (response.ok) {
+                    html += '<div class="status success">✅ Archivo MedicalRecordsPage actualizado encontrado</div>';
+                    html += `<div class="info">📅 Last-Modified: ${response.headers.get('last-modified')}</div>`;
+                } else {
+                    html += '<div class="status error">❌ Archivo MedicalRecordsPage no encontrado</div>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ Error al verificar archivo: ' + e.message + '</div>';
+            }
+
+            // 5. Verificar caché
+            html += '<h2>5️⃣ Verificación de Caché</h2>';
+            
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    if (cacheNames.length > 0) {
+                        html += '<div class="status warning">⚠️ Se encontraron ' + cacheNames.length + ' cachés activos</div>';
+                        html += '<div class="info">💡 Recomendación: Limpiar caché y recargar</div>';
+                        cacheNames.forEach(name => {
+                            html += `<div class="permission-item">📦 ${name}</div>`;
+                        });
+                    } else {
+                        html += '<div class="status success">✅ No hay cachés activos</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al verificar cachés: ' + e.message + '</div>';
+                }
+            }
+
+            // 6. Recomendaciones
+            html += '<h2>6️⃣ Recomendaciones</h2>';
+            
+            const authStore2 = localStorage.getItem('auth-storage');
+            if (authStore2) {
+                const store = JSON.parse(authStore2);
+                const hasPermission = store.state?.user?.role?.permissions?.includes('delete_medical_records');
+                
+                if (hasPermission) {
+                    html += '<div class="status success">✅ El usuario tiene el permiso correcto</div>';
+                    html += '<div class="info">💡 Si no ves el botón, intenta:</div>';
+                    html += '<ol>';
+                    html += '<li>Hacer clic en "Limpiar Caché y Recargar"</li>';
+                    html += '<li>Presionar Ctrl+Shift+R (recarga forzada)</li>';
+                    html += '<li>Cerrar todas las pestañas y volver a abrir</li>';
+                    html += '<li>Cerrar sesión y volver a iniciar sesión</li>';
+                    html += '</ol>';
+                } else {
+                    html += '<div class="status error">❌ El usuario NO tiene el permiso</div>';
+                    html += '<div class="warning">⚠️ Solución: Contactar al administrador para que asigne el permiso</div>';
+                }
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function clearAndReload() {
+            try {
+                // Limpiar cachés
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+
+                // Limpiar service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+
+                alert('✅ Caché limpiada. La página se recargará.');
+                window.location.reload(true);
+            } catch (e) {
+                alert('❌ Error: ' + e.message);
+            }
+        }
+
+        // Ejecutar automáticamente al cargar
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostic, 500);
+        });
+    </script>
+</body>
+</html>

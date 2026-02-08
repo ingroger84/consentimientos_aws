@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Código Botón Eliminar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .info { background: #dbeafe; color: #1e40af; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1d4ed8; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .code-snippet {
+            background: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación del Código del Botón Eliminar</h1>
+        
+        <div class="info">
+            <strong>📋 Objetivo:</strong> Verificar que el archivo JavaScript contiene el código del botón de eliminar
+        </div>
+
+        <button onclick="verifyCode()">🚀 Verificar Código</button>
+        <button onclick="testPermission()">🔐 Probar Permiso</button>
+        <button onclick="forceReload()">🔄 Forzar Recarga</button>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function verifyCode() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Verificando código...</h2>';
+
+            let html = '';
+
+            // 1. Verificar que el archivo existe
+            html += '<h2>1️⃣ Verificación de Archivo</h2>';
+            
+            try {
+                const response = await fetch('/assets/MedicalRecordsPage-Bb54mhqb.js');
+                if (response.ok) {
+                    html += '<div class="status success">✅ Archivo encontrado</div>';
+                    
+                    const code = await response.text();
+                    
+                    // Buscar el código del botón de eliminar
+                    const hasDeletePermissionCheck = code.includes('delete_medical_records');
+                    const hasTrash2Icon = code.includes('Trash2');
+                    const hasHandleDelete = code.includes('handleDelete');
+                    
+                    html += '<h3>Verificación de Código:</h3>';
+                    html += '<div class="code-snippet">';
+                    html += `<p>${hasDeletePermissionCheck ? '✅' : '❌'} Verificación de permiso: <code>delete_medical_records</code></p>`;
+                    html += `<p>${hasTrash2Icon ? '✅' : '❌'} Icono Trash2 importado</p>`;
+                    html += `<p>${hasHandleDelete ? '✅' : '❌'} Función handleDelete implementada</p>`;
+                    html += '</div>';
+                    
+                    if (hasDeletePermissionCheck && hasTrash2Icon && hasHandleDelete) {
+                        html += '<div class="status success">✅ El código del botón está presente en el archivo</div>';
+                    } else {
+                        html += '<div class="status error">❌ Falta código del botón en el archivo</div>';
+                    }
+                    
+                    // Buscar el fragmento específico
+                    const deleteButtonPattern = /hasPermission\(['"]delete_medical_records['"]\)/;
+                    if (deleteButtonPattern.test(code)) {
+                        html += '<div class="status success">✅ Patrón de verificación de permiso encontrado</div>';
+                        
+                        // Extraer contexto
+                        const match = code.match(/.{0,200}hasPermission\(['"]delete_medical_records['"]\).{0,200}/);
+                        if (match) {
+                            html += '<h3>Fragmento de Código:</h3>';
+                            html += '<pre>' + match[0].replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+                        }
+                    } else {
+                        html += '<div class="status error">❌ No se encontró el patrón de verificación de permiso</div>';
+                    }
+                    
+                    // Información del archivo
+                    html += '<h3>Información del Archivo:</h3>';
+                    html += '<div class="info">';
+                    html += `<p>📦 Tamaño: ${(code.length / 1024).toFixed(2)} KB</p>`;
+                    html += `<p>📅 Last-Modified: ${response.headers.get('last-modified')}</p>`;
+                    html += `<p>🔖 ETag: ${response.headers.get('etag')}</p>`;
+                    html += '</div>';
+                    
+                } else {
+                    html += '<div class="status error">❌ Archivo no encontrado (Status: ' + response.status + ')</div>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ Error al cargar archivo: ' + e.message + '</div>';
+            }
+
+            // 2. Verificar módulo cargado
+            html += '<h2>2️⃣ Verificación de Módulo Cargado</h2>';
+            
+            const scripts = document.querySelectorAll('script[src*="MedicalRecordsPage"]');
+            if (scripts.length > 0) {
+                html += '<div class="status success">✅ Módulo MedicalRecordsPage encontrado en DOM</div>';
+                scripts.forEach((script, i) => {
+                    html += `<div class="info">Script ${i + 1}: ${script.src}</div>`;
+                });
+            } else {
+                html += '<div class="status info">ℹ️ Módulo no cargado aún (se carga dinámicamente)</div>';
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function testPermission() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Probando permiso...</h2>';
+
+            let html = '';
+
+            // Verificar localStorage
+            const authStore = localStorage.getItem('auth-storage');
+            if (authStore) {
+                try {
+                    const store = JSON.parse(authStore);
+                    const user = store.state?.user;
+                    
+                    if (user && user.role && user.role.permissions) {
+                        const hasPermission = user.role.permissions.includes('delete_medical_records');
+                        
+                        html += '<h2>🔐 Estado del Permiso</h2>';
+                        html += `<div class="status ${hasPermission ? 'success' : 'error'}">`;
+                        html += hasPermission ? '✅ Usuario TIENE el permiso delete_medical_records' : '❌ Usuario NO TIENE el permiso';
+                        html += '</div>';
+                        
+                        html += '<div class="info">';
+                        html += `<p>👤 Usuario: ${user.name}</p>`;
+                        html += `<p>🎭 Rol: ${user.role.name}</p>`;
+                        html += `<p>📊 Total permisos: ${user.role.permissions.length}</p>`;
+                        html += '</div>';
+                        
+                        if (hasPermission) {
+                            html += '<div class="status success">';
+                            html += '<p><strong>✅ El usuario tiene el permiso correcto</strong></p>';
+                            html += '<p>Si no ves el botón, el problema es de caché del navegador.</p>';
+                            html += '</div>';
+                        }
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al leer store: ' + e.message + '</div>';
+                }
+            } else {
+                html += '<div class="status error">❌ No hay sesión activa</div>';
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function forceReload() {
+            // Limpiar todo
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+            }
+            
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+            }
+            
+            // Agregar timestamp a la URL
+            const url = new URL(window.location);
+            url.searchParams.set('_t', Date.now());
+            window.location.href = url.toString();
+        }
+
+        // Ejecutar automáticamente
+        window.addEventListener('load', () => {
+            setTimeout(verifyCode, 500);
+        });
+    </script>
+</body>
+</html>

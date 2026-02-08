@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Completo de Login</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #dc2626; }
+        h2 { color: #2563eb; margin-top: 30px; }
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .error { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
+        .warning { background: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
+        .info { background: #dbeafe; color: #1e40af; border-left: 4px solid #3b82f6; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1d4ed8; }
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico Completo - Problema de Login</h1>
+        
+        <div class="error">
+            <strong>⚠️ PROBLEMA:</strong> Pantalla en blanco después de iniciar sesión
+        </div>
+
+        <div class="grid">
+            <button onclick="diagnosticoCompleto()">🚀 Diagnóstico Completo</button>
+            <button onclick="testBackend()">🔧 Probar Backend</button>
+            <button onclick="testLogin()">🔐 Probar Login</button>
+            <button onclick="limpiarTodo()" class="danger">🗑️ Limpiar Todo y Recargar</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function diagnosticoCompleto() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Ejecutando diagnóstico completo...</h2>';
+
+            let html = '';
+
+            // 1. Verificar Backend
+            html += '<h2>1️⃣ Estado del Backend</h2>';
+            try {
+                const response = await fetch('/api/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    html += '<div class="status success">✅ Backend respondiendo correctamente</div>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    html += '<div class="status error">❌ Backend no responde (Status: ' + response.status + ')</div>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ Error al conectar con backend: ' + e.message + '</div>';
+            }
+
+            // 2. Verificar Autenticación
+            html += '<h2>2️⃣ Estado de Autenticación</h2>';
+            
+            const token = localStorage.getItem('token');
+            if (token) {
+                html += '<div class="status success">✅ Token encontrado</div>';
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    html += '<div class="card">';
+                    html += '<h3>Información del Token:</h3>';
+                    html += '<ul>';
+                    html += `<li><strong>Usuario ID:</strong> ${payload.sub}</li>`;
+                    html += `<li><strong>Email:</strong> ${payload.email}</li>`;
+                    html += `<li><strong>Nombre:</strong> ${payload.name || 'N/A'}</li>`;
+                    html += `<li><strong>Rol:</strong> ${payload.role || 'N/A'}</li>`;
+                    html += `<li><strong>Expira:</strong> ${new Date(payload.exp * 1000).toLocaleString()}</li>`;
+                    html += '</ul>';
+                    html += '</div>';
+                } catch (e) {
+                    html += '<div class="status error">❌ Token inválido: ' + e.message + '</div>';
+                }
+            } else {
+                html += '<div class="status warning">⚠️ No hay token (no has iniciado sesión)</div>';
+            }
+
+            // 3. Verificar Store de Zustand
+            html += '<h2>3️⃣ Estado del Store (Zustand)</h2>';
+            
+            const authStore = localStorage.getItem('auth-storage');
+            if (authStore) {
+                try {
+                    const store = JSON.parse(authStore);
+                    html += '<div class="status success">✅ Store encontrado</div>';
+                    
+                    if (store.state && store.state.user) {
+                        html += '<div class="card">';
+                        html += '<h3>Usuario en Store:</h3>';
+                        html += '<pre>' + JSON.stringify(store.state.user, null, 2) + '</pre>';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="status error">❌ No hay usuario en el store</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al parsear store: ' + e.message + '</div>';
+                }
+            } else {
+                html += '<div class="status warning">⚠️ No hay store de autenticación</div>';
+            }
+
+            // 4. Verificar Errores de JavaScript
+            html += '<h2>4️⃣ Errores de JavaScript</h2>';
+            html += '<div class="info">';
+            html += '<p><strong>Instrucciones:</strong></p>';
+            html += '<ol>';
+            html += '<li>Presiona F12 para abrir DevTools</li>';
+            html += '<li>Ve a la pestaña "Console"</li>';
+            html += '<li>Busca errores en rojo</li>';
+            html += '<li>Copia cualquier error que veas</li>';
+            html += '</ol>';
+            html += '</div>';
+
+            // 5. Verificar Archivos Cargados
+            html += '<h2>5️⃣ Archivos JavaScript Cargados</h2>';
+            
+            const scripts = document.querySelectorAll('script[src]');
+            html += '<div class="info">Scripts encontrados: ' + scripts.length + '</div>';
+            html += '<ul>';
+            scripts.forEach((script, i) => {
+                html += `<li>${i + 1}. ${script.src}</li>`;
+            });
+            html += '</ul>';
+
+            // 6. Verificar Caché
+            html += '<h2>6️⃣ Estado de Caché</h2>';
+            
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    if (cacheNames.length > 0) {
+                        html += '<div class="status warning">⚠️ Hay ' + cacheNames.length + ' cachés activos</div>';
+                        html += '<div class="error"><strong>ESTO PUEDE SER EL PROBLEMA</strong></div>';
+                        html += '<ul>';
+                        cacheNames.forEach(name => {
+                            html += `<li>${name}</li>`;
+                        });
+                        html += '</ul>';
+                    } else {
+                        html += '<div class="status success">✅ No hay cachés activos</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al verificar cachés: ' + e.message + '</div>';
+                }
+            }
+
+            // 7. Verificar Service Workers
+            html += '<h2>7️⃣ Service Workers</h2>';
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    if (registrations.length > 0) {
+                        html += '<div class="status warning">⚠️ Hay ' + registrations.length + ' service workers activos</div>';
+                        html += '<div class="error"><strong>ESTO PUEDE SER EL PROBLEMA</strong></div>';
+                    } else {
+                        html += '<div class="status success">✅ No hay service workers activos</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="status error">❌ Error al verificar service workers: ' + e.message + '</div>';
+                }
+            }
+
+            // 8. Recomendaciones
+            html += '<h2>8️⃣ Recomendaciones</h2>';
+            
+            const hasCache = (await caches.keys()).length > 0;
+            const hasServiceWorker = (await navigator.serviceWorker.getRegistrations()).length > 0;
+            
+            if (hasCache || hasServiceWorker) {
+                html += '<div class="error">';
+                html += '<h3>🚨 PROBLEMA IDENTIFICADO: Caché del Navegador</h3>';
+                html += '<p><strong>Solución:</strong></p>';
+                html += '<ol>';
+                html += '<li>Haz clic en el botón "Limpiar Todo y Recargar" arriba</li>';
+                html += '<li>O presiona Ctrl+Shift+Delete</li>';
+                html += '<li>Selecciona "Todo el tiempo"</li>';
+                html += '<li>Marca "Imágenes y archivos en caché"</li>';
+                html += '<li>Haz clic en "Borrar datos"</li>';
+                html += '<li>Cierra TODAS las pestañas</li>';
+                html += '<li>Abre una nueva pestaña</li>';
+                html += '</ol>';
+                html += '</div>';
+            } else {
+                html += '<div class="warning">';
+                html += '<h3>⚠️ Posibles Causas:</h3>';
+                html += '<ul>';
+                html += '<li>Error en el código JavaScript del frontend</li>';
+                html += '<li>Archivo JavaScript corrupto</li>';
+                html += '<li>Problema de red al cargar archivos</li>';
+                html += '</ul>';
+                html += '<p><strong>Solución:</strong></p>';
+                html += '<ol>';
+                html += '<li>Abre DevTools (F12)</li>';
+                html += '<li>Ve a la pestaña "Console"</li>';
+                html += '<li>Busca errores en rojo</li>';
+                html += '<li>Reporta los errores que encuentres</li>';
+                html += '</ol>';
+                html += '</div>';
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function testBackend() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Probando backend...</h2>';
+
+            let html = '';
+
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                html += '<div class="status success">✅ Backend funcionando correctamente</div>';
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (e) {
+                html += '<div class="status error">❌ Error: ' + e.message + '</div>';
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function testLogin() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>⏳ Probando login...</h2>';
+
+            let html = '';
+
+            const email = prompt('Email:');
+            const password = prompt('Password:');
+
+            if (!email || !password) {
+                results.innerHTML = '<div class="status warning">⚠️ Cancelado</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    html += '<div class="status success">✅ Login exitoso</div>';
+                    html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                    
+                    // Guardar token
+                    if (data.access_token) {
+                        localStorage.setItem('token', data.access_token);
+                        html += '<div class="status success">✅ Token guardado en localStorage</div>';
+                    }
+                } else {
+                    const error = await response.json();
+                    html += '<div class="status error">❌ Login fallido</div>';
+                    html += '<pre>' + JSON.stringify(error, null, 2) + '</pre>';
+                }
+            } catch (e) {
+                html += '<div class="status error">❌ Error: ' + e.message + '</div>';
+            }
+
+            results.innerHTML = html;
+        }
+
+        async function limpiarTodo() {
+            if (!confirm('¿Estás seguro? Esto eliminará TODA la caché y datos locales.')) {
+                return;
+            }
+
+            try {
+                // Limpiar cachés
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+
+                // Limpiar service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+
+                // Limpiar localStorage (excepto este diagnóstico)
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (!key.includes('diagnostico')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+
+                alert('✅ Todo limpiado. La página se recargará.');
+                window.location.href = '/';
+            } catch (e) {
+                alert('❌ Error: ' + e.message);
+            }
+        }
+
+        // Ejecutar automáticamente
+        window.addEventListener('load', () => {
+            setTimeout(diagnosticoCompleto, 500);
+        });
+    </script>
+</body>
+</html>

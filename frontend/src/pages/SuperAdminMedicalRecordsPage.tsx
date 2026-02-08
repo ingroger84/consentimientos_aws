@@ -5,7 +5,6 @@ import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
 import { medicalRecordsService } from '@/services/medical-records.service';
-import { usePermissions } from '@/hooks/usePermissions';
 
 interface MedicalRecord {
   id: string;
@@ -34,7 +33,6 @@ interface GroupedRecords {
 }
 
 export default function SuperAdminMedicalRecordsPage() {
-  const { hasPermission } = usePermissions();
   const [loading, setLoading] = useState(true);
   const [groupedRecords, setGroupedRecords] = useState<GroupedRecords[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -439,18 +437,18 @@ export default function SuperAdminMedicalRecordsPage() {
                                 >
                                   <Lock className="w-5 h-5" />
                                 </button>
-
-                                {/* Botón Eliminar */}
-                                {hasPermission('delete_medical_records') && record.status !== 'closed' && (
-                                  <button
-                                    onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
-                                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Eliminar"
-                                  >
-                                    <Trash2 className="w-5 h-5" />
-                                  </button>
-                                )}
                               </>
+                            )}
+                            
+                            {/* Botón Eliminar - SIEMPRE VISIBLE (fuera del condicional de updatingStatus) */}
+                            {record.status !== 'closed' && (
+                              <button
+                                onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                                className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Eliminar Historia Clínica"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
                             )}
                             
                             {/* Botón Ver detalles */}

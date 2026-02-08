@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solución Email SMTP - Gmail</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border-left: 6px solid #f59e0b;
+            padding: 20px;
+            margin: 30px;
+            border-radius: 8px;
+        }
+        
+        .alert h2 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .alert p {
+            color: #78350f;
+            line-height: 1.6;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .step {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 6px solid #667eea;
+            transition: transform 0.2s;
+        }
+        
+        .step:hover {
+            transform: translateX(5px);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        .step h3 {
+            display: inline-block;
+            color: #1f2937;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .step-content {
+            margin-left: 55px;
+            margin-top: 15px;
+        }
+        
+        .step-content p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+        
+        .step-content ol {
+            margin-left: 20px;
+            color: #4b5563;
+            line-height: 2;
+        }
+        
+        .code-block {
+            background: #1f2937;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .code-block .comment {
+            color: #6b7280;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .warning-box strong {
+            color: #92400e;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .success-box strong {
+            color: #065f46;
+        }
+        
+        .link-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .icon {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            background: #f9fafb;
+            padding: 30px;
+            text-align: center;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .footer p {
+            color: #6b7280;
+            margin: 5px 0;
+        }
+        
+        .time-estimate {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Solución Email SMTP</h1>
+            <p>Configurar Gmail para envío de consentimientos</p>
+            <div class="time-estimate">⏱️ Tiempo estimado: 5 minutos</div>
+        </div>
+        
+        <div class="alert">
+            <h2>⚠️ Problema Identificado</h2>
+            <p><strong>Error:</strong> "Invalid login: 535-5.7.8 Username and Password not accepted"</p>
+            <p><strong>Causa:</strong> Gmail requiere contraseñas de aplicación (no contraseña normal)</p>
+            <p><strong>Solución:</strong> Generar nueva contraseña de aplicación y actualizar configuración</p>
+        </div>
+        
+        <div class="content">
+            <!-- PASO 1 -->
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Generar Contraseña de Gmail</h3>
+                <div class="step-content">
+                    <p>Inicia sesión en Gmail con: <strong>info@innovasystems.com.co</strong></p>
+                    
+                    <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link-button">
+                        🔑 Ir a Contraseñas de Aplicación
+                    </a>
+                    
+                    <ol>
+                        <li>Si te pide activar verificación en 2 pasos, hazlo primero</li>
+                        <li>Selecciona: <strong>"Correo"</strong></li>
+                        <li>Selecciona: <strong>"Otro (nombre personalizado)"</strong></li>
+                        <li>Escribe: <strong>"Archivo en Linea"</strong></li>
+                        <li>Haz clic en <strong>"Generar"</strong></li>
+                    </ol>
+                    
+                    <div class="success-box">
+                        <strong>✅ Copia la contraseña de 16 caracteres SIN ESPACIOS</strong><br>
+                        Ejemplo correcto: <code>abcdwxyzefgh1234</code>
+                    </div>
+                    
+                    <div class="warning-box">
+                        <strong>⚠️ NO copies con espacios:</strong><br>
+                        Ejemplo incorrecto: <code>abcd wxyz efgh 1234</code>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PASO 2 -->
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Conectar al Servidor AWS</h3>
+                <div class="step-content">
+                    <p>Abre PowerShell y ejecuta:</p>
+                    
+                    <div class="code-block">
+<span class="comment"># Conectar al servidor</span>
+ssh -i keys/AWS-ISSABEL.pem ubuntu@100.28.198.249
+
+<span class="comment"># Ir a la carpeta del backend</span>
+cd /home/ubuntu/consentimientos_aws/backend
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PASO 3 -->
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Actualizar Configuración</h3>
+                <div class="step-content">
+                    <p>Edita el archivo .env:</p>
+                    
+                    <div class="code-block">
+<span class="comment"># Editar archivo</span>
+nano .env
+
+<span class="comment"># Busca esta línea:</span>
+SMTP_PASSWORD=tifk jmqh nvbn zaqa
+
+<span class="comment"># Reemplázala con tu nueva contraseña (SIN ESPACIOS):</span>
+SMTP_PASSWORD=abcdwxyzefgh1234
+
+<span class="comment"># Guardar y salir:</span>
+<span class="comment"># Ctrl+O (guardar)</span>
+<span class="comment"># Enter (confirmar)</span>
+<span class="comment"># Ctrl+X (salir)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PASO 4 -->
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Reiniciar Backend</h3>
+                <div class="step-content">
+                    <p>Ejecuta estos comandos:</p>
+                    
+                    <div class="code-block">
+<span class="comment"># Detener PM2</span>
+pm2 stop datagree
+pm2 delete datagree
+
+<span class="comment"># Reiniciar con el script</span>
+bash start-production.sh
+
+<span class="comment"># Verificar estado</span>
+pm2 status
+                    </div>
+                    
+                    <div class="success-box">
+                        <strong>✅ Deberías ver:</strong><br>
+                        <code>datagree │ online │ 26.0.3</code>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PASO 5 -->
+            <div class="step">
+                <span class="step-number">5</span>
+                <h3>Probar Conexión</h3>
+                <div class="step-content">
+                    <p>Ejecuta el script de prueba:</p>
+                    
+                    <div class="code-block">
+<span class="comment"># Probar conexión SMTP</span>
+node test-smtp-connection.js
+                    </div>
+                    
+                    <div class="success-box">
+                        <strong>✅ Si todo está bien, verás:</strong><br>
+                        <code>✅ Conexión exitosa con el servidor SMTP</code><br>
+                        <code>✅ Email de prueba enviado exitosamente</code>
+                    </div>
+                    
+                    <p style="margin-top: 20px;">Luego prueba desde la aplicación:</p>
+                    <ol>
+                        <li>Abre: <a href="http://100.28.198.249" target="_blank">http://100.28.198.249</a></li>
+                        <li>Inicia sesión como Super Admin</li>
+                        <li>Ve a <strong>Historias Clínicas</strong></li>
+                        <li>Abre una HC con consentimientos</li>
+                        <li>Haz clic en <strong>"Reenviar Email"</strong></li>
+                        <li>Verifica que el email llegue</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- RESUMEN -->
+            <div class="step" style="border-left-color: #10b981;">
+                <div class="icon">🎯</div>
+                <h3 style="text-align: center; width: 100%;">Resumen de Comandos</h3>
+                <div class="step-content" style="margin-left: 0;">
+                    <div class="code-block">
+<span class="comment"># 1. Conectar</span>
+ssh -i keys/AWS-ISSABEL.pem ubuntu@100.28.198.249
+
+<span class="comment"># 2. Editar .env</span>
+cd /home/ubuntu/consentimientos_aws/backend
+nano .env
+<span class="comment"># Actualizar SMTP_PASSWORD (sin espacios)</span>
+<span class="comment"># Ctrl+O, Enter, Ctrl+X</span>
+
+<span class="comment"># 3. Reiniciar</span>
+pm2 stop datagree && pm2 delete datagree
+bash start-production.sh
+
+<span class="comment"># 4. Probar</span>
+node test-smtp-connection.js
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="icon">📚</div>
+            <p><strong>Documentación Completa:</strong></p>
+            <p>SOLUCION_ERROR_EMAIL_SMTP.md</p>
+            <p>INSTRUCCIONES_URGENTES_EMAIL_SMTP.md</p>
+            <p style="margin-top: 20px; font-size: 12px;">
+                Versión: 26.0.3 | Fecha: 2026-02-07
+            </p>
+        </div>
+    </div>
+</body>
+</html>
