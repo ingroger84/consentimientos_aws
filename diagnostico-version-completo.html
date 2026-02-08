@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Diagnóstico Completo de Versión</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        .result h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .result p {
+            color: #6c757d;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .result strong {
+            color: #495057;
+            font-weight: 600;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .highlight {
+            background: #ffeb3b;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico Completo</h1>
+        <p class="subtitle">Verificación de versión del sistema</p>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analizando el sistema...</p>
+        </div>
+
+        <div id="results" style="display: none;">
+            <div class="result" id="serverVersion">
+                <h3>📡 Versión en el Servidor</h3>
+                <div id="serverVersionContent"></div>
+            </div>
+
+            <div class="result" id="cacheHeaders">
+                <h3>🗄️ Headers de Caché HTTP</h3>
+                <div id="cacheHeadersContent"></div>
+            </div>
+
+            <div class="result" id="browserCache">
+                <h3>🌐 Estado del Caché del Navegador</h3>
+                <div id="browserCacheContent"></div>
+            </div>
+
+            <div class="result" id="jsFiles">
+                <h3>📦 Archivos JavaScript Cargados</h3>
+                <div id="jsFilesContent"></div>
+            </div>
+
+            <div class="result" id="recommendation">
+                <h3>💡 Diagnóstico y Recomendación</h3>
+                <div id="recommendationContent"></div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn" onclick="runDiagnostic()">🔄 Ejecutar Diagnóstico</button>
+            <button class="btn btn-secondary" onclick="forceClearAndReload()">🗑️ Limpiar Caché Completo</button>
+            <button class="btn btn-success" onclick="window.location.href='/'">🏠 Ir a la Aplicación</button>
+        </div>
+    </div>
+
+    <script>
+        async function runDiagnostic() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                // 1. Verificar versión del servidor
+                const timestamp = new Date().getTime();
+                const indexResponse = await fetch(`/assets/index.html?t=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+
+                const indexHtml = await indexResponse.text();
+                
+                // Buscar archivos JS en el HTML
+                const jsMatches = indexHtml.match(/\/assets\/index-([a-zA-Z0-9]+)\.js/g) || [];
+                
+                let serverVersion = 'No encontrada';
+                let serverDate = 'No encontrada';
+                let jsFileName = 'No encontrado';
+                let versionFound = false;
+
+                if (jsMatches.length > 0) {
+                    jsFileName = jsMatches[0];
+                    
+                    // Descargar el archivo JS
+                    const jsResponse = await fetch(`${jsFileName}?t=${timestamp}`, {
+                        cache: 'no-store',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+
+                    const jsContent = await jsResponse.text();
+                    
+                    // Buscar la versión en diferentes formatos posibles
+                    const patterns = [
+                        /"(\d+\.\d+\.\d+) - (\d{4}-\d{2}-\d{2})"/,
+                        /version:"(\d+\.\d+\.\d+)"/,
+                        /version:'(\d+\.\d+\.\d+)'/,
+                        /APP_VERSION.*version:"(\d+\.\d+\.\d+)"/
+                    ];
+
+                    for (const pattern of patterns) {
+                        const match = jsContent.match(pattern);
+                        if (match) {
+                            serverVersion = match[1];
+                            if (match[2]) {
+                                serverDate = match[2];
+                            }
+                            versionFound = true;
+                            break;
+                        }
+                    }
+
+                    // Mostrar versión del servidor
+                    document.getElementById('serverVersionContent').innerHTML = `
+                        <p><strong>Versión detectada:</strong> <span class="highlight">${serverVersion}</span></p>
+                        <p><strong>Fecha:</strong> ${serverDate}</p>
+                        <p><strong>Archivo JS:</strong> ${jsFileName}</p>
+                        <p><strong>Tamaño del archivo:</strong> ${(jsContent.length / 1024).toFixed(2)} KB</p>
+                        <p><strong>Estado:</strong> ${versionFound ? '✅ Versión encontrada' : '⚠️ Versión no encontrada en el formato esperado'}</p>
+                    `;
+
+                    // Verificar headers de caché
+                    const cacheControl = jsResponse.headers.get('Cache-Control');
+                    const pragma = jsResponse.headers.get('Pragma');
+                    const expires = jsResponse.headers.get('Expires');
+                    const etag = jsResponse.headers.get('ETag');
+                    const lastModified = jsResponse.headers.get('Last-Modified');
+
+                    document.getElementById('cacheHeadersContent').innerHTML = `
+                        <p><strong>Cache-Control:</strong> ${cacheControl || '❌ No configurado'}</p>
+                        <p><strong>Pragma:</strong> ${pragma || '❌ No configurado'}</p>
+                        <p><strong>Expires:</strong> ${expires || '❌ No configurado'}</p>
+                        <p><strong>ETag:</strong> ${etag || '❌ No configurado'}</p>
+                        <p><strong>Last-Modified:</strong> ${lastModified || '❌ No configurado'}</p>
+                    `;
+                } else {
+                    document.getElementById('serverVersionContent').innerHTML = `
+                        <p class="error">❌ No se encontraron archivos JavaScript en el HTML</p>
+                    `;
+                }
+
+                // 2. Verificar caché del navegador
+                const cachedVersion = localStorage.getItem('app_version');
+                const hasServiceWorker = 'serviceWorker' in navigator;
+                let swRegistrations = [];
+                
+                if (hasServiceWorker) {
+                    swRegistrations = await navigator.serviceWorker.getRegistrations();
+                }
+
+                document.getElementById('browserCacheContent').innerHTML = `
+                    <p><strong>localStorage 'app_version':</strong> ${cachedVersion || '❌ No encontrada'}</p>
+                    <p><strong>Service Workers:</strong> ${hasServiceWorker ? '✅ Soportados' : '❌ No soportados'}</p>
+                    <p><strong>Service Workers activos:</strong> ${swRegistrations.length}</p>
+                    <p><strong>Cookies:</strong> ${document.cookie ? '✅ Presentes' : '❌ No hay cookies'}</p>
+                    <p><strong>sessionStorage items:</strong> ${sessionStorage.length}</p>
+                    <p><strong>localStorage items:</strong> ${localStorage.length}</p>
+                `;
+
+                // 3. Listar archivos JS cargados actualmente
+                const scripts = Array.from(document.scripts);
+                const jsScripts = scripts.filter(s => s.src && s.src.includes('.js'));
+                
+                let jsFilesHtml = '<div class="code-block">';
+                jsScripts.forEach(script => {
+                    jsFilesHtml += `${script.src}<br>`;
+                });
+                jsFilesHtml += '</div>';
+                
+                document.getElementById('jsFilesContent').innerHTML = `
+                    <p><strong>Total de scripts JS:</strong> ${jsScripts.length}</p>
+                    ${jsFilesHtml}
+                `;
+
+                // 4. Generar recomendación
+                let recommendationClass = 'result';
+                let recommendationHtml = '';
+
+                if (serverVersion === '28.1.1') {
+                    recommendationClass = 'result success';
+                    recommendationHtml = `
+                        <p>✅ <strong>El servidor tiene la versión correcta: 28.1.1</strong></p>
+                        <br>
+                        <p>Si en la aplicación principal sigues viendo <span class="highlight">26.0.3</span>, el problema es el caché de tu navegador.</p>
+                        <br>
+                        <p><strong>Solución recomendada:</strong></p>
+                        <ol style="margin-left: 20px; line-height: 2;">
+                            <li>Haz clic en el botón "🗑️ Limpiar Caché Completo" arriba</li>
+                            <li>O presiona <strong>Ctrl + Shift + Delete</strong> en tu navegador</li>
+                            <li>Selecciona "Imágenes y archivos en caché"</li>
+                            <li>Haz clic en "Borrar datos"</li>
+                            <li>Recarga la página con <strong>Ctrl + F5</strong></li>
+                        </ol>
+                    `;
+                } else if (serverVersion === '26.0.3') {
+                    recommendationClass = 'result error';
+                    recommendationHtml = `
+                        <p>❌ <strong>El servidor tiene una versión antigua: ${serverVersion}</strong></p>
+                        <br>
+                        <p>Se esperaba: <span class="highlight">28.1.1</span></p>
+                        <br>
+                        <p><strong>Posibles causas:</strong></p>
+                        <ol style="margin-left: 20px; line-height: 2;">
+                            <li>El despliegue no se completó correctamente</li>
+                            <li>Nginx está sirviendo archivos antiguos</li>
+                            <li>El build no se ejecutó antes del despliegue</li>
+                        </ol>
+                        <br>
+                        <p><strong>Acción requerida:</strong> Contacta al administrador del sistema para verificar el despliegue.</p>
+                    `;
+                } else {
+                    recommendationClass = 'result warning';
+                    recommendationHtml = `
+                        <p>⚠️ <strong>No se pudo determinar la versión del servidor</strong></p>
+                        <br>
+                        <p>Versión detectada: <span class="highlight">${serverVersion}</span></p>
+                        <br>
+                        <p>Esto puede indicar un problema con el formato de la versión en el código.</p>
+                    `;
+                }
+
+                document.getElementById('recommendation').className = recommendationClass;
+                document.getElementById('recommendationContent').innerHTML = recommendationHtml;
+
+            } catch (error) {
+                document.getElementById('serverVersionContent').innerHTML = `
+                    <p class="error"><strong>Error:</strong> ${error.message}</p>
+                `;
+                document.getElementById('recommendation').className = 'result error';
+                document.getElementById('recommendationContent').innerHTML = `
+                    <p>❌ <strong>No se pudo completar el diagnóstico</strong></p>
+                    <br>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function forceClearAndReload() {
+            console.log('🗑️ Limpiando caché completo...');
+            
+            // Limpiar localStorage
+            localStorage.clear();
+            console.log('✅ localStorage limpiado');
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            console.log('✅ sessionStorage limpiado');
+            
+            // Limpiar cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            console.log('✅ Cookies limpiadas');
+
+            // Desregistrar service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                        console.log('✅ Service Worker desregistrado');
+                    }
+                });
+            }
+            
+            // Mostrar mensaje
+            alert('✅ Caché limpiado completamente.\n\nLa página se recargará sin caché.');
+            
+            // Recargar sin caché
+            window.location.href = window.location.href + '?nocache=' + new Date().getTime();
+        }
+
+        // Ejecutar diagnóstico al cargar
+        window.addEventListener('load', runDiagnostic);
+    </script>
+</body>
+</html>
