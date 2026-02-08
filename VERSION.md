@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 30.0.1
+## Versión Actual: 30.1.0
 **Fecha:** 2026-02-08
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,12 @@
 
 ## Historial de Versiones
 
+### 30.1.0 - 2026-02-08 [MINOR]
+- Documentación: 2 archivo(s) modificado(s)
+- Scripts: 2 archivo(s) modificado(s)
+
 ### 30.0.1 - 2026-02-08 [PATCH]
 - Documentación: 2 archivo(s) modificado(s)
-
-### 30.0.0 - 2026-02-08 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
