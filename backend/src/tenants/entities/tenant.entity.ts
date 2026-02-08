@@ -73,6 +73,19 @@ export class Tenant {
   @Column({ type: 'boolean', default: true, name: 'auto_renew' })
   autoRenew: boolean;
 
+  // Campos de Multi-Región
+  @Column({ type: 'varchar', length: 2, default: 'CO', name: 'region' })
+  region: string; // Código de país: CO, US, DEFAULT
+
+  @Column({ type: 'varchar', length: 3, default: 'COP', name: 'currency' })
+  currency: string; // Moneda: COP, USD
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'plan_price_original' })
+  planPriceOriginal: number; // Precio original al momento de suscripción
+
+  @Column({ type: 'boolean', default: false, name: 'price_locked' })
+  priceLocked: boolean; // Si true, el precio no cambia con actualizaciones de plan
+
   @Column({ nullable: true })
   contactName: string;
 

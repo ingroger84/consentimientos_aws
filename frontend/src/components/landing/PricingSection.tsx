@@ -32,13 +32,22 @@ interface PricingPlan {
   popular?: boolean;
 }
 
+interface PricingData {
+  region: string;
+  currency: string;
+  symbol: string;
+  taxRate: number;
+  taxName: string;
+  plans: PricingPlan[];
+}
+
 interface PricingSectionProps {
   onSelectPlan: (plan: PricingPlan & { billingCycle: 'monthly' | 'annual' }) => void;
 }
 
 export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [plans, setPlans] = useState<PricingPlan[]>([]);
+  const [pricingData, setPricingData] = useState<PricingData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,7 +57,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   const fetchPlans = async () => {
     try {
       const response = await api.get('/plans/public');
-      setPlans(response.data);
+      setPricingData(response.data);
     } catch (error) {
       console.error('Error fetching plans:', error);
     } finally {
@@ -57,10 +66,15 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-CO', {
+    if (!pricingData) return '$0';
+    
+    // Formatear según la moneda
+    const locale = pricingData.currency === 'COP' ? 'es-CO' : 'en-US';
+    
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
+      currency: pricingData.currency,
+      minimumFractionDigits: pricingData.currency === 'COP' ? 0 : 2,
     }).format(price);
   };
 
@@ -104,8 +118,30 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
     );
   }
 
+  if (!pricingData) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-600">Error cargando planes. Por favor, intenta de nuevo.</p>
+      </div>
+    );
+  }
+
+  const plans = pricingData.plans;
+
   return (
     <div>
+      {/* Region Indicator */}
+      <div className="text-center mb-8">
+        <p className="text-sm text-gray-600">
+          Precios en <span className="font-semibold">{pricingData.currency}</span> para{' '}
+          <span className="font-semibold">{pricingData.region}</span>
+        </p>
+        {pricingData.taxRate > 0 && (
+          <p className="text-xs text-gray-500 mt-1">
+            {pricingData.taxName} ({(pricingData.taxRate * 100).toFixed(0)}%) no incluido
+          </p>
+        )}
+      </div>
       {/* Billing Cycle Toggle */}
       <div className="flex justify-center mb-12">
         <div className="bg-gray-100 p-1 rounded-lg inline-flex">

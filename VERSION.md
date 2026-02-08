@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 29.0.1
-**Fecha:** 2026-02-07
-**Tipo de Cambio:** PATCH
+## Versión Actual: 29.1.0
+**Fecha:** 2026-02-08
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,13 @@
 
 ## Historial de Versiones
 
-### 29.0.1 - 2026-02-07 [PATCH]
+### 29.1.0 - 2026-02-08 [MINOR]
+- Backend: 6 archivo(s) modificado(s)
+- Frontend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
-### 29.0.0 - 2026-02-07 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
+### 29.0.1 - 2026-02-07 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
