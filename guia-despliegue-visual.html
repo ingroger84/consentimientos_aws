@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Despliegue Multi-Región</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        .step {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+            position: relative;
+        }
+        .step.completed {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .step.completed .step-number {
+            background: #28a745;
+        }
+        .step h3 {
+            color: #495057;
+            margin: 10px 0 15px 0;
+            font-size: 1.4em;
+        }
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        .checkbox-container input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        .checkbox-container label {
+            font-size: 1.1em;
+            cursor: pointer;
+            user-select: none;
+        }
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.05em;
+        }
+        .alert-success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            color: #155724;
+        }
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            color: #856404;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            color: #0c5460;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Guía de Despliegue Multi-Región</h1>
+        <p class="subtitle">Versión 30.1.0 - Sistema listo para desplegar</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress">0%</div>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>📋 Instrucciones:</strong> Sigue cada paso en orden. Marca la casilla cuando completes cada uno. Los comandos se copian automáticamente al hacer clic en "Copiar".
+        </div>
+
+        <!-- Paso 1 -->
+        <div class="step" id="step1">
+            <div class="step-number">1</div>
+            <h3>Conectarse al Servidor AWS</h3>
+            <p>Abre PowerShell como Administrador y ejecuta:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code1')">Copiar</button>
+                <pre id="code1">ssh -i "AWS-ISSABEL.pem" ubuntu@ec2-18-191-157-215.us-east-2.compute.amazonaws.com</pre>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check1" onchange="updateProgress()">
+                <label for="check1">✓ Conectado al servidor exitosamente</label>
+            </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="step" id="step2">
+            <div class="step-number">2</div>
+            <h3>Actualizar Código desde GitHub</h3>
+            <p>Ejecuta estos comandos en el servidor:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code2')">Copiar</button>
+                <pre id="code2">cd /var/www/consentimientos
+git pull origin main</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong> "Updating..." y lista de archivos actualizados
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check2" onchange="updateProgress()">
+                <label for="check2">✓ Código actualizado desde GitHub</label>
+            </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="step" id="step3">
+            <div class="step-number">3</div>
+            <h3>Aplicar Migración de Base de Datos</h3>
+            <p>Ejecuta el script de migración:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code3')">Copiar</button>
+                <pre id="code3">cd /var/www/consentimientos/backend
+node apply-region-migration.js</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong><br>
+                ✅ Migración aplicada exitosamente<br>
+                📊 Primeros 5 tenants actualizados<br>
+                📈 Distribución de tenants por región
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check3" onchange="updateProgress()">
+                <label for="check3">✓ Migración aplicada correctamente</label>
+            </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="step" id="step4">
+            <div class="step-number">4</div>
+            <h3>Compilar Backend</h3>
+            <p>Instala dependencias y compila el backend:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code4')">Copiar</button>
+                <pre id="code4">npm install
+npm run build</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong> "Build successful"
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check4" onchange="updateProgress()">
+                <label for="check4">✓ Backend compilado exitosamente</label>
+            </div>
+        </div>
+
+        <!-- Paso 5 -->
+        <div class="step" id="step5">
+            <div class="step-number">5</div>
+            <h3>Compilar Frontend</h3>
+            <p>Instala dependencias y compila el frontend:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code5')">Copiar</button>
+                <pre id="code5">cd /var/www/consentimientos/frontend
+npm install
+npm run build</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong> "Build successful" y "dist folder created"
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check5" onchange="updateProgress()">
+                <label for="check5">✓ Frontend compilado exitosamente</label>
+            </div>
+        </div>
+
+        <!-- Paso 6 -->
+        <div class="step" id="step6">
+            <div class="step-number">6</div>
+            <h3>Reiniciar Servicios</h3>
+            <p>Reinicia PM2 y Nginx:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code6')">Copiar</button>
+                <pre id="code6">pm2 restart all
+sudo systemctl reload nginx</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong> "✓ All processes restarted"
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check6" onchange="updateProgress()">
+                <label for="check6">✓ Servicios reiniciados correctamente</label>
+            </div>
+        </div>
+
+        <!-- Paso 7 -->
+        <div class="step" id="step7">
+            <div class="step-number">7</div>
+            <h3>Verificar API</h3>
+            <p>Verifica que la API responde correctamente:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code7')">Copiar</button>
+                <pre id="code7">curl http://localhost:3000/api/plans/public | head -n 20</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Resultado esperado:</strong> JSON con "region": "Colombia", "currency": "COP"
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check7" onchange="updateProgress()">
+                <label for="check7">✓ API verificada y funcionando</label>
+            </div>
+        </div>
+
+        <!-- Paso 8 -->
+        <div class="step" id="step8">
+            <div class="step-number">8</div>
+            <h3>Verificar Landing Page</h3>
+            <p>Abre en tu navegador:</p>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this, 'code8')">Copiar</button>
+                <pre id="code8">https://archivoenlinea.com</pre>
+            </div>
+            <div class="alert alert-success">
+                <strong>✓ Debe mostrar:</strong><br>
+                • "Precios en COP para Colombia"<br>
+                • Precios: $89,900 - $189,900 COP
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="check8" onchange="updateProgress()">
+                <label for="check8">✓ Landing page muestra precios en COP</label>
+            </div>
+        </div>
+
+        <div class="alert alert-info" id="finalMessage" style="display: none;">
+            <h3>🎉 ¡DESPLIEGUE COMPLETADO!</h3>
+            <p>El sistema multi-región está funcionando correctamente.</p>
+            <p><strong>Próximos pasos:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>✓ Usuarios de Colombia ven precios en COP</li>
+                <li>✓ Usuarios de USA verán precios en USD</li>
+                <li>✓ Tenants existentes mantienen sus precios</li>
+            </ul>
+            <button class="btn" onclick="window.open('https://archivoenlinea.com', '_blank')">
+                🌐 Abrir Sitio Web
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function copyCode(button, codeId) {
+            const code = document.getElementById(codeId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                button.textContent = '✓ Copiado';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copiar';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked').length;
+            const total = checkboxes.length;
+            const percentage = Math.round((checked / total) * 100);
+            
+            const progressFill = document.getElementById('progress');
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+
+            // Actualizar estilos de pasos completados
+            checkboxes.forEach((checkbox, index) => {
+                const step = document.getElementById('step' + (index + 1));
+                if (checkbox.checked) {
+                    step.classList.add('completed');
+                } else {
+                    step.classList.remove('completed');
+                }
+            });
+
+            // Mostrar mensaje final si todo está completado
+            if (percentage === 100) {
+                document.getElementById('finalMessage').style.display = 'block';
+                document.getElementById('finalMessage').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+</html>
