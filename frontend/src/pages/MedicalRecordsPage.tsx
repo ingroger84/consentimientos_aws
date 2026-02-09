@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileText, Search, Eye, LayoutGrid, List, User, Calendar, Building2, Trash2 } from 'lucide-react';
+import { Plus, FileText, Search, Eye, LayoutGrid, List, User, Calendar, Building2, Trash2, Mail, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { medicalRecordsService } from '../services/medical-records.service';
 import { MedicalRecord } from '../types/medical-record';
 import { usePermissions } from '../hooks/usePermissions';
 import { useToast } from '../hooks/useToast';
+import MedicalRecordConsentPdfViewer from '../components/medical-records/MedicalRecordConsentPdfViewer';
 
 type ViewMode = 'table' | 'cards';
 
@@ -16,6 +17,8 @@ export default function MedicalRecordsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table'); // Vista de tabla por defecto
+  const [selectedPdf, setSelectedPdf] = useState<{ recordId: string; consentId: string; clientName: string } | null>(null);
+  const [sendingEmail, setSendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
     loadRecords();
@@ -46,6 +49,51 @@ export default function MedicalRecordsPage() {
       loadRecords();
     } catch (error: any) {
       toast.error('Error al eliminar historia clínica', error.response?.data?.message);
+    }
+  };
+
+  const handlePreview = async (record: MedicalRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      // Verificar que tenga consentimientos
+      const consents = await medicalRecordsService.getConsents(record.id);
+      if (consents.length === 0) {
+        toast.error('No hay consentimientos generados', 'Esta historia clínica no tiene consentimientos para visualizar');
+        return;
+      }
+      
+      // Abrir modal con el primer consentimiento (el más reciente)
+      setSelectedPdf({
+        recordId: record.id,
+        consentId: consents[0].id,
+        clientName: record.client?.name || record.client?.fullName || 'Sin nombre'
+      });
+    } catch (error: any) {
+      toast.error('Error al cargar vista previa', error.response?.data?.message || error.message);
+    }
+  };
+
+  const handleSendEmail = async (record: MedicalRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!record.client?.email) {
+      toast.error('Sin email', 'El paciente no tiene email registrado');
+      return;
+    }
+
+    if (!confirm(`¿Enviar consentimientos por correo a ${record.client.email}?`)) {
+      return;
+    }
+
+    try {
+      setSendingEmail(record.id);
+      await medicalRecordsService.sendRecordEmail(record.id);
+      toast.success('Email enviado', `Consentimientos enviados a ${record.client.email}`);
+    } catch (error: any) {
+      toast.error('Error al enviar email', error.response?.data?.message || error.message);
+    } finally {
+      setSendingEmail(null);
     }
   };
 
@@ -282,6 +330,25 @@ export default function MedicalRecordsPage() {
                           <Eye className="w-5 h-5" />
                         </button>
                         <button
+                          onClick={(e) => handlePreview(record, e)}
+                          className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
+                          title="Vista Previa PDF"
+                        >
+                          <FileText className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={(e) => handleSendEmail(record, e)}
+                          disabled={sendingEmail === record.id || !record.client?.email}
+                          className="text-purple-600 hover:text-purple-900 inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={record.client?.email ? "Enviar por correo" : "Sin email registrado"}
+                        >
+                          {sendingEmail === record.id ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            <Mail className="w-5 h-5" />
+                          )}
+                        </button>
+                        <button
                           onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
                           className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
                           title="Eliminar Historia Clínica"
@@ -357,6 +424,25 @@ export default function MedicalRecordsPage() {
                     Ver
                   </button>
                   <button
+                    onClick={(e) => handlePreview(record, e)}
+                    className="text-green-600 hover:text-green-700 flex items-center gap-1 text-sm"
+                    title="Vista Previa"
+                  >
+                    <FileText className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => handleSendEmail(record, e)}
+                    disabled={sendingEmail === record.id || !record.client?.email}
+                    className="text-purple-600 hover:text-purple-700 flex items-center gap-1 text-sm disabled:opacity-50"
+                    title="Enviar Email"
+                  >
+                    {sendingEmail === record.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Mail className="w-4 h-4" />
+                    )}
+                  </button>
+                  <button
                     onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
                     className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
                     title="Eliminar Historia Clínica"
@@ -368,6 +454,16 @@ export default function MedicalRecordsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal de Vista Previa */}
+      {selectedPdf && (
+        <MedicalRecordConsentPdfViewer
+          medicalRecordId={selectedPdf.recordId}
+          consentId={selectedPdf.consentId}
+          clientName={selectedPdf.clientName}
+          onClose={() => setSelectedPdf(null)}
+        />
       )}
     </div>
   );

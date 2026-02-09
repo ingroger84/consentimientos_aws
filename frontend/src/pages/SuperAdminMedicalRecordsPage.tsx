@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter, Lock, Archive, CheckCircle, Loader2, Trash2 } from 'lucide-react';
+import { FileText, Building2, User, Calendar, ChevronRight, Search, Filter, Lock, Archive, CheckCircle, Loader2, Trash2, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
 import { medicalRecordsService } from '@/services/medical-records.service';
+import MedicalRecordConsentPdfViewer from '@/components/medical-records/MedicalRecordConsentPdfViewer';
 
 interface MedicalRecord {
   id: string;
@@ -39,6 +40,8 @@ export default function SuperAdminMedicalRecordsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [selectedPdf, setSelectedPdf] = useState<{ recordId: string; consentId: string; clientName: string } | null>(null);
+  const [sendingEmail, setSendingEmail] = useState<string | null>(null);
   const navigate = useNavigate();
   const toast = useToast();
   const confirm = useConfirm();
@@ -143,6 +146,52 @@ export default function SuperAdminMedicalRecordsPage() {
       toast.error('Error al eliminar historia clínica', error.response?.data?.message || error.message);
     } finally {
       setUpdatingStatus(null);
+    }
+  };
+
+  const handlePreview = async (record: MedicalRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      // Verificar que tenga consentimientos
+      const consents = await medicalRecordsService.getConsents(record.id);
+      if (consents.length === 0) {
+        toast.error('No hay consentimientos generados', 'Esta historia clínica no tiene consentimientos para visualizar');
+        return;
+      }
+      
+      // Abrir modal con el primer consentimiento (el más reciente)
+      setSelectedPdf({
+        recordId: record.id,
+        consentId: consents[0].id,
+        clientName: record.clientName
+      });
+    } catch (error: any) {
+      toast.error('Error al cargar vista previa', error.response?.data?.message || error.message);
+    }
+  };
+
+  const handleSendEmail = async (record: MedicalRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!confirm({
+      type: 'info',
+      title: 'Enviar por correo',
+      message: `¿Enviar consentimientos por correo al paciente ${record.clientName}?`,
+      confirmText: 'Enviar',
+      cancelText: 'Cancelar',
+    })) {
+      return;
+    }
+
+    try {
+      setSendingEmail(record.id);
+      await medicalRecordsService.sendRecordEmail(record.id);
+      toast.success('Email enviado', `Consentimientos enviados correctamente`);
+    } catch (error: any) {
+      toast.error('Error al enviar email', error.response?.data?.message || error.message);
+    } finally {
+      setSendingEmail(null);
     }
   };
 
@@ -387,6 +436,29 @@ export default function SuperAdminMedicalRecordsPage() {
                               <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
                             ) : (
                               <>
+                                {/* Botón Vista Previa */}
+                                <button
+                                  onClick={(e) => handlePreview(record, e)}
+                                  className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                                  title="Vista Previa PDF"
+                                >
+                                  <FileText className="w-5 h-5" />
+                                </button>
+
+                                {/* Botón Enviar Email */}
+                                <button
+                                  onClick={(e) => handleSendEmail(record, e)}
+                                  disabled={sendingEmail === record.id}
+                                  className="p-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Enviar por correo"
+                                >
+                                  {sendingEmail === record.id ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                  ) : (
+                                    <Mail className="w-5 h-5" />
+                                  )}
+                                </button>
+
                                 {/* Botón Activa */}
                                 <button
                                   onClick={(e) => {
@@ -473,6 +545,16 @@ export default function SuperAdminMedicalRecordsPage() {
           ))
         )}
       </div>
+
+      {/* Modal de Vista Previa */}
+      {selectedPdf && (
+        <MedicalRecordConsentPdfViewer
+          medicalRecordId={selectedPdf.recordId}
+          consentId={selectedPdf.consentId}
+          clientName={selectedPdf.clientName}
+          onClose={() => setSelectedPdf(null)}
+        />
+      )}
     </div>
   );
 }

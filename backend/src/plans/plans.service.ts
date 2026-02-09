@@ -289,11 +289,15 @@ export function calculatePrice(planId: string, billingCycle: 'monthly' | 'annual
   async getAvailableRegions(): Promise<Array<{ region: string; regionName: string; currency: string }>> {
     const regions = await this.planPricingRepository
       .createQueryBuilder('pp')
-      .select('DISTINCT pp.region', 'region')
+      .select('pp.region', 'region')
       .addSelect('pp.regionName', 'regionName')
       .addSelect('pp.currency', 'currency')
       .addSelect('pp.currencySymbol', 'currencySymbol')
       .where('pp.isActive = :isActive', { isActive: true })
+      .groupBy('pp.region')
+      .addGroupBy('pp.regionName')
+      .addGroupBy('pp.currency')
+      .addGroupBy('pp.currencySymbol')
       .orderBy('pp.region', 'ASC')
       .getRawMany();
 

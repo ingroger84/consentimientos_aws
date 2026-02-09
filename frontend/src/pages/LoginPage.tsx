@@ -137,6 +137,28 @@ export default function LoginPage() {
       console.log('[LoginPage] Actualizando store...');
       setUser(response.user);
       console.log('[LoginPage] Usuario guardado en store');
+      
+      // Verificar si es Super Admin y está en un subdominio de tenant
+      const isSuperAdmin = response.user.role.type === 'super_admin';
+      const hostname = window.location.hostname;
+      const isAdminDomain = hostname.startsWith('admin.');
+      const isMainDomain = hostname === 'archivoenlinea.com' || hostname === 'www.archivoenlinea.com';
+      const isTenantDomain = !isAdminDomain && !isMainDomain && hostname !== 'localhost' && hostname !== '127.0.0.1';
+      
+      console.log('[LoginPage] isSuperAdmin:', isSuperAdmin);
+      console.log('[LoginPage] hostname:', hostname);
+      console.log('[LoginPage] isTenantDomain:', isTenantDomain);
+      
+      // Si es Super Admin y está en un dominio de tenant, redirigir a admin
+      if (isSuperAdmin && isTenantDomain) {
+        console.log('[LoginPage] Super Admin en dominio de tenant, redirigiendo a admin...');
+        const protocol = window.location.protocol;
+        const adminUrl = `${protocol}//admin.archivoenlinea.com/dashboard`;
+        console.log('[LoginPage] Redirigiendo a:', adminUrl);
+        window.location.href = adminUrl;
+        return;
+      }
+      
       console.log('[LoginPage] Navegando a /dashboard...');
       navigate('/dashboard');
       console.log('[LoginPage] Navegación completada');

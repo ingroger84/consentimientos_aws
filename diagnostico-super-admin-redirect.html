@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Super Admin - Redirección Automática v31.1.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #10b981;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        
+        .section {
+            margin-bottom: 32px;
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-box {
+            background: #f7fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .info-box.success {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .info-box.error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        
+        .info-box.warning {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .info-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+        
+        .info-text {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .url-box {
+            background: #1a202c;
+            color: #10b981;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 8px 0;
+            word-break: break-all;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .domain-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .domain-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .domain-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        .domain-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .domain-url {
+            color: #3b82f6;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        
+        .domain-desc {
+            color: #4a5568;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .flow-diagram {
+            background: #f7fafc;
+            padding: 24px;
+            border-radius: 12px;
+            margin: 16px 0;
+        }
+        
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .flow-number {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        .flow-content {
+            flex: 1;
+        }
+        
+        .flow-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .flow-text {
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .arrow {
+            text-align: center;
+            color: #3b82f6;
+            font-size: 24px;
+            margin: -8px 0;
+        }
+        
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .comparison-col {
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .comparison-col.wrong {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+        }
+        
+        .comparison-col.right {
+            background: #f0fdf4;
+            border: 2px solid #10b981;
+        }
+        
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .comparison-title.wrong {
+            color: #dc2626;
+        }
+        
+        .comparison-title.right {
+            color: #059669;
+        }
+        
+        .comparison-item {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .grid, .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>
+                🔄 Diagnóstico Super Admin - Redirección Automática
+            </h1>
+            <div class="subtitle">Solución a Pantalla en Blanco v31.1.0</div>
+            
+            <div class="status">
+                ✓ SOLUCIÓN IMPLEMENTADA Y ACTIVA
+            </div>
+
+            <!-- Problema -->
+            <div class="section">
+                <div class="section-title">🔍 Problema Identificado</div>
+                
+                <div class="info-box error">
+                    <div class="info-title">❌ Pantalla en Blanco al Iniciar Sesión</div>
+                    <div class="info-text">
+                        Cuando el Super Admin iniciaba sesión en el subdominio de un tenant 
+                        (ej: demoestetica.archivoenlinea.com), la pantalla se quedaba en blanco 
+                        con errores 403 y 400 porque intentaba acceder a recursos del tenant 
+                        sin tener permisos.
+                    </div>
+                </div>
+
+                <div class="url-box">
+Errores en Consola:
+- vendor-react-Dc0L5a4_.js:1 Uncaught NotFoundError
+- api/tenants/[id]:1 Failed to load resource: 403
+- api/invoices/tenant/[id]:1 Failed to load resource: 403
+- api/consent-templates/stats/overview:1 Failed to load resource: 400
+                </div>
+            </div>
+
+            <!-- Solución -->
+            <div class="section">
+                <div class="section-title">✅ Solución Implementada</div>
+                
+                <div class="info-box success">
+                    <div class="info-title">🔄 Redirección Automática</div>
+                    <div class="info-text">
+                        Ahora, cuando un Super Admin inicia sesión en un subdominio de tenant, 
+                        es <strong>redirigido automáticamente</strong> a admin.archivoenlinea.com 
+                        donde tiene todos los permisos necesarios.
+                    </div>
+                </div>
+
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="flow-number">1</div>
+                        <div class="flow-content">
+                            <div class="flow-title">Super Admin inicia sesión</div>
+                            <div class="flow-text">En demoestetica.archivoenlinea.com</div>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-number">2</div>
+                        <div class="flow-content">
+                            <div class="flow-title">Sistema detecta rol</div>
+                            <div class="flow-text">Identifica que es Super Admin</div>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-number">3</div>
+                        <div class="flow-content">
+                            <div class="flow-title">Redirección automática</div>
+                            <div class="flow-text">A admin.archivoenlinea.com/dashboard</div>
+                        </div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step">
+                        <div class="flow-number">4</div>
+                        <div class="flow-content">
+                            <div class="flow-title">Dashboard carga correctamente</div>
+                            <div class="flow-text">Sin errores 403, con todos los permisos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dominios Correctos -->
+            <div class="section">
+                <div class="section-title">🌐 Dominios Correctos por Tipo de Usuario</div>
+                
+                <div class="grid">
+                    <div class="domain-card">
+                        <div class="domain-icon">👑</div>
+                        <div class="domain-title">Super Admin</div>
+                        <div class="domain-url">admin.archivoenlinea.com</div>
+                        <div class="domain-desc">
+                            Acceso completo a todos los tenants, configuración global, 
+                            facturación, planes y gestión de usuarios.
+                        </div>
+                    </div>
+                    
+                    <div class="domain-card">
+                        <div class="domain-icon">🏢</div>
+                        <div class="domain-title">Usuario de Tenant</div>
+                        <div class="domain-url">[tenant].archivoenlinea.com</div>
+                        <div class="domain-desc">
+                            Acceso solo a los datos de su tenant: clientes, historias clínicas, 
+                            consentimientos, usuarios del tenant.
+                        </div>
+                    </div>
+                    
+                    <div class="domain-card">
+                        <div class="domain-icon">🌍</div>
+                        <div class="domain-title">Landing Page</div>
+                        <div class="domain-url">archivoenlinea.com</div>
+                        <div class="domain-desc">
+                            Página pública con información del servicio, planes, precios 
+                            y formulario de registro.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparación -->
+            <div class="section">
+                <div class="section-title">⚖️ Correcto vs Incorrecto</div>
+                
+                <div class="comparison">
+                    <div class="comparison-col wrong">
+                        <div class="comparison-title wrong">
+                            ❌ NO Hagas Esto
+                        </div>
+                        <div class="comparison-item">
+                            Super Admin en demoestetica.archivoenlinea.com
+                        </div>
+                        <div class="comparison-item">
+                            Usuario de tenant en admin.archivoenlinea.com
+                        </div>
+                        <div class="comparison-item">
+                            Usar credenciales incorrectas para el dominio
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-col right">
+                        <div class="comparison-title right">
+                            ✅ SÍ Haz Esto
+                        </div>
+                        <div class="comparison-item">
+                            Super Admin en admin.archivoenlinea.com
+                        </div>
+                        <div class="comparison-item">
+                            Usuario de tenant en [tenant].archivoenlinea.com
+                        </div>
+                        <div class="comparison-item">
+                            Usar credenciales correctas para cada dominio
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pasos para Verificar -->
+            <div class="section">
+                <div class="section-title">📋 Pasos para Verificar</div>
+                
+                <div class="info-box">
+                    <div class="info-title">1. Limpiar Caché del Navegador</div>
+                    <div class="info-text">
+                        Presiona <strong>Ctrl + Shift + Delete</strong> (Windows) o 
+                        <strong>Cmd + Shift + Delete</strong> (Mac) y elimina caché e imágenes.
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">2. Cerrar Sesión Actual</div>
+                    <div class="info-text">
+                        Si estás logueado, cierra sesión completamente antes de probar.
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">3. Acceder como Super Admin</div>
+                    <div class="info-text">
+                        Ve a <strong>admin.archivoenlinea.com</strong> e ingresa tus credenciales.
+                        Deberías ver el dashboard sin errores.
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">4. Verificar Versión</div>
+                    <div class="info-text">
+                        El footer debe mostrar <strong>v31.1.0</strong>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <div class="info-title">5. Probar Funcionalidades</div>
+                    <div class="info-text">
+                        Navega por el menú y verifica que todo carga correctamente sin errores 403.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado Final -->
+            <div class="section">
+                <div class="section-title">📊 Estado del Sistema</div>
+                
+                <div class="url-box">
+✅ Versión: 31.1.0
+✅ Redirección automática: ACTIVA
+✅ Frontend compilado y desplegado
+✅ Nginx recargado
+✅ Backend funcionando (PM2)
+✅ Sin errores 403 para Super Admin
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center; padding: 20px;">
+            <div style="color: #10b981; font-size: 48px; margin-bottom: 12px;">✅</div>
+            <div style="font-size: 24px; font-weight: 600; color: #1a202c; margin-bottom: 8px;">
+                Solución Implementada
+            </div>
+            <div style="color: #718096;">
+                La redirección automática está activa. Accede desde el dominio correcto.
+            </div>
+            <div style="margin-top: 16px; color: #4a5568; font-size: 14px;">
+                Fecha: 2026-02-09 05:35 UTC | Versión: 31.1.0
+            </div>
+        </div>
+    </div>
+</body>
+</html>

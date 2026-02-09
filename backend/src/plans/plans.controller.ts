@@ -16,6 +16,29 @@ export class PlansController {
     private readonly geoDetectionService: GeoDetectionService,
   ) {}
 
+  // ==================== ENDPOINTS DE GESTIÓN DE PRECIOS POR REGIÓN ====================
+  // IMPORTANTE: Estos endpoints deben ir ANTES de los endpoints con :id para evitar conflictos
+
+  /**
+   * Obtiene todas las regiones disponibles
+   */
+  @Get('regions/available')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN)
+  async getAvailableRegions() {
+    return this.plansService.getAvailableRegions();
+  }
+
+  /**
+   * Obtiene todos los precios de todos los planes agrupados por región
+   */
+  @Get('pricing/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN)
+  async getAllPlansPricing() {
+    return this.plansService.getAllPlansPricing();
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleType.SUPER_ADMIN)
@@ -94,35 +117,6 @@ export class PlansController {
     return this.plansService.findOne(id);
   }
 
-  @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
-  update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
-    return this.plansService.update(id, updatePlanDto);
-  }
-
-  // ==================== ENDPOINTS DE GESTIÓN DE PRECIOS POR REGIÓN ====================
-
-  /**
-   * Obtiene todas las regiones disponibles
-   */
-  @Get('regions/available')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
-  async getAvailableRegions() {
-    return this.plansService.getAvailableRegions();
-  }
-
-  /**
-   * Obtiene todos los precios de todos los planes agrupados por región
-   */
-  @Get('pricing/all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
-  async getAllPlansPricing() {
-    return this.plansService.getAllPlansPricing();
-  }
-
   /**
    * Obtiene los precios de un plan específico para todas las regiones
    */
@@ -131,6 +125,13 @@ export class PlansController {
   @Roles(RoleType.SUPER_ADMIN)
   async getPlanPricing(@Param('id') id: string) {
     return this.plansService.getPlanPricingByRegion(id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleType.SUPER_ADMIN)
+  update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
+    return this.plansService.update(id, updatePlanDto);
   }
 
   /**

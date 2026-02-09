@@ -8,11 +8,11 @@ import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 /**
- * Interceptor de cache simple en memoria
- * Para produccion, considerar usar Redis
+ * Interceptor de caché simple en memoria
+ * Para endpoints que no cambian frecuentemente
  */
 @Injectable()
-export class HttpCacheInterceptor implements NestInterceptor {
+export class CacheInterceptor implements NestInterceptor {
   private cache = new Map<string, { data: any; timestamp: number }>();
   private readonly TTL = 60000; // 1 minuto
 
@@ -20,18 +20,13 @@ export class HttpCacheInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const key = this.generateCacheKey(request);
 
-    // Solo cachear GET requests
-    if (request.method !== 'GET') {
-      return next.handle();
-    }
-
-    // Verificar si existe en cache y no ha expirado
+    // Verificar si existe en caché y no ha expirado
     const cached = this.cache.get(key);
     if (cached && Date.now() - cached.timestamp < this.TTL) {
       return of(cached.data);
     }
 
-    // Si no esta en cache, ejecutar y guardar resultado
+    // Si no está en caché, ejecutar y guardar
     return next.handle().pipe(
       tap((data) => {
         this.cache.set(key, {
@@ -39,17 +34,19 @@ export class HttpCacheInterceptor implements NestInterceptor {
           timestamp: Date.now(),
         });
 
-        // Limpiar cache viejo periodicamente
-        this.cleanupCache();
+        // Limpiar caché antiguo cada 100 requests
+        if (this.cache.size > 100) {
+          this.cleanOldCache();
+        }
       }),
     );
   }
 
   private generateCacheKey(request: any): string {
-    return `${request.url}_${JSON.stringify(request.query)}`;
+    return `${request.method}:${request.url}:${JSON.stringify(request.query)}`;
   }
 
-  private cleanupCache(): void {
+  private cleanOldCache(): void {
     const now = Date.now();
     for (const [key, value] of this.cache.entries()) {
       if (now - value.timestamp > this.TTL) {
@@ -58,9 +55,7 @@ export class HttpCacheInterceptor implements NestInterceptor {
     }
   }
 
-  /**
-   * Limpiar cache manualmente
-   */
+  // Método para limpiar caché manualmente
   clearCache(): void {
     this.cache.clear();
   }
