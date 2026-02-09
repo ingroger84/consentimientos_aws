@@ -1,10 +1,27 @@
 import { useEffect, useState } from 'react';
 import { plansService, PlanConfig } from '@/services/plans.service';
-import { Edit, Save, X, DollarSign, Users, Building2, FileText, Briefcase, HelpCircle, HardDrive } from 'lucide-react';
+import { Edit, Save, X, Users, Building2, FileText, Briefcase, HelpCircle, HardDrive, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
+import api from '@/services/api';
+
+interface PlanPricing {
+  id: number;
+  planId: string;
+  region: string;
+  regionName: string;
+  currency: string;
+  currencySymbol: string;
+  priceMonthly: number;
+  priceAnnual: number;
+  taxRate: number;
+  taxName: string;
+  isActive: boolean;
+}
 
 export default function PlansManagementPage() {
   const [plans, setPlans] = useState<PlanConfig[]>([]);
+  const [pricing, setPricing] = useState<Record<string, PlanPricing[]>>({});
+  const [regions, setRegions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<PlanConfig>>({});
@@ -12,16 +29,22 @@ export default function PlansManagementPage() {
   const toast = useToast();
 
   useEffect(() => {
-    loadPlans();
+    loadData();
   }, []);
 
-  const loadPlans = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await plansService.getAll();
-      setPlans(data);
+      const [plansData, regionsData, pricingData] = await Promise.all([
+        plansService.getAll(),
+        api.get('/plans/regions/available'),
+        api.get('/plans/pricing/all'),
+      ]);
+      setPlans(plansData);
+      setRegions(regionsData.data);
+      setPricing(pricingData.data);
     } catch (error) {
-      console.error('Error loading plans:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -47,7 +70,7 @@ export default function PlansManagementPage() {
       const { id, ...updateData } = formData;
       
       await plansService.update(editingPlan, updateData);
-      await loadPlans();
+      await loadData();
       setEditingPlan(null);
       setFormData({});
       toast.success('¡Plan actualizado!', 'Los cambios se guardaron correctamente');
@@ -57,6 +80,15 @@ export default function PlansManagementPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const formatCurrency = (amount: number, currency: string): string => {
+    const locale = currency === 'COP' ? 'es-CO' : 'en-US';
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: currency === 'COP' ? 0 : 2,
+    }).format(amount);
   };
 
   const handleChange = (field: string, value: any) => {
@@ -89,6 +121,25 @@ export default function PlansManagementPage() {
         <p className="text-gray-600 mt-2">
           Administra los planes de suscripción del sistema
         </p>
+      </div>
+
+      {/* Info Alert */}
+      <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+        <div className="flex items-start gap-3">
+          <Globe className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-semibold text-blue-900 mb-1">
+              💡 Precios Multi-Región
+            </h3>
+            <p className="text-sm text-blue-800">
+              Los precios se muestran por región (COP para Colombia, USD para Estados Unidos). 
+              Para <strong>modificar los precios en COP o USD</strong>, ve a{' '}
+              <a href="/plan-pricing" className="font-semibold underline hover:text-blue-900">
+                Administración → Precios Multi-Región
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Plans Grid */}
@@ -165,43 +216,89 @@ export default function PlansManagementPage() {
               {/* Pricing */}
               <div className="p-6 border-b border-gray-200">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Precios
+                  <Globe className="w-4 h-4" />
+                  Precios por Región
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Mensual</label>
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={currentData.priceMonthly || 0}
-                        onChange={(e) => handleChange('priceMonthly', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        min="0"
-                      />
-                    ) : (
-                      <p className="text-lg font-bold text-gray-900">
-                        {plansService.formatPrice(plan.priceMonthly)}
-                      </p>
-                    )}
+                
+                {regions.length > 0 ? (
+                  <div className="space-y-4">
+                    {regions.map((region) => {
+                      const planPricing = pricing[plan.id]?.find(p => p.region === region.region);
+                      if (!planPricing) return null;
+
+                      return (
+                        <div key={region.region} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{region.regionName}</h4>
+                              <p className="text-xs text-gray-600">{region.currency} ({region.currencySymbol})</p>
+                            </div>
+                            <a
+                              href="/plan-pricing"
+                              className="text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                            >
+                              Editar precios →
+                            </a>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Mensual</label>
+                              <p className="text-base font-bold text-gray-900">
+                                {formatCurrency(planPricing.priceMonthly, planPricing.currency)}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-600 mb-1">Anual</label>
+                              <p className="text-base font-bold text-gray-900">
+                                {formatCurrency(planPricing.priceAnnual, planPricing.currency)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-gray-300">
+                            <p className="text-xs text-gray-600">
+                              {planPricing.taxName}: {(planPricing.taxRate * 100).toFixed(0)}%
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1">Anual</label>
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={currentData.priceAnnual || 0}
-                        onChange={(e) => handleChange('priceAnnual', parseInt(e.target.value))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        min="0"
-                      />
-                    ) : (
-                      <p className="text-lg font-bold text-gray-900">
-                        {plansService.formatPrice(plan.priceAnnual)}
-                      </p>
-                    )}
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Mensual</label>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={currentData.priceMonthly || 0}
+                          onChange={(e) => handleChange('priceMonthly', parseInt(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          min="0"
+                        />
+                      ) : (
+                        <p className="text-lg font-bold text-gray-900">
+                          {plansService.formatPrice(plan.priceMonthly)}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Anual</label>
+                      {isEditing ? (
+                        <input
+                          type="number"
+                          value={currentData.priceAnnual || 0}
+                          onChange={(e) => handleChange('priceAnnual', parseInt(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          min="0"
+                        />
+                      ) : (
+                        <p className="text-lg font-bold text-gray-900">
+                          {plansService.formatPrice(plan.priceAnnual)}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Limits */}

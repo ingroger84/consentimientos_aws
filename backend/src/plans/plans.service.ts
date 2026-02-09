@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException, Inject, forwardRef } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { PLANS, PlanConfig } from '../tenants/plans.config';
 import { UpdatePlanDto } from './dto/update-plan.dto';
+import { UpdatePlanPricingDto } from './dto/update-plan-pricing.dto';
 import { TenantsService } from '../tenants/tenants.service';
+import { PlanPricing } from './entities/plan-pricing.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,6 +16,8 @@ export class PlansService {
   private plans: Record<string, PlanConfig> = { ...PLANS };
 
   constructor(
+    @InjectRepository(PlanPricing)
+    private planPricingRepository: Repository<PlanPricing>,
     @Inject(forwardRef(() => TenantsService))
     private tenantsService: TenantsService,
   ) {
@@ -198,5 +204,99 @@ export function calculatePrice(planId: string, billingCycle: 'monthly' | 'annual
   return billingCycle === 'annual' ? plan.priceAnnual : plan.priceMonthly;
 }
 `;
+  }
+
+  // ==================== MÉTODOS PARA GESTIÓN DE PRECIOS POR REGIÓN ====================
+
+  /**
+   * Obtiene todos los precios de un plan para todas las regiones
+   */
+  async getPlanPricingByRegion(planId: string): Promise<PlanPricing[]> {
+    return this.planPricingRepository.find({
+      where: { planId, isActive: true },
+      order: { region: 'ASC' },
+    });
+  }
+
+  /**
+   * Obtiene el precio de un plan para una región específica
+   */
+  async getPlanPricingForRegion(planId: string, region: string): Promise<PlanPricing | null> {
+    return this.planPricingRepository.findOne({
+      where: { planId, region, isActive: true },
+    });
+  }
+
+  /**
+   * Obtiene todos los precios de todas las regiones agrupados por plan
+   */
+  async getAllPlansPricing(): Promise<Record<string, PlanPricing[]>> {
+    const allPricing = await this.planPricingRepository.find({
+      where: { isActive: true },
+      order: { planId: 'ASC', region: 'ASC' },
+    });
+
+    // Agrupar por planId
+    const grouped: Record<string, PlanPricing[]> = {};
+    for (const pricing of allPricing) {
+      if (!grouped[pricing.planId]) {
+        grouped[pricing.planId] = [];
+      }
+      grouped[pricing.planId].push(pricing);
+    }
+
+    return grouped;
+  }
+
+  /**
+   * Actualiza el precio de un plan para una región específica
+   */
+  async updatePlanPricing(
+    planId: string,
+    region: string,
+    updateDto: UpdatePlanPricingDto,
+  ): Promise<PlanPricing> {
+    const pricing = await this.planPricingRepository.findOne({
+      where: { planId, region },
+    });
+
+    if (!pricing) {
+      throw new NotFoundException(
+        `Precio no encontrado para plan ${planId} en región ${region}`,
+      );
+    }
+
+    // Actualizar campos
+    if (updateDto.priceMonthly !== undefined) {
+      pricing.priceMonthly = updateDto.priceMonthly;
+    }
+    if (updateDto.priceAnnual !== undefined) {
+      pricing.priceAnnual = updateDto.priceAnnual;
+    }
+    if (updateDto.taxRate !== undefined) {
+      pricing.taxRate = updateDto.taxRate;
+    }
+    if (updateDto.taxName !== undefined) {
+      pricing.taxName = updateDto.taxName;
+    }
+
+    return this.planPricingRepository.save(pricing);
+  }
+
+  /**
+   * Obtiene todas las regiones disponibles
+   */
+  async getAvailableRegions(): Promise<Array<{ region: string; regionName: string; currency: string }>> {
+    const regions = await this.planPricingRepository
+      .createQueryBuilder('pp')
+      .select('DISTINCT pp.region', 'region')
+      .addSelect('pp.regionName', 'regionName')
+      .addSelect('pp.currency', 'currency')
+      .addSelect('pp.currencySymbol', 'currencySymbol')
+      .where('pp.isActive = :isActive', { isActive: true })
+      .orderBy('pp.region', 'ASC')
+      .getRawMany();
+
+    return regions;
   }
 }

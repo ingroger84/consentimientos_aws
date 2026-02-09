@@ -30,6 +30,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 const TenantsPage = lazy(() => import('./pages/TenantsPage'));
 const MyPlanPage = lazy(() => import('./pages/MyPlanPage'));
 const PlansManagementPage = lazy(() => import('./pages/PlansManagementPage'));
+const PlanPricingManagementPage = lazy(() => import('./pages/PlanPricingManagementPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
@@ -159,6 +160,7 @@ function App() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/tenants" element={<TenantsPage />} />
               <Route path="/plans" element={<PlansManagementPage />} />
+              <Route path="/plan-pricing" element={<PlanPricingManagementPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/my-plan" element={<MyPlanPage />} />
               <Route path="/my-invoices" element={<TenantInvoicesPage />} />

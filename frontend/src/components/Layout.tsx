@@ -301,9 +301,15 @@ export default function Layout() {
             permission: 'manage_tenants'
           },
           {
+            name: 'Precios Multi-Región',
+            href: '/plan-pricing',
+            icon: DollarSign,
+            permission: 'manage_tenants'
+          },
+          {
             name: 'Facturación',
             href: '/billing',
-            icon: DollarSign,
+            icon: Receipt,
             permission: 'manage_tenants'
           },
           {

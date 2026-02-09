@@ -53,6 +53,7 @@ import { MedicalRecordAudit } from './medical-records/entities/medical-record-au
 import { MedicalRecordConsent } from './medical-records/entities/medical-record-consent.entity';
 import { MRConsentTemplate } from './medical-record-consent-templates/entities/mr-consent-template.entity';
 import { UserSession } from './auth/entities/user-session.entity';
+import { PlanPricing } from './plans/entities/plan-pricing.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { SessionGuard } from './auth/guards/session.guard';
@@ -102,6 +103,7 @@ import { SessionGuard } from './auth/guards/session.guard';
           MedicalRecordAudit,
           MedicalRecordConsent,
           MRConsentTemplate,
+          PlanPricing,
         ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
