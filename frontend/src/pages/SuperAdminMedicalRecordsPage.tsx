@@ -436,7 +436,7 @@ export default function SuperAdminMedicalRecordsPage() {
                               <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
                             ) : (
                               <>
-                                {/* Botón Vista Previa */}
+                                {/* Botón Vista Previa - Siempre visible para Super Admin */}
                                 <button
                                   onClick={(e) => handlePreview(record, e)}
                                   className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
@@ -445,7 +445,7 @@ export default function SuperAdminMedicalRecordsPage() {
                                   <FileText className="w-5 h-5" />
                                 </button>
 
-                                {/* Botón Enviar Email */}
+                                {/* Botón Enviar Email - Siempre visible para Super Admin */}
                                 <button
                                   onClick={(e) => handleSendEmail(record, e)}
                                   disabled={sendingEmail === record.id}
@@ -512,7 +512,7 @@ export default function SuperAdminMedicalRecordsPage() {
                               </>
                             )}
                             
-                            {/* Botón Eliminar - SIEMPRE VISIBLE (fuera del condicional de updatingStatus) */}
+                            {/* Botón Eliminar - SIEMPRE VISIBLE */}
                             {record.status !== 'closed' && (
                               <button
                                 onClick={(e) => handleDelete(record.id, record.recordNumber, e)}

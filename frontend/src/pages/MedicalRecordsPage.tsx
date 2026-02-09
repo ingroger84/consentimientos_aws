@@ -329,32 +329,38 @@ export default function MedicalRecordsPage() {
                         >
                           <Eye className="w-5 h-5" />
                         </button>
-                        <button
-                          onClick={(e) => handlePreview(record, e)}
-                          className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
-                          title="Vista Previa PDF"
-                        >
-                          <FileText className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => handleSendEmail(record, e)}
-                          disabled={sendingEmail === record.id || !record.client?.email}
-                          className="text-purple-600 hover:text-purple-900 inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={record.client?.email ? "Enviar por correo" : "Sin email registrado"}
-                        >
-                          {sendingEmail === record.id ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                          ) : (
-                            <Mail className="w-5 h-5" />
-                          )}
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
-                          className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
-                          title="Eliminar Historia Clínica"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        {hasPermission('preview_medical_records') && (
+                          <button
+                            onClick={(e) => handlePreview(record, e)}
+                            className="text-green-600 hover:text-green-900 inline-flex items-center gap-1"
+                            title="Vista Previa PDF"
+                          >
+                            <FileText className="w-5 h-5" />
+                          </button>
+                        )}
+                        {hasPermission('send_email_medical_records') && (
+                          <button
+                            onClick={(e) => handleSendEmail(record, e)}
+                            disabled={sendingEmail === record.id || !record.client?.email}
+                            className="text-purple-600 hover:text-purple-900 inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={record.client?.email ? "Enviar por correo" : "Sin email registrado"}
+                          >
+                            {sendingEmail === record.id ? (
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                              <Mail className="w-5 h-5" />
+                            )}
+                          </button>
+                        )}
+                        {hasPermission('delete_medical_records') && (
+                          <button
+                            onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                            className="text-red-600 hover:text-red-900 inline-flex items-center gap-1"
+                            title="Eliminar Historia Clínica"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -423,32 +429,38 @@ export default function MedicalRecordsPage() {
                     <Eye className="w-4 h-4" />
                     Ver
                   </button>
-                  <button
-                    onClick={(e) => handlePreview(record, e)}
-                    className="text-green-600 hover:text-green-700 flex items-center gap-1 text-sm"
-                    title="Vista Previa"
-                  >
-                    <FileText className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => handleSendEmail(record, e)}
-                    disabled={sendingEmail === record.id || !record.client?.email}
-                    className="text-purple-600 hover:text-purple-700 flex items-center gap-1 text-sm disabled:opacity-50"
-                    title="Enviar Email"
-                  >
-                    {sendingEmail === record.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Mail className="w-4 h-4" />
-                    )}
-                  </button>
-                  <button
-                    onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
-                    className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
-                    title="Eliminar Historia Clínica"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {hasPermission('preview_medical_records') && (
+                    <button
+                      onClick={(e) => handlePreview(record, e)}
+                      className="text-green-600 hover:text-green-700 flex items-center gap-1 text-sm"
+                      title="Vista Previa"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </button>
+                  )}
+                  {hasPermission('send_email_medical_records') && (
+                    <button
+                      onClick={(e) => handleSendEmail(record, e)}
+                      disabled={sendingEmail === record.id || !record.client?.email}
+                      className="text-purple-600 hover:text-purple-700 flex items-center gap-1 text-sm disabled:opacity-50"
+                      title="Enviar Email"
+                    >
+                      {sendingEmail === record.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Mail className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+                  {hasPermission('delete_medical_records') && (
+                    <button
+                      onClick={(e) => handleDelete(record.id, record.recordNumber, e)}
+                      className="text-red-600 hover:text-red-700 flex items-center gap-1 text-sm"
+                      title="Eliminar Historia Clínica"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

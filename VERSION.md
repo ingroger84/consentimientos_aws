@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 32.0.0
+## Versión Actual: 33.0.0
 **Fecha:** 2026-02-09
 **Tipo de Cambio:** MAJOR
 
@@ -18,17 +18,16 @@
 
 ## Historial de Versiones
 
+### 33.0.0 - 2026-02-09 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 3 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 32.0.0 - 2026-02-09 [MAJOR]
 - Backend: 9 archivo(s) modificado(s)
 - Frontend: 6 archivo(s) modificado(s)
 - Documentación: 10 archivo(s) modificado(s)
 - Scripts: 2 archivo(s) modificado(s)
-
-### 31.0.0 - 2026-02-08 [MAJOR]
-- Backend: 10 archivo(s) modificado(s)
-- Frontend: 6 archivo(s) modificado(s)
-- Documentación: 11 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
 
 ---
 
