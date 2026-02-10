@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 34.0.1
+## Versión Actual: 35.0.0
 **Fecha:** 2026-02-09
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,12 +18,13 @@
 
 ## Historial de Versiones
 
-### 34.0.1 - 2026-02-09 [PATCH]
-- Backend: 1 archivo(s) modificado(s)
+### 35.0.0 - 2026-02-09 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
-### 34.0.0 - 2026-02-09 [MAJOR]
-- Backend: 1 archivo(s) modificado(s)
+### 34.0.2 - 2026-02-09 [PATCH]
+- Mejoras y correcciones generales
 
 ---
 
