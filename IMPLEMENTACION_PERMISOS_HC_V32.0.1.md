@@ -430,3 +430,167 @@ node apply-preview-email-permissions.js 2>&1 | tee permissions-log.txt
 **Fecha:** 2026-02-09  
 **Estado:** ✅ LISTO PARA DESPLEGAR  
 **Servidor:** archivoenlinea.com (100.28.198.249)
+
+
+---
+
+## 🎯 ACTUALIZACIÓN: DESPLIEGUE COMPLETADO
+
+**Fecha de Despliegue:** 2026-02-09  
+**Estado:** ✅ COMPLETADO EXITOSAMENTE
+
+---
+
+### ✅ DESCUBRIMIENTO IMPORTANTE
+
+Durante la aplicación de permisos, se descubrió que el sistema NO usa tablas separadas para permisos:
+
+**Estructura Real:**
+- ❌ NO existe tabla `permissions`
+- ❌ NO existe tabla `role_permissions`
+- ✅ Los permisos se almacenan como **texto** en la tabla `roles`
+- ✅ Formato: cadena separada por comas
+
+**Ejemplo:**
+```sql
+permissions: "view_dashboard,view_consents,create_consents,...,preview_medical_records,send_email_medical_records"
+```
+
+**Tipos de Roles (UPPERCASE):**
+- `super_admin` (minúsculas)
+- `ADMIN_GENERAL` (mayúsculas)
+- `ADMIN_SEDE` (mayúsculas)
+- `OPERADOR` (mayúsculas)
+
+---
+
+### ✅ SOLUCIÓN APLICADA
+
+**Script Correcto Creado:** `backend/apply-permissions-hc-fixed.sql`
+
+```sql
+-- Agregar permisos usando concatenación de strings
+UPDATE roles 
+SET permissions = permissions || ',preview_medical_records,send_email_medical_records',
+    updated_at = NOW()
+WHERE type = 'ADMIN_GENERAL' 
+AND permissions NOT LIKE '%preview_medical_records%';
+```
+
+**Resultado de Ejecución:**
+```
+UPDATE 0  -- Super Admin (ya tenía los permisos)
+UPDATE 1  -- Admin General (actualizado)
+UPDATE 1  -- Admin Sede (actualizado)
+UPDATE 1  -- Operador (actualizado)
+```
+
+---
+
+### ✅ VERIFICACIÓN COMPLETADA
+
+**Query de Verificación:**
+```sql
+SELECT 
+    type,
+    name,
+    CASE 
+        WHEN permissions LIKE '%preview_medical_records%' THEN '✓ Tiene preview_medical_records'
+        ELSE '✗ NO tiene preview_medical_records'
+    END as preview_status,
+    CASE 
+        WHEN permissions LIKE '%send_email_medical_records%' THEN '✓ Tiene send_email_medical_records'
+        ELSE '✗ NO tiene send_email_medical_records'
+    END as email_status
+FROM roles
+WHERE type IN ('super_admin', 'ADMIN_GENERAL', 'ADMIN_SEDE', 'OPERADOR')
+ORDER BY type;
+```
+
+**Resultado:**
+```
+     type      |         name          |         preview_status          |            email_status
+---------------+-----------------------+---------------------------------+------------------------------------
+ super_admin   | Super Administrador   | ✓ Tiene preview_medical_records | ✓ Tiene send_email_medical_records
+ ADMIN_GENERAL | Administrador General | ✓ Tiene preview_medical_records | ✓ Tiene send_email_medical_records
+ ADMIN_SEDE    | Administrador de Sede | ✓ Tiene preview_medical_records | ✓ Tiene send_email_medical_records
+ OPERADOR      | Operador              | ✓ Tiene preview_medical_records | ✓ Tiene send_email_medical_records
+```
+
+---
+
+### ✅ CHECKLIST FINAL
+
+- [x] Backend compilado y desplegado (v32.0.1)
+- [x] Frontend compilado y desplegado (v32.0.1)
+- [x] Script de permisos ejecutado en base de datos
+- [x] Permisos aplicados a Super Admin
+- [x] Permisos aplicados a Admin General
+- [x] Permisos aplicados a Admin Sede
+- [x] Permisos aplicados a Operador
+- [x] PM2 reiniciado
+- [x] Nginx recargado
+- [x] Permisos verificados en base de datos
+- [x] GitHub actualizado (commit afa1066)
+- [ ] Caché del navegador limpiado (pendiente usuario)
+- [ ] Botones verificados en interfaz (pendiente usuario)
+- [ ] Permisos verificados en Roles y Permisos (pendiente usuario)
+- [ ] Funcionalidad probada (pendiente usuario)
+
+---
+
+### 📋 PRÓXIMOS PASOS PARA EL USUARIO
+
+1. **Limpiar Caché del Navegador:**
+   ```
+   Ctrl + Shift + R (varias veces)
+   ```
+
+2. **Verificar en Roles y Permisos:**
+   - Ir a: `https://admin.archivoenlinea.com/roles`
+   - Editar rol "Administrador General"
+   - Buscar sección "Historias Clínicas"
+   - Verificar que aparecen:
+     - ✅ Vista previa de historias clínicas
+     - ✅ Enviar historias clínicas por email
+
+3. **Probar en Historias Clínicas:**
+   - Iniciar sesión como Admin General
+   - Ir a Historias Clínicas
+   - Verificar que aparecen los botones:
+     - 📄 Vista Previa (verde)
+     - ✉️ Enviar Email (morado)
+
+4. **Probar Activar/Desactivar:**
+   - Desactivar "Vista previa de historias clínicas" para Operador
+   - Guardar cambios
+   - Iniciar sesión como Operador
+   - Verificar que el botón NO aparece
+   - Reactivar el permiso
+   - Verificar que el botón SÍ aparece
+
+---
+
+### 📊 RESUMEN DE ARCHIVOS
+
+**Archivos Creados:**
+- `backend/apply-permissions-hc-fixed.sql` - Script SQL correcto
+- `RESUMEN_PERMISOS_HC_V32.0.1.md` - Resumen ejecutivo
+
+**Archivos Modificados:**
+- `backend/src/auth/constants/permissions.ts` - Permisos agregados
+- `frontend/src/pages/MedicalRecordsPage.tsx` - Verificación de permisos
+- `frontend/src/pages/SuperAdminMedicalRecordsPage.tsx` - Comentarios
+- `IMPLEMENTACION_PERMISOS_HC_V32.0.1.md` - Este archivo (actualizado)
+
+**Archivos Obsoletos (no usar):**
+- `backend/add-preview-email-permissions.sql` - Asume tabla permissions
+- `backend/apply-preview-email-permissions.js` - Asume tabla permissions
+- `temp-apply-permissions.sql` - Asume tabla permissions
+
+---
+
+**Estado Final:** ✅ IMPLEMENTACIÓN COMPLETADA Y DESPLEGADA  
+**Versión Desplegada:** 32.0.1  
+**Servidor:** archivoenlinea.com (100.28.198.249)  
+**Fecha:** 2026-02-09

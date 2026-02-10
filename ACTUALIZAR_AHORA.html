@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización v34.0.0 - RECARGAR AHORA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 { color: #2d3748; font-size: 32px; margin-bottom: 20px; }
+        .version { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 25px; font-size: 18px; font-weight: 600; display: inline-block; margin-bottom: 20px; }
+        .button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 600; border: none; cursor: pointer; margin: 10px; transition: all 0.3s; }
+        .button:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); }
+        .instructions { background: #f7fafc; padding: 20px; border-radius: 12px; margin-top: 20px; text-align: left; }
+        .instructions h3 { color: #2d3748; margin-bottom: 10px; }
+        .instructions p { color: #4a5568; line-height: 1.6; margin-bottom: 10px; }
+        .kbd { background: #2d3748; color: white; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; margin: 0 2px; }
+        #status { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
+        .success { background: #f0fff4; border: 2px solid #48bb78; color: #22543d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="version">✨ Versión 34.0.0</div>
+        <h1>🔄 Actualización Disponible</h1>
+        <p style="color: #718096; margin-bottom: 30px;">
+            Nueva versión desplegada. Haz clic en el botón para actualizar.
+        </p>
+
+        <button class="button" onclick="forceReload()">
+            🚀 ACTUALIZAR AHORA
+        </button>
+
+        <div id="status"></div>
+
+        <div class="instructions">
+            <h3>📝 Si el botón no funciona:</h3>
+            <p><strong>Windows/Linux:</strong> <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">Delete</span></p>
+            <p>1. Selecciona "Imágenes y archivos en caché"</p>
+            <p>2. Haz clic en "Borrar datos"</p>
+            <p>3. Recarga la página con <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">R</span></p>
+            <br>
+            <p><strong>Mac:</strong> <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">Delete</span></p>
+            <p>Luego: <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">R</span></p>
+        </div>
+    </div>
+
+    <script>
+        function forceReload() {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.className = 'success';
+            status.innerHTML = '<strong>✅ Limpiando caché...</strong><br>La página se recargará en 2 segundos...';
+
+            // Limpiar todo
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Limpiar cookies
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            // Limpiar Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // Limpiar caché de la API
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+
+            // Recargar con timestamp
+            setTimeout(() => {
+                window.location.href = '/?v=' + new Date().getTime() + '&cache=clear';
+            }, 2000);
+        }
+
+        // Auto-limpiar al cargar
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('cache')) {
+                // Primera carga, limpiar caché silenciosamente
+                if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                        for (let name of names) {
+                            caches.delete(name);
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
