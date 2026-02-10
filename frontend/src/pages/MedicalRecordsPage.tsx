@@ -5,7 +5,6 @@ import { medicalRecordsService } from '../services/medical-records.service';
 import { MedicalRecord } from '../types/medical-record';
 import { usePermissions } from '../hooks/usePermissions';
 import { useToast } from '../hooks/useToast';
-import MedicalRecordConsentPdfViewer from '../components/medical-records/MedicalRecordConsentPdfViewer';
 
 type ViewMode = 'table' | 'cards';
 
@@ -17,7 +16,6 @@ export default function MedicalRecordsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table'); // Vista de tabla por defecto
-  const [selectedPdf, setSelectedPdf] = useState<{ recordId: string; consentId: string; clientName: string } | null>(null);
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,19 +54,9 @@ export default function MedicalRecordsPage() {
     e.stopPropagation();
     
     try {
-      // Verificar que tenga consentimientos
-      const consents = await medicalRecordsService.getConsents(record.id);
-      if (consents.length === 0) {
-        toast.error('No hay consentimientos generados', 'Esta historia clínica no tiene consentimientos para visualizar');
-        return;
-      }
-      
-      // Abrir modal con el primer consentimiento (el más reciente)
-      setSelectedPdf({
-        recordId: record.id,
-        consentId: consents[0].id,
-        clientName: record.client?.name || record.client?.fullName || 'Sin nombre'
-      });
+      // Abrir el PDF de la HC completa en una nueva ventana
+      const pdfUrl = await medicalRecordsService.getRecordPdfUrl(record.id);
+      window.open(pdfUrl, '_blank');
     } catch (error: any) {
       toast.error('Error al cargar vista previa', error.response?.data?.message || error.message);
     }
@@ -82,14 +70,14 @@ export default function MedicalRecordsPage() {
       return;
     }
 
-    if (!confirm(`¿Enviar consentimientos por correo a ${record.client.email}?`)) {
+    if (!confirm(`¿Enviar historia clínica completa por correo a ${record.client.email}?`)) {
       return;
     }
 
     try {
       setSendingEmail(record.id);
       await medicalRecordsService.sendRecordEmail(record.id);
-      toast.success('Email enviado', `Consentimientos enviados a ${record.client.email}`);
+      toast.success('Email enviado', `Historia clínica enviada a ${record.client.email}`);
     } catch (error: any) {
       toast.error('Error al enviar email', error.response?.data?.message || error.message);
     } finally {
@@ -466,16 +454,6 @@ export default function MedicalRecordsPage() {
             </div>
           ))}
         </div>
-      )}
-
-      {/* Modal de Vista Previa */}
-      {selectedPdf && (
-        <MedicalRecordConsentPdfViewer
-          medicalRecordId={selectedPdf.recordId}
-          consentId={selectedPdf.consentId}
-          clientName={selectedPdf.clientName}
-          onClose={() => setSelectedPdf(null)}
-        />
       )}
     </div>
   );

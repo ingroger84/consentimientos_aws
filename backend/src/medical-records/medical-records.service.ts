@@ -906,6 +906,274 @@ export class MedicalRecordsService {
     });
   }
 
+  // ==================== MÉTODOS PARA PDF Y EMAIL DE HC COMPLETA ====================
+
+  /**
+   * Genera un PDF completo de la Historia Clínica con toda la información recopilada
+   */
+  async generateMedicalRecordPDF(
+    medicalRecordId: string,
+    tenantId: string,
+  ): Promise<Buffer> {
+    // Obtener la HC completa con todas sus relaciones
+    const medicalRecord = await this.medicalRecordsRepository.findOne({
+      where: { id: medicalRecordId, tenantId },
+      relations: [
+        'client',
+        'branch',
+        'tenant',
+        'creator',
+        'closer',
+        'anamnesis',
+        'physicalExams',
+        'diagnoses',
+        'evolutions',
+        'evolutions.creator',
+      ],
+    });
+
+    if (!medicalRecord) {
+      throw new NotFoundException('Historia clínica no encontrada');
+    }
+
+    // Cargar settings para logos
+    const settings = await this.settingsService.getSettings(tenantId);
+    const logoUrl = settings.hcLogoUrl || settings.logoUrl;
+    const footerLogoUrl = settings.hcFooterLogoUrl || settings.footerLogoUrl;
+    const watermarkLogoUrl = settings.hcWatermarkLogoUrl || settings.watermarkLogoUrl;
+    const primaryColor = settings.primaryColor || '#3B82F6';
+
+    // Construir el contenido de la HC como plantillas
+    const templates = [];
+
+    // 1. Información General
+    let generalInfo = `HISTORIA CLÍNICA\n\n`;
+    generalInfo += `Número de HC: ${medicalRecord.recordNumber}\n`;
+    generalInfo += `Fecha de Admisión: ${this.formatDate(medicalRecord.admissionDate)}\n`;
+    generalInfo += `Tipo de Admisión: ${this.getAdmissionTypeText(medicalRecord.admissionType)}\n`;
+    generalInfo += `Estado: ${this.getStatusText(medicalRecord.status)}\n\n`;
+    
+    if (medicalRecord.branch) {
+      generalInfo += `Sede: ${medicalRecord.branch.name}\n`;
+      if (medicalRecord.branch.address) generalInfo += `Dirección: ${medicalRecord.branch.address}\n`;
+      if (medicalRecord.branch.phone) generalInfo += `Teléfono: ${medicalRecord.branch.phone}\n`;
+    }
+
+    templates.push({
+      name: 'Información General',
+      content: generalInfo,
+    });
+
+    // 2. Anamnesis
+    if (medicalRecord.anamnesis && medicalRecord.anamnesis.length > 0) {
+      medicalRecord.anamnesis.forEach((anamnesis, index) => {
+        let anamnesisContent = `Fecha: ${this.formatDate(anamnesis.createdAt)}\n\n`;
+        
+        if (anamnesis.chiefComplaint) {
+          anamnesisContent += `MOTIVO DE CONSULTA\n${anamnesis.chiefComplaint}\n\n`;
+        }
+        
+        if (anamnesis.currentIllness) {
+          anamnesisContent += `ENFERMEDAD ACTUAL\n${anamnesis.currentIllness}\n\n`;
+        }
+        
+        if (anamnesis.personalHistory) {
+          anamnesisContent += `ANTECEDENTES PERSONALES\n${anamnesis.personalHistory}\n\n`;
+        }
+        
+        if (anamnesis.familyHistory) {
+          anamnesisContent += `ANTECEDENTES FAMILIARES\n${anamnesis.familyHistory}\n\n`;
+        }
+        
+        if (anamnesis.allergies) {
+          anamnesisContent += `ALERGIAS\n${anamnesis.allergies}\n\n`;
+        }
+        
+        if (anamnesis.currentMedications) {
+          anamnesisContent += `MEDICAMENTOS ACTUALES\n${anamnesis.currentMedications}\n\n`;
+        }
+
+        templates.push({
+          name: `Anamnesis ${index + 1}`,
+          content: anamnesisContent,
+        });
+      });
+    }
+
+    // 3. Examen Físico
+    if (medicalRecord.physicalExams && medicalRecord.physicalExams.length > 0) {
+      medicalRecord.physicalExams.forEach((exam, index) => {
+        let examContent = `Fecha: ${this.formatDate(exam.createdAt)}\n\n`;
+        
+        if (exam.vitalSigns) {
+          examContent += `SIGNOS VITALES\n${JSON.stringify(exam.vitalSigns, null, 2)}\n\n`;
+        }
+        
+        if (exam.generalAppearance) {
+          examContent += `APARIENCIA GENERAL\n${exam.generalAppearance}\n\n`;
+        }
+        
+        if (exam.systemsReview) {
+          examContent += `REVISIÓN POR SISTEMAS\n${JSON.stringify(exam.systemsReview, null, 2)}\n\n`;
+        }
+        
+        if (exam.findings) {
+          examContent += `HALLAZGOS\n${exam.findings}\n\n`;
+        }
+
+        templates.push({
+          name: `Examen Físico ${index + 1}`,
+          content: examContent,
+        });
+      });
+    }
+
+    // 4. Diagnósticos
+    if (medicalRecord.diagnoses && medicalRecord.diagnoses.length > 0) {
+      let diagnosesContent = '';
+      
+      medicalRecord.diagnoses.forEach((diagnosis, index) => {
+        diagnosesContent += `${index + 1}. ${diagnosis.code} - ${diagnosis.description}\n`;
+        diagnosesContent += `   Tipo: ${diagnosis.diagnosisType}\n`;
+        if (diagnosis.notes) {
+          diagnosesContent += `   Notas: ${diagnosis.notes}\n`;
+        }
+        diagnosesContent += `   Fecha: ${this.formatDate(diagnosis.createdAt)}\n\n`;
+      });
+
+      templates.push({
+        name: 'Diagnósticos',
+        content: diagnosesContent,
+      });
+    }
+
+    // 5. Evoluciones
+    if (medicalRecord.evolutions && medicalRecord.evolutions.length > 0) {
+      medicalRecord.evolutions.forEach((evolution, index) => {
+        let evolutionContent = `Fecha: ${this.formatDate(evolution.evolutionDate)}\n`;
+        if (evolution.creator) {
+          evolutionContent += `Profesional: ${evolution.creator.name}\n\n`;
+        }
+        
+        if (evolution.subjective) {
+          evolutionContent += `SUBJETIVO (S):\n${evolution.subjective}\n\n`;
+        }
+        
+        if (evolution.objective) {
+          evolutionContent += `OBJETIVO (O):\n${evolution.objective}\n\n`;
+        }
+        
+        if (evolution.assessment) {
+          evolutionContent += `ANÁLISIS (A):\n${evolution.assessment}\n\n`;
+        }
+        
+        if (evolution.plan) {
+          evolutionContent += `PLAN (P):\n${evolution.plan}\n\n`;
+        }
+
+        templates.push({
+          name: `Evolución ${index + 1}`,
+          content: evolutionContent,
+        });
+      });
+    }
+
+    // Si no hay contenido, agregar mensaje
+    if (templates.length === 1) {
+      templates.push({
+        name: 'Información',
+        content: 'Esta historia clínica aún no tiene información clínica registrada.',
+      });
+    }
+
+    // Generar PDF
+    const pdfBuffer = await this.medicalRecordsPdfService.generateCompositePDF(
+      templates,
+      {
+        clientName: medicalRecord.client.fullName,
+        clientDocument: medicalRecord.client.documentNumber,
+        clientEmail: medicalRecord.client.email,
+        clientPhone: medicalRecord.client.phone,
+        recordNumber: medicalRecord.recordNumber,
+        admissionDate: this.formatDate(medicalRecord.admissionDate),
+        branchName: medicalRecord.branch?.name,
+        companyName: medicalRecord.tenant?.name,
+        logoUrl,
+        footerLogoUrl,
+        watermarkLogoUrl,
+        primaryColor,
+        footerText: `${medicalRecord.tenant?.name || ''} - Historia Clínica Electrónica`,
+      },
+    );
+
+    return pdfBuffer;
+  }
+
+  /**
+   * Envía la Historia Clínica completa por email
+   */
+  async sendMedicalRecordEmail(
+    medicalRecordId: string,
+    tenantId: string,
+  ): Promise<void> {
+    // Obtener la HC
+    const medicalRecord = await this.medicalRecordsRepository.findOne({
+      where: { id: medicalRecordId, tenantId },
+      relations: ['client', 'tenant'],
+    });
+
+    if (!medicalRecord) {
+      throw new NotFoundException('Historia clínica no encontrada');
+    }
+
+    if (!medicalRecord.client.email) {
+      throw new BadRequestException('El paciente no tiene email registrado');
+    }
+
+    // Generar PDF
+    const pdfBuffer = await this.generateMedicalRecordPDF(medicalRecordId, tenantId);
+
+    // Subir PDF a S3
+    const timestamp = Date.now();
+    const fileName = `historia-clinica-${medicalRecord.recordNumber}-${timestamp}.pdf`;
+    const folder = `medical-records/${medicalRecordId}`;
+    
+    const pdfUrl = await this.storageService.uploadBuffer(
+      pdfBuffer,
+      folder,
+      fileName,
+      'application/pdf',
+    );
+
+    // Enviar email
+    await this.mailService.sendMedicalRecordEmail({
+      to: medicalRecord.client.email,
+      clientName: medicalRecord.client.fullName,
+      recordNumber: medicalRecord.recordNumber,
+      pdfUrl,
+      companyName: medicalRecord.tenant?.name || '',
+    });
+  }
+
+  private getAdmissionTypeText(type: string): string {
+    const types = {
+      consulta: 'Consulta',
+      urgencia: 'Urgencia',
+      hospitalizacion: 'Hospitalización',
+      control: 'Control',
+    };
+    return types[type] || type;
+  }
+
+  private getStatusText(status: string): string {
+    const statuses = {
+      active: 'Activa',
+      closed: 'Cerrada',
+      archived: 'Archivada',
+    };
+    return statuses[status] || status;
+  }
+
   async getConsentById(
     medicalRecordId: string,
     consentId: string,

@@ -194,6 +194,154 @@ export class MailService {
     }
   }
 
+  /**
+   * Enviar correo con Historia Clínica completa
+   */
+  async sendMedicalRecordEmail(data: {
+    to: string;
+    clientName: string;
+    recordNumber: string;
+    pdfUrl: string;
+    companyName: string;
+  }): Promise<void> {
+    try {
+      const attachments = [];
+
+      // Descargar PDF desde S3
+      if (data.pdfUrl && data.pdfUrl.startsWith('http')) {
+        this.logger.log(`Descargando PDF de HC desde S3: ${data.pdfUrl}`);
+        const pdfBuffer = await this.storageService.downloadFile(data.pdfUrl);
+        attachments.push({
+          filename: `historia-clinica-${data.recordNumber}.pdf`,
+          content: pdfBuffer,
+        });
+      }
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: data.to,
+        subject: `Historia Clínica ${data.recordNumber} - ${data.companyName}`,
+        html: this.getMedicalRecordEmailTemplate(data),
+        attachments,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Medical record email sent to ${data.to}`);
+    } catch (error) {
+      this.logger.error(`Error sending medical record email to ${data.to}:`, error);
+      throw error;
+    }
+  }
+
+  private getMedicalRecordEmailTemplate(data: {
+    clientName: string;
+    recordNumber: string;
+    companyName: string;
+  }): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+          }
+          .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          .content {
+            padding: 30px;
+          }
+          .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+          }
+          .info-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+          }
+          h1 {
+            margin: 0;
+            font-size: 24px;
+          }
+          h2 {
+            color: #10b981;
+            font-size: 18px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📋 Historia Clínica</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px;">${data.companyName}</p>
+          </div>
+          <div class="content">
+            <h2>Estimado/a ${data.clientName},</h2>
+            <p>Adjunto encontrará su Historia Clínica completa con toda la información recopilada durante su atención médica.</p>
+            
+            <div class="info-box">
+              <strong>Número de Historia Clínica:</strong> ${data.recordNumber}<br>
+              <strong>Fecha de envío:</strong> ${new Date().toLocaleDateString('es-CO', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
+
+            <p><strong>Contenido del documento:</strong></p>
+            <ul>
+              <li>Información general del paciente</li>
+              <li>Anamnesis (motivo de consulta, antecedentes)</li>
+              <li>Examen físico y signos vitales</li>
+              <li>Diagnósticos</li>
+              <li>Evoluciones y notas médicas</li>
+            </ul>
+
+            <p><strong>Importante:</strong></p>
+            <ul>
+              <li>Este documento es confidencial y de uso exclusivo del paciente</li>
+              <li>Conserve este documento para futuras consultas médicas</li>
+              <li>Si tiene alguna pregunta, no dude en contactarnos</li>
+            </ul>
+
+            <p>Gracias por confiar en nosotros para su atención médica.</p>
+          </div>
+          <div class="footer">
+            <p><strong>${data.companyName}</strong></p>
+            <p>Este es un correo automático, por favor no responder.</p>
+            <p style="margin-top: 10px; font-size: 11px;">
+              © ${new Date().getFullYear()} ${data.companyName}. Todos los derechos reservados.
+            </p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
   private getMedicalRecordConsentEmailTemplate(data: {
     clientName: string;
     consentNumber: string;

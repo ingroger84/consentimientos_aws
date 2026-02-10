@@ -453,6 +453,55 @@ export class MedicalRecordsController {
     }
   }
 
+  // ==================== ENDPOINTS PARA HC COMPLETA (PDF Y EMAIL) ====================
+
+  @Get(':id/pdf')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.PREVIEW_MEDICAL_RECORDS)
+  async getMedicalRecordPdf(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Res() res: Response,
+  ) {
+    try {
+      const pdfBuffer = await this.medicalRecordsService.generateMedicalRecordPDF(
+        id,
+        req.user.tenantId,
+      );
+
+      const medicalRecord = await this.medicalRecordsService.findOne(
+        id,
+        req.user.tenantId,
+        req.user.sub,
+      );
+
+      const filename = `historia-clinica-${medicalRecord.recordNumber}.pdf`;
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length.toString());
+
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('Error al generar PDF de HC:', error);
+      return res.status(500).json({ message: 'Error al generar el PDF' });
+    }
+  }
+
+  @Post(':id/send-email')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.SEND_EMAIL_MEDICAL_RECORDS)
+  async sendMedicalRecordEmail(
+    @Param('id') id: string,
+    @Request() req: any,
+  ) {
+    await this.medicalRecordsService.sendMedicalRecordEmail(
+      id,
+      req.user.tenantId,
+    );
+    return { message: 'Historia clínica enviada por email exitosamente' };
+  }
+
   // ==================== ENDPOINTS DE ÓRDENES MÉDICAS ====================
 
   @Post(':id/orders')

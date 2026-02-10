@@ -111,24 +111,13 @@ class MedicalRecordsService {
 
   // Vista previa y envío de email para HC completa
   async getRecordPdfUrl(id: string): Promise<string> {
-    // Por ahora retornamos la URL del primer consentimiento
-    // En el futuro se podría generar un PDF completo de la HC
-    const consents = await this.getConsents(id);
-    if (consents.length === 0) {
-      throw new Error('No hay consentimientos generados para esta historia clínica');
-    }
-    // Retornar URL del PDF del primer consentimiento
-    return `/api/medical-records/${id}/consents/${consents[0].id}/pdf`;
+    // Retornar URL del endpoint que genera el PDF completo de la HC
+    return `/api/medical-records/${id}/pdf`;
   }
 
   async sendRecordEmail(id: string): Promise<void> {
-    // Por ahora enviamos el email del primer consentimiento
-    // En el futuro se podría enviar un email con la HC completa
-    const consents = await this.getConsents(id);
-    if (consents.length === 0) {
-      throw new Error('No hay consentimientos generados para esta historia clínica');
-    }
-    await this.resendConsentEmail(id, consents[0].id);
+    // Enviar la HC completa por email
+    await api.post(`/medical-records/${id}/send-email`);
   }
 }
 
