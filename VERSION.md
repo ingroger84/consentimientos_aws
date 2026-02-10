@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 33.0.1
+## Versión Actual: 34.0.0
 **Fecha:** 2026-02-09
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,19 +18,13 @@
 
 ## Historial de Versiones
 
+### 34.0.0 - 2026-02-09 [MAJOR]
+- Backend: 1 archivo(s) modificado(s)
+
 ### 33.0.1 - 2026-02-09 [PATCH]
 - Backend: 3 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 3 archivo(s) modificado(s)
-
-### 33.0.0 - 2026-02-09 [MAJOR]
-**Implementación Botones Vista Previa y Email en HC**
-- Backend: 3 archivos modificados (service, controller, mail)
-- Frontend: 2 archivos modificados (service, page)
-- Documentación: 3 archivos creados
-- Funcionalidad: Botones muestran/envían HC completa (no consentimientos)
-- Permisos: PREVIEW_MEDICAL_RECORDS, SEND_EMAIL_MEDICAL_RECORDS
-- Estado: ✅ DESPLEGADO EN PRODUCCIÓN
 
 ---
 

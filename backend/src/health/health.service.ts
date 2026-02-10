@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { getVersion } from '../config/version';
 import * as os from 'os';
 
 @Injectable()
@@ -82,7 +83,7 @@ export class HealthService {
           load: cpuUsage.map(load => load.toFixed(2)),
         },
       },
-      version: process.env.APP_VERSION || '19.0.0',
+      version: getVersion(),
     };
   }
 
