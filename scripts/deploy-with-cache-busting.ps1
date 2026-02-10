@@ -1,5 +1,5 @@
-# Script de Despliegue con Cache Busting Automático
-# Versión: 2.0
+# Script de Despliegue con Cache Busting Automatico
+# Version: 2.0
 # Fecha: 2026-02-09
 
 param(
@@ -12,40 +12,40 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "╔════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║  DESPLIEGUE CON CACHE BUSTING AUTOMÁTICO  ║" -ForegroundColor Cyan
-Write-Host "╚════════════════════════════════════════════╝" -ForegroundColor Cyan
+Write-Host "================================================" -ForegroundColor Cyan
+Write-Host "  DESPLIEGUE CON CACHE BUSTING AUTOMATICO" -ForegroundColor Cyan
+Write-Host "================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Función para mostrar mensajes
+# Funcion para mostrar mensajes
 function Write-Step {
     param([string]$Message)
-    Write-Host "▶ $Message" -ForegroundColor Yellow
+    Write-Host "> $Message" -ForegroundColor Yellow
 }
 
 function Write-Success {
     param([string]$Message)
-    Write-Host "✓ $Message" -ForegroundColor Green
+    Write-Host "[OK] $Message" -ForegroundColor Green
 }
 
 function Write-Error {
     param([string]$Message)
-    Write-Host "✗ $Message" -ForegroundColor Red
+    Write-Host "[ERROR] $Message" -ForegroundColor Red
 }
 
 # 1. Verificar archivos necesarios
 Write-Step "Verificando archivos necesarios..."
 if (-not (Test-Path $KeyFile)) {
-    Write-Error "No se encontró el archivo de clave: $KeyFile"
+    Write-Error "No se encontro el archivo de clave: $KeyFile"
     exit 1
 }
 Write-Success "Archivos verificados"
 
-# 2. Leer versión actual
-Write-Step "Leyendo versión actual..."
+# 2. Leer version actual
+Write-Step "Leyendo version actual..."
 $packageJson = Get-Content "frontend/package.json" | ConvertFrom-Json
 $version = $packageJson.version
-Write-Success "Versión: $version"
+Write-Success "Version: $version"
 
 # 3. Compilar Backend
 Write-Step "Compilando backend..."
@@ -58,11 +58,10 @@ try {
     Pop-Location
 }
 
-# 4. Compilar Frontend (con actualización automática de version.json)
+# 4. Compilar Frontend (con actualizacion automatica de version.json)
 Write-Step "Compilando frontend..."
 Push-Location frontend
 try {
-    # El script update-version.js se ejecuta automáticamente en el build
     npm run build
     if ($LASTEXITCODE -ne 0) { throw "Error al compilar frontend" }
     Write-Success "Frontend compilado"
@@ -70,17 +69,17 @@ try {
     Pop-Location
 }
 
-# 5. Verificar que version.json se generó correctamente
+# 5. Verificar que version.json se genero correctamente
 Write-Step "Verificando version.json..."
 $versionJsonPath = "frontend/dist/version.json"
 if (Test-Path $versionJsonPath) {
     $versionJson = Get-Content $versionJsonPath | ConvertFrom-Json
-    Write-Host "  Versión: $($versionJson.version)" -ForegroundColor Cyan
+    Write-Host "  Version: $($versionJson.version)" -ForegroundColor Cyan
     Write-Host "  Build Hash: $($versionJson.buildHash)" -ForegroundColor Cyan
     Write-Host "  Fecha: $($versionJson.buildDate)" -ForegroundColor Cyan
     Write-Success "version.json generado correctamente"
 } else {
-    Write-Error "No se generó version.json"
+    Write-Error "No se genero version.json"
     exit 1
 }
 
@@ -114,20 +113,20 @@ Write-Host "  Copiando archivos nuevos..." -ForegroundColor Gray
 scp -i $KeyFile -r frontend/dist/* "$User@${Server}:/var/www/consentimientos/frontend/"
 Write-Success "Frontend desplegado"
 
-# 9. Actualizar configuración de Nginx (si existe)
-Write-Step "Verificando configuración de Nginx..."
+# 9. Actualizar configuracion de Nginx (si existe)
+Write-Step "Verificando configuracion de Nginx..."
 if (Test-Path "nginx-cache-control.conf") {
-    Write-Host "  Copiando configuración optimizada de Nginx..." -ForegroundColor Gray
+    Write-Host "  Copiando configuracion optimizada de Nginx..." -ForegroundColor Gray
     scp -i $KeyFile nginx-cache-control.conf "$User@${Server}:/tmp/nginx-cache-control.conf"
     ssh -i $KeyFile "$User@$Server" @"
         if [ -f /tmp/nginx-cache-control.conf ]; then
-            echo 'Configuración de Nginx disponible en /tmp/nginx-cache-control.conf'
+            echo 'Configuracion de Nginx disponible en /tmp/nginx-cache-control.conf'
             echo 'Para aplicarla, ejecuta:'
             echo '  sudo cp /tmp/nginx-cache-control.conf /etc/nginx/sites-available/consentimientos'
             echo '  sudo nginx -t && sudo systemctl reload nginx'
         fi
 "@
-    Write-Success "Configuración de Nginx copiada"
+    Write-Success "Configuracion de Nginx copiada"
 }
 
 # 10. Reiniciar PM2
@@ -156,19 +155,19 @@ Write-Success "Despliegue completado"
 
 # 13. Resumen final
 Write-Host ""
-Write-Host "╔════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║         DESPLIEGUE COMPLETADO              ║" -ForegroundColor Green
-Write-Host "╚════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Green
+Write-Host "         DESPLIEGUE COMPLETADO" -ForegroundColor Green
+Write-Host "================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Versión desplegada: $version" -ForegroundColor Cyan
+Write-Host "Version desplegada: $version" -ForegroundColor Cyan
 Write-Host "Servidor: $Server" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "URLs de acceso:" -ForegroundColor Yellow
-Write-Host "  • Aplicación: https://archivoenlinea.com" -ForegroundColor White
-Write-Host "  • Super Admin: https://admin.archivoenlinea.com" -ForegroundColor White
-Write-Host "  • Version JSON: https://archivoenlinea.com/version.json" -ForegroundColor White
+Write-Host "  - Aplicacion: https://archivoenlinea.com" -ForegroundColor White
+Write-Host "  - Super Admin: https://admin.archivoenlinea.com" -ForegroundColor White
+Write-Host "  - Version JSON: https://archivoenlinea.com/version.json" -ForegroundColor White
 Write-Host ""
 Write-Host "IMPORTANTE:" -ForegroundColor Yellow
-Write-Host "  Los usuarios verán una notificación automática para actualizar." -ForegroundColor White
-Write-Host "  El sistema detectará la nueva versión en ~5 minutos." -ForegroundColor White
+Write-Host "  Los usuarios veran una notificacion automatica para actualizar." -ForegroundColor White
+Write-Host "  El sistema detectara la nueva version en ~5 minutos." -ForegroundColor White
 Write-Host ""

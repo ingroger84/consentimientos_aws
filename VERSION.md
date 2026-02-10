@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 37.1.0
+## Versión Actual: 37.1.1
 **Fecha:** 2026-02-09
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,14 +18,13 @@
 
 ## Historial de Versiones
 
+### 37.1.1 - 2026-02-09 [PATCH]
+- Frontend: 1 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
+
 ### 37.1.0 - 2026-02-09 [MINOR]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 37.0.0 - 2026-02-09 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 9 archivo(s) modificado(s)
-- Documentación: 3 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
 
 ---
 
