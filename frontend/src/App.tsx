@@ -7,6 +7,7 @@ import PrivateRoute from './components/PrivateRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ToastContainer from './components/ui/ToastContainer';
 import ConfirmDialogContainer from './components/ui/ConfirmDialogContainer';
+import { UpdateNotification } from './components/UpdateNotification';
 
 // Eager loading para páginas críticas (auth y landing)
 import LoginPage from './pages/LoginPage';
@@ -128,6 +129,7 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <UpdateNotification />
         <Suspense fallback={<LoadingSpinner fullScreen />}>
           <Routes>
             {/* Ruta raíz: Landing si es dominio principal, Login si es subdominio */}

@@ -1,9 +1,25 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { execSync } from 'child_process';
+
+// Plugin personalizado para actualizar version.json antes del build
+function versionPlugin() {
+  return {
+    name: 'version-plugin',
+    buildStart() {
+      try {
+        execSync('node scripts/update-version.js', { stdio: 'inherit' });
+      } catch (error) {
+        console.warn('⚠️ No se pudo actualizar version.json:', error);
+      }
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
+    versionPlugin(),
     react({
       // Optimizacion de React en produccion
       babel: {
