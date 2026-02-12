@@ -16,12 +16,72 @@
     <!-- Theme Color -->
     <meta name="theme-color" content="#3B82F6" />
     
-    <!-- Cache Control -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <!-- Cache Control Agresivo -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
+    <!-- Build Timestamp - Forzar recarga en cada build -->
+    <meta name="build-timestamp" content="BUILD_TIMESTAMP_PLACEHOLDER" />
+    <meta name="app-version" content="APP_VERSION_PLACEHOLDER" />
+    
     <title>Sistema de Consentimientos Digitales</title>
+    
+    <!-- Script de detección de caché antiguo -->
+    <script>
+      (function() {
+        const currentVersion = 'APP_VERSION_PLACEHOLDER';
+        const buildTimestamp = 'BUILD_TIMESTAMP_PLACEHOLDER';
+        const storedVersion = localStorage.getItem('app_version');
+        const storedTimestamp = localStorage.getItem('build_timestamp');
+        
+        // Si la versión o timestamp no coinciden, limpiar caché
+        if (storedVersion !== currentVersion || storedTimestamp !== buildTimestamp) {
+          console.log('🔄 Versión desactualizada detectada. Limpiando caché...');
+          
+          // Limpiar localStorage excepto datos de sesión
+          const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+          const storage = {};
+          keysToKeep.forEach(key => {
+            const value = localStorage.getItem(key);
+            if (value) storage[key] = value;
+          });
+          
+          localStorage.clear();
+          
+          keysToKeep.forEach(key => {
+            if (storage[key]) localStorage.setItem(key, storage[key]);
+          });
+          
+          // Guardar nueva versión
+          localStorage.setItem('app_version', currentVersion);
+          localStorage.setItem('build_timestamp', buildTimestamp);
+          
+          // Limpiar sessionStorage
+          sessionStorage.clear();
+          
+          // Limpiar Service Workers
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+              registrations.forEach(function(registration) {
+                registration.unregister();
+              });
+            });
+          }
+          
+          // Limpiar Cache API
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(name) {
+                caches.delete(name);
+              });
+            });
+          }
+          
+          console.log('✅ Caché limpiado. Nueva versión:', currentVersion);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -14,6 +14,14 @@ function versionPlugin() {
         console.warn('⚠️ No se pudo actualizar version.json:', error);
       }
     },
+    closeBundle() {
+      // Post-build: actualizar index.html con timestamp
+      try {
+        execSync('node scripts/post-build.js', { stdio: 'inherit' });
+      } catch (error) {
+        console.warn('⚠️ No se pudo ejecutar post-build:', error);
+      }
+    },
   };
 }
 

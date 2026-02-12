@@ -1,8 +1,9 @@
 /**
  * Script para actualizar version.json automáticamente durante el build
+ * También actualiza index.html con timestamp único
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,13 +24,14 @@ const version = versionMatch ? versionMatch[1] : packageJson.version;
 
 // Generar hash único basado en timestamp
 const buildHash = Date.now().toString(36);
+const buildTimestamp = Date.now().toString();
 
 // Crear version.json
 const versionInfo = {
   version,
   buildDate: new Date().toISOString().split('T')[0],
   buildHash,
-  buildTimestamp: Date.now(),
+  buildTimestamp,
 };
 
 // Escribir version.json en public
@@ -38,3 +40,17 @@ writeFileSync(versionJsonPath, JSON.stringify(versionInfo, null, 2));
 
 console.log('✅ version.json actualizado:');
 console.log(JSON.stringify(versionInfo, null, 2));
+
+// Actualizar index.html con timestamp y versión
+const indexHtmlPath = join(__dirname, '../index.html');
+let indexHtml = readFileSync(indexHtmlPath, 'utf-8');
+
+// Reemplazar placeholders
+indexHtml = indexHtml.replace(/BUILD_TIMESTAMP_PLACEHOLDER/g, buildTimestamp);
+indexHtml = indexHtml.replace(/APP_VERSION_PLACEHOLDER/g, version);
+
+// Guardar temporalmente para que Vite lo procese
+const tempIndexPath = join(__dirname, '../index.temp.html');
+writeFileSync(tempIndexPath, indexHtml);
+
+console.log('✅ index.html preparado con timestamp:', buildTimestamp);

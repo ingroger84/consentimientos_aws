@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Actualizacion v37.1.0 - FORZAR AHORA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        h1 { color: #2d3748; font-size: 32px; margin-bottom: 20px; }
+        .version { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 15px 30px; 
+            border-radius: 25px; 
+            font-size: 24px; 
+            font-weight: 700; 
+            display: inline-block; 
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .alert strong { display: block; margin-bottom: 10px; font-size: 18px; }
+        .button { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 20px 50px; 
+            border-radius: 12px; 
+            font-size: 20px; 
+            font-weight: 600; 
+            border: none; 
+            cursor: pointer; 
+            margin: 10px; 
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6); 
+        }
+        .button:active {
+            transform: translateY(-1px);
+        }
+        .instructions { 
+            background: #f7fafc; 
+            padding: 25px; 
+            border-radius: 12px; 
+            margin-top: 30px; 
+            text-align: left; 
+        }
+        .instructions h3 { color: #2d3748; margin-bottom: 15px; font-size: 20px; }
+        .instructions p { color: #4a5568; line-height: 1.8; margin-bottom: 12px; font-size: 16px; }
+        .instructions ol { margin-left: 20px; color: #4a5568; line-height: 1.8; }
+        .instructions li { margin-bottom: 10px; }
+        .kbd { 
+            background: #2d3748; 
+            color: white; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            font-family: monospace; 
+            font-size: 14px; 
+            margin: 0 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        #status { 
+            margin-top: 30px; 
+            padding: 20px; 
+            border-radius: 12px; 
+            display: none;
+            font-size: 18px;
+        }
+        .success { 
+            background: #f0fff4; 
+            border: 2px solid #48bb78; 
+            color: #22543d; 
+        }
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="version">v37.1.0</div>
+        <h1>🔄 Actualizacion Forzada Requerida</h1>
+        
+        <div class="alert">
+            <strong>⚠️ Problema Detectado:</strong>
+            Tu navegador esta mostrando la version 32.0.1 (antigua) debido a cache agresivo.
+            <br><br>
+            <strong>Solucion:</strong> Haz clic en el boton para forzar la actualizacion a v37.1.0.
+        </div>
+
+        <button class="button" onclick="forceUpdate()">
+            🚀 FORZAR ACTUALIZACION AHORA
+        </button>
+
+        <div id="status"></div>
+
+        <div class="instructions">
+            <h3>📝 Que hace este proceso:</h3>
+            <ol>
+                <li>Limpia completamente el cache del navegador</li>
+                <li>Elimina todos los archivos antiguos almacenados</li>
+                <li>Descarga los archivos nuevos con version 37.1.0</li>
+                <li>Recarga la aplicacion con la version correcta</li>
+            </ol>
+            <br>
+            <h3>🔧 Si el boton no funciona:</h3>
+            <p><strong>Windows/Linux:</strong></p>
+            <ol>
+                <li>Presiona <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">Delete</span></li>
+                <li>Selecciona "Imagenes y archivos en cache"</li>
+                <li>Selecciona "Todo el tiempo"</li>
+                <li>Haz clic en "Borrar datos"</li>
+                <li>Cierra TODAS las pestanas de archivoenlinea.com</li>
+                <li>Abre una nueva ventana de incognito</li>
+                <li>Accede a: <strong>https://archivoenlinea.com</strong></li>
+            </ol>
+            <br>
+            <p><strong>Mac:</strong></p>
+            <ol>
+                <li>Presiona <span class="kbd">Cmd</span> + <span class="kbd">Shift</span> + <span class="kbd">Delete</span></li>
+                <li>Sigue los mismos pasos que Windows</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let progressInterval;
+        
+        function forceUpdate() {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.className = 'success';
+            status.innerHTML = '<strong>✅ Limpiando cache profundo...</strong><div class="progress"><div class="progress-bar" id="progressBar"></div></div>';
+
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            
+            progressInterval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                
+                if (progress === 30) {
+                    status.innerHTML = '<strong>🗑️ Eliminando archivos antiguos...</strong><div class="progress"><div class="progress-bar" style="width: 30%"></div></div>';
+                } else if (progress === 60) {
+                    status.innerHTML = '<strong>🔄 Limpiando Service Workers...</strong><div class="progress"><div class="progress-bar" style="width: 60%"></div></div>';
+                } else if (progress === 90) {
+                    status.innerHTML = '<strong>✨ Preparando recarga...</strong><div class="progress"><div class="progress-bar" style="width: 90%"></div></div>';
+                }
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    status.innerHTML = '<strong>✅ Recargando con version 37.1.0...</strong><div class="progress"><div class="progress-bar" style="width: 100%"></div></div>';
+                }
+            }, 200);
+
+            // Paso 1: Limpiar localStorage (excepto datos importantes)
+            const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+            const storage = {};
+            keysToKeep.forEach(key => {
+                const value = localStorage.getItem(key);
+                if (value) storage[key] = value;
+            });
+            localStorage.clear();
+            keysToKeep.forEach(key => {
+                if (storage[key]) localStorage.setItem(key, storage[key]);
+            });
+
+            // Paso 2: Limpiar sessionStorage
+            sessionStorage.clear();
+            
+            // Paso 3: Limpiar cookies
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+
+            // Paso 4: Limpiar Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+
+            // Paso 5: Limpiar Cache API
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+
+            // Paso 6: Recargar con timestamp y parametros especiales
+            setTimeout(() => {
+                const timestamp = Date.now();
+                // Usar replace para evitar que el usuario pueda volver atras
+                window.location.replace('/?v=' + timestamp + '&force=true&clear=all');
+            }, 2500);
+        }
+
+        // Auto-limpiar al cargar esta pagina
+        window.addEventListener('load', function() {
+            // Limpiar cache silenciosamente
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Limpiar version antigua del localStorage
+            localStorage.removeItem('app_version');
+            localStorage.removeItem('cacheVersion');
+        });
+    </script>
+</body>
+</html>

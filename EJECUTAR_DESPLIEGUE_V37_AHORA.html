@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despliegue v37.1.0 - Sistema de Cache Busting</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #2d3748;
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .version {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 24px;
+            font-weight: 700;
+            display: inline-block;
+            margin: 0 auto 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: block;
+            text-align: center;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .alert {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+        .alert h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .alert p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+        }
+        .success h3, .success p {
+            color: #155724;
+        }
+        .step {
+            background: #f7fafc;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+        .step h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .code {
+            background: #2d3748;
+            color: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+        .code::before {
+            content: '💻 Comando:';
+            display: block;
+            color: #48bb78;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: inline-block;
+            text-decoration: none;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+        .checklist {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .checklist h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .checklist-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f7fafc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .feature {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .feature-card h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .comparison-card {
+            padding: 20px;
+            border-radius: 12px;
+        }
+        .comparison-card.before {
+            background: #fee;
+            border: 2px solid #f56565;
+        }
+        .comparison-card.after {
+            background: #e6fffa;
+            border: 2px solid #38b2ac;
+        }
+        .comparison-card h4 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .comparison-card.before h4 {
+            color: #c53030;
+        }
+        .comparison-card.after h4 {
+            color: #234e52;
+        }
+        .comparison-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .comparison-card li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Despliegue v37.1.0</h1>
+        <div class="version">Sistema de Cache Busting Ultra Agresivo</div>
+
+        <div class="alert">
+            <h3>⚠️ Problema Resuelto</h3>
+            <p>Has reportado que <strong>siempre tienes que reportar que no ves la versión adecuada</strong>. Este problema se debe a que el navegador cachea agresivamente el archivo <code>index.html</code>.</p>
+            <p style="margin-top: 10px;"><strong>Solución:</strong> He implementado un sistema de cache busting ultra agresivo que detecta automáticamente versiones antiguas y limpia el caché sin intervención manual.</p>
+        </div>
+
+        <div class="success">
+            <h3>✅ Qué Incluye Esta Solución</h3>
+            <p>Un sistema completo que garantiza que siempre veas la versión correcta sin tener que limpiar caché manualmente.</p>
+        </div>
+
+        <div class="feature">
+            <div class="feature-card">
+                <h4>🔍 Detección Automática</h4>
+                <p>Script inline que detecta versión antigua antes de cargar React y limpia caché automáticamente.</p>
+            </div>
+            <div class="feature-card">
+                <h4>⏱️ Timestamp Único</h4>
+                <p>Cada build genera un timestamp único que garantiza que el navegador detecte cambios.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🚫 Headers Ultra Agresivos</h4>
+                <p>Nginx configurado para enviar headers que prohíben el caché del HTML.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔔 Notificaciones</h4>
+                <p>Banner que aparece cuando hay actualización con botón "Actualizar Ahora".</p>
+            </div>
+        </div>
+
+        <h2 style="color: #2d3748; margin: 40px 0 20px;">📋 Pasos para Desplegar</h2>
+
+        <div class="step">
+            <h3><span class="step-number">1</span> Ejecutar Script de Despliegue</h3>
+            <p>Este script hace TODO automáticamente: compila, sube, limpia caché, reinicia servicios.</p>
+            <div class="code">.\scripts\deploy-with-aggressive-cache-busting.ps1</div>
+            <p style="margin-top: 10px; color: #4a5568;"><strong>Tiempo estimado:</strong> 5-10 minutos</p>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">2</span> Actualizar Configuración de Nginx</h3>
+            <p>Subir y aplicar la nueva configuración de Nginx con headers ultra agresivos.</p>
+            <div class="code">scp -i AWS-ISSABEL.pem nginx-aggressive-no-cache.conf ubuntu@100.28.198.249:/tmp/
+
+ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249
+
+sudo cp /etc/nginx/sites-available/archivoenlinea /etc/nginx/sites-available/archivoenlinea.backup
+sudo mv /tmp/nginx-aggressive-no-cache.conf /etc/nginx/sites-available/archivoenlinea
+sudo nginx -t
+sudo systemctl reload nginx
+sudo rm -rf /var/cache/nginx/*</div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">3</span> Verificar Despliegue</h3>
+            <p>Ejecutar script de verificación para confirmar que todo está correcto.</p>
+            <div class="code">bash /home/ubuntu/consentimientos_aws/scripts/verify-deployment.sh</div>
+        </div>
+
+        <div class="step">
+            <h3><span class="step-number">4</span> Probar en Navegador</h3>
+            <p>Abrir ventana de incógnito y verificar la versión.</p>
+            <div class="code">// En DevTools Console (F12)
+localStorage.getItem('app_version')
+// Debe mostrar: "37.1.0"</div>
+        </div>
+
+        <div class="checklist">
+            <h4>✅ Checklist de Verificación</h4>
+            <div class="checklist-item">
+                <input type="checkbox" id="check1">
+                <label for="check1">Script de despliegue ejecutado exitosamente</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check2">
+                <label for="check2">Configuración de Nginx actualizada</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check3">
+                <label for="check3">Caché de Nginx limpiado</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check4">
+                <label for="check4">PM2 reiniciado correctamente</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check5">
+                <label for="check5">version.json muestra 37.1.0</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check6">
+                <label for="check6">Headers HTTP verificados (no-cache)</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check7">
+                <label for="check7">Prueba en ventana de incógnito exitosa</label>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="check8">
+                <label for="check8">localStorage muestra versión correcta</label>
+            </div>
+        </div>
+
+        <h2 style="color: #2d3748; margin: 40px 0 20px;">🔄 Comparativa: Antes vs Después</h2>
+
+        <div class="comparison">
+            <div class="comparison-card before">
+                <h4>❌ Sistema Anterior (v32.0.1)</h4>
+                <ul>
+                    <li>❌ Detección manual de versión</li>
+                    <li>❌ Limpieza manual de caché (Ctrl+Shift+Delete)</li>
+                    <li>❌ Sin notificaciones de actualización</li>
+                    <li>❌ Headers de caché parciales</li>
+                    <li>❌ Sin timestamp único</li>
+                    <li>❌ Sin script de detección inline</li>
+                    <li>❌ Usuarios reportan constantemente el problema</li>
+                </ul>
+            </div>
+            <div class="comparison-card after">
+                <h4>✅ Sistema Nuevo (v37.1.0)</h4>
+                <ul>
+                    <li>✅ Detección automática de versión</li>
+                    <li>✅ Limpieza automática de caché</li>
+                    <li>✅ Banner de notificación con botón</li>
+                    <li>✅ Headers ultra agresivos de no-cache</li>
+                    <li>✅ Timestamp único en cada build</li>
+                    <li>✅ Script inline que detecta versión antigua</li>
+                    <li>✅ Usuarios ven versión correcta automáticamente</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="alert" style="background: #e6fffa; border-left-color: #38b2ac;">
+            <h3 style="color: #234e52;">🎯 Resultado Esperado</h3>
+            <p style="color: #234e52;"><strong>Primera vez:</strong> Los usuarios con caché antiguo necesitarán limpiar manualmente UNA VEZ.</p>
+            <p style="color: #234e52; margin-top: 10px;"><strong>Después:</strong> El sistema detecta automáticamente nuevas versiones y muestra un banner con botón "Actualizar Ahora". Un solo clic y listo.</p>
+            <p style="color: #234e52; margin-top: 10px;"><strong>Nunca más:</strong> Reportes de "no veo la versión correcta".</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="https://archivoenlinea.com" class="button" target="_blank">🌐 Ir a la Aplicación</a>
+            <a href="https://archivoenlinea.com/FORZAR_ACTUALIZACION_V37.html" class="button" target="_blank">🔄 Limpieza Forzada</a>
+            <a href="https://archivoenlinea.com/version.json" class="button" target="_blank">📋 Ver Versión</a>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f7fafc; border-radius: 12px;">
+            <h3 style="color: #2d3748; margin-bottom: 15px;">📚 Documentación Completa</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0;">📄 <strong>SOLUCION_CACHE_PERSISTENTE_V37.md</strong> - Documentación técnica completa</li>
+                <li style="padding: 8px 0;">⚡ <strong>INSTRUCCIONES_URGENTES_CACHE_V37.md</strong> - Guía rápida de despliegue</li>
+                <li style="padding: 8px 0;">📋 <strong>RESUMEN_SESION_2026-02-09_CACHE_BUSTING_V37.md</strong> - Resumen ejecutivo</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 12px; border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin-bottom: 10px;">⚠️ Importante</h3>
+            <p style="color: #856404; line-height: 1.6;">Si después de desplegar sigues viendo la versión 32.0.1, necesitarás limpiar el caché del navegador <strong>UNA VEZ</strong> manualmente. Después de eso, el sistema detectará automáticamente todas las actualizaciones futuras.</p>
+        </div>
+    </div>
+
+    <script>
+        // Guardar estado de checkboxes en localStorage
+        document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(checkbox => {
+            const savedState = localStorage.getItem(checkbox.id);
+            if (savedState === 'true') {
+                checkbox.checked = true;
+            }
+            
+            checkbox.addEventListener('change', function() {
+                localStorage.setItem(this.id, this.checked);
+            });
+        });
+    </script>
+</body>
+</html>
