@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    
+    <!-- Viewport optimizado para móviles -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="DatAgree" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3B82F6" />
+    
+    <!-- Cache Control Agresivo -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <!-- Build Timestamp - Forzar recarga en cada build -->
+    <meta name="build-timestamp" content="1770967730945" />
+    <meta name="app-version" content="38.0.0" />
+    
+    <title>Sistema de Consentimientos Digitales</title>
+    
+    <!-- Script de detección de caché antiguo -->
+    <script>
+      (function() {
+        const currentVersion = '38.0.0';
+        const buildTimestamp = '1770967730945';
+        const storedVersion = localStorage.getItem('app_version');
+        const storedTimestamp = localStorage.getItem('build_timestamp');
+        
+        // Si la versión o timestamp no coinciden, limpiar caché
+        if (storedVersion !== currentVersion || storedTimestamp !== buildTimestamp) {
+          console.log('🔄 Versión desactualizada detectada. Limpiando caché...');
+          
+          // Limpiar localStorage excepto datos de sesión
+          const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+          const storage = {};
+          keysToKeep.forEach(key => {
+            const value = localStorage.getItem(key);
+            if (value) storage[key] = value;
+          });
+          
+          localStorage.clear();
+          
+          keysToKeep.forEach(key => {
+            if (storage[key]) localStorage.setItem(key, storage[key]);
+          });
+          
+          // Guardar nueva versión
+          localStorage.setItem('app_version', currentVersion);
+          localStorage.setItem('build_timestamp', buildTimestamp);
+          
+          // Limpiar sessionStorage
+          sessionStorage.clear();
+          
+          // Limpiar Service Workers
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+              registrations.forEach(function(registration) {
+                registration.unregister();
+              });
+            });
+          }
+          
+          // Limpiar Cache API
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(name) {
+                caches.delete(name);
+              });
+            });
+          }
+          
+          console.log('✅ Caché limpiado. Nueva versión:', currentVersion);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

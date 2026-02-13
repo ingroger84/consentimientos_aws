@@ -1,6 +1,6 @@
 {
   "name": "consentimientos-backend",
-  "version": "37.2.1",
+  "version": "38.0.0",
   "description": "API REST para Sistema de Consentimientos Digitales",
   "author": "",
   "private": true,
@@ -25,15 +25,16 @@
     "reset:factory": "ts-node reset-to-factory.ts"
   },
   "dependencies": {
-    "@nestjs/common": "^10.3.0",
+    "@nestjs/common": "^11.1.13",
     "@nestjs/config": "^3.1.1",
-    "@nestjs/core": "^10.3.0",
+    "@nestjs/core": "^11.1.13",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/passport": "^10.0.3",
-    "@nestjs/platform-express": "^10.3.0",
+    "@nestjs/platform-express": "^11.1.13",
     "@nestjs/schedule": "^6.1.0",
     "@nestjs/serve-static": "^4.0.2",
+    "@nestjs/swagger": "^11.2.6",
     "@nestjs/throttler": "^5.1.1",
     "@nestjs/typeorm": "^10.0.1",
     "@types/compression": "^1.8.1",
@@ -54,6 +55,7 @@
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.19"
   },
   "devDependencies": {

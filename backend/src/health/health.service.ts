@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tenant } from '../tenants/entities/tenant.entity';
-import { getVersion } from '../config/version';
+import { getVersionInfo, getChangelog, getAllVersions } from '../config/version';
 import * as os from 'os';
 
 @Injectable()
@@ -38,6 +38,7 @@ export class HealthService {
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
+    const versionInfo = getVersionInfo();
     
     return {
       status: dbStatus ? 'operational' : 'degraded',
@@ -83,7 +84,23 @@ export class HealthService {
           load: cpuUsage.map(load => load.toFixed(2)),
         },
       },
-      version: getVersion(),
+      version: versionInfo,
+    };
+  }
+
+  /**
+   * Obtiene información completa de la versión de la aplicación
+   */
+  getVersionInfo() {
+    const versionInfo = getVersionInfo();
+    const changelog = getChangelog();
+    const allVersions = getAllVersions();
+    
+    return {
+      current: versionInfo,
+      changelog: changelog,
+      availableVersions: allVersions,
+      releaseNotes: changelog[versionInfo.version] || null,
     };
   }
 
