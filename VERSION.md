@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 38.0.0
+## Versión Actual: 38.1.0
 **Fecha:** 2026-02-13
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
+### 38.1.0 - 2026-02-13 [MINOR]
+- Backend: 5 archivo(s) modificado(s)
+- Documentación: 3 archivo(s) modificado(s)
+
 ### 38.0.0 - 2026-02-13 [MAJOR]
 - Backend: 7 archivo(s) modificado(s)
 - Frontend: 4 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
-
-### 37.2.1 - 2026-02-11 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
 
 ---
 

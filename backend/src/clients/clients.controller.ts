@@ -13,6 +13,7 @@ import {
   Inject,
   forwardRef,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -24,6 +25,8 @@ import { PERMISSIONS } from '../auth/constants/permissions';
 import { TenantSlug } from '../common/decorators/tenant-slug.decorator';
 import { TenantsService } from '../tenants/tenants.service';
 
+@ApiTags('clients')
+@ApiBearerAuth('JWT-auth')
 @Controller('clients')
 @UseGuards(JwtAuthGuard)
 export class ClientsController {
