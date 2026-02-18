@@ -2,9 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { APP_GUARD } from '@nestjs/core';
-import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
@@ -51,6 +49,7 @@ import { Diagnosis } from './medical-records/entities/diagnosis.entity';
 import { Evolution } from './medical-records/entities/evolution.entity';
 import { MedicalRecordAudit } from './medical-records/entities/medical-record-audit.entity';
 import { MedicalRecordConsent } from './medical-records/entities/medical-record-consent.entity';
+import { Admission } from './medical-records/entities/admission.entity';
 import { MRConsentTemplate } from './medical-record-consent-templates/entities/mr-consent-template.entity';
 import { UserSession } from './auth/entities/user-session.entity';
 import { PlanPricing } from './plans/entities/plan-pricing.entity';
@@ -69,45 +68,50 @@ import { SessionGuard } from './auth/guards/session.guard';
     // Database
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [
-          Role,
-          User,
-          Branch,
-          Service,
-          Question,
-          Consent,
-          Answer,
-          AppSettings,
-          Tenant,
-          Payment,
-          Invoice,
-          TaxConfig,
-          PaymentReminder,
-          BillingHistory,
-          Notification,
-          Client,
-          ConsentTemplate,
-          UserSession,
-          MedicalRecord,
-          Anamnesis,
-          PhysicalExam,
-          Diagnosis,
-          Evolution,
-          MedicalRecordAudit,
-          MedicalRecordConsent,
-          MRConsentTemplate,
-          PlanPricing,
-        ],
-        synchronize: configService.get('NODE_ENV') === 'development',
-        logging: configService.get('NODE_ENV') === 'development',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbSsl = configService.get('DB_SSL') === 'true';
+        return {
+          type: 'postgres',
+          host: configService.get('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username: configService.get('DB_USERNAME'),
+          password: configService.get('DB_PASSWORD'),
+          database: configService.get('DB_DATABASE'),
+          ssl: dbSsl ? { rejectUnauthorized: false } : false,
+          entities: [
+            Role,
+            User,
+            Branch,
+            Service,
+            Question,
+            Consent,
+            Answer,
+            AppSettings,
+            Tenant,
+            Payment,
+            Invoice,
+            TaxConfig,
+            PaymentReminder,
+            BillingHistory,
+            Notification,
+            Client,
+            ConsentTemplate,
+            UserSession,
+            MedicalRecord,
+            Anamnesis,
+            PhysicalExam,
+            Diagnosis,
+            Evolution,
+            MedicalRecordAudit,
+            MedicalRecordConsent,
+            Admission,
+            MRConsentTemplate,
+            PlanPricing,
+          ],
+          synchronize: configService.get('NODE_ENV') === 'development',
+          logging: configService.get('NODE_ENV') === 'development',
+        };
+      },
       inject: [ConfigService],
     }),
 
@@ -148,12 +152,6 @@ import { SessionGuard } from './auth/guards/session.guard';
     MedicalRecordsModule,
     MRConsentTemplatesModule,
     HealthModule,
-
-    // Serve static files
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-    }),
   ],
   providers: [
     // Registrar TenantGuard globalmente

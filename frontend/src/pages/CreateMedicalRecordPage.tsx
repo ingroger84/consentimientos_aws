@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft } from 'lucide-react';
 import { medicalRecordsService } from '../services/medical-records.service';
+import { admissionsService } from '../services/admissions.service';
 import { branchesService, Branch } from '../services/branches.service';
 import { CreateMedicalRecordDto } from '../types/medical-record';
 import { Client, ClientDocumentType } from '../types/client';
 import ClientSearchForm from '../components/consents/ClientSearchForm';
+import AdmissionTypeModal from '../components/AdmissionTypeModal';
 import { useToast } from '../hooks/useToast';
 
 export default function CreateMedicalRecordPage() {
@@ -16,6 +18,8 @@ export default function CreateMedicalRecordPage() {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [existingHC, setExistingHC] = useState<any>(null);
+  const [showAdmissionModal, setShowAdmissionModal] = useState(false);
   const [clientData, setClientData] = useState({
     clientName: '',
     clientId: '',
@@ -46,8 +50,24 @@ export default function CreateMedicalRecordPage() {
     }
   };
 
-  const handleClientSelected = (client: Client | null) => {
+  const handleClientSelected = async (client: Client | null) => {
     setSelectedClient(client);
+    
+    // Si se seleccionó un cliente, verificar si ya tiene HC
+    if (client) {
+      try {
+        const existingRecords = await medicalRecordsService.getByClient(client.id);
+        
+        if (existingRecords.length > 0) {
+          // Cliente tiene HC existente, mostrar modal de admisión
+          const hcWithAdmissions = await medicalRecordsService.getById(existingRecords[0].id);
+          setExistingHC(hcWithAdmissions);
+          setShowAdmissionModal(true);
+        }
+      } catch (error) {
+        console.error('Error al verificar HC existente:', error);
+      }
+    }
   };
 
   const handleClientDataChange = (data: {
@@ -58,6 +78,32 @@ export default function CreateMedicalRecordPage() {
     documentType: ClientDocumentType;
   }) => {
     setClientData(data);
+  };
+
+  const handleAdmissionTypeSelect = async (admissionType: string, reason: string) => {
+    if (!existingHC) return;
+
+    try {
+      setLoading(true);
+      setShowAdmissionModal(false);
+
+      // Crear nueva admisión para la HC existente
+      const admission = await admissionsService.create({
+        medicalRecordId: existingHC.id,
+        admissionType,
+        reason,
+        admissionDate: new Date().toISOString(),
+      });
+
+      toast.success('Admisión creada', 'Nueva admisión creada exitosamente');
+      
+      // Navegar a la HC con la nueva admisión
+      navigate(`/medical-records/${existingHC.id}?admissionId=${admission.id}`);
+    } catch (error: any) {
+      toast.error('Error al crear admisión', error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onSubmit = async (data: CreateMedicalRecordDto) => {
@@ -209,6 +255,20 @@ export default function CreateMedicalRecordPage() {
           </div>
         </form>
       </div>
+
+      {/* Modal de Tipo de Admisión */}
+      {existingHC && (
+        <AdmissionTypeModal
+          isOpen={showAdmissionModal}
+          onClose={() => {
+            setShowAdmissionModal(false);
+            setExistingHC(null);
+            setSelectedClient(null);
+          }}
+          onSelect={handleAdmissionTypeSelect}
+          existingHC={existingHC}
+        />
+      )}
     </div>
   );
 }

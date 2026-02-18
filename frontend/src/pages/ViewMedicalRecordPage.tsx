@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Calendar, MapPin, FileText, Plus, Mail, Trash2, Loader2 } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, User, Calendar, MapPin, FileText, Plus, Mail, Trash2, Loader2, Clipboard } from 'lucide-react';
 import { medicalRecordsService } from '../services/medical-records.service';
+import { admissionsService } from '../services/admissions.service';
 import { MedicalRecord } from '../types/medical-record';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
@@ -12,10 +13,13 @@ import AddDiagnosisModal from '../components/medical-records/AddDiagnosisModal';
 import AddEvolutionModal from '../components/medical-records/AddEvolutionModal';
 import GenerateConsentModal from '../components/medical-records/GenerateConsentModal';
 import MedicalRecordConsentPdfViewer from '../components/medical-records/MedicalRecordConsentPdfViewer';
+import AdmissionTypeModal from '../components/AdmissionTypeModal';
+import AdmissionsSection from '../components/medical-records/AdmissionsSection';
 
 export default function ViewMedicalRecordPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const toast = useToast();
   const confirm = useConfirm();
   const { user } = useAuthStore();
@@ -27,9 +31,11 @@ export default function ViewMedicalRecordPage() {
   const [showDiagnosisModal, setShowDiagnosisModal] = useState(false);
   const [showEvolutionModal, setShowEvolutionModal] = useState(false);
   const [showConsentModal, setShowConsentModal] = useState(false);
+  const [showAdmissionModal, setShowAdmissionModal] = useState(false);
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
   const [deletingConsent, setDeletingConsent] = useState<string | null>(null);
   const [selectedPdf, setSelectedPdf] = useState<{ consentId: string } | null>(null);
+  const [activeAdmissionId, setActiveAdmissionId] = useState<string | null>(null);
 
   // Permisos
   const canDeleteConsents = user?.role?.permissions?.includes('delete_mr_consents') || false;
@@ -43,6 +49,28 @@ export default function ViewMedicalRecordPage() {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Obtener admissionId de la URL si existe
+    const admissionIdFromUrl = searchParams.get('admissionId');
+    if (admissionIdFromUrl) {
+      setActiveAdmissionId(admissionIdFromUrl);
+    } else if (record?.admissions && record.admissions.length > 0) {
+      // Si no hay admissionId en la URL, usar la admisión activa más reciente
+      const activeAdmission = record.admissions.find((a: any) => a.status === 'active');
+      if (activeAdmission) {
+        setActiveAdmissionId(activeAdmission.id);
+      } else {
+        // Si no hay admisión activa y la HC está activa, mostrar modal para crear una
+        if (record.status === 'active') {
+          setShowAdmissionModal(true);
+        }
+      }
+    } else if (record && record.status === 'active') {
+      // Si no hay admisiones y la HC está activa, mostrar modal para crear la primera
+      setShowAdmissionModal(true);
+    }
+  }, [searchParams, record]);
+
   const loadRecord = async () => {
     try {
       setLoading(true);
@@ -53,6 +81,89 @@ export default function ViewMedicalRecordPage() {
       navigate('/medical-records');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNewAdmission = () => {
+    setShowAdmissionModal(true);
+  };
+
+  const handleAdmissionTypeSelect = async (admissionType: string, reason: string) => {
+    if (!record) return;
+
+    try {
+      setLoading(true);
+      setShowAdmissionModal(false);
+
+      // Crear nueva admisión
+      const admission = await admissionsService.create({
+        medicalRecordId: record.id,
+        admissionType,
+        reason,
+        admissionDate: new Date().toISOString(),
+      });
+
+      toast.success('Nueva admisión creada', 'Puede comenzar a agregar registros a esta admisión');
+      
+      // Establecer como admisión activa
+      setActiveAdmissionId(admission.id);
+      
+      // Recargar la HC
+      await loadRecord();
+    } catch (error: any) {
+      toast.error('Error al crear admisión', error.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCloseAdmission = async (admissionId: string) => {
+    const confirmed = await confirm({
+      type: 'warning',
+      title: '¿Cerrar admisión?',
+      message: 'Al cerrar la admisión, no se podrán agregar más registros a ella. ¿Desea continuar?',
+      confirmText: 'Cerrar',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await admissionsService.close(admissionId, {});
+      toast.success('Admisión cerrada exitosamente');
+      
+      // Si era la admisión activa, limpiar
+      if (activeAdmissionId === admissionId) {
+        setActiveAdmissionId(null);
+      }
+      
+      await loadRecord();
+    } catch (error: any) {
+      toast.error('Error al cerrar admisión', error.response?.data?.message);
+    }
+  };
+
+  const handleReopenAdmission = async (admissionId: string) => {
+    const confirmed = await confirm({
+      type: 'info',
+      title: '¿Reabrir admisión?',
+      message: 'La admisión será reactivada y se podrán agregar registros nuevamente. ¿Desea continuar?',
+      confirmText: 'Reabrir',
+      cancelText: 'Cancelar',
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await admissionsService.reopen(admissionId);
+      toast.success('Admisión reabierta exitosamente');
+      
+      // Establecer como admisión activa
+      setActiveAdmissionId(admissionId);
+      
+      await loadRecord();
+    } catch (error: any) {
+      toast.error('Error al reabrir admisión', error.response?.data?.message);
     }
   };
 
@@ -218,6 +329,13 @@ export default function ViewMedicalRecordPage() {
           {record.status === 'active' && (
             <>
               <button
+                onClick={handleNewAdmission}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Clipboard className="w-4 h-4" />
+                Nueva Admisión
+              </button>
+              <button
                 onClick={() => setShowConsentModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
@@ -350,7 +468,7 @@ export default function ViewMedicalRecordPage() {
       <div className="bg-white rounded-lg shadow">
         <div className="border-b">
           <div className="flex gap-4 px-6">
-            {['resumen', 'anamnesis', 'examenes', 'diagnosticos', 'evoluciones', 'consentimientos'].map((tab) => (
+            {['resumen', 'admisiones', 'anamnesis', 'examenes', 'diagnosticos', 'evoluciones', 'consentimientos'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -391,14 +509,50 @@ export default function ViewMedicalRecordPage() {
             </div>
           )}
 
+          {activeTab === 'admisiones' && (
+            <AdmissionsSection
+              admissions={record.admissions || []}
+              onAdmissionSelect={(admissionId: string) => setActiveAdmissionId(admissionId)}
+              activeAdmissionId={activeAdmissionId}
+              onRefresh={loadRecord}
+              onCloseAdmission={handleCloseAdmission}
+              onReopenAdmission={handleReopenAdmission}
+            />
+          )}
+
           {activeTab === 'anamnesis' && (
             <div className="space-y-4">
+              {!activeAdmissionId && record.status === 'active' && (
+                <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Admisión Requerida</h3>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        Debe crear o seleccionar una admisión activa antes de agregar registros a la historia clínica.
+                      </p>
+                      <button
+                        onClick={handleNewAdmission}
+                        className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition"
+                      >
+                        Crear Nueva Admisión
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Anamnesis</h3>
                 {record.status === 'active' && (
                   <button
                     onClick={() => setShowAnamnesisModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={!activeAdmissionId}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!activeAdmissionId ? 'Debe seleccionar una admisión activa' : ''}
                   >
                     <Plus className="w-4 h-4" />
                     Agregar Anamnesis
@@ -435,12 +589,37 @@ export default function ViewMedicalRecordPage() {
 
           {activeTab === 'examenes' && (
             <div className="space-y-4">
+              {!activeAdmissionId && record.status === 'active' && (
+                <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Admisión Requerida</h3>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        Debe crear o seleccionar una admisión activa antes de agregar registros a la historia clínica.
+                      </p>
+                      <button
+                        onClick={handleNewAdmission}
+                        className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition"
+                      >
+                        Crear Nueva Admisión
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Exámenes Físicos</h3>
                 {record.status === 'active' && (
                   <button
                     onClick={() => setShowPhysicalExamModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={!activeAdmissionId}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!activeAdmissionId ? 'Debe seleccionar una admisión activa' : ''}
                   >
                     <Plus className="w-4 h-4" />
                     Agregar Examen
@@ -491,12 +670,37 @@ export default function ViewMedicalRecordPage() {
 
           {activeTab === 'diagnosticos' && (
             <div className="space-y-4">
+              {!activeAdmissionId && record.status === 'active' && (
+                <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Admisión Requerida</h3>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        Debe crear o seleccionar una admisión activa antes de agregar registros a la historia clínica.
+                      </p>
+                      <button
+                        onClick={handleNewAdmission}
+                        className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition"
+                      >
+                        Crear Nueva Admisión
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Diagnósticos</h3>
                 {record.status === 'active' && (
                   <button
                     onClick={() => setShowDiagnosisModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={!activeAdmissionId}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!activeAdmissionId ? 'Debe seleccionar una admisión activa' : ''}
                   >
                     <Plus className="w-4 h-4" />
                     Agregar Diagnóstico
@@ -529,12 +733,37 @@ export default function ViewMedicalRecordPage() {
 
           {activeTab === 'evoluciones' && (
             <div className="space-y-4">
+              {!activeAdmissionId && record.status === 'active' && (
+                <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Admisión Requerida</h3>
+                      <p className="mt-1 text-sm text-yellow-700">
+                        Debe crear o seleccionar una admisión activa antes de agregar registros a la historia clínica.
+                      </p>
+                      <button
+                        onClick={handleNewAdmission}
+                        className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition"
+                      >
+                        Crear Nueva Admisión
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Evoluciones</h3>
                 {record.status === 'active' && (
                   <button
                     onClick={() => setShowEvolutionModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    disabled={!activeAdmissionId}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={!activeAdmissionId ? 'Debe seleccionar una admisión activa' : ''}
                   >
                     <Plus className="w-4 h-4" />
                     Agregar Evolución
@@ -710,6 +939,7 @@ export default function ViewMedicalRecordPage() {
       {showAnamnesisModal && (
         <AddAnamnesisModal
           medicalRecordId={id!}
+          admissionId={activeAdmissionId}
           onClose={() => setShowAnamnesisModal(false)}
           onSuccess={loadRecord}
         />
@@ -717,6 +947,7 @@ export default function ViewMedicalRecordPage() {
       {showPhysicalExamModal && (
         <AddPhysicalExamModal
           medicalRecordId={id!}
+          admissionId={activeAdmissionId}
           onClose={() => setShowPhysicalExamModal(false)}
           onSuccess={loadRecord}
         />
@@ -724,6 +955,7 @@ export default function ViewMedicalRecordPage() {
       {showDiagnosisModal && (
         <AddDiagnosisModal
           medicalRecordId={id!}
+          admissionId={activeAdmissionId}
           onClose={() => setShowDiagnosisModal(false)}
           onSuccess={loadRecord}
         />
@@ -731,6 +963,7 @@ export default function ViewMedicalRecordPage() {
       {showEvolutionModal && (
         <AddEvolutionModal
           medicalRecordId={id!}
+          admissionId={activeAdmissionId}
           onClose={() => setShowEvolutionModal(false)}
           onSuccess={loadRecord}
         />
@@ -738,10 +971,19 @@ export default function ViewMedicalRecordPage() {
       {showConsentModal && (
         <GenerateConsentModal
           medicalRecordId={id!}
+          admissionId={activeAdmissionId}
           clientId={record.clientId}
           clientName={record.client?.name || record.client?.fullName || ''}
           onClose={() => setShowConsentModal(false)}
           onSuccess={loadRecord}
+        />
+      )}
+      {showAdmissionModal && (
+        <AdmissionTypeModal
+          isOpen={showAdmissionModal}
+          onClose={() => setShowAdmissionModal(false)}
+          onSelect={handleAdmissionTypeSelect}
+          existingHC={record}
         />
       )}
       {selectedPdf && (

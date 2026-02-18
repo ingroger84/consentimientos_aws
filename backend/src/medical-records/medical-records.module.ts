@@ -13,7 +13,9 @@ import { Procedure } from './entities/procedure.entity';
 import { TreatmentPlan } from './entities/treatment-plan.entity';
 import { Epicrisis } from './entities/epicrisis.entity';
 import { MedicalRecordDocument } from './entities/medical-record-document.entity';
+import { Admission } from './entities/admission.entity';
 import { MedicalRecordsService } from './medical-records.service';
+import { AdmissionsService } from './admissions.service';
 import { AnamnesisService } from './anamnesis.service';
 import { PhysicalExamService } from './physical-exam.service';
 import { DiagnosisService } from './diagnosis.service';
@@ -25,6 +27,7 @@ import { TreatmentPlansService } from './treatment-plans.service';
 import { EpicrisisService } from './epicrisis.service';
 import { MedicalRecordDocumentsService } from './medical-record-documents.service';
 import { MedicalRecordsController } from './medical-records.controller';
+import { AdmissionsController } from './admissions.controller';
 import { MedicalRecordsPdfService } from './medical-records-pdf.service';
 import { ClientsModule } from '../clients/clients.module';
 import { ConsentsModule } from '../consents/consents.module';
@@ -50,6 +53,7 @@ import { TenantsModule } from '../tenants/tenants.module';
       TreatmentPlan,
       Epicrisis,
       MedicalRecordDocument,
+      Admission,
     ]),
     ClientsModule,
     ConsentsModule,
@@ -59,9 +63,10 @@ import { TenantsModule } from '../tenants/tenants.module';
     CommonModule,
     forwardRef(() => TenantsModule),
   ],
-  controllers: [MedicalRecordsController],
+  controllers: [MedicalRecordsController, AdmissionsController],
   providers: [
     MedicalRecordsService,
+    AdmissionsService,
     MedicalRecordsPdfService,
     AnamnesisService,
     PhysicalExamService,
@@ -76,6 +81,7 @@ import { TenantsModule } from '../tenants/tenants.module';
   ],
   exports: [
     MedicalRecordsService,
+    AdmissionsService,
     AnamnesisService,
     PhysicalExamService,
     DiagnosisService,

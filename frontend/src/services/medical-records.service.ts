@@ -12,6 +12,11 @@ class MedicalRecordsService {
     return response.data;
   }
 
+  async getByClient(clientId: string): Promise<MedicalRecord[]> {
+    const response = await api.get('/medical-records', { params: { clientId } });
+    return response.data;
+  }
+
   async create(data: CreateMedicalRecordDto): Promise<MedicalRecord> {
     const response = await api.post('/medical-records', data);
     return response.data;

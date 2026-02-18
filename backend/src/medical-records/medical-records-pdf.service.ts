@@ -289,7 +289,7 @@ export class MedicalRecordsPdfService {
     });
     
     // Subtítulo
-    page.drawText('CONSENTIMIENTO INFORMADO', {
+    page.drawText('HISTORIA CLÍNICA', {
       x: textX,
       y: textY - 20,
       size: 18,

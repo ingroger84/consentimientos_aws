@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { MedicalRecord } from './medical-record.entity';
+import { Admission } from './admission.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -22,6 +23,13 @@ export class Diagnosis {
   @ManyToOne(() => MedicalRecord, (record) => record.diagnoses)
   @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
+
+  @Column({ name: 'admission_id' })
+  admissionId: string;
+
+  @ManyToOne(() => Admission, (admission) => admission.diagnoses)
+  @JoinColumn({ name: 'admission_id' })
+  admission: Admission;
 
   @Column({ name: 'tenant_id' })
   tenantId: string;

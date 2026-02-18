@@ -18,6 +18,7 @@ import { PhysicalExam } from './physical-exam.entity';
 import { Diagnosis } from './diagnosis.entity';
 import { Evolution } from './evolution.entity';
 import { MedicalRecordConsent } from './medical-record-consent.entity';
+import { Admission } from './admission.entity';
 
 @Entity('medical_records')
 export class MedicalRecord {
@@ -88,6 +89,11 @@ export class MedicalRecord {
     cascade: true,
   })
   consents: MedicalRecordConsent[];
+
+  @OneToMany(() => Admission, (admission) => admission.medicalRecord, {
+    cascade: true,
+  })
+  admissions: Admission[];
 
   // Auditoría
   @Column({ name: 'created_by' })

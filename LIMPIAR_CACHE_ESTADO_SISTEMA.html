@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Limpiar Caché - Estado del Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .error-box {
+            background: #fee;
+            border: 2px solid #fcc;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .error-title {
+            font-weight: 700;
+            color: #c53030;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .error-text {
+            color: #742a2a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+        }
+
+        .steps {
+            background: #f7fafc;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .steps-title {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: start;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .step-content {
+            flex: 1;
+            padding-top: 5px;
+        }
+
+        .step-text {
+            color: #2d3748;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .code {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .highlight {
+            background: #fef5e7;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f39c12;
+            margin: 20px 0;
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            color: #d68910;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .highlight-text {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🔧</div>
+            <h1>Limpiar Caché del Navegador</h1>
+            <p class="subtitle">
+                La página "Estado del Sistema" está mostrando errores porque tu navegador 
+                tiene archivos antiguos en caché.
+            </p>
+
+            <div class="error-box">
+                <div class="error-title">❌ Error Detectado</div>
+                <div class="error-text">
+                    <strong>Uncaught SyntaxError: The requested module does not provide an export named 'default'</strong>
+                    <br><br>
+                    Este error ocurre cuando el navegador intenta cargar archivos JavaScript antiguos 
+                    que ya no coinciden con la versión actual del sistema.
+                </div>
+            </div>
+
+            <div class="highlight">
+                <div class="highlight-title">💡 Solución Rápida</div>
+                <div class="highlight-text">
+                    Haz click en el botón de abajo para limpiar automáticamente el caché 
+                    y recargar la página correctamente.
+                </div>
+            </div>
+
+            <button class="btn" onclick="clearCacheAndReload()">
+                🚀 Limpiar Caché y Recargar
+            </button>
+
+            <div id="status" style="display: none;"></div>
+
+            <div class="steps">
+                <div class="steps-title">📋 Pasos Manuales (si el botón no funciona)</div>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            Presiona <span class="code">Ctrl + Shift + Delete</span> (Windows) 
+                            o <span class="code">Cmd + Shift + Delete</span> (Mac)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            En la ventana que se abre, selecciona <strong>"Todo el tiempo"</strong> 
+                            o <strong>"Desde siempre"</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            Marca SOLO la opción <strong>"Imágenes y archivos en caché"</strong>
+                            <br>
+                            <small style="color: #718096;">
+                                (No marques cookies ni historial para no perder tu sesión)
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            Click en <strong>"Borrar datos"</strong> o <strong>"Eliminar"</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            Recarga la página con <span class="code">Ctrl + F5</span> 
+                            (Windows) o <span class="code">Cmd + Shift + R</span> (Mac)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <div class="step-text">
+                            Vuelve a intentar acceder a 
+                            <a href="https://archivoenlinea.com/status" target="_blank" 
+                               style="color: #667eea; font-weight: 600;">
+                                Estado del Sistema
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status info">
+                <strong>ℹ️ Nota Importante</strong><br>
+                Después de limpiar el caché, la página debería cargar correctamente 
+                mostrando el estado de todos los servicios del sistema.
+            </div>
+
+            <button class="btn btn-secondary" onclick="testAfterClear()">
+                ✅ Probar Estado del Sistema
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function clearCacheAndReload() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status info';
+            statusDiv.innerHTML = '🔄 Limpiando caché...<span class="loading"></span>';
+
+            try {
+                // Limpiar caché del navegador
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    console.log('Cachés encontrados:', cacheNames);
+                    
+                    await Promise.all(
+                        cacheNames.map(cacheName => {
+                            console.log('Eliminando caché:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }
+
+                // Limpiar localStorage y sessionStorage
+                localStorage.clear();
+                sessionStorage.clear();
+
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Caché limpiado exitosamente. Redirigiendo...';
+
+                // Esperar un momento y redirigir
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Redirigir a la página de estado con parámetro para evitar caché
+                window.location.href = 'https://archivoenlinea.com/status?nocache=' + Date.now();
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    ❌ Error al limpiar caché automáticamente.<br>
+                    Por favor, usa los pasos manuales descritos abajo.
+                `;
+            }
+        }
+
+        function testAfterClear() {
+            // Abrir en nueva pestaña con parámetro nocache
+            window.open('https://archivoenlinea.com/status?nocache=' + Date.now(), '_blank');
+        }
+
+        // Mostrar información del navegador
+        console.log('Navegador:', navigator.userAgent);
+        console.log('Soporte de Cache API:', 'caches' in window);
+    </script>
+</body>
+</html>

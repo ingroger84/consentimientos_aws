@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Actualización v38.1.8</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .version {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            background: #fef5e7;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f39c12;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .highlight-title {
+            font-weight: 700;
+            color: #d68910;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .highlight-text {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .comparison-item.before {
+            background: #fee;
+            border: 2px solid #fcc;
+        }
+
+        .comparison-item.after {
+            background: #efe;
+            border: 2px solid #cfc;
+        }
+
+        .comparison-label {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .comparison-item.before .comparison-label {
+            color: #c53030;
+        }
+
+        .comparison-item.after .comparison-label {
+            color: #2f855a;
+        }
+
+        .comparison-text {
+            font-size: 13px;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+        }
+
+        .status {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status.checking {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        #currentVersion {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🔄</div>
+            <h1>Actualización Disponible</h1>
+            <div class="version">v38.1.8</div>
+
+            <div class="highlight">
+                <div class="highlight-title">✨ Nuevo en esta versión</div>
+                <div class="highlight-text">
+                    Los signos vitales ahora se muestran en español y con formato legible en el PDF de Historia Clínica, 
+                    incluyendo unidades de medida apropiadas (cm, kg, °C, lpm, rpm, %, mmHg).
+                </div>
+            </div>
+
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <div class="comparison-label">❌ Antes (v38.1.7)</div>
+                    <div class="comparison-text">
+{"height": 170,<br>
+"weight": 70,<br>
+"heartRate": 70,<br>
+"temperature": 36}
+                    </div>
+                </div>
+                <div class="comparison-item after">
+                    <div class="comparison-label">✅ Ahora (v38.1.8)</div>
+                    <div class="comparison-text">
+• Altura: 170 cm<br>
+• Peso: 70 kg<br>
+• Frecuencia Cardíaca: 70 lpm<br>
+• Temperatura: 36 °C
+                    </div>
+                </div>
+            </div>
+
+            <div id="statusContainer" class="status checking">
+                <div>Verificando versión actual...</div>
+                <div class="loading"></div>
+            </div>
+
+            <div id="currentVersion"></div>
+
+            <div id="actions" style="display: none;">
+                <button class="btn" onclick="clearCacheAndReload()">
+                    🚀 Actualizar Ahora
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='https://archivoenlinea.com'">
+                    ← Volver al Sistema
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXPECTED_VERSION = '38.1.8';
+        const API_URL = 'https://archivoenlinea.com/api';
+
+        async function checkVersion() {
+            try {
+                const frontendResponse = await fetch(`/version.json?t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const frontendData = await frontendResponse.json();
+                
+                const backendResponse = await fetch(`${API_URL}/health/version?t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const backendData = await backendResponse.json();
+
+                const statusContainer = document.getElementById('statusContainer');
+                const currentVersionDiv = document.getElementById('currentVersion');
+                const actionsDiv = document.getElementById('actions');
+
+                currentVersionDiv.innerHTML = `
+                    Frontend: <strong>${frontendData.version}</strong><br>
+                    Backend: <strong>${backendData.current.version}</strong>
+                `;
+
+                if (frontendData.version === EXPECTED_VERSION && backendData.current.version === EXPECTED_VERSION) {
+                    statusContainer.className = 'status success';
+                    statusContainer.innerHTML = `
+                        <div class="icon">✅</div>
+                        <div><strong>¡Sistema Actualizado!</strong></div>
+                        <div>Ya estás usando la versión más reciente</div>
+                    `;
+                    actionsDiv.style.display = 'block';
+                    actionsDiv.innerHTML = `
+                        <button class="btn" onclick="window.location.href='https://archivoenlinea.com'">
+                            ✨ Ir al Sistema
+                        </button>
+                    `;
+                } else {
+                    statusContainer.className = 'status error';
+                    statusContainer.innerHTML = `
+                        <div class="icon">⚠️</div>
+                        <div><strong>Actualización Necesaria</strong></div>
+                        <div>Tu navegador tiene una versión antigua en caché</div>
+                    `;
+                    actionsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error al verificar versión:', error);
+                const statusContainer = document.getElementById('statusContainer');
+                statusContainer.className = 'status error';
+                statusContainer.innerHTML = `
+                    <div class="icon">❌</div>
+                    <div><strong>Error de Conexión</strong></div>
+                    <div>No se pudo verificar la versión del sistema</div>
+                `;
+                document.getElementById('actions').style.display = 'block';
+            }
+        }
+
+        async function clearCacheAndReload() {
+            const statusContainer = document.getElementById('statusContainer');
+            statusContainer.className = 'status checking';
+            statusContainer.innerHTML = `
+                <div>Limpiando caché y actualizando...</div>
+                <div class="loading"></div>
+            `;
+
+            try {
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+
+                localStorage.clear();
+                sessionStorage.clear();
+
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                window.location.href = 'https://archivoenlinea.com?' + Date.now();
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                statusContainer.className = 'status error';
+                statusContainer.innerHTML = `
+                    <div class="icon">❌</div>
+                    <div><strong>Error</strong></div>
+                    <div>Por favor, limpia el caché manualmente (Ctrl+Shift+Delete)</div>
+                `;
+            }
+        }
+
+        checkVersion();
+    </script>
+</body>
+</html>

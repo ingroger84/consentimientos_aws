@@ -5,11 +5,12 @@ import { useToast } from '../../hooks/useToast';
 
 interface AddPhysicalExamModalProps {
   medicalRecordId: string;
+  admissionId?: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddPhysicalExamModal({ medicalRecordId, onClose, onSuccess }: AddPhysicalExamModalProps) {
+export default function AddPhysicalExamModal({ medicalRecordId, admissionId, onClose, onSuccess }: AddPhysicalExamModalProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,6 +29,11 @@ export default function AddPhysicalExamModal({ medicalRecordId, onClose, onSucce
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
+      return;
+    }
+
     try {
       setLoading(true);
       
@@ -42,7 +48,9 @@ export default function AddPhysicalExamModal({ medicalRecordId, onClose, onSucce
       if (formData.weight) vitalSigns.weight = Number(formData.weight);
       if (formData.height) vitalSigns.height = Number(formData.height);
       
-      const payload: any = {};
+      const payload: any = {
+        admissionId,
+      };
       
       if (Object.keys(vitalSigns).length > 0) {
         payload.vitalSigns = vitalSigns;

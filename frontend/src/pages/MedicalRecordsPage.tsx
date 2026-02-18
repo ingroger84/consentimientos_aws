@@ -5,6 +5,7 @@ import { medicalRecordsService } from '../services/medical-records.service';
 import { MedicalRecord } from '../types/medical-record';
 import { usePermissions } from '../hooks/usePermissions';
 import { useToast } from '../hooks/useToast';
+import MedicalRecordPdfViewer from '../components/medical-records/MedicalRecordPdfViewer';
 
 type ViewMode = 'table' | 'cards';
 
@@ -17,6 +18,7 @@ export default function MedicalRecordsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('table'); // Vista de tabla por defecto
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
+  const [previewRecord, setPreviewRecord] = useState<MedicalRecord | null>(null);
 
   useEffect(() => {
     loadRecords();
@@ -53,13 +55,8 @@ export default function MedicalRecordsPage() {
   const handlePreview = async (record: MedicalRecord, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    try {
-      // Abrir el PDF de la HC completa en una nueva ventana
-      const pdfUrl = await medicalRecordsService.getRecordPdfUrl(record.id);
-      window.open(pdfUrl, '_blank');
-    } catch (error: any) {
-      toast.error('Error al cargar vista previa', error.response?.data?.message || error.message);
-    }
+    // Abrir el modal de vista previa
+    setPreviewRecord(record);
   };
 
   const handleSendEmail = async (record: MedicalRecord, e: React.MouseEvent) => {
@@ -454,6 +451,16 @@ export default function MedicalRecordsPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* Modal de Vista Previa */}
+      {previewRecord && (
+        <MedicalRecordPdfViewer
+          medicalRecordId={previewRecord.id}
+          recordNumber={previewRecord.recordNumber}
+          clientName={previewRecord.client?.name || previewRecord.client?.fullName || 'Sin nombre'}
+          onClose={() => setPreviewRecord(null)}
+        />
       )}
     </div>
   );

@@ -52,22 +52,37 @@ interface HealthData {
 export default function SystemStatusPage() {
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
     fetchHealthData();
-    const interval = setInterval(fetchHealthData, 30000); // Actualizar cada 30 segundos
+    const interval = setInterval(fetchHealthData, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchHealthData = async () => {
     try {
-      const response = await fetch('https://archivoenlinea.com/api/health/detailed');
+      const response = await fetch('/api/health/detailed');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setHealthData(data);
       setLastUpdate(new Date());
     } catch (error) {
       console.error('Error fetching health data:', error);
+      setHealthData({
+        status: 'unknown',
+        timestamp: new Date().toISOString(),
+        uptime: 'No disponible',
+        uptimeSeconds: 0,
+        services: {
+          api: { status: 'unknown' },
+          database: { status: 'unknown' },
+          storage: { status: 'unknown', provider: 'AWS S3' }
+        },
+        version: '38.1.7'
+      });
     } finally {
       setLoading(false);
     }

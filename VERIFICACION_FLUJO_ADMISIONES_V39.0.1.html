@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Flujo de Admisiones v39.0.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+        }
+        
+        .test-list {
+            list-style: none;
+        }
+        
+        .test-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .test-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .test-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .expected {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #2196F3;
+        }
+        
+        .expected strong {
+            color: #2196F3;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .warning-icon {
+            color: #ffc107;
+            font-size: 2em;
+            margin-right: 10px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .feature {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #17a2b8;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #17a2b8;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px 10px 10px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .timestamp {
+            color: #95a5a6;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Verificación Flujo de Admisiones</h1>
+            <div class="version">Versión 39.0.1</div>
+            <p style="margin-top: 20px; font-size: 1.1em;">Sistema de Admisiones Múltiples Implementado</p>
+        </div>
+        
+        <div class="content">
+            <!-- Resumen de Cambios -->
+            <div class="section">
+                <h2><span class="icon">🎯</span> Resumen de Cambios Implementados</h2>
+                
+                <div class="feature">
+                    <div class="feature-title">✨ Modal de Admisión Automático</div>
+                    <p>Al abrir una HC existente sin admisión activa, el sistema muestra automáticamente el modal para crear una nueva admisión.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">🔒 Validación de Admisión Activa</div>
+                    <p>Los botones para agregar registros (anamnesis, exámenes, diagnósticos, evoluciones, consentimientos) se deshabilitan si no hay admisión activa.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">⚠️ Alertas Visuales</div>
+                    <p>Se muestran alertas amarillas en cada tab cuando no hay admisión activa, con botón para crear una nueva.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">📋 Gestión de Admisiones</div>
+                    <p>Tab "Admisiones" con funcionalidad completa: seleccionar admisión activa, cerrar, reabrir, y ver estadísticas.</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">🔄 Flujo Completo</div>
+                    <p>Al seleccionar un cliente con HC existente en "Nueva Historia Clínica", se muestra el modal para crear una nueva admisión.</p>
+                </div>
+            </div>
+            
+            <!-- Pruebas a Realizar -->
+            <div class="section">
+                <h2><span class="icon">🧪</span> Pruebas a Realizar</h2>
+                
+                <div class="warning">
+                    <span class="warning-icon">⚠️</span>
+                    <strong>IMPORTANTE:</strong> Limpie la caché del navegador antes de realizar las pruebas (Ctrl+Shift+R o Cmd+Shift+R)
+                </div>
+                
+                <ul class="test-list">
+                    <li class="test-item">
+                        <span class="test-number">1</span>
+                        <strong>Crear Nueva Historia Clínica</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> El botón "Nueva Historia Clínica" debe estar visible en la página de listado de HC.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">2</span>
+                        <strong>Seleccionar Cliente con HC Existente</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Al buscar y seleccionar un cliente que ya tiene HC, debe mostrarse el modal de tipo de admisión automáticamente.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">3</span>
+                        <strong>Abrir HC Existente sin Admisión Activa</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Al abrir una HC que no tiene admisiones activas, debe mostrarse automáticamente el modal para crear una nueva admisión.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">4</span>
+                        <strong>Intentar Agregar Registros sin Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Los botones "Agregar Anamnesis", "Agregar Examen", etc. deben estar deshabilitados (gris) y mostrar tooltip al pasar el mouse.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">5</span>
+                        <strong>Ver Alertas en Tabs</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> En los tabs de Anamnesis, Exámenes, Diagnósticos y Evoluciones debe aparecer una alerta amarilla indicando que se requiere una admisión activa.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">6</span>
+                        <strong>Crear Nueva Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Al hacer clic en "Nueva Admisión" o en el botón de la alerta, debe mostrarse el modal con los 10 tipos de admisión disponibles.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">7</span>
+                        <strong>Seleccionar Tipo de Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Debe poder seleccionar un tipo (Primera Vez, Control, Urgencia, etc.) e ingresar el motivo de la admisión.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">8</span>
+                        <strong>Agregar Registros con Admisión Activa</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Después de crear la admisión, los botones deben habilitarse y permitir agregar anamnesis, exámenes, diagnósticos, evoluciones y consentimientos.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">9</span>
+                        <strong>Ver Tab de Admisiones</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> El tab "Admisiones" debe mostrar todas las admisiones con estadísticas (cantidad de anamnesis, exámenes, diagnósticos, evoluciones, consentimientos).
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">10</span>
+                        <strong>Seleccionar Admisión Activa</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Debe poder expandir una admisión y hacer clic en "Seleccionar como Activa" para cambiar la admisión activa.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">11</span>
+                        <strong>Cerrar Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Debe poder cerrar una admisión activa, lo que la bloqueará y no permitirá agregar más registros a ella.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">12</span>
+                        <strong>Reabrir Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Debe poder reabrir una admisión cerrada, lo que la reactivará y permitirá agregar registros nuevamente.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">13</span>
+                        <strong>Múltiples Admisiones para el Mismo Paciente</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Debe poder crear múltiples admisiones para el mismo paciente/HC, cada una con su propio tipo y motivo.
+                        </div>
+                    </li>
+                    
+                    <li class="test-item">
+                        <span class="test-number">14</span>
+                        <strong>Vinculación de Registros a Admisión</strong>
+                        <div class="expected">
+                            <strong>✓ Esperado:</strong> Todos los registros agregados (anamnesis, exámenes, etc.) deben aparecer en las estadísticas de la admisión activa.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Flujo Esperado -->
+            <div class="section">
+                <h2><span class="icon">🔄</span> Flujo Esperado Completo</h2>
+                
+                <div class="feature">
+                    <div class="feature-title">Escenario 1: Nuevo Paciente</div>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Usuario hace clic en "Nueva Historia Clínica"</li>
+                        <li>Busca o crea un nuevo paciente</li>
+                        <li>Completa el formulario y crea la HC</li>
+                        <li>Sistema crea automáticamente la primera admisión</li>
+                        <li>Usuario puede agregar registros inmediatamente</li>
+                    </ol>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">Escenario 2: Paciente con HC Existente (desde "Nueva HC")</div>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Usuario hace clic en "Nueva Historia Clínica"</li>
+                        <li>Busca un paciente que ya tiene HC</li>
+                        <li>Sistema detecta HC existente y muestra modal de admisión</li>
+                        <li>Usuario selecciona tipo de admisión e ingresa motivo</li>
+                        <li>Sistema crea nueva admisión y redirige a la HC</li>
+                        <li>Usuario puede agregar registros a la nueva admisión</li>
+                    </ol>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">Escenario 3: Abrir HC Existente sin Admisión Activa</div>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Usuario abre una HC desde el listado</li>
+                        <li>Sistema detecta que no hay admisión activa</li>
+                        <li>Muestra automáticamente modal de admisión</li>
+                        <li>Usuario selecciona tipo e ingresa motivo</li>
+                        <li>Sistema crea admisión y habilita botones</li>
+                        <li>Usuario puede agregar registros</li>
+                    </ol>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-title">Escenario 4: Abrir HC con Admisión Activa</div>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Usuario abre una HC desde el listado</li>
+                        <li>Sistema detecta admisión activa existente</li>
+                        <li>Botones están habilitados automáticamente</li>
+                        <li>Usuario puede agregar registros inmediatamente</li>
+                        <li>Si necesita nueva admisión, hace clic en "Nueva Admisión"</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Acceso Rápido -->
+            <div class="section">
+                <h2><span class="icon">🚀</span> Acceso Rápido</h2>
+                <a href="https://archivoenlinea.com" class="btn" target="_blank">
+                    🌐 Abrir Sistema en Producción
+                </a>
+                <a href="https://archivoenlinea.com/medical-records" class="btn btn-secondary" target="_blank">
+                    📋 Ir a Historias Clínicas
+                </a>
+            </div>
+            
+            <!-- Notas Técnicas -->
+            <div class="section info">
+                <h2><span class="icon">📝</span> Notas Técnicas</h2>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Versión Frontend:</strong> 39.0.1</li>
+                    <li><strong>Versión Backend:</strong> 39.0.0</li>
+                    <li><strong>Base de Datos:</strong> PostgreSQL en RDS</li>
+                    <li><strong>Servidor:</strong> AWS EC2 (100.28.198.249)</li>
+                    <li><strong>Dominio:</strong> archivoenlinea.com</li>
+                    <li><strong>Fecha de Despliegue:</strong> <span id="deployDate"></span></li>
+                </ul>
+            </div>
+            
+            <!-- Archivos Modificados -->
+            <div class="section">
+                <h2><span class="icon">📁</span> Archivos Modificados</h2>
+                <ul style="margin-left: 20px; line-height: 1.8; font-family: 'Courier New', monospace;">
+                    <li><code>frontend/src/pages/ViewMedicalRecordPage.tsx</code> - Lógica de admisiones y validaciones</li>
+                    <li><code>frontend/src/pages/CreateMedicalRecordPage.tsx</code> - Detección de HC existente</li>
+                    <li><code>frontend/src/components/medical-records/AdmissionsSection.tsx</code> - Gestión de admisiones</li>
+                    <li><code>frontend/src/components/AdmissionTypeModal.tsx</code> - Modal de selección de tipo</li>
+                    <li><code>frontend/src/components/medical-records/AddAnamnesisModal.tsx</code> - Validación de admisión</li>
+                    <li><code>frontend/src/components/medical-records/AddPhysicalExamModal.tsx</code> - Validación de admisión</li>
+                    <li><code>frontend/src/components/medical-records/AddDiagnosisModal.tsx</code> - Validación de admisión</li>
+                    <li><code>frontend/src/components/medical-records/AddEvolutionModal.tsx</code> - Validación de admisión</li>
+                    <li><code>frontend/src/components/medical-records/GenerateConsentModal.tsx</code> - Validación de admisión</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Sistema de Historias Clínicas - Archivo en Línea</strong></p>
+            <p class="timestamp">Despliegue realizado el <span id="timestamp"></span></p>
+            <p style="margin-top: 10px; color: #95a5a6;">
+                ✅ Frontend desplegado | ✅ Backend funcionando | ✅ Base de datos actualizada
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Establecer fecha y hora actual
+        const now = new Date();
+        const options = { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            timeZone: 'America/Bogota'
+        };
+        document.getElementById('timestamp').textContent = now.toLocaleDateString('es-CO', options);
+        document.getElementById('deployDate').textContent = now.toLocaleDateString('es-CO', options);
+    </script>
+</body>
+</html>

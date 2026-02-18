@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limpieza Completa de Caché - v38.1.12</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 60px;
+            animation: shake 2s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #ef4444;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .alert {
+            background: #fee2e2;
+            border: 3px solid #ef4444;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            color: #991b1b;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .alert-text {
+            color: #7f1d1d;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        
+        .steps {
+            background: #f9fafb;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .steps-title {
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 22px;
+            text-align: center;
+        }
+        
+        .step {
+            background: white;
+            border-left: 5px solid #ef4444;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+            float: left;
+        }
+        
+        .step-content {
+            margin-left: 60px;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .step-desc {
+            color: #4b5563;
+            line-height: 1.6;
+        }
+        
+        .keyboard {
+            background: #1f2937;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 0 3px;
+            font-weight: bold;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 20px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        }
+        
+        .progress {
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            color: #1f2937;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            border: 3px solid #10b981;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+        
+        .success-title {
+            color: #065f46;
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .success-text {
+            color: #047857;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🧹</div>
+            <h1>Limpieza Completa de Caché</h1>
+            <div class="subtitle">Solución al Error React #31</div>
+        </div>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ PROBLEMA DETECTADO</div>
+            <div class="alert-text">
+                Tu navegador está cargando archivos JavaScript antiguos del caché que contienen 
+                código incompatible. Esto causa el error "Minified React error #31".<br><br>
+                <strong>Necesitas limpiar COMPLETAMENTE el caché del navegador para ver la nueva versión 38.1.12.</strong>
+            </div>
+        </div>
+        
+        <div class="steps">
+            <div class="steps-title">📋 Pasos para Limpiar el Caché</div>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Abre las Herramientas de Desarrollador</div>
+                    <div class="step-desc">
+                        Presiona <span class="keyboard">F12</span> o 
+                        <span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">I</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Haz Clic Derecho en el Botón de Recargar</div>
+                    <div class="step-desc">
+                        Con las herramientas de desarrollador abiertas, haz clic derecho en el botón 
+                        de recargar (🔄) del navegador y selecciona <strong>"Vaciar caché y volver a cargar de manera forzada"</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Limpia Todo el Caché del Navegador</div>
+                    <div class="step-desc">
+                        Presiona <span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">Delete</span>
+                        y selecciona:<br>
+                        ✅ Imágenes y archivos en caché<br>
+                        ✅ Cookies y otros datos de sitios<br>
+                        ✅ Rango de tiempo: <strong>Todo el tiempo</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Cierra y Abre el Navegador</div>
+                    <div class="step-desc">
+                        Cierra TODAS las ventanas del navegador y ábrelo de nuevo. 
+                        Esto asegura que no queden archivos en memoria.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <div class="step-title">Verifica la Nueva Versión</div>
+                    <div class="step-desc">
+                        Visita <strong>https://archivoenlinea.com/status</strong> y verifica que 
+                        la página carga correctamente sin errores.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-danger" onclick="automaticClean()">
+                🚀 Limpieza Automática (Paso 1)
+            </button>
+            <a href="https://archivoenlinea.com/status?nocache=<?php echo time(); ?>" class="btn btn-success" target="_blank">
+                ✅ Abrir Página de Estado (Después de Limpiar)
+            </a>
+        </div>
+        
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Limpiando caché...</div>
+        </div>
+        
+        <div class="success-message" id="successMessage">
+            <div class="success-title">✅ Limpieza Automática Completada</div>
+            <div class="success-text">
+                Ahora sigue los pasos 2-5 manualmente para completar la limpieza.<br>
+                Especialmente importante: <strong>Cierra y abre el navegador</strong>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function automaticClean() {
+            const progressDiv = document.getElementById('progress');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const successDiv = document.getElementById('successMessage');
+            
+            progressDiv.style.display = 'block';
+            
+            let progress = 0;
+            const steps = [
+                { text: 'Limpiando Cache Storage...', action: async () => {
+                    if ('caches' in window) {
+                        const names = await caches.keys();
+                        for (let name of names) {
+                            await caches.delete(name);
+                        }
+                    }
+                }},
+                { text: 'Desregistrando Service Workers...', action: async () => {
+                    if ('serviceWorker' in navigator) {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                        }
+                    }
+                }},
+                { text: 'Limpiando localStorage...', action: () => {
+                    try {
+                        localStorage.clear();
+                    } catch (e) {}
+                }},
+                { text: 'Limpiando sessionStorage...', action: () => {
+                    try {
+                        sessionStorage.clear();
+                    } catch (e) {}
+                }},
+                { text: 'Limpiando IndexedDB...', action: async () => {
+                    if ('indexedDB' in window) {
+                        try {
+                            const dbs = await indexedDB.databases();
+                            for (let db of dbs) {
+                                indexedDB.deleteDatabase(db.name);
+                            }
+                        } catch (e) {}
+                    }
+                }}
+            ];
+            
+            for (let i = 0; i < steps.length; i++) {
+                progressText.textContent = steps[i].text;
+                await steps[i].action();
+                progress = ((i + 1) / steps.length) * 100;
+                progressFill.style.width = progress + '%';
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            progressText.textContent = '✅ Limpieza automática completada';
+            progressFill.style.width = '100%';
+            
+            setTimeout(() => {
+                successDiv.style.display = 'block';
+            }, 1000);
+        }
+        
+        // Agregar timestamp a enlaces
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href*="archivoenlinea.com"]');
+            links.forEach(function(link) {
+                const url = new URL(link.href);
+                url.searchParams.set('nocache', Date.now());
+                link.href = url.toString();
+            });
+        });
+    </script>
+</body>
+</html>

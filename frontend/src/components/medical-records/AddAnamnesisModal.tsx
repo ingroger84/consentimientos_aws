@@ -5,11 +5,12 @@ import { useToast } from '../../hooks/useToast';
 
 interface AddAnamnesisModalProps {
   medicalRecordId: string;
+  admissionId?: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddAnamnesisModal({ medicalRecordId, onClose, onSuccess }: AddAnamnesisModalProps) {
+export default function AddAnamnesisModal({ medicalRecordId, admissionId, onClose, onSuccess }: AddAnamnesisModalProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,12 +28,18 @@ export default function AddAnamnesisModal({ medicalRecordId, onClose, onSuccess 
       return;
     }
 
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
+      return;
+    }
+
     try {
       setLoading(true);
       
       // Construir el objeto solo con los campos que tienen valor
       const payload: any = {
         chiefComplaint: formData.chiefComplaint,
+        admissionId,
       };
       
       if (formData.currentIllness) {

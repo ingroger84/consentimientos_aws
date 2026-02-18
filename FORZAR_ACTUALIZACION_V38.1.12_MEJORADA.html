@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización v38.1.12 - Versión Mejorada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+            }
+        }
+        
+        .icon-text {
+            font-size: 50px;
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            color: #10b981;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .alert {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .alert-text {
+            color: #047857;
+            line-height: 1.6;
+        }
+        
+        .features {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .features-title {
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: start;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .feature:hover {
+            transform: translateX(5px);
+        }
+        
+        .feature-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .feature-text {
+            color: #4b5563;
+            line-height: 1.5;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        
+        .countdown {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #fef3c7;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .countdown-text {
+            color: #92400e;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .countdown-number {
+            font-size: 48px;
+            color: #f59e0b;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                <div class="icon-text">🚀</div>
+            </div>
+            <h1>¡Nueva Versión Mejorada!</h1>
+            <div class="version">v38.1.12</div>
+            <div class="subtitle">Página de Estado del Sistema con Información Completa</div>
+        </div>
+        
+        <div class="alert">
+            <div class="alert-title">✨ ¡Actualización Importante!</div>
+            <div class="alert-text">
+                Hemos mejorado la página de estado del sistema con mucha más información 
+                y métricas en tiempo real. Para ver todos los cambios, necesitas limpiar 
+                el caché de tu navegador.
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="features-title">🎯 Nuevas Características:</div>
+            
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-text">
+                    <strong>Métricas en Tiempo Real</strong><br>
+                    Actualización automática cada 30 segundos
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <div class="feature-text">
+                    <strong>Uso de Memoria</strong><br>
+                    Información detallada del servidor y la aplicación
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text">
+                    <strong>Información de CPU</strong><br>
+                    Núcleos, modelo y carga del procesador
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-text">
+                    <strong>Tiempo de Actividad</strong><br>
+                    Uptime del sistema y disponibilidad
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-text">
+                    <strong>Diseño Mejorado</strong><br>
+                    Interfaz más clara y organizada
+                </div>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📈</div>
+                <div class="feature-text">
+                    <strong>Tiempos de Respuesta</strong><br>
+                    Métricas de rendimiento de cada servicio
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="clearCacheAndRedirect()">
+                🧹 Limpiar Caché y Ver Nueva Versión
+            </button>
+            <a href="https://archivoenlinea.com/status?v=38.1.12&t=<?php echo time(); ?>" class="btn btn-secondary" target="_blank">
+                👀 Abrir en Nueva Pestaña
+            </a>
+        </div>
+        
+        <div class="countdown" id="countdown">
+            <div class="countdown-text">Redirigiendo en...</div>
+            <div class="countdown-number" id="countdownNumber">3</div>
+            <div class="countdown-text">segundos</div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Archivo en Línea</strong> - Sistema de Gestión de Consentimientos</p>
+            <p style="margin-top: 10px;">
+                ¿Necesitas ayuda? 
+                <a href="mailto:soporte@archivoenlinea.com" style="color: #10b981; font-weight: bold;">
+                    soporte@archivoenlinea.com
+                </a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function clearCacheAndRedirect() {
+            // Limpiar Cache Storage
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Limpiar Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Limpiar localStorage y sessionStorage
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                console.log('No se pudo limpiar el storage:', e);
+            }
+            
+            // Mostrar countdown
+            const countdownDiv = document.getElementById('countdown');
+            const countdownNumber = document.getElementById('countdownNumber');
+            countdownDiv.style.display = 'block';
+            
+            let count = 3;
+            const interval = setInterval(function() {
+                count--;
+                countdownNumber.textContent = count;
+                
+                if (count === 0) {
+                    clearInterval(interval);
+                    // Redirigir con parámetros para evitar caché
+                    window.location.href = 'https://archivoenlinea.com/status?v=38.1.12&t=' + Date.now() + '&clear=true';
+                }
+            }, 1000);
+        }
+        
+        // Agregar timestamp a todos los enlaces
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href*="archivoenlinea.com"]');
+            links.forEach(function(link) {
+                const url = new URL(link.href);
+                url.searchParams.set('t', Date.now());
+                link.href = url.toString();
+            });
+        });
+    </script>
+</body>
+</html>

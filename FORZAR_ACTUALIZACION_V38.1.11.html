@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Actualización v38.1.11 - Archivo en Línea</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        .icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2;
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+        
+        .alert-text {
+            color: #78350f;
+            font-size: 14px;
+        }
+        
+        .steps {
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .step:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .step-content {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 50px);
+        }
+        
+        .step-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .keyboard {
+            background: #2d3748;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 0 2px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .success-title {
+            color: #065f46;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .success-text {
+            color: #047857;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <path d="M9 10h.01M15 10h.01M9.5 15a3.5 3.5 0 005 0"/>
+                </svg>
+            </div>
+            <h1>Actualización Disponible</h1>
+            <div class="version">Versión 38.1.11</div>
+        </div>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ Acción Requerida</div>
+            <div class="alert-text">
+                Se ha desplegado una nueva versión. Para ver los cambios correctamente, 
+                necesitas limpiar el caché de tu navegador.
+            </div>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <div class="step-title">Limpia el Caché</div>
+                    <div class="step-desc">
+                        Presiona <span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">Delete</span>
+                        (Windows/Linux) o <span class="keyboard">Cmd</span> + <span class="keyboard">Shift</span> + <span class="keyboard">Delete</span> (Mac)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <div class="step-title">Selecciona el Rango de Tiempo</div>
+                    <div class="step-desc">
+                        Elige "Todo el tiempo" o "Última hora" en el selector de tiempo
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <div class="step-title">Marca las Opciones</div>
+                    <div class="step-desc">
+                        Asegúrate de marcar "Imágenes y archivos en caché" y "Cookies y otros datos de sitios"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">4</span>
+                <div class="step-content">
+                    <div class="step-title">Recarga Forzada</div>
+                    <div class="step-desc">
+                        Después de limpiar, presiona <span class="keyboard">Ctrl</span> + <span class="keyboard">F5</span>
+                        o <span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="clearCache()">
+                🧹 Limpiar Caché Ahora
+            </button>
+            <a href="https://archivoenlinea.com/status" class="btn btn-primary">
+                ✅ Verificar Estado
+            </a>
+        </div>
+        
+        <div class="success" id="successMessage">
+            <div class="success-title">✅ Caché Limpiado</div>
+            <div class="success-text">
+                El caché ha sido limpiado. Ahora recarga la página con Ctrl+F5 para ver la nueva versión.
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Archivo en Línea - Sistema de Gestión de Consentimientos</p>
+            <p>¿Problemas? Contacta a <a href="mailto:soporte@archivoenlinea.com" style="color: #667eea;">soporte@archivoenlinea.com</a></p>
+        </div>
+    </div>
+    
+    <script>
+        function clearCache() {
+            // Intentar limpiar el caché usando la API del navegador
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Limpiar localStorage y sessionStorage
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+            } catch (e) {
+                console.log('No se pudo limpiar el storage:', e);
+            }
+            
+            // Mostrar mensaje de éxito
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Redirigir después de 3 segundos
+            setTimeout(function() {
+                window.location.href = 'https://archivoenlinea.com/status?v=' + Date.now();
+            }, 3000);
+        }
+        
+        // Agregar timestamp a todos los enlaces para evitar caché
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a[href*="archivoenlinea.com"]');
+            links.forEach(function(link) {
+                const url = new URL(link.href);
+                url.searchParams.set('v', Date.now());
+                link.href = url.toString();
+            });
+        });
+    </script>
+</body>
+</html>

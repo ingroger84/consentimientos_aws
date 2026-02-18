@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { MedicalRecord } from './medical-record.entity';
+import { Admission } from './admission.entity';
 import { Consent } from '../../consents/entities/consent.entity';
 import { Evolution } from './evolution.entity';
 import { User } from '../../users/entities/user.entity';
@@ -33,6 +34,9 @@ export class MedicalRecordConsent {
 
   @Column({ name: 'evolution_id', nullable: true })
   evolutionId: string;
+
+  @Column({ name: 'admission_id', nullable: true })
+  admissionId: string;
 
   @Column({ name: 'created_during_consultation', default: true })
   createdDuringConsultation: boolean;
@@ -72,6 +76,10 @@ export class MedicalRecordConsent {
   @ManyToOne(() => Evolution, { nullable: true })
   @JoinColumn({ name: 'evolution_id' })
   evolution: Evolution;
+
+  @ManyToOne(() => Admission, (admission) => admission.consents, { nullable: true })
+  @JoinColumn({ name: 'admission_id' })
+  admission: Admission;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'created_by' })

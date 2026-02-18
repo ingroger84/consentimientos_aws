@@ -5,11 +5,12 @@ import { useToast } from '../../hooks/useToast';
 
 interface AddEvolutionModalProps {
   medicalRecordId: string;
+  admissionId?: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddEvolutionModal({ medicalRecordId, onClose, onSuccess }: AddEvolutionModalProps) {
+export default function AddEvolutionModal({ medicalRecordId, admissionId, onClose, onSuccess }: AddEvolutionModalProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,11 +24,17 @@ export default function AddEvolutionModal({ medicalRecordId, onClose, onSuccess 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
+      return;
+    }
+
     try {
       setLoading(true);
       
       const payload: any = {
         evolutionDate: formData.evolutionDate,
+        admissionId,
       };
       
       if (formData.subjective) {

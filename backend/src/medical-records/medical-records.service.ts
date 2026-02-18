@@ -210,8 +210,11 @@ export class MedicalRecordsService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<MedicalRecord> {
+    // Si tenantId es null (Super Admin), buscar sin restricción de tenant
+    const whereCondition = tenantId ? { id, tenantId } : { id };
+    
     const medicalRecord = await this.medicalRecordsRepository.findOne({
-      where: { id, tenantId },
+      where: whereCondition,
       relations: [
         'client',
         'branch',
@@ -231,14 +234,14 @@ export class MedicalRecordsService {
       throw new NotFoundException('Historia clínica no encontrada');
     }
 
-    // Auditar acceso
+    // Auditar acceso - usar el tenantId de la HC encontrada
     await this.logAudit({
       action: 'view',
       entityType: 'medical_record',
       entityId: id,
       medicalRecordId: id,
       userId,
-      tenantId,
+      tenantId: medicalRecord.tenantId, // Usar el tenantId de la HC
       ipAddress,
       userAgent,
     });
@@ -798,6 +801,100 @@ export class MedicalRecordsService {
     });
   }
 
+  /**
+   * Formatea los signos vitales de forma legible en español
+   */
+  private formatVitalSigns(vitalSigns: Record<string, any>): string {
+    const labels: Record<string, string> = {
+      height: 'Altura',
+      weight: 'Peso',
+      heartRate: 'Frecuencia Cardíaca',
+      temperature: 'Temperatura',
+      respiratoryRate: 'Frecuencia Respiratoria',
+      oxygenSaturation: 'Saturación de Oxígeno',
+      bloodPressureSystolic: 'Presión Arterial Sistólica',
+      bloodPressureDiastolic: 'Presión Arterial Diastólica',
+      bloodPressure: 'Presión Arterial',
+      pulse: 'Pulso',
+      bmi: 'Índice de Masa Corporal',
+    };
+
+    const units: Record<string, string> = {
+      height: 'cm',
+      weight: 'kg',
+      heartRate: 'lpm',
+      temperature: '°C',
+      respiratoryRate: 'rpm',
+      oxygenSaturation: '%',
+      bloodPressureSystolic: 'mmHg',
+      bloodPressureDiastolic: 'mmHg',
+      bloodPressure: 'mmHg',
+      pulse: 'lpm',
+      bmi: 'kg/m²',
+    };
+
+    let formatted = '';
+    
+    // Si hay presión arterial sistólica y diastólica, combinarlas
+    if (vitalSigns.bloodPressureSystolic && vitalSigns.bloodPressureDiastolic) {
+      formatted += `• Presión Arterial: ${vitalSigns.bloodPressureSystolic}/${vitalSigns.bloodPressureDiastolic} mmHg\n`;
+    }
+
+    // Procesar el resto de signos vitales
+    for (const [key, value] of Object.entries(vitalSigns)) {
+      // Saltar si ya procesamos la presión arterial
+      if (key === 'bloodPressureSystolic' || key === 'bloodPressureDiastolic') {
+        continue;
+      }
+
+      if (value !== null && value !== undefined && value !== '') {
+        const label = labels[key] || key;
+        const unit = units[key] || '';
+        formatted += `• ${label}: ${value}${unit ? ' ' + unit : ''}\n`;
+      }
+    }
+
+    return formatted || 'No se registraron signos vitales';
+  }
+
+  /**
+   * Formatea la revisión por sistemas de forma legible en español
+   */
+  private formatSystemsReview(systemsReview: Record<string, any>): string {
+    const systemLabels: Record<string, string> = {
+      cardiovascular: 'Sistema Cardiovascular',
+      respiratory: 'Sistema Respiratorio',
+      gastrointestinal: 'Sistema Gastrointestinal',
+      genitourinary: 'Sistema Genitourinario',
+      musculoskeletal: 'Sistema Musculoesquelético',
+      neurological: 'Sistema Neurológico',
+      skin: 'Piel y Anexos',
+      endocrine: 'Sistema Endocrino',
+      hematologic: 'Sistema Hematológico',
+      psychiatric: 'Sistema Psiquiátrico',
+      eyes: 'Ojos',
+      ears: 'Oídos',
+      nose: 'Nariz',
+      throat: 'Garganta',
+      head: 'Cabeza',
+      neck: 'Cuello',
+      chest: 'Tórax',
+      abdomen: 'Abdomen',
+      extremities: 'Extremidades',
+    };
+
+    let formatted = '';
+
+    for (const [key, value] of Object.entries(systemsReview)) {
+      if (value !== null && value !== undefined && value !== '') {
+        const label = systemLabels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+        formatted += `• ${label}: ${value}\n`;
+      }
+    }
+
+    return formatted || 'No se registró revisión por sistemas';
+  }
+
   async getConsents(
     medicalRecordId: string,
     tenantId: string,
@@ -1006,7 +1103,7 @@ export class MedicalRecordsService {
         let examContent = `Fecha: ${this.formatDate(exam.createdAt)}\n\n`;
         
         if (exam.vitalSigns) {
-          examContent += `SIGNOS VITALES\n${JSON.stringify(exam.vitalSigns, null, 2)}\n\n`;
+          examContent += `SIGNOS VITALES\n${this.formatVitalSigns(exam.vitalSigns)}\n\n`;
         }
         
         if (exam.generalAppearance) {
@@ -1014,7 +1111,7 @@ export class MedicalRecordsService {
         }
         
         if (exam.systemsReview) {
-          examContent += `REVISIÓN POR SISTEMAS\n${JSON.stringify(exam.systemsReview, null, 2)}\n\n`;
+          examContent += `REVISIÓN POR SISTEMAS\n${this.formatSystemsReview(exam.systemsReview)}\n\n`;
         }
         
         if (exam.findings) {
@@ -1130,7 +1227,7 @@ export class MedicalRecordsService {
       throw new BadRequestException('El paciente no tiene email registrado');
     }
 
-    // Generar PDF
+    // Generar PDF usando el método que ya formatea correctamente
     const pdfBuffer = await this.generateMedicalRecordPDF(medicalRecordId, tenantId);
 
     // Subir PDF a S3

@@ -12,11 +12,6 @@ export function UpdateNotification() {
   const [isReloading, setIsReloading] = useState(false);
 
   useEffect(() => {
-    // Verificar si hay caché antiguo al cargar
-    if (versionService.hasOldCache()) {
-      setShowNotification(true);
-    }
-
     // Iniciar verificación automática
     versionService.startAutoCheck();
 

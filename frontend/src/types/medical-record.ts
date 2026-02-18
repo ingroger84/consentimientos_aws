@@ -43,6 +43,33 @@ export interface MedicalRecord {
   diagnoses?: Diagnosis[];
   evolutions?: Evolution[];
   consents?: MedicalRecordConsent[];
+  admissions?: Admission[];
+}
+
+export interface Admission {
+  id: string;
+  medicalRecordId: string;
+  tenantId: string;
+  admissionNumber: string;
+  admissionDate: string;
+  admissionType: string;
+  reason: string;
+  status: 'active' | 'closed' | 'cancelled';
+  isLocked: boolean;
+  closedAt?: string;
+  closedBy?: string;
+  closureNotes?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  creator?: {
+    id: string;
+    name: string;
+  };
+  closer?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface MedicalRecordConsent {

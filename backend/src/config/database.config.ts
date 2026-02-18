@@ -5,6 +5,7 @@ export const getDatabaseConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => {
   const isProduction = configService.get('NODE_ENV') === 'production';
+  const dbSsl = configService.get('DB_SSL') === 'true';
 
   return {
     type: 'postgres',
@@ -16,6 +17,9 @@ export const getDatabaseConfig = (
     entities: [__dirname + '/../**/*.entity{.ts,.js}'],
     synchronize: false, // NUNCA usar true en produccion
     logging: !isProduction, // Solo logging en desarrollo
+    
+    // SSL Configuration
+    ssl: dbSsl ? { rejectUnauthorized: false } : false,
     
     // Pool de conexiones optimizado
     extra: {

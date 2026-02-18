@@ -456,7 +456,7 @@ export class MedicalRecordsController {
   // ==================== ENDPOINTS PARA HC COMPLETA (PDF Y EMAIL) ====================
 
   @Get(':id/pdf')
-  @UseGuards(PermissionsGuard)
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(PERMISSIONS.PREVIEW_MEDICAL_RECORDS)
   async getMedicalRecordPdf(
     @Param('id') id: string,
@@ -464,15 +464,33 @@ export class MedicalRecordsController {
     @Res() res: Response,
   ) {
     try {
+      // Detectar si es Super Admin (no tiene tenant)
+      const isSuperAdmin = !req.user.tenantId;
+      
+      let tenantId: string;
+      let medicalRecord: any;
+      
+      if (isSuperAdmin) {
+        // Super Admin: Obtener la HC sin restricción de tenant
+        medicalRecord = await this.medicalRecordsService.findOne(
+          id,
+          null, // Sin restricción de tenant
+          req.user.sub,
+        );
+        tenantId = medicalRecord.tenantId;
+      } else {
+        // Usuario normal: Validar que pertenezca a su tenant
+        tenantId = req.user.tenantId;
+        medicalRecord = await this.medicalRecordsService.findOne(
+          id,
+          tenantId,
+          req.user.sub,
+        );
+      }
+
       const pdfBuffer = await this.medicalRecordsService.generateMedicalRecordPDF(
         id,
-        req.user.tenantId,
-      );
-
-      const medicalRecord = await this.medicalRecordsService.findOne(
-        id,
-        req.user.tenantId,
-        req.user.sub,
+        tenantId,
       );
 
       const filename = `historia-clinica-${medicalRecord.recordNumber}.pdf`;
@@ -489,15 +507,33 @@ export class MedicalRecordsController {
   }
 
   @Post(':id/send-email')
-  @UseGuards(PermissionsGuard)
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(PERMISSIONS.SEND_EMAIL_MEDICAL_RECORDS)
   async sendMedicalRecordEmail(
     @Param('id') id: string,
     @Request() req: any,
   ) {
+    // Detectar si es Super Admin (no tiene tenant)
+    const isSuperAdmin = !req.user.tenantId;
+    
+    let tenantId: string;
+    
+    if (isSuperAdmin) {
+      // Super Admin: Obtener el tenantId de la HC
+      const medicalRecord = await this.medicalRecordsService.findOne(
+        id,
+        null, // Sin restricción de tenant
+        req.user.sub,
+      );
+      tenantId = medicalRecord.tenantId;
+    } else {
+      // Usuario normal: Usar su tenantId
+      tenantId = req.user.tenantId;
+    }
+    
     await this.medicalRecordsService.sendMedicalRecordEmail(
       id,
-      req.user.tenantId,
+      tenantId,
     );
     return { message: 'Historia clínica enviada por email exitosamente' };
   }

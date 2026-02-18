@@ -8,6 +8,7 @@ import CameraCapture from '@/components/CameraCapture';
 
 interface GenerateConsentModalProps {
   medicalRecordId: string;
+  admissionId?: string | null;
   clientId: string;
   clientName: string;
   onClose: () => void;
@@ -25,6 +26,7 @@ interface ConsentFormData {
 
 export default function GenerateConsentModal({
   medicalRecordId,
+  admissionId,
   clientName,
   onClose,
   onSuccess,
@@ -116,6 +118,11 @@ export default function GenerateConsentModal({
       return;
     }
 
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
+      return;
+    }
+
     try {
       setLoading(true);
       const result = await medicalRecordsService.createConsent(medicalRecordId, {
@@ -123,6 +130,7 @@ export default function GenerateConsentModal({
         templateIds: selectedTemplates,
         signatureData,
         clientPhoto: clientPhoto || undefined,
+        admissionId,
       });
       
       // Mostrar mensaje de éxito sin abrir el PDF automáticamente

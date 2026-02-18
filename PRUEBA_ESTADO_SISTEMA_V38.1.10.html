@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba - Estado del Sistema v38.1.10</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #10b981; }
+        .status-error { background-color: #ef4444; }
+        .status-warning { background-color: #f59e0b; }
+        .status-unknown { background-color: #6b7280; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border-2 border-blue-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-900 mb-2">
+                        🔧 Prueba de Estado del Sistema
+                    </h1>
+                    <p class="text-gray-600 text-lg">
+                        Versión 38.1.10 - Desplegada el 18 de febrero de 2026
+                    </p>
+                </div>
+                <div class="text-right">
+                    <div class="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold">
+                        <span class="status-indicator status-success pulse"></span>
+                        Desplegado
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones Principales -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Paso 1 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                        1
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Abrir Página de Estado</h3>
+                        <p class="text-gray-600 mb-4">
+                            Haz clic en el botón de abajo para abrir la página de estado en una nueva pestaña.
+                        </p>
+                        <a href="https://archivoenlinea.com/status" 
+                           target="_blank"
+                           onclick="trackTest('open_status')"
+                           class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition transform hover:scale-105">
+                            🔗 Abrir /status
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center text-xl font-bold">
+                        2
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Forzar Recarga</h3>
+                        <p class="text-gray-600 mb-4">
+                            Una vez abierta, presiona estas teclas para forzar recarga sin caché:
+                        </p>
+                        <div class="space-y-2">
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <span class="font-mono text-sm">Windows: <strong>Ctrl + Shift + R</strong></span>
+                            </div>
+                            <div class="bg-gray-100 p-3 rounded-lg">
+                                <span class="font-mono text-sm">Mac: <strong>Cmd + Shift + R</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados Esperados -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <span class="text-3xl">✅</span>
+                ¿Qué Deberías Ver?
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Si Funciona -->
+                <div class="border-2 border-green-300 rounded-lg p-6 bg-green-50">
+                    <h3 class="text-lg font-bold text-green-900 mb-3 flex items-center gap-2">
+                        <span class="status-indicator status-success"></span>
+                        Si Funciona Correctamente
+                    </h3>
+                    <ul class="space-y-2 text-green-800">
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-600 font-bold">✓</span>
+                            <span>Header con título "Estado del Sistema"</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-600 font-bold">✓</span>
+                            <span>Botón "Volver al inicio"</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-600 font-bold">✓</span>
+                            <span>Tarjeta blanca con información</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-600 font-bold">✓</span>
+                            <span>Texto "Sistema Operacional"</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-green-100 rounded-lg">
+                        <p class="text-sm text-green-900 font-semibold">
+                            🎉 ¡Excelente! La página funciona correctamente.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Si NO Funciona -->
+                <div class="border-2 border-red-300 rounded-lg p-6 bg-red-50">
+                    <h3 class="text-lg font-bold text-red-900 mb-3 flex items-center gap-2">
+                        <span class="status-indicator status-error"></span>
+                        Si Sigue en Blanco
+                    </h3>
+                    <ul class="space-y-2 text-red-800">
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-600 font-bold">1.</span>
+                            <span>Presiona <strong>F12</strong> para abrir consola</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-600 font-bold">2.</span>
+                            <span>Ve a la pestaña <strong>"Console"</strong></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-600 font-bold">3.</span>
+                            <span>Busca mensajes de error en rojo</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-red-600 font-bold">4.</span>
+                            <span>Copia y reporta los errores</span>
+                        </li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-red-100 rounded-lg">
+                        <p class="text-sm text-red-900 font-semibold">
+                            ⚠️ Necesitamos ver los errores de la consola.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pruebas Alternativas -->
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-lg p-8 mb-8 border border-purple-200">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <span class="text-3xl">🔄</span>
+                Pruebas Alternativas
+            </h2>
+            
+            <div class="grid md:grid-cols-3 gap-4">
+                <!-- Modo Incógnito -->
+                <div class="bg-white rounded-lg p-4 shadow">
+                    <h4 class="font-bold text-gray-900 mb-2">🕵️ Modo Incógnito</h4>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Prueba en una ventana privada para descartar problemas de caché.
+                    </p>
+                    <button onclick="alert('Abre una ventana de incógnito manualmente:\\n\\nChrome/Edge: Ctrl+Shift+N\\nFirefox: Ctrl+Shift+P\\nSafari: Cmd+Shift+N')" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded text-sm transition">
+                        Ver Instrucciones
+                    </button>
+                </div>
+
+                <!-- Otro Navegador -->
+                <div class="bg-white rounded-lg p-4 shadow">
+                    <h4 class="font-bold text-gray-900 mb-2">🌐 Otro Navegador</h4>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Prueba en Chrome, Firefox, Edge o Safari para comparar.
+                    </p>
+                    <a href="https://archivoenlinea.com/status" 
+                       target="_blank"
+                       class="block w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded text-sm text-center transition">
+                        Abrir en Otro
+                    </a>
+                </div>
+
+                <!-- Otro Dispositivo -->
+                <div class="bg-white rounded-lg p-4 shadow">
+                    <h4 class="font-bold text-gray-900 mb-2">📱 Otro Dispositivo</h4>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Prueba desde tu celular o tablet para verificar.
+                    </p>
+                    <button onclick="showQR()" 
+                            class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded text-sm transition">
+                        Ver QR Code
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Técnica -->
+        <div class="bg-gray-900 text-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span class="text-3xl">💻</span>
+                Información Técnica
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-bold text-blue-400 mb-3">Versiones Desplegadas</h4>
+                    <div class="space-y-2 text-sm font-mono">
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Frontend:</span>
+                            <span class="text-green-400">38.1.10</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Backend:</span>
+                            <span class="text-green-400">38.1.7</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Fecha:</span>
+                            <span class="text-green-400">2026-02-18</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">Build Hash:</span>
+                            <span class="text-green-400">mlsap6l1</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold text-blue-400 mb-3">Cambios Aplicados</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Versión simplificada de SystemStatusPage</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Eliminados hooks complejos</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400">✓</span>
+                            <span>UI básica para diagnóstico</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-green-400">✓</span>
+                            <span>Desplegado en AWS</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registro de Pruebas -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <span class="text-3xl">📋</span>
+                Registro de Pruebas
+            </h2>
+            
+            <div id="testLog" class="space-y-2 mb-4 max-h-64 overflow-y-auto">
+                <div class="text-gray-500 text-center py-8">
+                    No hay pruebas registradas aún. Haz clic en los botones de arriba para comenzar.
+                </div>
+            </div>
+            
+            <div class="flex gap-4">
+                <button onclick="clearLog()" 
+                        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition">
+                    🗑️ Limpiar Registro
+                </button>
+                <button onclick="copyLog()" 
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded transition">
+                    📋 Copiar Registro
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-8 text-center text-gray-600">
+            <p class="mb-2">
+                ¿Necesitas ayuda? Reporta los resultados de las pruebas.
+            </p>
+            <p class="text-sm">
+                Archivo en Línea - Sistema de Consentimientos Digitales
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const testLog = [];
+
+        function trackTest(action) {
+            const timestamp = new Date().toLocaleString('es-CO');
+            const entry = {
+                action,
+                timestamp,
+                userAgent: navigator.userAgent
+            };
+            testLog.push(entry);
+            updateLogDisplay();
+            console.log('🔍 Test tracked:', entry);
+        }
+
+        function updateLogDisplay() {
+            const logDiv = document.getElementById('testLog');
+            if (testLog.length === 0) {
+                logDiv.innerHTML = '<div class="text-gray-500 text-center py-8">No hay pruebas registradas aún.</div>';
+                return;
+            }
+
+            logDiv.innerHTML = testLog.map((entry, index) => `
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-semibold text-gray-900">${index + 1}. ${getActionName(entry.action)}</span>
+                            <p class="text-sm text-gray-600">${entry.timestamp}</p>
+                        </div>
+                        <span class="text-green-600 font-bold">✓</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getActionName(action) {
+            const names = {
+                'open_status': 'Abrió página /status',
+                'open_landing': 'Abrió landing page',
+                'check_console': 'Revisó consola',
+                'incognito': 'Probó en modo incógnito'
+            };
+            return names[action] || action;
+        }
+
+        function clearLog() {
+            if (confirm('¿Estás seguro de que quieres limpiar el registro?')) {
+                testLog.length = 0;
+                updateLogDisplay();
+                console.log('🗑️ Log cleared');
+            }
+        }
+
+        function copyLog() {
+            const text = testLog.map((entry, index) => 
+                `${index + 1}. ${getActionName(entry.action)} - ${entry.timestamp}`
+            ).join('\n');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Registro copiado al portapapeles');
+            }).catch(() => {
+                alert('❌ Error al copiar. Usa Ctrl+C manualmente.');
+            });
+        }
+
+        function showQR() {
+            alert('📱 Escanea este QR desde tu celular:\\n\\nURL: https://archivoenlinea.com/status\\n\\n(Nota: Necesitarías generar un QR code real para esta URL)');
+        }
+
+        // Log inicial
+        console.log('🔧 Prueba de Estado del Sistema v38.1.10');
+        console.log('📅 Fecha:', new Date().toLocaleString('es-CO'));
+        console.log('🌐 URL de prueba: https://archivoenlinea.com/status');
+        console.log('💻 User Agent:', navigator.userAgent);
+    </script>
+</body>
+</html>

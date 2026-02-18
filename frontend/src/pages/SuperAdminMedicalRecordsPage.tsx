@@ -5,7 +5,7 @@ import api from '@/services/api';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
 import { medicalRecordsService } from '@/services/medical-records.service';
-import MedicalRecordConsentPdfViewer from '@/components/medical-records/MedicalRecordConsentPdfViewer';
+import MedicalRecordPdfViewer from '@/components/medical-records/MedicalRecordPdfViewer';
 
 interface MedicalRecord {
   id: string;
@@ -40,8 +40,8 @@ export default function SuperAdminMedicalRecordsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
-  const [selectedPdf, setSelectedPdf] = useState<{ recordId: string; consentId: string; clientName: string } | null>(null);
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
+  const [previewRecord, setPreviewRecord] = useState<MedicalRecord | null>(null);
   const navigate = useNavigate();
   const toast = useToast();
   const confirm = useConfirm();
@@ -152,23 +152,8 @@ export default function SuperAdminMedicalRecordsPage() {
   const handlePreview = async (record: MedicalRecord, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    try {
-      // Verificar que tenga consentimientos
-      const consents = await medicalRecordsService.getConsents(record.id);
-      if (consents.length === 0) {
-        toast.error('No hay consentimientos generados', 'Esta historia clínica no tiene consentimientos para visualizar');
-        return;
-      }
-      
-      // Abrir modal con el primer consentimiento (el más reciente)
-      setSelectedPdf({
-        recordId: record.id,
-        consentId: consents[0].id,
-        clientName: record.clientName
-      });
-    } catch (error: any) {
-      toast.error('Error al cargar vista previa', error.response?.data?.message || error.message);
-    }
+    // Abrir el modal de vista previa
+    setPreviewRecord(record);
   };
 
   const handleSendEmail = async (record: MedicalRecord, e: React.MouseEvent) => {
@@ -547,12 +532,12 @@ export default function SuperAdminMedicalRecordsPage() {
       </div>
 
       {/* Modal de Vista Previa */}
-      {selectedPdf && (
-        <MedicalRecordConsentPdfViewer
-          medicalRecordId={selectedPdf.recordId}
-          consentId={selectedPdf.consentId}
-          clientName={selectedPdf.clientName}
-          onClose={() => setSelectedPdf(null)}
+      {previewRecord && (
+        <MedicalRecordPdfViewer
+          medicalRecordId={previewRecord.id}
+          recordNumber={previewRecord.recordNumber}
+          clientName={previewRecord.clientName}
+          onClose={() => setPreviewRecord(null)}
         />
       )}
     </div>

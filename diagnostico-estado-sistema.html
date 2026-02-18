@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico - Estado del Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .test-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .test-url {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .response-box {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #e6f7ff;
+            border: 2px solid #91d5ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            font-weight: 700;
+            color: #0050b3;
+            margin-bottom: 8px;
+        }
+
+        .info-text {
+            color: #096dd9;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔍 Diagnóstico - Estado del Sistema</h1>
+            <p class="subtitle">Verificación de endpoints y conectividad</p>
+
+            <div class="info-box">
+                <div class="info-title">ℹ️ Información</div>
+                <div class="info-text">
+                    Esta página prueba la conectividad con los endpoints del sistema para diagnosticar
+                    por qué la página de "Estado del Sistema" no carga correctamente.
+                </div>
+            </div>
+
+            <!-- Test 1: Health Basic -->
+            <div class="test-section">
+                <div class="test-title">Test 1: Health Check Básico</div>
+                <div class="test-url">GET https://archivoenlinea.com/api/health</div>
+                <button class="btn" onclick="testHealthBasic()">🧪 Probar</button>
+                <div id="result1" class="status loading" style="display: none;">
+                    Probando...<span class="loading-spinner"></span>
+                </div>
+                <div id="response1" class="response-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 2: Health Detailed -->
+            <div class="test-section">
+                <div class="test-title">Test 2: Health Check Detallado</div>
+                <div class="test-url">GET https://archivoenlinea.com/api/health/detailed</div>
+                <button class="btn" onclick="testHealthDetailed()">🧪 Probar</button>
+                <div id="result2" class="status loading" style="display: none;">
+                    Probando...<span class="loading-spinner"></span>
+                </div>
+                <div id="response2" class="response-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 3: Version -->
+            <div class="test-section">
+                <div class="test-title">Test 3: Versión del Sistema</div>
+                <div class="test-url">GET https://archivoenlinea.com/api/health/version</div>
+                <button class="btn" onclick="testVersion()">🧪 Probar</button>
+                <div id="result3" class="status loading" style="display: none;">
+                    Probando...<span class="loading-spinner"></span>
+                </div>
+                <div id="response3" class="response-box" style="display: none;"></div>
+            </div>
+
+            <!-- Test 4: Ruta Frontend -->
+            <div class="test-section">
+                <div class="test-title">Test 4: Ruta Frontend /status</div>
+                <div class="test-url">https://archivoenlinea.com/status</div>
+                <button class="btn" onclick="window.open('https://archivoenlinea.com/status', '_blank')">
+                    🔗 Abrir en Nueva Pestaña
+                </button>
+                <div class="info-text" style="margin-top: 10px;">
+                    Esto abrirá la página de estado en una nueva pestaña. Verifica si carga correctamente.
+                </div>
+            </div>
+
+            <!-- Test All -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="testAll()" style="font-size: 16px; padding: 16px 32px;">
+                    🚀 Ejecutar Todos los Tests
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testHealthBasic() {
+            const resultDiv = document.getElementById('result1');
+            const responseDiv = document.getElementById('response1');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'status loading';
+            resultDiv.innerHTML = 'Probando...<span class="loading-spinner"></span>';
+            responseDiv.style.display = 'none';
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch('https://archivoenlinea.com/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const endTime = Date.now();
+                const data = await response.json();
+
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Éxito - Status: ${response.status} - Tiempo: ${endTime - startTime}ms`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error completo:\n${error.stack || error.toString()}`;
+            }
+        }
+
+        async function testHealthDetailed() {
+            const resultDiv = document.getElementById('result2');
+            const responseDiv = document.getElementById('response2');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'status loading';
+            resultDiv.innerHTML = 'Probando...<span class="loading-spinner"></span>';
+            responseDiv.style.display = 'none';
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch('https://archivoenlinea.com/api/health/detailed', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const endTime = Date.now();
+                const data = await response.json();
+
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Éxito - Status: ${response.status} - Tiempo: ${endTime - startTime}ms`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error completo:\n${error.stack || error.toString()}`;
+            }
+        }
+
+        async function testVersion() {
+            const resultDiv = document.getElementById('result3');
+            const responseDiv = document.getElementById('response3');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'status loading';
+            resultDiv.innerHTML = 'Probando...<span class="loading-spinner"></span>';
+            responseDiv.style.display = 'none';
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch('https://archivoenlinea.com/api/health/version', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const endTime = Date.now();
+                const data = await response.json();
+
+                resultDiv.className = 'status success';
+                resultDiv.innerHTML = `✅ Éxito - Status: ${response.status} - Tiempo: ${endTime - startTime}ms`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.className = 'status error';
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error completo:\n${error.stack || error.toString()}`;
+            }
+        }
+
+        async function testAll() {
+            await testHealthBasic();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testHealthDetailed();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testVersion();
+        }
+
+        // Auto-ejecutar al cargar
+        window.addEventListener('load', () => {
+            console.log('Página de diagnóstico cargada');
+            console.log('Puedes ejecutar los tests manualmente o usar el botón "Ejecutar Todos los Tests"');
+        });
+    </script>
+</body>
+</html>

@@ -5,11 +5,12 @@ import { useToast } from '../../hooks/useToast';
 
 interface AddDiagnosisModalProps {
   medicalRecordId: string;
+  admissionId?: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess }: AddDiagnosisModalProps) {
+export default function AddDiagnosisModal({ medicalRecordId, admissionId, onClose, onSuccess }: AddDiagnosisModalProps) {
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,12 +28,18 @@ export default function AddDiagnosisModal({ medicalRecordId, onClose, onSuccess 
       return;
     }
 
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
+      return;
+    }
+
     try {
       setLoading(true);
       
       const payload: any = {
         diagnosisType: formData.diagnosisType,
         description: formData.description,
+        admissionId,
       };
       
       if (formData.code) {

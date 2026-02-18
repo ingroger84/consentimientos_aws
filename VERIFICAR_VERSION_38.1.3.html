@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Versión 38.1.3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 15px;
+            font-size: 1.1em;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 5px solid #17a2b8;
+        }
+        
+        .icon {
+            font-size: 30px;
+            margin-right: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px 5px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .result-box {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificación de Versión</h1>
+        <div style="text-align: center;">
+            <div class="version-badge">Versión 38.1.3</div>
+        </div>
+        
+        <div class="status info">
+            <span class="icon">ℹ️</span>
+            <div>
+                <strong>Versión esperada:</strong> 38.1.3 - 2026-02-14<br>
+                <small>Esta es la versión que debe aparecer en la aplicación</small>
+            </div>
+        </div>
+
+        <div style="margin: 30px 0;">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">📋 Pasos de Verificación</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Limpiar caché del navegador</strong>
+                <div style="margin-left: 40px; margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="clearCache()">🗑️ Limpiar Caché</button>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Verificar versión del servidor</strong>
+                <div style="margin-left: 40px; margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="checkVersion()">🔍 Verificar Versión</button>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Acceder a la aplicación</strong>
+                <div style="margin-left: 40px; margin-top: 10px;">
+                    <a href="https://admin.archivoenlinea.com" target="_blank" class="btn btn-success">
+                        🚀 Ir a Super Admin
+                    </a>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Verificar en el sidebar</strong>
+                <div style="margin-left: 40px; margin-top: 10px; color: #666;">
+                    Buscar en la parte inferior del sidebar la versión.<br>
+                    Debe mostrar: <span class="highlight">v38.1.3 - 2026-02-14</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" style="display: none; margin-top: 30px;">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">📊 Resultados</h2>
+            <div id="version-result"></div>
+            <div id="cache-result"></div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #e7f3ff; border-radius: 10px; border-left: 5px solid #2196F3;">
+            <h3 style="color: #1976D2; margin-bottom: 10px;">💡 Información Importante</h3>
+            <ul style="margin-left: 20px; color: #0c5460;">
+                <li style="margin: 8px 0;">El problema NO era caché del navegador</li>
+                <li style="margin: 8px 0;">Era un archivo de código fuente no actualizado</li>
+                <li style="margin: 8px 0;">Ahora todos los archivos están sincronizados</li>
+                <li style="margin: 8px 0;">La versión 38.1.3 está desplegada correctamente</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #d4edda; border-radius: 10px; border-left: 5px solid #28a745;">
+            <h3 style="color: #155724; margin-bottom: 10px;">✅ Cambios en v38.1.3</h3>
+            <ul style="margin-left: 20px; color: #155724;">
+                <li style="margin: 8px 0;"><strong>Banner de actualización:</strong> Solo aparece con actualización real</li>
+                <li style="margin: 8px 0;"><strong>Botón Vista Previa HC:</strong> Muestra el PDF completo</li>
+                <li style="margin: 8px 0;"><strong>Sistema:</strong> Completamente operacional</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function clearCache() {
+            // Limpiar localStorage
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.includes('app_') || key.includes('build_') || key.includes('version') || key.includes('cache'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            
+            // Mostrar resultado
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('cache-result').innerHTML = `
+                <div class="status success">
+                    <span class="icon">✅</span>
+                    <div>
+                        <strong>Caché limpiado exitosamente</strong><br>
+                        Se eliminaron ${keysToRemove.length} elementos del localStorage<br>
+                        <small>Ahora verifica la versión del servidor</small>
+                    </div>
+                </div>
+            `;
+        }
+        
+        async function checkVersion() {
+            try {
+                const response = await fetch('https://admin.archivoenlinea.com/version.json?t=' + Date.now(), {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error('No se pudo obtener la versión del servidor');
+                }
+                
+                const data = await response.json();
+                
+                document.getElementById('results').style.display = 'block';
+                
+                const isCorrect = data.version === '38.1.3';
+                const statusClass = isCorrect ? 'success' : 'error';
+                const icon = isCorrect ? '✅' : '❌';
+                
+                document.getElementById('version-result').innerHTML = `
+                    <div class="status ${statusClass}">
+                        <span class="icon">${icon}</span>
+                        <div>
+                            <strong>Versión del servidor: ${data.version}</strong><br>
+                            Build Hash: ${data.buildHash}<br>
+                            Fecha: ${data.buildDate}<br>
+                            Timestamp: ${data.buildTimestamp}<br>
+                            <br>
+                            ${isCorrect ? 
+                                '<span style="color: #28a745; font-weight: bold;">✅ Versión correcta desplegada</span>' : 
+                                '<span style="color: #dc3545; font-weight: bold;">❌ Versión incorrecta - Contactar soporte</span>'
+                            }
+                        </div>
+                    </div>
+                `;
+                
+                if (isCorrect) {
+                    setTimeout(() => {
+                        alert('✅ Versión correcta detectada!\n\nAhora puedes acceder a la aplicación y verificar que aparece v38.1.3 en el sidebar.');
+                    }, 500);
+                }
+            } catch (error) {
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('version-result').innerHTML = `
+                    <div class="status error">
+                        <span class="icon">❌</span>
+                        <div>
+                            <strong>Error al verificar versión</strong><br>
+                            ${error.message}<br>
+                            <small>Verifica tu conexión a internet</small>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Verificar versión automáticamente al cargar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const autoCheck = confirm('¿Deseas verificar la versión del servidor automáticamente?');
+                if (autoCheck) {
+                    checkVersion();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

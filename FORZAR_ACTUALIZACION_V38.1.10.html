@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Actualización v38.1.10 - Corrección Super Admin HC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .version {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .changes {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .changes h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .changes ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .changes li {
+            color: #555;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .changes li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .critical {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .critical strong {
+            color: #856404;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔧</div>
+        <h1>Actualización Crítica Disponible</h1>
+        <div class="version">Versión 38.1.10</div>
+        
+        <div class="critical">
+            <strong>⚠️ CORRECCIÓN CRÍTICA:</strong> Error 500 al cargar PDF desde Super Admin corregido
+        </div>
+
+        <div class="description">
+            Esta actualización corrige un error crítico que impedía al Super Admin ver historias clínicas y reenviar emails.
+        </div>
+
+        <div class="changes">
+            <h3>🎯 Cambios en esta versión:</h3>
+            <ul>
+                <li>Corrección crítica: Error 500 al cargar PDF desde Super Admin</li>
+                <li>Corrección: método findOne() ahora maneja correctamente tenantId null</li>
+                <li>Corrección: logAudit() usa el tenantId de la HC encontrada</li>
+                <li>Mejora: Super Admin puede ver PDFs y reenviar emails sin errores</li>
+            </ul>
+        </div>
+
+        <button class="btn" onclick="clearCacheAndReload()">🚀 Actualizar Ahora</button>
+        <button class="btn" onclick="testBackend()">🔍 Verificar Backend</button>
+
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+            <div id="progressText">Iniciando...</div>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="footer">
+            <p>Sistema de Consentimientos Informados</p>
+            <p>Actualizado: 14 de Febrero, 2026</p>
+        </div>
+    </div>
+
+    <script>
+        function showProgress() {
+            document.getElementById('progress').style.display = 'block';
+        }
+
+        function hideProgress() {
+            document.getElementById('progress').style.display = 'none';
+        }
+
+        function updateProgress(percent, text) {
+            const fill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            fill.style.width = percent + '%';
+            fill.textContent = percent + '%';
+            progressText.textContent = text;
+        }
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+            status.style.display = 'block';
+        }
+
+        async function clearCacheAndReload() {
+            showProgress();
+            updateProgress(10, 'Limpiando caché del navegador...');
+
+            try {
+                // 1. Limpiar localStorage
+                updateProgress(20, 'Limpiando localStorage...');
+                localStorage.clear();
+                await sleep(300);
+
+                // 2. Limpiar sessionStorage
+                updateProgress(30, 'Limpiando sessionStorage...');
+                sessionStorage.clear();
+                await sleep(300);
+
+                // 3. Limpiar cookies
+                updateProgress(40, 'Limpiando cookies...');
+                document.cookie.split(";").forEach(function(c) {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+                await sleep(300);
+
+                // 4. Limpiar Cache API
+                updateProgress(50, 'Limpiando Cache API...');
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+                await sleep(300);
+
+                // 5. Limpiar Service Workers
+                updateProgress(60, 'Desregistrando Service Workers...');
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(reg => reg.unregister()));
+                }
+                await sleep(300);
+
+                // 6. Verificar versión del backend
+                updateProgress(70, 'Verificando versión del backend...');
+                const response = await fetch('https://archivoenlinea.com/api/health/version', {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                const data = await response.json();
+                await sleep(300);
+
+                updateProgress(80, 'Versión del backend: ' + data.version);
+                await sleep(500);
+
+                if (data.version === '38.1.10') {
+                    updateProgress(90, 'Backend actualizado correctamente');
+                    await sleep(500);
+                    
+                    updateProgress(100, '¡Actualización completada! Recargando...');
+                    await sleep(1000);
+
+                    // Recargar con parámetros anti-caché
+                    window.location.href = 'https://archivoenlinea.com/?v=' + Date.now() + '&cache=clear';
+                } else {
+                    showStatus('⚠️ Backend en versión ' + data.version + '. Se esperaba 38.1.10', true);
+                    hideProgress();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus('❌ Error al actualizar: ' + error.message, true);
+                hideProgress();
+            }
+        }
+
+        async function testBackend() {
+            showProgress();
+            updateProgress(30, 'Conectando con el backend...');
+
+            try {
+                const response = await fetch('https://archivoenlinea.com/api/health/version', {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
+
+                updateProgress(60, 'Procesando respuesta...');
+                const data = await response.json();
+
+                updateProgress(100, 'Verificación completada');
+                await sleep(500);
+
+                hideProgress();
+                showStatus(`✅ Backend funcionando correctamente\nVersión: ${data.version}\nFecha: ${data.date}`, false);
+            } catch (error) {
+                console.error('Error:', error);
+                hideProgress();
+                showStatus('❌ Error al conectar con el backend: ' + error.message, true);
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Auto-verificar al cargar
+        window.addEventListener('load', () => {
+            setTimeout(testBackend, 1000);
+        });
+    </script>
+</body>
+</html>

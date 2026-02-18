@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Actualización v38.1.7</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .version {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .status {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .status.checking {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .instructions {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #4a5568;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+        }
+
+        .code {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        #currentVersion {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🔄</div>
+            <h1>Actualización Disponible</h1>
+            <div class="version">v38.1.7</div>
+
+            <div id="statusContainer" class="status checking">
+                <div>Verificando versión actual...</div>
+                <div class="loading"></div>
+            </div>
+
+            <div id="currentVersion"></div>
+
+            <div id="actions" style="display: none;">
+                <button class="btn" onclick="clearCacheAndReload()">
+                    🚀 Actualizar Ahora
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='https://archivoenlinea.com'">
+                    ← Volver al Sistema
+                </button>
+            </div>
+
+            <div class="instructions">
+                <h3>📋 Si la actualización automática no funciona:</h3>
+                <ol>
+                    <li>Presiona <span class="code">Ctrl + Shift + Delete</span> (Windows) o <span class="code">Cmd + Shift + Delete</span> (Mac)</li>
+                    <li>Selecciona "Todo el tiempo" o "Desde siempre"</li>
+                    <li>Marca solo "Imágenes y archivos en caché"</li>
+                    <li>Click en "Borrar datos"</li>
+                    <li>Recarga la página con <span class="code">Ctrl + F5</span></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXPECTED_VERSION = '38.1.7';
+        const API_URL = 'https://archivoenlinea.com/api';
+
+        async function checkVersion() {
+            try {
+                // Verificar versión del frontend
+                const frontendResponse = await fetch(`/version.json?t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const frontendData = await frontendResponse.json();
+                
+                // Verificar versión del backend
+                const backendResponse = await fetch(`${API_URL}/health/version?t=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const backendData = await backendResponse.json();
+
+                const statusContainer = document.getElementById('statusContainer');
+                const currentVersionDiv = document.getElementById('currentVersion');
+                const actionsDiv = document.getElementById('actions');
+
+                currentVersionDiv.innerHTML = `
+                    Frontend: <strong>${frontendData.version}</strong><br>
+                    Backend: <strong>${backendData.current.version}</strong>
+                `;
+
+                if (frontendData.version === EXPECTED_VERSION && backendData.current.version === EXPECTED_VERSION) {
+                    statusContainer.className = 'status success';
+                    statusContainer.innerHTML = `
+                        <div class="icon">✅</div>
+                        <div><strong>¡Sistema Actualizado!</strong></div>
+                        <div>Ya estás usando la versión más reciente</div>
+                    `;
+                    actionsDiv.style.display = 'block';
+                    actionsDiv.innerHTML = `
+                        <button class="btn" onclick="window.location.href='https://archivoenlinea.com'">
+                            ✨ Ir al Sistema
+                        </button>
+                    `;
+                } else {
+                    statusContainer.className = 'status error';
+                    statusContainer.innerHTML = `
+                        <div class="icon">⚠️</div>
+                        <div><strong>Actualización Necesaria</strong></div>
+                        <div>Tu navegador tiene una versión antigua en caché</div>
+                    `;
+                    actionsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error al verificar versión:', error);
+                const statusContainer = document.getElementById('statusContainer');
+                statusContainer.className = 'status error';
+                statusContainer.innerHTML = `
+                    <div class="icon">❌</div>
+                    <div><strong>Error de Conexión</strong></div>
+                    <div>No se pudo verificar la versión del sistema</div>
+                `;
+                document.getElementById('actions').style.display = 'block';
+            }
+        }
+
+        async function clearCacheAndReload() {
+            const statusContainer = document.getElementById('statusContainer');
+            statusContainer.className = 'status checking';
+            statusContainer.innerHTML = `
+                <div>Limpiando caché y actualizando...</div>
+                <div class="loading"></div>
+            `;
+
+            try {
+                // Limpiar caché del navegador
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+
+                // Limpiar localStorage y sessionStorage
+                localStorage.clear();
+                sessionStorage.clear();
+
+                // Esperar un momento
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Recargar con caché limpio
+                window.location.href = 'https://archivoenlinea.com?' + Date.now();
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                statusContainer.className = 'status error';
+                statusContainer.innerHTML = `
+                    <div class="icon">❌</div>
+                    <div><strong>Error</strong></div>
+                    <div>Por favor, limpia el caché manualmente siguiendo las instrucciones</div>
+                `;
+            }
+        }
+
+        // Verificar versión al cargar
+        checkVersion();
+    </script>
+</body>
+</html>

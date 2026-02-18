@@ -7,6 +7,9 @@ export { UpdateMedicalRecordDto } from './update-medical-record.dto';
 
 // Anamnesis DTOs
 export class CreateAnamnesisDto {
+  @IsUUID()
+  admissionId: string;
+
   @IsString()
   chiefComplaint: string;
 
@@ -35,6 +38,9 @@ export class UpdateAnamnesisDto extends PartialType(CreateAnamnesisDto) {}
 
 // Physical Exam DTOs
 export class CreatePhysicalExamDto {
+  @IsUUID()
+  admissionId: string;
+
   @IsObject()
   @IsOptional()
   vitalSigns?: Record<string, any>;
@@ -56,6 +62,9 @@ export class UpdatePhysicalExamDto extends PartialType(CreatePhysicalExamDto) {}
 
 // Diagnosis DTOs
 export class CreateDiagnosisDto {
+  @IsUUID()
+  admissionId: string;
+
   @IsString()
   @IsIn(['principal', 'relacionado', 'complicacion'])
   diagnosisType: string;
@@ -76,6 +85,9 @@ export class UpdateDiagnosisDto extends PartialType(CreateDiagnosisDto) {}
 
 // Evolution DTOs
 export class CreateEvolutionDto {
+  @IsUUID()
+  admissionId: string;
+
   @IsDateString()
   evolutionDate: string;
 

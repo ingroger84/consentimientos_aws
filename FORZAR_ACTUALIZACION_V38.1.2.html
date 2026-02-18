@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar a v38.1.2 - Corrección Vista Previa HC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .version {
+            text-align: center;
+            color: #764ba2;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .alert h2 {
+            color: #856404;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .alert p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        .changelog {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .changelog h3 {
+            color: #1976D2;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .changelog ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .changelog li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .changelog li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .steps h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .step {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step-content {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 50px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 18px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        
+        .highlight {
+            background: #fffacd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Nueva Versión Disponible</h1>
+        <div class="version">v38.1.2</div>
+        
+        <div class="alert">
+            <h2>⚠️ Actualización Importante</h2>
+            <p>Se ha corregido el botón <span class="highlight">"Vista Previa"</span> en Historias Clínicas. Ahora muestra correctamente la HC completa en lugar del consentimiento.</p>
+        </div>
+        
+        <div class="changelog">
+            <h3>📋 Corrección en esta versión:</h3>
+            <ul>
+                <li><strong>Botón "Vista Previa" en HC:</strong> Ahora abre el PDF de la Historia Clínica completa (anamnesis, exámenes, diagnósticos, etc.)</li>
+                <li><strong>Antes:</strong> Mostraba solo el consentimiento</li>
+                <li><strong>Ahora:</strong> Muestra la HC completa en nueva ventana</li>
+                <li><strong>Sección de consentimientos:</strong> Sigue funcionando correctamente dentro de la HC</li>
+            </ul>
+        </div>
+        
+        <div class="steps">
+            <h3>📝 Pasos para actualizar:</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <strong>Presiona el botón "Limpiar Caché"</strong> abajo para eliminar automáticamente la versión antigua.
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <strong>Espera 2 segundos</strong> mientras se limpia la caché y se recarga automáticamente.
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <strong>Verifica la versión</strong> en la esquina inferior derecha (debe mostrar v38.1.2).
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">4</span>
+                <div class="step-content">
+                    <strong>Prueba el botón "Vista Previa"</strong> en cualquier Historia Clínica para confirmar que muestra la HC completa.
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="clearCacheAndReload()">
+                🗑️ Limpiar Caché y Recargar
+            </button>
+            <button class="btn-secondary" onclick="checkVersion()">
+                🔍 Verificar Versión Actual
+            </button>
+        </div>
+        
+        <div id="status" class="status"></div>
+    </div>
+    
+    <script>
+        async function clearCacheAndReload() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '🔄 Limpiando caché...';
+            
+            try {
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                // Limpiar Cache Storage
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+                
+                // Limpiar localStorage (excepto datos de sesión)
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                // Actualizar versión
+                localStorage.setItem('app_version', '38.1.2');
+                localStorage.setItem('build_timestamp', '1770970561653');
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Caché limpiada exitosamente. Recargando en 2 segundos...';
+                
+                setTimeout(() => {
+                    window.location.href = 'https://admin.archivoenlinea.com/?t=' + Date.now();
+                }, 2000);
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error al limpiar caché: ' + error.message;
+            }
+        }
+        
+        async function checkVersion() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status info';
+            statusDiv.textContent = '🔍 Verificando versión...';
+            
+            try {
+                // Verificar versión del frontend
+                const frontendResponse = await fetch('https://admin.archivoenlinea.com/version.json?t=' + Date.now(), {
+                    cache: 'no-cache'
+                });
+                const frontendData = await frontendResponse.json();
+                
+                // Verificar versión en localStorage
+                const storedVersion = localStorage.getItem('app_version');
+                const storedTimestamp = localStorage.getItem('build_timestamp');
+                
+                statusDiv.className = 'status info';
+                statusDiv.innerHTML = `
+                    📱 <strong>Versión en Servidor:</strong> ${frontendData.version}<br>
+                    🏗️ <strong>Build Hash:</strong> ${frontendData.buildHash}<br>
+                    📅 <strong>Fecha:</strong> ${frontendData.buildDate}<br><br>
+                    💾 <strong>Versión en tu Navegador:</strong> ${storedVersion || 'No detectada'}<br>
+                    ⏱️ <strong>Timestamp en tu Navegador:</strong> ${storedTimestamp || 'No detectado'}
+                `;
+                
+                if (storedVersion !== '38.1.2' || storedTimestamp !== '1770970561653') {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML += '<br><br>⚠️ <strong>Tu navegador tiene una versión antigua. Por favor, limpia la caché.</strong>';
+                } else {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML += '<br><br>✅ <strong>Tu navegador está actualizado a la última versión.</strong>';
+                }
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error al verificar versión: ' + error.message;
+            }
+        }
+        
+        // Verificar versión automáticamente al cargar
+        window.addEventListener('load', () => {
+            setTimeout(checkVersion, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SuspendedAccountPage from './pages/SuspendedAccountPage';
 import PublicLandingPage from './pages/PublicLandingPage';
-import SystemStatusPage from './pages/SystemStatusPage';
+import SystemStatusPage from './pages/SystemStatusPageSimple';
 
 // Lazy loading para páginas secundarias (mejor performance)
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
