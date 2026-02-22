@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Actualización V39.2.0 - Sistema de Consentimientos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .alert {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-title {
+            color: #c53030;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .alert-content {
+            color: #742a2a;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info-title {
+            color: #2c5282;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info-content {
+            color: #2c5282;
+            line-height: 1.6;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-title {
+            color: #22543d;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .success-content {
+            color: #22543d;
+            line-height: 1.6;
+        }
+
+        .steps {
+            margin: 30px 0;
+        }
+
+        .step {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-title {
+            color: #2d3748;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .step-content {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-left: 50px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 101, 101, 0.6);
+        }
+
+        .status {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.loading {
+            background: #fef5e7;
+            color: #7d6608;
+        }
+
+        .status.success {
+            background: #f0fff4;
+            color: #22543d;
+        }
+
+        .status.error {
+            background: #fff5f5;
+            color: #c53030;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .changelog {
+            background: #faf5ff;
+            border-left: 4px solid #9f7aea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .changelog-title {
+            color: #553c9a;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .changelog-item {
+            color: #553c9a;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .changelog-item:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #9f7aea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version-badge">V39.2.0</div>
+            <h1>🔄 Actualización Crítica del Sistema</h1>
+            <p class="subtitle">Reestructuración Completa del Flujo de Historias Clínicas</p>
+        </div>
+
+        <div class="alert">
+            <div class="alert-title">⚠️ ACCIÓN REQUERIDA</div>
+            <div class="alert-content">
+                <p><strong>Se ha desplegado una actualización crítica (V39.2.0)</strong> que corrige el problema del modal de admisiones que no se cierra y causa cierre de sesión.</p>
+                <p style="margin-top: 10px;"><strong>DEBE limpiar el caché de su navegador</strong> para ver los cambios.</p>
+            </div>
+        </div>
+
+        <div class="changelog">
+            <div class="changelog-title">📋 Cambios en V39.2.0</div>
+            <div class="changelog-item">Reestructuración completa del flujo de creación de admisiones</div>
+            <div class="changelog-item">Corrección del problema de modal que no se cierra</div>
+            <div class="changelog-item">Corrección del cierre de sesión inesperado</div>
+            <div class="changelog-item">Guardado de IDs antes de limpiar estados</div>
+            <div class="changelog-item">Pausa de sincronización antes de navegar</div>
+            <div class="changelog-item">Reset automático del modal al cerrar</div>
+            <div class="changelog-item">Simplificación de la lógica del modal</div>
+            <div class="changelog-item">Mejoras en la gestión de estados</div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">ℹ️ ¿Por qué necesito limpiar el caché?</div>
+            <div class="info-content">
+                <p>Su navegador guarda copias de los archivos antiguos para cargar más rápido. Esto significa que puede estar viendo la versión anterior (39.1.0 o 39.1.1) en lugar de la nueva (39.2.0).</p>
+                <p style="margin-top: 10px;">Limpiar el caché fuerza al navegador a descargar los archivos nuevos con las correcciones.</p>
+            </div>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    Limpiar Caché del Navegador
+                </div>
+                <div class="step-content">
+                    <p><strong>Opción A - Limpieza Rápida:</strong></p>
+                    <p>Presione <code>Ctrl+Shift+Delete</code> → Seleccione "Imágenes y archivos en caché" → Borrar datos</p>
+                    <p style="margin-top: 10px;"><strong>Opción B - Modo Incógnito:</strong></p>
+                    <p>Presione <code>Ctrl+Shift+N</code> para abrir ventana de incógnito</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    Recargar la Página
+                </div>
+                <div class="step-content">
+                    <p>Después de limpiar el caché, presione <code>Ctrl+F5</code> para forzar una recarga completa</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    Verificar Versión
+                </div>
+                <div class="step-content">
+                    <p>Vaya a "Estado del Sistema" y verifique que muestre: <strong>Versión 39.2.0</strong></p>
+                    <p style="margin-top: 10px;">Si muestra otra versión, repita el paso 1</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">4</span>
+                    Probar el Flujo
+                </div>
+                <div class="step-content">
+                    <p>1. Busque un cliente que ya tenga Historia Clínica</p>
+                    <p>2. Cree una nueva admisión</p>
+                    <p>3. Verifique que:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>✅ El modal se cierra correctamente</li>
+                        <li>✅ NO cierra su sesión</li>
+                        <li>✅ Navega a la Historia Clínica</li>
+                        <li>✅ Muestra la nueva admisión</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="success-box">
+            <div class="success-title">✅ Mejoras Implementadas</div>
+            <div class="success-content">
+                <p><strong>Orden correcto de operaciones:</strong> Los IDs se guardan antes de limpiar estados</p>
+                <p style="margin-top: 8px;"><strong>Sincronización mejorada:</strong> Pausa de 100ms asegura que el modal se cierre</p>
+                <p style="margin-top: 8px;"><strong>Reset automático:</strong> El modal siempre inicia limpio</p>
+                <p style="margin-top: 8px;"><strong>Navegación robusta:</strong> Usa React Router sin forzar recargas</p>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-danger" onclick="clearCache()">
+                🗑️ Limpiar Caché Ahora
+            </button>
+            <a href="https://demo-estetica.archivoenlinea.com" class="btn btn-primary" target="_blank">
+                🚀 Ir al Sistema
+            </a>
+            <button class="btn btn-secondary" onclick="checkVersion()">
+                🔍 Verificar Versión
+            </button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        function clearCache() {
+            const status = document.getElementById('status');
+            status.className = 'status show loading';
+            status.innerHTML = `
+                <div class="spinner"></div>
+                <p><strong>Limpiando caché...</strong></p>
+                <p>Por favor, espere...</p>
+            `;
+
+            // Limpiar localStorage
+            localStorage.clear();
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+
+            // Intentar limpiar service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => registration.unregister());
+                });
+            }
+
+            // Intentar limpiar cache storage
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+
+            setTimeout(() => {
+                status.className = 'status show success';
+                status.innerHTML = `
+                    <p><strong>✅ Caché limpiado exitosamente</strong></p>
+                    <p>Ahora presione <code>Ctrl+F5</code> para recargar la página</p>
+                    <p style="margin-top: 10px;">O use el botón de abajo para ir al sistema</p>
+                `;
+            }, 2000);
+        }
+
+        function checkVersion() {
+            const status = document.getElementById('status');
+            status.className = 'status show loading';
+            status.innerHTML = `
+                <div class="spinner"></div>
+                <p><strong>Verificando versión...</strong></p>
+            `;
+
+            fetch('https://demo-estetica.archivoenlinea.com/version.json?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.version === '39.2.0') {
+                        status.className = 'status show success';
+                        status.innerHTML = `
+                            <p><strong>✅ Versión correcta detectada</strong></p>
+                            <p>Versión del servidor: <strong>${data.version}</strong></p>
+                            <p>Fecha de build: ${data.buildDate}</p>
+                            <p style="margin-top: 10px;">El sistema está actualizado correctamente</p>
+                        `;
+                    } else {
+                        status.className = 'status show error';
+                        status.innerHTML = `
+                            <p><strong>⚠️ Versión incorrecta</strong></p>
+                            <p>Versión detectada: <strong>${data.version}</strong></p>
+                            <p>Versión esperada: <strong>39.2.0</strong></p>
+                            <p style="margin-top: 10px;">Por favor, limpie el caché y recargue la página</p>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    status.className = 'status show error';
+                    status.innerHTML = `
+                        <p><strong>❌ Error al verificar versión</strong></p>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 10px;">Verifique su conexión a internet</p>
+                    `;
+                });
+        }
+
+        // Auto-verificar versión al cargar
+        window.addEventListener('load', () => {
+            setTimeout(checkVersion, 1000);
+        });
+    </script>
+</body>
+</html>
