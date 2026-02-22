@@ -104,7 +104,7 @@ export default function SystemStatusPageSimple() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-600 mb-1">Versión del Sistema</p>
-              <p className="text-2xl font-bold text-gray-900">39.0.0</p>
+              <p className="text-2xl font-bold text-gray-900">39.1.0</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Disponibilidad</p>

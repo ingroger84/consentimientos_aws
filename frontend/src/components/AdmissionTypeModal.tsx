@@ -48,25 +48,14 @@ export default function AdmissionTypeModal({
     setError('');
     
     try {
-      console.log('🔵 [MODAL] Iniciando creación de admisión', { selectedType, reason });
-      
-      // Llamar a onSelect y esperar a que termine
+      // Llamar a onSelect (que creará la admisión y navegará)
       await onSelect(selectedType, reason);
       
-      console.log('✅ [MODAL] onSelect completado exitosamente');
-      
-      // Si llegamos aquí, la admisión se creó pero la navegación no ocurrió
-      // Esto NO debería pasar, pero como medida de seguridad, esperamos 2 segundos
-      console.warn('⚠️ [MODAL] La navegación no ocurrió automáticamente. Esperando...');
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Si después de 2 segundos seguimos aquí, algo salió mal
-      console.error('❌ [MODAL] La navegación falló. Recargando página...');
-      window.location.reload();
+      // Si llegamos aquí, todo salió bien
+      // El componente padre se encargará de cerrar el modal y navegar
       
     } catch (error) {
-      console.error('❌ [MODAL] Error al crear admisión:', error);
+      console.error('Error al crear admisión:', error);
       setIsSubmitting(false);
       setError('Error al crear la admisión. Por favor, intente nuevamente.');
     }

@@ -87,16 +87,13 @@ export default function CreateMedicalRecordPage() {
   };
 
   const handleAdmissionTypeSelect = async (admissionType: string, reason: string) => {
-    console.log('🔵 [PAGE] handleAdmissionTypeSelect llamado', { admissionType, reason, existingHC });
-    
     if (!existingHC) {
-      console.error('❌ [PAGE] No hay HC existente');
-      throw new Error('No hay HC existente');
+      console.error('No hay HC existente');
+      return;
     }
 
     try {
       setLoading(true);
-      console.log('🔵 [PAGE] Creando admisión...');
 
       // Crear nueva admisión para la HC existente
       const admission = await admissionsService.create({
@@ -106,28 +103,24 @@ export default function CreateMedicalRecordPage() {
         admissionDate: new Date().toISOString(),
       });
 
-      console.log('✅ [PAGE] Admisión creada exitosamente:', admission);
-      
       // Mostrar mensaje de éxito
-      toast.success('Admisión creada', 'Redirigiendo a la historia clínica...');
+      toast.success('Admisión creada', 'La admisión fue creada exitosamente');
       
-      // Construir URL de destino
-      const targetUrl = `/medical-records/${existingHC.id}?admissionId=${admission.id}&t=${Date.now()}`;
-      console.log('🚀 [PAGE] Navegando a:', targetUrl);
-
-      // Usar window.location.href para navegación completa (fuerza recarga)
-      // Esto desmonta completamente el modal y todos los componentes
-      window.location.href = targetUrl;
+      // Cerrar el modal primero
+      setShowAdmissionModal(false);
       
-      // IMPORTANTE: No hacer nada más después de window.location.href
-      // El navegador está cambiando de página
+      // Limpiar estados
+      setExistingHC(null);
+      setSelectedClient(null);
+      setLoading(false);
+      
+      // Navegar usando React Router (sin forzar recarga)
+      navigate(`/medical-records/${existingHC.id}?admissionId=${admission.id}`);
       
     } catch (error: any) {
-      console.error('❌ [PAGE] Error al crear admisión:', error);
-      console.error('❌ [PAGE] Error details:', error.response?.data);
+      console.error('Error al crear admisión:', error);
       toast.error('Error al crear admisión', error.response?.data?.message || error.message);
       setLoading(false);
-      throw error; // Re-lanzar el error para que el modal lo maneje
     }
   };
 
