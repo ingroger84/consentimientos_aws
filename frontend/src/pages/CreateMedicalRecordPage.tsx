@@ -103,19 +103,28 @@ export default function CreateMedicalRecordPage() {
         admissionDate: new Date().toISOString(),
       });
 
+      // Guardar el ID de la HC antes de limpiar estados
+      const medicalRecordId = existingHC.id;
+      const admissionId = admission.id;
+
       // Mostrar mensaje de éxito
       toast.success('Admisión creada', 'La admisión fue creada exitosamente');
       
-      // Cerrar el modal primero
-      setShowAdmissionModal(false);
-      
-      // Limpiar estados
+      // Limpiar estados ANTES de cerrar el modal
       setExistingHC(null);
       setSelectedClient(null);
       setLoading(false);
       
-      // Navegar usando React Router (sin forzar recarga)
-      navigate(`/medical-records/${existingHC.id}?admissionId=${admission.id}`);
+      // Cerrar el modal
+      setShowAdmissionModal(false);
+      
+      // Pequeña pausa para asegurar que el modal se cierre
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Navegar usando React Router
+      navigate(`/medical-records/${medicalRecordId}?admissionId=${admissionId}`, {
+        replace: false,
+      });
       
     } catch (error: any) {
       console.error('Error al crear admisión:', error);

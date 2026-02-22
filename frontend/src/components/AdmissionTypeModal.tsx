@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface AdmissionTypeModalProps {
@@ -32,9 +32,19 @@ export default function AdmissionTypeModal({
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Resetear estado cuando el modal se cierra
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedType('');
+      setReason('');
+      setError('');
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!selectedType) {
       setError('Debe seleccionar un tipo de admisión');
       return;
@@ -47,18 +57,9 @@ export default function AdmissionTypeModal({
     setIsSubmitting(true);
     setError('');
     
-    try {
-      // Llamar a onSelect (que creará la admisión y navegará)
-      await onSelect(selectedType, reason);
-      
-      // Si llegamos aquí, todo salió bien
-      // El componente padre se encargará de cerrar el modal y navegar
-      
-    } catch (error) {
-      console.error('Error al crear admisión:', error);
-      setIsSubmitting(false);
-      setError('Error al crear la admisión. Por favor, intente nuevamente.');
-    }
+    // Llamar a onSelect de forma síncrona
+    // El componente padre manejará el async y la navegación
+    onSelect(selectedType, reason);
   };
 
   const handleClose = () => {
