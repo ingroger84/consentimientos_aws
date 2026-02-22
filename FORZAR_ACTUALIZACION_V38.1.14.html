@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización V38.1.14 - Sistema de Consentimientos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        
+        .changes-list {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .changes-list h3 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .changes-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .changes-list li {
+            color: #4a5568;
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .changes-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .warning {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .warning-title {
+            color: #c53030;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .warning-text {
+            color: #742a2a;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .steps {
+            background: #edf2f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .steps h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .steps ol {
+            padding-left: 20px;
+        }
+        
+        .steps li {
+            color: #4a5568;
+            padding: 8px 0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚀</div>
+        <div class="version-badge">VERSIÓN 38.1.14</div>
+        <h1>Nueva Actualización Disponible</h1>
+        <p class="subtitle">Mejoras importantes en el sistema de historias clínicas</p>
+        
+        <div class="changes-list">
+            <h3>
+                <span>📋</span>
+                Mejoras Implementadas
+            </h3>
+            <ul>
+                <li><strong>Validación de HC Única:</strong> Ahora el sistema valida que un paciente solo pueda tener una historia clínica activa</li>
+                <li><strong>Flujo Mejorado:</strong> Al seleccionar un cliente con HC activa, se muestra automáticamente el modal para agregar nueva admisión</li>
+                <li><strong>Corrección de Race Condition:</strong> Solucionado el problema de números duplicados en historias clínicas</li>
+                <li><strong>Retry Logic:</strong> El sistema ahora reintenta automáticamente en caso de conflictos de numeración</li>
+                <li><strong>Feedback Visual:</strong> Alertas claras cuando un paciente ya tiene HC activa</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <div class="warning-title">⚠️ Acción Requerida</div>
+            <div class="warning-text">
+                Para aplicar esta actualización correctamente, es necesario limpiar la caché del navegador.
+                Sigue los pasos a continuación para asegurar que veas la versión más reciente.
+            </div>
+        </div>
+        
+        <div class="steps">
+            <h4>Pasos para Actualizar:</h4>
+            <ol>
+                <li>Presiona <strong>Ctrl + Shift + Delete</strong> (Windows) o <strong>Cmd + Shift + Delete</strong> (Mac)</li>
+                <li>Selecciona "Imágenes y archivos en caché"</li>
+                <li>Haz clic en "Borrar datos"</li>
+                <li>Recarga la página con <strong>Ctrl + F5</strong> (Windows) o <strong>Cmd + Shift + R</strong> (Mac)</li>
+            </ol>
+        </div>
+        
+        <a href="https://demo-estetica.archivoenlinea.com" class="btn" onclick="clearCacheAndRedirect(event)">
+            Actualizar Ahora
+        </a>
+        
+        <p style="margin-top: 30px; color: #a0aec0; font-size: 14px;">
+            Fecha de actualización: 19 de Febrero, 2026
+        </p>
+    </div>
+    
+    <script>
+        function clearCacheAndRedirect(event) {
+            event.preventDefault();
+            
+            // Limpiar localStorage
+            localStorage.clear();
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            
+            // Agregar timestamp para forzar recarga
+            const timestamp = new Date().getTime();
+            window.location.href = 'https://demo-estetica.archivoenlinea.com?v=' + timestamp;
+        }
+        
+        // Auto-limpiar caché al cargar la página
+        window.addEventListener('load', function() {
+            console.log('🚀 Versión 38.1.14 - Limpiando caché...');
+            localStorage.clear();
+            sessionStorage.clear();
+        });
+    </script>
+</body>
+</html>

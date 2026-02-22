@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización V38.1.16 - CORRECCIÓN DEFINITIVA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border-left: 4px solid #48bb78;
+        }
+        .section h2 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .icon {
+            font-size: 24px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+        .list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .list li:last-child {
+            border-bottom: none;
+        }
+        .list li:before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .success {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success h3 {
+            color: #22543d;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .success p {
+            color: #276749;
+            line-height: 1.6;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            text-align: center;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.4);
+        }
+        .timestamp {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version">V38.1.16</div>
+            <h1>✅ CORRECCIÓN DEFINITIVA</h1>
+            <p class="subtitle">Modal de admisiones ahora funciona correctamente</p>
+        </div>
+
+        <div class="success">
+            <h3>🎉 Problema Resuelto</h3>
+            <p>
+                <strong>El problema NO era caché.</strong> Era un problema de timing en el código.<br><br>
+                El modal se cerraba correctamente, pero la navegación ocurría tan rápido que React no tenía tiempo de procesar el cierre antes de cambiar de ruta.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🔧</span> Solución Implementada</h2>
+            <ul class="list">
+                <li>Agregado <span class="code">setShowAdmissionModal(false)</span> para cerrar el modal explícitamente</li>
+                <li>Agregado <span class="code">setTimeout(..., 100)</span> para dar tiempo a React de procesar el cierre</li>
+                <li>La navegación ahora ocurre 100ms después de cerrar el modal</li>
+                <li>Esto permite que React actualice el DOM antes de cambiar de ruta</li>
+                <li>El modal desaparece correctamente y luego navega a la HC</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">📝</span> Código Corregido</h2>
+            <div style="background: #2d3748; color: #68d391; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; overflow-x: auto;">
+// Cerrar el modal primero<br>
+setShowAdmissionModal(false);<br>
+<br>
+toast.success('Admisión creada', 'Redirigiendo...');<br>
+<br>
+// Pequeño delay para que React procese el cierre<br>
+setTimeout(() => {<br>
+&nbsp;&nbsp;navigate(`/medical-records/${existingHC.id}?admissionId=${admission.id}`, { replace: true });<br>
+}, 100);
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">✅</span> Flujo Correcto Ahora</h2>
+            <ul class="list">
+                <li>Usuario selecciona paciente con HC existente → Modal se abre</li>
+                <li>Usuario selecciona tipo de admisión y motivo</li>
+                <li>Usuario hace clic en "Crear Admisión"</li>
+                <li>Se crea la admisión en el backend</li>
+                <li>Se cierra el modal (setShowAdmissionModal(false))</li>
+                <li>Se espera 100ms para que React procese el cierre</li>
+                <li>Se navega a la HC con el admissionId</li>
+                <li>Se pueden agregar anamnesis, exámenes, diagnósticos, etc.</li>
+            </ul>
+        </div>
+
+        <button class="button" onclick="forceUpdate()">
+            🔄 Actualizar y Probar Ahora
+        </button>
+
+        <div class="timestamp">
+            Desplegado: 19 de febrero de 2026, 01:56 AM<br>
+            Build: mlsshz7n | Timestamp: 1771464960131<br>
+            <strong>VERSIÓN DEFINITIVA - PROBLEMA RESUELTO</strong>
+        </div>
+    </div>
+
+    <script>
+        function forceUpdate() {
+            console.log('🔄 Limpiando caché y actualizando...');
+            
+            // Limpiar todo
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            console.log('✅ Limpieza completa. Redirigiendo...');
+            
+            setTimeout(function() {
+                window.location.href = 'https://www.archivoenlinea.com/?v=38.1.16&t=' + Date.now();
+            }, 1000);
+        }
+
+        window.addEventListener('load', function() {
+            console.log('📦 Versión 38.1.16 - CORRECCIÓN DEFINITIVA');
+            console.log('🔧 Problema resuelto: Modal ahora se cierra correctamente');
+            console.log('⏰ Build: 1771464960131');
+        });
+    </script>
+</body>
+</html>

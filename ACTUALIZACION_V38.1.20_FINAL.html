@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización V38.1.20 - SOLUCIÓN FINAL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #059669;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            background: #dcfce7;
+            border-left: 4px solid #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            color: #166534;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .alert-text {
+            color: #14532d;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .steps {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            background: #10b981;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .log {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .log.show {
+            display: block;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+        }
+        
+        .success {
+            color: #10b981;
+        }
+        
+        .error {
+            color: #ef4444;
+        }
+        
+        .info {
+            color: #3b82f6;
+        }
+        
+        .warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="version">VERSIÓN 38.1.20</div>
+        <h1>✅ Solución Final Aplicada</h1>
+        <p style="color: #64748b; margin-bottom: 20px;">Navegación inmediata sin delays</p>
+        
+        <div class="alert">
+            <div class="alert-title">🎯 Cambio Implementado</div>
+            <div class="alert-text">
+                Se eliminó el delay de 300ms y el cierre del modal. Ahora el sistema navega 
+                INMEDIATAMENTE después de crear la admisión, lo que debería resolver el problema 
+                del modal que no se cierra.
+            </div>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Limpiar Caché</div>
+                    <div class="step-desc">Eliminar todos los archivos en caché del navegador</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Recargar Sistema</div>
+                    <div class="step-desc">Forzar recarga completa con la nueva versión</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Probar Flujo</div>
+                    <div class="step-desc">Crear una admisión y verificar que navega automáticamente</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="forceUpdate()">
+            🚀 Actualizar a V38.1.20
+        </button>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            log.classList.add('show');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function forceUpdate() {
+            const log = document.getElementById('log');
+            log.innerHTML = '';
+            log.classList.add('show');
+            
+            try {
+                addLog('🔄 Iniciando actualización a V38.1.20...', 'info');
+                
+                // Limpiar Service Workers
+                addLog('📋 Limpiando Service Workers...', 'info');
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        addLog(`✅ Service Worker desregistrado`, 'success');
+                    }
+                }
+                
+                // Limpiar Cache Storage
+                addLog('📋 Limpiando Cache Storage...', 'info');
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        addLog(`✅ Caché eliminado: ${cacheName}`, 'success');
+                    }
+                }
+                
+                // Limpiar LocalStorage (excepto token)
+                addLog('📋 Limpiando almacenamiento local...', 'info');
+                const token = localStorage.getItem('token');
+                localStorage.clear();
+                if (token) {
+                    localStorage.setItem('token', token);
+                    addLog('✅ Token preservado', 'success');
+                }
+                sessionStorage.clear();
+                addLog('✅ Almacenamiento limpiado', 'success');
+                
+                // Preparar recarga
+                addLog('📋 Preparando recarga del sistema...', 'info');
+                const timestamp = new Date().getTime();
+                const url = `https://demo-estetica.archivoenlinea.com/?v=${timestamp}&force=true`;
+                
+                addLog('✅ Limpieza completada exitosamente', 'success');
+                addLog(`🚀 Redirigiendo a: ${url}`, 'info');
+                addLog('⏳ Espere 2 segundos...', 'warning');
+                
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 2000);
+                
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

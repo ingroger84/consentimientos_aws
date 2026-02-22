@@ -1,12 +1,13 @@
-import { Link } from 'react-router-dom';
-import { Activity, CheckCircle, Server, Database, HardDrive } from 'lucide-react';
+import { 
+  Activity, CheckCircle, Server, Database, HardDrive
+} from 'lucide-react';
 
 export default function SystemStatusPageSimple() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -14,15 +15,9 @@ export default function SystemStatusPageSimple() {
                 Estado del Sistema
               </h1>
               <p className="text-gray-600 mt-1">
-                Monitoreo en tiempo real de Archivo en Línea
+                Monitoreo en tiempo real del sistema
               </p>
             </div>
-            <Link
-              to="/"
-              className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-2"
-            >
-              ← Volver al inicio
-            </Link>
           </div>
         </div>
       </div>
@@ -109,7 +104,7 @@ export default function SystemStatusPageSimple() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-600 mb-1">Versión del Sistema</p>
-              <p className="text-2xl font-bold text-gray-900">38.1.13</p>
+              <p className="text-2xl font-bold text-gray-900">38.1.24</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Disponibilidad</p>

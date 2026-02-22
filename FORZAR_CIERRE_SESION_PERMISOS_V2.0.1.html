@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización de Permisos - Cerrar Sesión</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .message {
+            color: #4a5568;
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .success-box p {
+            color: #155724;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+
+        .steps {
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        .step:hover {
+            transform: translateX(5px);
+            background: #edf2f7;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .step-description {
+            color: #718096;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: #48bb78;
+        }
+
+        .button-secondary:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            color: #718096;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .message {
+                font-size: 16px;
+            }
+
+            .button {
+                padding: 15px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🔐</div>
+        <h1>Actualización de Permisos</h1>
+        <div class="version">Versión 2.0.1</div>
+        
+        <div class="message">
+            Se han corregido los permisos del rol <strong>"Operador"</strong> en la base de datos.
+        </div>
+
+        <div class="warning-box">
+            <h3>⚠️ Acción Requerida</h3>
+            <p><strong>Debes cerrar sesión y volver a iniciar sesión</strong> para que los nuevos permisos se apliquen correctamente.</p>
+            <p>El token JWT actual contiene los permisos antiguos (corruptos).</p>
+        </div>
+
+        <div class="success-box">
+            <h3>✅ Problema Identificado y Corregido</h3>
+            <p><strong>Causa:</strong> Los permisos del rol "Operador" estaban corruptos en la base de datos (guardados como caracteres individuales en lugar de strings completos).</p>
+            <p><strong>Solución:</strong> Se actualizaron los permisos correctamente, incluyendo <code>create_medical_records</code>.</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Haz clic en "Cerrar Sesión y Limpiar Caché"</div>
+                    <div class="step-description">Esto eliminará tu sesión actual y limpiará el caché del navegador</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Inicia sesión nuevamente</div>
+                    <div class="step-description">Usa tus credenciales de "Operador 1" para iniciar sesión</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Intenta crear una historia clínica</div>
+                    <div class="step-description">El botón "Nueva Historia Clínica" ahora debería funcionar sin errores de permisos</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="button" onclick="cerrarSesionYLimpiar()">
+            🚪 Cerrar Sesión y Limpiar Caché
+        </button>
+
+        <button class="button button-secondary" onclick="irALogin()">
+            🔑 Ir Directamente al Login
+        </button>
+
+        <div id="status"></div>
+
+        <div class="footer">
+            <p><strong>Fecha de actualización:</strong> 18 de febrero de 2026</p>
+            <p><strong>Versión del sistema:</strong> 2.0.1</p>
+            <p><strong>Permisos corregidos:</strong> Rol "Operador"</p>
+        </div>
+    </div>
+
+    <script>
+        function mostrarEstado(mensaje, tipo) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = mensaje;
+            statusDiv.className = tipo === 'success' ? 'status-success' : 'status-error';
+            statusDiv.style.display = 'block';
+        }
+
+        function cerrarSesionYLimpiar() {
+            try {
+                // 1. Limpiar localStorage
+                localStorage.clear();
+                mostrarEstado('✅ Paso 1/4: localStorage limpiado', 'success');
+
+                // 2. Limpiar sessionStorage
+                sessionStorage.clear();
+                mostrarEstado('✅ Paso 2/4: sessionStorage limpiado', 'success');
+
+                // 3. Limpiar cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                mostrarEstado('✅ Paso 3/4: Cookies eliminadas', 'success');
+
+                // 4. Limpiar caché del navegador
+                if ('caches' in window) {
+                    caches.keys().then(function(names) {
+                        names.forEach(function(name) {
+                            caches.delete(name);
+                        });
+                    });
+                }
+                mostrarEstado('✅ Paso 4/4: Caché limpiado', 'success');
+
+                // 5. Redirigir al login después de 2 segundos
+                setTimeout(function() {
+                    mostrarEstado('🔄 Redirigiendo al login...', 'success');
+                    setTimeout(function() {
+                        window.location.href = 'https://archivoenlinea.com/login';
+                    }, 1000);
+                }, 2000);
+
+            } catch (error) {
+                mostrarEstado('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function irALogin() {
+            window.location.href = 'https://archivoenlinea.com/login';
+        }
+
+        // Mostrar mensaje inicial
+        window.addEventListener('load', function() {
+            console.log('=== ACTUALIZACIÓN DE PERMISOS V2.0.1 ===');
+            console.log('Permisos del rol "Operador" corregidos en la base de datos');
+            console.log('Se requiere cerrar sesión y volver a iniciar sesión');
+        });
+    </script>
+</body>
+</html>

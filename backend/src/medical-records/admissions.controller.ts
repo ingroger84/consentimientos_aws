@@ -13,6 +13,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/permissions.decorator';
+import { PERMISSIONS } from '../auth/constants/permissions';
 import { AdmissionsService } from './admissions.service';
 import { CreateAdmissionDto, UpdateAdmissionDto, CloseAdmissionDto } from './dto/admission.dto';
 
@@ -24,20 +25,20 @@ export class AdmissionsController {
   constructor(private readonly admissionsService: AdmissionsService) {}
 
   @Post()
-  @RequirePermissions('medical_records.create')
+  @RequirePermissions(PERMISSIONS.CREATE_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Crear nueva admisión para una HC existente' })
   @ApiResponse({ status: 201, description: 'Admisión creada exitosamente' })
   @ApiResponse({ status: 404, description: 'Historia clínica no encontrada' })
   async create(@Body() createDto: CreateAdmissionDto, @Request() req) {
     return this.admissionsService.create(
       createDto,
-      req.user.userId,
+      req.user.sub,
       req.user.tenantId,
     );
   }
 
   @Get('medical-record/:medicalRecordId')
-  @RequirePermissions('medical_records.view')
+  @RequirePermissions(PERMISSIONS.VIEW_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Obtener todas las admisiones de una HC' })
   @ApiResponse({ status: 200, description: 'Lista de admisiones' })
   async findByMedicalRecord(
@@ -51,7 +52,7 @@ export class AdmissionsController {
   }
 
   @Get(':id')
-  @RequirePermissions('medical_records.view')
+  @RequirePermissions(PERMISSIONS.VIEW_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Obtener una admisión específica' })
   @ApiResponse({ status: 200, description: 'Admisión encontrada' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -60,7 +61,7 @@ export class AdmissionsController {
   }
 
   @Put(':id')
-  @RequirePermissions('medical_records.update')
+  @RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Actualizar una admisión' })
   @ApiResponse({ status: 200, description: 'Admisión actualizada' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -73,7 +74,7 @@ export class AdmissionsController {
   }
 
   @Patch(':id/close')
-  @RequirePermissions('medical_records.update')
+  @RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Cerrar una admisión' })
   @ApiResponse({ status: 200, description: 'Admisión cerrada' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -85,13 +86,13 @@ export class AdmissionsController {
     return this.admissionsService.close(
       id,
       closeDto,
-      req.user.userId,
+      req.user.sub,
       req.user.tenantId,
     );
   }
 
   @Patch(':id/reopen')
-  @RequirePermissions('medical_records.update')
+  @RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Reabrir una admisión cerrada' })
   @ApiResponse({ status: 200, description: 'Admisión reabierta' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -100,7 +101,7 @@ export class AdmissionsController {
   }
 
   @Patch(':id/cancel')
-  @RequirePermissions('medical_records.delete')
+  @RequirePermissions(PERMISSIONS.DELETE_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Cancelar una admisión' })
   @ApiResponse({ status: 200, description: 'Admisión cancelada' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -113,7 +114,7 @@ export class AdmissionsController {
   }
 
   @Get('medical-record/:medicalRecordId/active')
-  @RequirePermissions('medical_records.view')
+  @RequirePermissions(PERMISSIONS.VIEW_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Obtener la admisión activa de una HC' })
   @ApiResponse({ status: 200, description: 'Admisión activa encontrada' })
   @ApiResponse({ status: 404, description: 'No hay admisión activa' })

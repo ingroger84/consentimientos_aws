@@ -17,6 +17,11 @@ class MedicalRecordsService {
     return response.data;
   }
 
+  async getActiveByClient(clientId: string): Promise<MedicalRecord | null> {
+    const response = await api.get(`/medical-records/client/${clientId}/active`);
+    return response.data;
+  }
+
   async create(data: CreateMedicalRecordDto): Promise<MedicalRecord> {
     const response = await api.post('/medical-records', data);
     return response.data;

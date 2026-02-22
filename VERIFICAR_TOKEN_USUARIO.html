@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Token de Usuario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+        
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background: #2563eb;
+        }
+        
+        .result {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .error {
+            color: #ef4444;
+        }
+        
+        .success {
+            color: #10b981;
+        }
+        
+        .warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Verificar Token de Usuario</h1>
+        
+        <div class="info-box">
+            <strong>Instrucciones:</strong><br>
+            Esta herramienta verifica el token JWT almacenado en su navegador y muestra los permisos que tiene asignados.
+        </div>
+        
+        <button class="btn" onclick="checkToken()">🔍 Verificar Token</button>
+        <button class="btn" onclick="clearAndReload()">🔄 Cerrar Sesión y Recargar</button>
+        
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.classList.add('show');
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = message;
+            result.appendChild(line);
+        }
+
+        function checkToken() {
+            const result = document.getElementById('result');
+            result.innerHTML = '';
+            result.classList.add('show');
+            
+            addLog('🔍 Verificando token JWT...', 'info');
+            addLog('', 'info');
+            
+            // Obtener token del localStorage
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                addLog('❌ No se encontró token en localStorage', 'error');
+                addLog('', 'info');
+                addLog('💡 Esto significa que NO ha iniciado sesión', 'warning');
+                addLog('   Por favor, inicie sesión en el sistema', 'warning');
+                return;
+            }
+            
+            addLog('✅ Token encontrado en localStorage', 'success');
+            addLog('', 'info');
+            
+            // Decodificar token JWT (sin verificar firma)
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    addLog('❌ Token inválido (formato incorrecto)', 'error');
+                    return;
+                }
+                
+                const payload = JSON.parse(atob(parts[1]));
+                
+                addLog('📋 Información del Token:', 'info');
+                addLog('', 'info');
+                addLog(`Usuario ID: ${payload.sub}`, 'info');
+                addLog(`Email: ${payload.email || 'No disponible'}`, 'info');
+                addLog(`Tenant ID: ${payload.tenantId || 'No disponible'}`, 'info');
+                addLog(`Rol: ${payload.role || 'No disponible'}`, 'info');
+                addLog('', 'info');
+                
+                // Verificar expiración
+                if (payload.exp) {
+                    const expDate = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    
+                    if (expDate < now) {
+                        addLog('❌ Token EXPIRADO', 'error');
+                        addLog(`   Expiró el: ${expDate.toLocaleString()}`, 'error');
+                        addLog('', 'info');
+                        addLog('💡 Debe cerrar sesión y volver a iniciar sesión', 'warning');
+                        return;
+                    } else {
+                        addLog('✅ Token válido (no expirado)', 'success');
+                        addLog(`   Expira el: ${expDate.toLocaleString()}`, 'info');
+                    }
+                }
+                
+                addLog('', 'info');
+                
+                // Verificar permisos
+                if (payload.permissions && Array.isArray(payload.permissions)) {
+                    addLog(`📋 Permisos (${payload.permissions.length} total):`, 'info');
+                    addLog('', 'info');
+                    
+                    const hasViewMR = payload.permissions.includes('view_medical_records');
+                    const hasCreateMR = payload.permissions.includes('create_medical_records');
+                    
+                    addLog(`   view_medical_records: ${hasViewMR ? '✅ SÍ' : '❌ NO'}`, hasViewMR ? 'success' : 'error');
+                    addLog(`   create_medical_records: ${hasCreateMR ? '✅ SÍ' : '❌ NO'}`, hasCreateMR ? 'success' : 'error');
+                    
+                    if (!hasCreateMR) {
+                        addLog('', 'info');
+                        addLog('❌ PROBLEMA ENCONTRADO:', 'error');
+                        addLog('   El token NO tiene el permiso create_medical_records', 'error');
+                        addLog('', 'info');
+                        addLog('💡 SOLUCIÓN:', 'warning');
+                        addLog('   1. Haga clic en "Cerrar Sesión y Recargar"', 'warning');
+                        addLog('   2. Inicie sesión nuevamente', 'warning');
+                        addLog('   3. Vuelva a probar crear una admisión', 'warning');
+                    } else {
+                        addLog('', 'info');
+                        addLog('✅ El token tiene los permisos correctos', 'success');
+                        addLog('', 'info');
+                        addLog('💡 Si sigue teniendo problemas:', 'warning');
+                        addLog('   - Verifique la consola del navegador (F12)', 'warning');
+                        addLog('   - Busque errores 401 o 403', 'warning');
+                        addLog('   - Envíe una captura de pantalla', 'warning');
+                    }
+                    
+                    addLog('', 'info');
+                    addLog('📋 Todos los permisos:', 'info');
+                    payload.permissions.forEach(perm => {
+                        addLog(`   - ${perm}`, 'info');
+                    });
+                } else {
+                    addLog('⚠️ No se encontraron permisos en el token', 'warning');
+                    addLog('', 'info');
+                    addLog('💡 Debe cerrar sesión y volver a iniciar sesión', 'warning');
+                }
+                
+            } catch (error) {
+                addLog('❌ Error al decodificar token:', 'error');
+                addLog(`   ${error.message}`, 'error');
+            }
+        }
+
+        function clearAndReload() {
+            if (confirm('¿Está seguro de que desea cerrar sesión?')) {
+                // Limpiar localStorage
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Limpiar cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                alert('Sesión cerrada. Redirigiendo al login...');
+                
+                // Redirigir al login
+                window.location.href = 'https://demo-estetica.archivoenlinea.com/login';
+            }
+        }
+    </script>
+</body>
+</html>

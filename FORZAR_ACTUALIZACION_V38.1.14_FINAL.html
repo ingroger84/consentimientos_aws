@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización V38.1.14 - Corrección de Favicon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            color: #764ba2;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-box li {
+            padding: 8px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .info-box li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .countdown {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚀</div>
+        <h1>Actualización Disponible</h1>
+        <div class="version">Versión 38.1.14</div>
+        
+        <div class="info-box">
+            <h3>🔧 Correcciones Aplicadas:</h3>
+            <ul>
+                <li>Eliminado error 404 del favicon (vite.svg)</li>
+                <li>Corregido versionamiento a 38.1.14</li>
+                <li>Mejorado sistema de validación de HC única</li>
+                <li>Solucionado race condition en generación de números de HC</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 Instrucciones:</h3>
+            <ul>
+                <li>Haz clic en "Limpiar Caché y Actualizar"</li>
+                <li>Espera a que se complete el proceso</li>
+                <li>El sistema se recargará automáticamente</li>
+                <li>Verifica que no aparezcan errores en la consola</li>
+            </ul>
+        </div>
+        
+        <button class="btn" onclick="clearCacheAndReload()">
+            🔄 Limpiar Caché y Actualizar
+        </button>
+        
+        <div id="status" class="status"></div>
+        <div id="countdown" class="countdown" style="display: none;"></div>
+        
+        <div class="footer">
+            <strong>DatAgree - Sistema de Consentimientos Digitales</strong><br>
+            Fecha de actualización: 18 de febrero de 2026
+        </div>
+    </div>
+
+    <script>
+        async function clearCacheAndReload() {
+            const statusDiv = document.getElementById('status');
+            const countdownDiv = document.getElementById('countdown');
+            const btn = document.querySelector('.btn');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Limpiando caché...';
+            
+            statusDiv.className = 'status info';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '🔄 Limpiando caché del navegador...';
+            
+            try {
+                // Limpiar localStorage (excepto datos de sesión)
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                // Actualizar versión
+                localStorage.setItem('app_version', '38.1.14');
+                localStorage.setItem('build_timestamp', Date.now().toString());
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                
+                statusDiv.innerHTML = '🔄 Limpiando Service Workers...';
+                
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                statusDiv.innerHTML = '🔄 Limpiando Cache API...';
+                
+                // Limpiar Cache API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Caché limpiado exitosamente. Recargando en...';
+                
+                // Countdown
+                countdownDiv.style.display = 'block';
+                let count = 3;
+                countdownDiv.textContent = count;
+                
+                const interval = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownDiv.textContent = count;
+                    } else {
+                        clearInterval(interval);
+                        window.location.href = 'https://archivoenlinea.com/login?v=' + Date.now();
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                statusDiv.className = 'status info';
+                statusDiv.innerHTML = '⚠️ Proceso completado con advertencias. Recargando...';
+                setTimeout(() => {
+                    window.location.href = 'https://archivoenlinea.com/login?v=' + Date.now();
+                }, 2000);
+            }
+        }
+        
+        // Auto-ejecutar al cargar la página (opcional)
+        // window.onload = () => setTimeout(clearCacheAndReload, 1000);
+    </script>
+</body>
+</html>

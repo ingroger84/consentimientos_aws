@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Completo - V38.1.19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            color: #1e3a8a;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .card-icon {
+            font-size: 32px;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .status-label {
+            font-weight: 500;
+            color: #475569;
+        }
+        
+        .status-value {
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+        
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .log {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+            line-height: 1.5;
+        }
+        
+        .log-success { color: #10b981; }
+        .log-error { color: #ef4444; }
+        .log-warning { color: #f59e0b; }
+        .log-info { color: #3b82f6; }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        .spinner.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #dcfce7;
+            border-left: 4px solid #16a34a;
+            color: #166534;
+        }
+        
+        .alert-error {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+            color: #991b1b;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Diagnóstico Completo del Sistema</h1>
+            <p>Verificación exhaustiva de la versión 38.1.19 y estado del sistema</p>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="grid">
+            <!-- Versión del Sistema -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📦</div>
+                    <div class="card-title">Versión del Sistema</div>
+                </div>
+                <div id="versionInfo">
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Archivos JavaScript -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📄</div>
+                    <div class="card-title">Archivos JavaScript</div>
+                </div>
+                <div id="jsFilesInfo">
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Caché del Navegador -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">💾</div>
+                    <div class="card-title">Caché del Navegador</div>
+                </div>
+                <div id="cacheInfo">
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Service Workers -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">⚙️</div>
+                    <div class="card-title">Service Workers</div>
+                </div>
+                <div id="swInfo">
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">Verificando...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <button class="btn btn-primary" onclick="runDiagnostic()">
+                🔍 Ejecutar Diagnóstico Completo
+            </button>
+            <button class="btn btn-success" onclick="window.open('FORZAR_RECARGA_COMPLETA_V38.1.19.html', '_blank')">
+                🚀 Ir a Herramienta de Actualización
+            </button>
+            <div class="spinner" id="spinner"></div>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = `log-line log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            container.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 10000);
+        }
+
+        async function runDiagnostic() {
+            const spinner = document.getElementById('spinner');
+            const log = document.getElementById('log');
+            
+            log.innerHTML = '';
+            spinner.classList.add('show');
+            
+            addLog('🔍 Iniciando diagnóstico completo del sistema...', 'info');
+            
+            // 1. Verificar versión del sistema
+            await checkVersion();
+            
+            // 2. Verificar archivos JavaScript
+            await checkJavaScriptFiles();
+            
+            // 3. Verificar caché
+            await checkCache();
+            
+            // 4. Verificar Service Workers
+            await checkServiceWorkers();
+            
+            // 5. Verificar conectividad
+            await checkConnectivity();
+            
+            spinner.classList.remove('show');
+            addLog('✅ Diagnóstico completo finalizado', 'success');
+        }
+
+        async function checkVersion() {
+            addLog('📦 Verificando versión del sistema...', 'info');
+            const versionInfo = document.getElementById('versionInfo');
+            
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`https://demo-estetica.archivoenlinea.com/assets/version.json?t=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addLog(`✅ Versión detectada: ${data.version}`, 'success');
+                    addLog(`📅 Fecha de build: ${data.buildDate}`, 'info');
+                    addLog(`🔑 Hash de build: ${data.buildHash}`, 'info');
+                    
+                    let html = '';
+                    if (data.version === '38.1.19') {
+                        html = `
+                            <div class="status-item">
+                                <span class="status-label">Versión</span>
+                                <span class="status-value status-success">${data.version}</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Fecha</span>
+                                <span class="status-value status-info">${data.buildDate}</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Estado</span>
+                                <span class="status-value status-success">✅ Actualizado</span>
+                            </div>
+                        `;
+                        showAlert('✅ Sistema actualizado correctamente a la versión 38.1.19', 'success');
+                    } else {
+                        html = `
+                            <div class="status-item">
+                                <span class="status-label">Versión</span>
+                                <span class="status-value status-warning">${data.version}</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Esperada</span>
+                                <span class="status-value status-info">38.1.19</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-label">Estado</span>
+                                <span class="status-value status-warning">⚠️ Desactualizado</span>
+                            </div>
+                        `;
+                        addLog(`⚠️ Versión desactualizada. Se esperaba 38.1.19`, 'warning');
+                        showAlert('⚠️ Sistema desactualizado. Use la herramienta de actualización.', 'warning');
+                    }
+                    versionInfo.innerHTML = html;
+                } else {
+                    addLog(`❌ Error al obtener versión: ${response.status}`, 'error');
+                    versionInfo.innerHTML = `
+                        <div class="status-item">
+                            <span class="status-label">Estado</span>
+                            <span class="status-value status-error">❌ Error</span>
+                        </div>
+                    `;
+                    showAlert('❌ No se pudo verificar la versión del sistema', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                versionInfo.innerHTML = `
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-error">❌ Error</span>
+                    </div>
+                `;
+            }
+        }
+
+        async function checkJavaScriptFiles() {
+            addLog('📄 Verificando archivos JavaScript críticos...', 'info');
+            const jsFilesInfo = document.getElementById('jsFilesInfo');
+            
+            const criticalFiles = [
+                'index-BfG6STr5.js',
+                'CreateMedicalRecordPage-CK-UEjVG.js',
+                'AdmissionTypeModal-Bs5Cjd97.js',
+                'medical-records.service-B9lOXLK8.js'
+            ];
+            
+            let allOk = true;
+            let html = '';
+            
+            for (const file of criticalFiles) {
+                try {
+                    const response = await fetch(`https://demo-estetica.archivoenlinea.com/assets/${file}`, {
+                        method: 'HEAD',
+                        cache: 'no-store'
+                    });
+                    
+                    if (response.ok) {
+                        addLog(`✅ ${file} - OK`, 'success');
+                        html += `
+                            <div class="status-item">
+                                <span class="status-label">${file.substring(0, 30)}...</span>
+                                <span class="status-value status-success">✅ OK</span>
+                            </div>
+                        `;
+                    } else {
+                        addLog(`❌ ${file} - Error ${response.status}`, 'error');
+                        html += `
+                            <div class="status-item">
+                                <span class="status-label">${file.substring(0, 30)}...</span>
+                                <span class="status-value status-error">❌ ${response.status}</span>
+                            </div>
+                        `;
+                        allOk = false;
+                    }
+                } catch (error) {
+                    addLog(`❌ ${file} - ${error.message}`, 'error');
+                    html += `
+                        <div class="status-item">
+                            <span class="status-label">${file.substring(0, 30)}...</span>
+                            <span class="status-value status-error">❌ Error</span>
+                        </div>
+                    `;
+                    allOk = false;
+                }
+            }
+            
+            jsFilesInfo.innerHTML = html;
+            
+            if (!allOk) {
+                showAlert('❌ Algunos archivos JavaScript no se encuentran. Use la herramienta de actualización.', 'error');
+            }
+        }
+
+        async function checkCache() {
+            addLog('💾 Verificando caché del navegador...', 'info');
+            const cacheInfo = document.getElementById('cacheInfo');
+            
+            let html = '';
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                addLog(`💾 Cachés activos: ${cacheNames.length}`, 'info');
+                
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Cachés activos</span>
+                        <span class="status-value status-info">${cacheNames.length}</span>
+                    </div>
+                `;
+                
+                if (cacheNames.length > 0) {
+                    addLog(`⚠️ Se recomienda limpiar el caché`, 'warning');
+                    html += `
+                        <div class="status-item">
+                            <span class="status-label">Recomendación</span>
+                            <span class="status-value status-warning">Limpiar</span>
+                        </div>
+                    `;
+                }
+            } else {
+                addLog('ℹ️ Cache Storage no disponible', 'info');
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">N/A</span>
+                    </div>
+                `;
+            }
+            
+            // LocalStorage
+            const localStorageKeys = Object.keys(localStorage);
+            addLog(`💾 Items en LocalStorage: ${localStorageKeys.length}`, 'info');
+            html += `
+                <div class="status-item">
+                    <span class="status-label">LocalStorage</span>
+                    <span class="status-value status-info">${localStorageKeys.length} items</span>
+                </div>
+            `;
+            
+            cacheInfo.innerHTML = html;
+        }
+
+        async function checkServiceWorkers() {
+            addLog('⚙️ Verificando Service Workers...', 'info');
+            const swInfo = document.getElementById('swInfo');
+            
+            let html = '';
+            
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                addLog(`⚙️ Service Workers activos: ${registrations.length}`, 'info');
+                
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Activos</span>
+                        <span class="status-value status-info">${registrations.length}</span>
+                    </div>
+                `;
+                
+                if (registrations.length > 0) {
+                    addLog(`⚠️ Se recomienda desregistrar Service Workers`, 'warning');
+                    html += `
+                        <div class="status-item">
+                            <span class="status-label">Recomendación</span>
+                            <span class="status-value status-warning">Desregistrar</span>
+                        </div>
+                    `;
+                }
+            } else {
+                addLog('ℹ️ Service Workers no disponibles', 'info');
+                html += `
+                    <div class="status-item">
+                        <span class="status-label">Estado</span>
+                        <span class="status-value status-info">N/A</span>
+                    </div>
+                `;
+            }
+            
+            swInfo.innerHTML = html;
+        }
+
+        async function checkConnectivity() {
+            addLog('🌐 Verificando conectividad con el servidor...', 'info');
+            
+            try {
+                const start = Date.now();
+                const response = await fetch('https://demo-estetica.archivoenlinea.com/api/health', {
+                    cache: 'no-store'
+                });
+                const end = Date.now();
+                const latency = end - start;
+                
+                if (response.ok) {
+                    addLog(`✅ Servidor respondiendo correctamente (${latency}ms)`, 'success');
+                } else {
+                    addLog(`⚠️ Servidor respondió con código ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                addLog(`❌ Error de conectividad: ${error.message}`, 'error');
+            }
+        }
+
+        // Ejecutar diagnóstico automáticamente al cargar
+        window.addEventListener('load', () => {
+            setTimeout(runDiagnostic, 500);
+        });
+    </script>
+</body>
+</html>

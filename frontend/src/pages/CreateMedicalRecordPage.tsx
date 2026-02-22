@@ -53,16 +53,22 @@ export default function CreateMedicalRecordPage() {
   const handleClientSelected = async (client: Client | null) => {
     setSelectedClient(client);
     
-    // Si se seleccionó un cliente, verificar si ya tiene HC
+    // Si se seleccionó un cliente, verificar si ya tiene HC activa
     if (client) {
       try {
-        const existingRecords = await medicalRecordsService.getByClient(client.id);
+        // Usar el nuevo endpoint que verifica HC activa
+        const activeHC = await medicalRecordsService.getActiveByClient(client.id);
         
-        if (existingRecords.length > 0) {
-          // Cliente tiene HC existente, mostrar modal de admisión
-          const hcWithAdmissions = await medicalRecordsService.getById(existingRecords[0].id);
+        if (activeHC) {
+          // Cliente tiene HC activa, mostrar modal de admisión
+          const hcWithAdmissions = await medicalRecordsService.getById(activeHC.id);
           setExistingHC(hcWithAdmissions);
           setShowAdmissionModal(true);
+          
+          toast.info(
+            'Historia Clínica Existente',
+            `El paciente ya tiene una HC activa (${activeHC.recordNumber}). Puede agregar una nueva admisión.`
+          );
         }
       } catch (error) {
         console.error('Error al verificar HC existente:', error);
@@ -81,11 +87,16 @@ export default function CreateMedicalRecordPage() {
   };
 
   const handleAdmissionTypeSelect = async (admissionType: string, reason: string) => {
-    if (!existingHC) return;
+    console.log('🔵 [PAGE] handleAdmissionTypeSelect llamado', { admissionType, reason, existingHC });
+    
+    if (!existingHC) {
+      console.error('❌ [PAGE] No hay HC existente');
+      throw new Error('No hay HC existente');
+    }
 
     try {
       setLoading(true);
-      setShowAdmissionModal(false);
+      console.log('🔵 [PAGE] Creando admisión...');
 
       // Crear nueva admisión para la HC existente
       const admission = await admissionsService.create({
@@ -95,14 +106,28 @@ export default function CreateMedicalRecordPage() {
         admissionDate: new Date().toISOString(),
       });
 
-      toast.success('Admisión creada', 'Nueva admisión creada exitosamente');
+      console.log('✅ [PAGE] Admisión creada exitosamente:', admission);
       
-      // Navegar a la HC con la nueva admisión
-      navigate(`/medical-records/${existingHC.id}?admissionId=${admission.id}`);
+      // Mostrar mensaje de éxito
+      toast.success('Admisión creada', 'Redirigiendo a la historia clínica...');
+      
+      // Construir URL de destino
+      const targetUrl = `/medical-records/${existingHC.id}?admissionId=${admission.id}&t=${Date.now()}`;
+      console.log('🚀 [PAGE] Navegando a:', targetUrl);
+
+      // Usar window.location.href para navegación completa (fuerza recarga)
+      // Esto desmonta completamente el modal y todos los componentes
+      window.location.href = targetUrl;
+      
+      // IMPORTANTE: No hacer nada más después de window.location.href
+      // El navegador está cambiando de página
+      
     } catch (error: any) {
-      toast.error('Error al crear admisión', error.response?.data?.message);
-    } finally {
+      console.error('❌ [PAGE] Error al crear admisión:', error);
+      console.error('❌ [PAGE] Error details:', error.response?.data);
+      toast.error('Error al crear admisión', error.response?.data?.message || error.message);
       setLoading(false);
+      throw error; // Re-lanzar el error para que el modal lo maneje
     }
   };
 
@@ -110,6 +135,15 @@ export default function CreateMedicalRecordPage() {
     // Validar que se haya seleccionado o ingresado un cliente
     if (!selectedClient && !clientData.clientName) {
       toast.error('Error', 'Debe seleccionar o crear un cliente');
+      return;
+    }
+
+    // Si hay HC existente, no permitir crear nueva
+    if (existingHC) {
+      toast.error(
+        'HC Activa Existente',
+        'El paciente ya tiene una HC activa. Use el modal para agregar una nueva admisión.'
+      );
       return;
     }
 
@@ -175,6 +209,35 @@ export default function CreateMedicalRecordPage() {
 
       {/* Form */}
       <div className="bg-white rounded-lg shadow p-6">
+        {/* Alerta de HC Activa */}
+        {existingHC && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Historia Clínica Activa Encontrada
+                </h3>
+                <p className="mt-1 text-sm text-blue-700">
+                  El paciente <strong>{selectedClient?.fullName}</strong> ya tiene una historia clínica activa 
+                  (N° {existingHC.recordNumber}). Para continuar la atención, agregue una nueva admisión usando el modal.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAdmissionModal(true)}
+                  className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Agregar Nueva Admisión
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Búsqueda/Creación de Cliente */}
           <ClientSearchForm
@@ -189,7 +252,8 @@ export default function CreateMedicalRecordPage() {
             </label>
             <select
               {...register('branchId')}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={!!existingHC}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option value="">Sin sede específica</option>
               {branches.map((branch) => (
@@ -209,7 +273,8 @@ export default function CreateMedicalRecordPage() {
               type="datetime-local"
               {...register('admissionDate', { required: 'La fecha es requerida' })}
               defaultValue={new Date().toISOString().slice(0, 16)}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={!!existingHC}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
             {errors.admissionDate && (
               <p className="mt-1 text-sm text-red-600">{errors.admissionDate.message}</p>
@@ -223,7 +288,8 @@ export default function CreateMedicalRecordPage() {
             </label>
             <select
               {...register('admissionType', { required: 'El tipo es requerido' })}
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={!!existingHC}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
               <option value="">Seleccionar tipo...</option>
               <option value="consulta">Consulta</option>
@@ -247,8 +313,8 @@ export default function CreateMedicalRecordPage() {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              disabled={loading || !!existingHC}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creando...' : 'Crear Historia Clínica'}
             </button>
@@ -257,18 +323,17 @@ export default function CreateMedicalRecordPage() {
       </div>
 
       {/* Modal de Tipo de Admisión */}
-      {existingHC && (
-        <AdmissionTypeModal
-          isOpen={showAdmissionModal}
-          onClose={() => {
-            setShowAdmissionModal(false);
-            setExistingHC(null);
-            setSelectedClient(null);
-          }}
-          onSelect={handleAdmissionTypeSelect}
-          existingHC={existingHC}
-        />
-      )}
+      <AdmissionTypeModal
+        isOpen={showAdmissionModal}
+        onClose={() => {
+          setShowAdmissionModal(false);
+          // Solo limpiar estado, NO navegar
+          setExistingHC(null);
+          setSelectedClient(null);
+        }}
+        onSelect={handleAdmissionTypeSelect}
+        existingHC={existingHC}
+      />
     </div>
   );
 }

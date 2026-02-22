@@ -30,10 +30,11 @@ export default function AdmissionTypeModal({
   const [selectedType, setSelectedType] = useState('');
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedType) {
       setError('Debe seleccionar un tipo de admisión');
       return;
@@ -43,19 +44,54 @@ export default function AdmissionTypeModal({
       return;
     }
 
-    onSelect(selectedType, reason);
-    // Reset
-    setSelectedType('');
-    setReason('');
+    setIsSubmitting(true);
     setError('');
+    
+    try {
+      console.log('🔵 [MODAL] Iniciando creación de admisión', { selectedType, reason });
+      
+      // Llamar a onSelect y esperar a que termine
+      await onSelect(selectedType, reason);
+      
+      console.log('✅ [MODAL] onSelect completado exitosamente');
+      
+      // Si llegamos aquí, la admisión se creó pero la navegación no ocurrió
+      // Esto NO debería pasar, pero como medida de seguridad, esperamos 2 segundos
+      console.warn('⚠️ [MODAL] La navegación no ocurrió automáticamente. Esperando...');
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Si después de 2 segundos seguimos aquí, algo salió mal
+      console.error('❌ [MODAL] La navegación falló. Recargando página...');
+      window.location.reload();
+      
+    } catch (error) {
+      console.error('❌ [MODAL] Error al crear admisión:', error);
+      setIsSubmitting(false);
+      setError('Error al crear la admisión. Por favor, intente nuevamente.');
+    }
   };
 
   const handleClose = () => {
+    if (isSubmitting) return; // No permitir cerrar mientras se procesa
     setSelectedType('');
     setReason('');
     setError('');
     onClose();
   };
+
+  // Si está enviando, mostrar overlay de carga
+  if (isSubmitting) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Creando admisión...</h3>
+          <p className="text-gray-600">Redirigiendo a la historia clínica</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -73,6 +109,7 @@ export default function AdmissionTypeModal({
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition"
+            disabled={isSubmitting}
           >
             <X className="w-6 h-6" />
           </button>
@@ -169,15 +206,17 @@ export default function AdmissionTypeModal({
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
           <button
             onClick={handleClose}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
           >
-            Crear Admisión
+            {isSubmitting ? 'Creando...' : 'Crear Admisión'}
           </button>
         </div>
       </div>

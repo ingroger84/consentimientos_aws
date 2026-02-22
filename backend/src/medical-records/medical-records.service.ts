@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { MedicalRecord } from './entities/medical-record.entity';
@@ -123,20 +123,47 @@ export class MedicalRecordsService {
       );
     }
 
-    // Generar número único de HC
-    const recordNumber = await this.generateRecordNumber(tenantId);
+    // Retry logic para manejar race conditions en la generación de números
+    let saved: MedicalRecord;
+    let attempts = 0;
+    const maxAttempts = 3;
 
-    const medicalRecord = this.medicalRecordsRepository.create({
-      clientId,
-      branchId: createDto.branchId,
-      admissionDate: createDto.admissionDate,
-      admissionType: createDto.admissionType,
-      recordNumber,
-      tenantId,
-      createdBy: userId,
-    });
+    while (attempts < maxAttempts) {
+      try {
+        // Generar número único de HC
+        const recordNumber = await this.generateRecordNumber(tenantId);
 
-    const saved = await this.medicalRecordsRepository.save(medicalRecord);
+        const medicalRecord = this.medicalRecordsRepository.create({
+          clientId,
+          branchId: createDto.branchId,
+          admissionDate: createDto.admissionDate,
+          admissionType: createDto.admissionType,
+          recordNumber,
+          tenantId,
+          createdBy: userId,
+        });
+
+        saved = await this.medicalRecordsRepository.save(medicalRecord);
+        break; // Éxito, salir del loop
+      } catch (error) {
+        attempts++;
+        
+        // Si es error de clave duplicada y aún tenemos intentos, reintentar
+        if (error.code === '23505' && error.constraint === 'medical_records_record_number_key' && attempts < maxAttempts) {
+          console.log(`⚠️ Número de HC duplicado detectado, reintentando... (intento ${attempts}/${maxAttempts})`);
+          // Esperar un poco antes de reintentar (backoff exponencial)
+          await new Promise(resolve => setTimeout(resolve, 100 * attempts));
+          continue;
+        }
+        
+        // Si no es error de duplicado o ya no hay más intentos, lanzar el error
+        throw error;
+      }
+    }
+
+    if (!saved) {
+      throw new InternalServerErrorException('No se pudo generar un número único de historia clínica después de varios intentos');
+    }
 
     // Auditoría
     await this.logAudit({
@@ -155,15 +182,25 @@ export class MedicalRecordsService {
   }
 
   async findByClient(
-    clientId: string,
-    tenantId: string,
-  ): Promise<MedicalRecord[]> {
-    return this.medicalRecordsRepository.find({
-      where: { clientId, tenantId },
-      relations: ['client', 'branch', 'creator', 'closer'],
-      order: { createdAt: 'DESC' },
-    });
-  }
+      clientId: string,
+      tenantId: string,
+      userId?: string,
+      filters?: { status?: string },
+    ): Promise<MedicalRecord[]> {
+      const where: any = { clientId, tenantId };
+
+      // Agregar filtro de status si se proporciona
+      if (filters?.status) {
+        where.status = filters.status;
+      }
+
+      return this.medicalRecordsRepository.find({
+        where,
+        relations: ['client', 'branch', 'creator', 'closer'],
+        order: { createdAt: 'DESC' },
+      });
+    }
+
 
   async findAll(
     tenantId: string,
@@ -474,11 +511,27 @@ export class MedicalRecordsService {
 
   private async generateRecordNumber(tenantId: string): Promise<string> {
     const year = new Date().getFullYear();
-    const count = await this.medicalRecordsRepository.count({
-      where: { tenantId },
-    });
+    
+    // Usar MAX para obtener el último número de forma atómica
+    // Esto evita race conditions cuando múltiples usuarios crean HCs simultáneamente
+    const lastRecord = await this.medicalRecordsRepository
+      .createQueryBuilder('mr')
+      .select('MAX(mr.recordNumber)', 'maxNumber')
+      .where('mr.tenantId = :tenantId', { tenantId })
+      .andWhere('mr.recordNumber LIKE :pattern', { pattern: `HC-${year}-%` })
+      .getRawOne();
 
-    return `HC-${year}-${(count + 1).toString().padStart(6, '0')}`;
+    let nextNumber = 1;
+    
+    if (lastRecord?.maxNumber) {
+      // Extraer el número del formato HC-2026-000004
+      const match = lastRecord.maxNumber.match(/HC-\d{4}-(\d{6})/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
+    }
+
+    return `HC-${year}-${nextNumber.toString().padStart(6, '0')}`;
   }
 
   // Método para Super Admin: obtener todas las historias clínicas agrupadas por tenant

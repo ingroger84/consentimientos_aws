@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización V38.1.15 - Corrección Flujo Admisiones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 25px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .icon {
+            font-size: 24px;
+        }
+        .list {
+            list-style: none;
+            padding: 0;
+        }
+        .list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .list li:last-child {
+            border-bottom: none;
+        }
+        .list li:before {
+            content: "✓";
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .warning {
+            background: #fff5f5;
+            border-left-color: #f56565;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .warning h3 {
+            color: #c53030;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .warning p {
+            color: #742a2a;
+            line-height: 1.6;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .timestamp {
+            text-align: center;
+            color: #a0aec0;
+            font-size: 14px;
+            margin-top: 30px;
+        }
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version">V38.1.15</div>
+            <h1>🎯 Corrección Flujo de Admisiones</h1>
+            <p class="subtitle">Solución definitiva al problema del modal</p>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🐛</span> Problema Identificado</h2>
+            <ul class="list">
+                <li>Al crear una admisión desde el modal, el modal no se cerraba correctamente</li>
+                <li>La página se quedaba bloqueada mostrando "Paciente con Historia Clínica Existente"</li>
+                <li>No se podía agregar anamnesis, exámenes, diagnósticos, evoluciones ni consentimientos</li>
+                <li>La pestaña "Admisiones" no mostraba las admisiones creadas</li>
+                <li>Había dos navegaciones compitiendo: una en <span class="code">handleAdmissionTypeSelect</span> y otra en <span class="code">onClose</span></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">✅</span> Solución Implementada</h2>
+            <ul class="list">
+                <li>Eliminado el cierre del modal ANTES de navegar en <span class="code">handleAdmissionTypeSelect</span></li>
+                <li>La navegación ahora ocurre INMEDIATAMENTE después de crear la admisión</li>
+                <li>El cambio de ruta desmonta el componente automáticamente, cerrando el modal</li>
+                <li>Modificado el <span class="code">onClose</span> del modal para que NO navegue automáticamente</li>
+                <li>El <span class="code">onClose</span> ahora solo limpia el estado local sin redirigir</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">📝</span> Archivos Modificados</h2>
+            <ul class="list">
+                <li><span class="code">frontend/src/pages/CreateMedicalRecordPage.tsx</span> - Corregido flujo de navegación</li>
+                <li><span class="code">frontend/src/config/version.ts</span> - Actualizado a 38.1.15</li>
+                <li><span class="code">frontend/package.json</span> - Actualizado a 38.1.15</li>
+                <li><span class="code">backend/package.json</span> - Actualizado a 38.1.15</li>
+                <li><span class="code">frontend/src/pages/SystemStatusPageSimple.tsx</span> - Actualizado a 38.1.15</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ ACCIÓN REQUERIDA</h3>
+            <p>
+                <strong>Debe limpiar el caché del navegador para ver los cambios.</strong><br><br>
+                Presione el botón de abajo para forzar la actualización y limpiar el caché automáticamente.
+                Después de hacer clic, el sistema se recargará con la nueva versión.
+            </p>
+        </div>
+
+        <button class="button" onclick="forceUpdate()">
+            🔄 Limpiar Caché y Actualizar Ahora
+        </button>
+
+        <div class="timestamp">
+            Desplegado: 19 de febrero de 2026, 01:31 AM<br>
+            Build: mlss3chm | Timestamp: 1771464277498
+        </div>
+    </div>
+
+    <script>
+        function forceUpdate() {
+            console.log('🔄 Iniciando limpieza de caché...');
+            
+            // Limpiar localStorage
+            localStorage.clear();
+            console.log('✅ localStorage limpiado');
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            console.log('✅ sessionStorage limpiado');
+            
+            // Limpiar cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            console.log('✅ Cookies limpiadas');
+            
+            // Limpiar caché del service worker si existe
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                    console.log('✅ Service Workers desregistrados');
+                });
+            }
+            
+            // Limpiar caché de la API de Cache
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                    console.log('✅ Cache API limpiada');
+                });
+            }
+            
+            console.log('✅ Limpieza completa. Redirigiendo...');
+            
+            // Redirigir con parámetros para forzar recarga
+            setTimeout(function() {
+                window.location.href = 'https://www.archivoenlinea.com/?v=38.1.15&t=' + Date.now();
+            }, 1000);
+        }
+
+        // Auto-ejecutar al cargar la página
+        window.addEventListener('load', function() {
+            console.log('📦 Versión 38.1.15 - Corrección Flujo Admisiones');
+            console.log('🔧 Cambios: Modal de admisiones corregido');
+            console.log('⏰ Build: 1771464277498');
+        });
+    </script>
+</body>
+</html>

@@ -74,6 +74,8 @@ export class MedicalRecordsController {
   ) {}
 
   @Post()
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.CREATE_MEDICAL_RECORDS)
   async create(
     @Body() createDto: CreateMedicalRecordDto,
     @Request() req: any,
@@ -801,5 +803,27 @@ export class MedicalRecordsController {
   ) {
     return this.medicalRecordsService.findByClient(clientId, req.user.tenantId);
   }
+  @Get('client/:clientId/active')
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_MEDICAL_RECORDS)
+  async findActiveByClient(
+    @Param('clientId') clientId: string,
+    @Request() req: any,
+  ) {
+    const tenantId = req.user.tenantId;
+    const userId = req.user.sub;
+
+    // Buscar HC activa del cliente
+    const activeRecords = await this.medicalRecordsService.findByClient(
+      clientId,
+      tenantId,
+      userId,
+      { status: 'active' }
+    );
+
+    // Retornar la primera HC activa o null
+    return activeRecords.length > 0 ? activeRecords[0] : null;
+  }
+
 }
 

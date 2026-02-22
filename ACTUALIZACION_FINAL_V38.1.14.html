@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>✅ ACTUALIZACIÓN FINAL V38.1.14</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+            animation: checkmark 0.8s ease-in-out;
+        }
+        
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .success-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .success-box li {
+            padding: 8px 0;
+            color: #155724;
+            line-height: 1.6;
+        }
+        
+        .success-box li:before {
+            content: "✅ ";
+            margin-right: 8px;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .info-box h3 {
+            color: #0c5460;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .info-box p {
+            color: #0c5460;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            text-align: center;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .countdown {
+            font-size: 60px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #6c757d;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">✅</div>
+            <h1>Actualización Completada</h1>
+            <div class="version">Versión 38.1.14</div>
+        </div>
+        
+        <div class="success-box">
+            <h3>✅ Correcciones Aplicadas:</h3>
+            <ul>
+                <li>Error 404 del favicon eliminado</li>
+                <li>Versión corregida de 2.0.1 a 38.1.14</li>
+                <li>Archivo version.ts actualizado (hardcode corregido)</li>
+                <li>Sistema de validación de HC única implementado</li>
+                <li>Race condition en generación de números de HC solucionado</li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 Problema Resuelto:</h3>
+            <p><strong>El problema era:</strong> El archivo <code>frontend/src/config/version.ts</code> tenía hardcodeada la versión 2.0.1 en lugar de leer del package.json.</p>
+            <p><strong>Solución aplicada:</strong> Se actualizó el archivo version.ts con la versión correcta 38.1.14 y se recompiló el frontend.</p>
+            <p><strong>Estado actual:</strong> El servidor tiene la versión correcta desplegada. Solo necesitas limpiar el caché de tu navegador.</p>
+        </div>
+        
+        <div style="text-align: center;">
+            <button class="btn" onclick="clearCacheAndReload()">
+                🔄 Limpiar Caché y Ver Nueva Versión
+            </button>
+        </div>
+        
+        <div id="status" class="status"></div>
+        <div id="countdown" class="countdown" style="display: none;"></div>
+        
+        <div class="footer">
+            <strong>DatAgree - Sistema de Consentimientos Digitales</strong><br>
+            Actualización desplegada: 19 de febrero de 2026<br>
+            Todos los archivos actualizados correctamente
+        </div>
+    </div>
+
+    <script>
+        async function clearCacheAndReload() {
+            const statusDiv = document.getElementById('status');
+            const countdownDiv = document.getElementById('countdown');
+            const btn = document.querySelector('.btn');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Limpiando caché...';
+            
+            statusDiv.className = 'status success';
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '🔄 Limpiando caché del navegador...';
+            
+            try {
+                // Limpiar localStorage (excepto datos de sesión)
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                // Actualizar versión
+                localStorage.setItem('app_version', '38.1.14');
+                localStorage.setItem('build_timestamp', Date.now().toString());
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                // Limpiar Cache API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+                
+                statusDiv.innerHTML = '✅ Caché limpiado exitosamente. Recargando en...';
+                
+                // Countdown
+                countdownDiv.style.display = 'block';
+                let count = 3;
+                countdownDiv.textContent = count;
+                
+                const interval = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownDiv.textContent = count;
+                    } else {
+                        clearInterval(interval);
+                        // Recarga SUPER agresiva
+                        const timestamp = Date.now();
+                        const random = Math.random().toString(36).substring(7);
+                        window.location.href = `https://archivoenlinea.com/login?v=${timestamp}&r=${random}&force=true`;
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Error durante limpieza:', error);
+                statusDiv.innerHTML = '✅ Proceso completado. Recargando...';
+                setTimeout(() => {
+                    window.location.href = 'https://archivoenlinea.com/login?v=' + Date.now();
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Recarga Completa - V38.1.19</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            color: #1a202c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 5px;
+        }
+        
+        .alert-text {
+            color: #78350f;
+            font-size: 14px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .log.show {
+            display: block;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+        }
+        
+        .success {
+            color: #48bb78;
+        }
+        
+        .error {
+            color: #f56565;
+        }
+        
+        .info {
+            color: #4299e1;
+        }
+        
+        .warning {
+            color: #ed8936;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        .spinner.show {
+            display: block;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .steps {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            color: #718096;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version">VERSIÓN 38.1.19</div>
+            <h1>🔄 Actualización del Sistema</h1>
+            <p class="subtitle">Corrección definitiva del flujo de admisiones</p>
+        </div>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ Problema Identificado</div>
+            <div class="alert-text">
+                El error 404 indica que el navegador está cargando un index.html desactualizado 
+                que referencia archivos JavaScript que ya no existen. Esta herramienta forzará 
+                la recarga completa del sistema.
+            </div>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Limpiar Caché del Navegador</div>
+                    <div class="step-desc">Eliminar todos los archivos en caché</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Limpiar Service Workers</div>
+                    <div class="step-desc">Desregistrar todos los service workers activos</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Limpiar LocalStorage</div>
+                    <div class="step-desc">Eliminar datos almacenados localmente</div>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Recargar Sistema</div>
+                    <div class="step-desc">Forzar recarga completa con timestamp único</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="forceCompleteReload()">
+            🚀 Ejecutar Actualización Completa
+        </button>
+        
+        <button class="btn btn-secondary" onclick="checkVersion()">
+            🔍 Verificar Versión Actual
+        </button>
+        
+        <div class="spinner" id="spinner"></div>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            log.classList.add('show');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            line.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function forceCompleteReload() {
+            const spinner = document.getElementById('spinner');
+            const log = document.getElementById('log');
+            
+            log.innerHTML = '';
+            log.classList.add('show');
+            spinner.classList.add('show');
+            
+            try {
+                addLog('🔄 Iniciando limpieza completa del sistema...', 'info');
+                
+                // 1. Limpiar Service Workers
+                addLog('📋 Paso 1/4: Limpiando Service Workers...', 'info');
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                        addLog(`✅ Service Worker desregistrado: ${registration.scope}`, 'success');
+                    }
+                } else {
+                    addLog('ℹ️ Service Workers no disponibles', 'info');
+                }
+                
+                // 2. Limpiar Cache Storage
+                addLog('📋 Paso 2/4: Limpiando Cache Storage...', 'info');
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        addLog(`✅ Caché eliminado: ${cacheName}`, 'success');
+                    }
+                } else {
+                    addLog('ℹ️ Cache Storage no disponible', 'info');
+                }
+                
+                // 3. Limpiar LocalStorage y SessionStorage
+                addLog('📋 Paso 3/4: Limpiando almacenamiento local...', 'info');
+                const localStorageKeys = Object.keys(localStorage);
+                localStorage.clear();
+                addLog(`✅ LocalStorage limpiado (${localStorageKeys.length} items)`, 'success');
+                
+                const sessionStorageKeys = Object.keys(sessionStorage);
+                sessionStorage.clear();
+                addLog(`✅ SessionStorage limpiado (${sessionStorageKeys.length} items)`, 'success');
+                
+                // 4. Limpiar cookies
+                addLog('📋 Limpiando cookies...', 'info');
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                addLog('✅ Cookies limpiadas', 'success');
+                
+                // 5. Preparar recarga con timestamp único
+                addLog('📋 Paso 4/4: Preparando recarga del sistema...', 'info');
+                const timestamp = new Date().getTime();
+                const url = `https://demo-estetica.archivoenlinea.com/?v=${timestamp}&force=true`;
+                
+                addLog('✅ Limpieza completada exitosamente', 'success');
+                addLog(`🚀 Redirigiendo a: ${url}`, 'info');
+                addLog('⏳ Espere 2 segundos...', 'warning');
+                
+                // Esperar 2 segundos y recargar
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 2000);
+                
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+                spinner.classList.remove('show');
+            }
+        }
+
+        async function checkVersion() {
+            const log = document.getElementById('log');
+            log.innerHTML = '';
+            log.classList.add('show');
+            
+            addLog('🔍 Verificando versión actual del sistema...', 'info');
+            
+            try {
+                // Intentar cargar el archivo de versión con timestamp para evitar caché
+                const timestamp = new Date().getTime();
+                const response = await fetch(`https://demo-estetica.archivoenlinea.com/assets/version.json?t=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addLog(`📦 Versión detectada: ${data.version}`, 'success');
+                    addLog(`📅 Fecha de build: ${data.date}`, 'info');
+                    
+                    if (data.version === '38.1.19') {
+                        addLog('✅ Sistema actualizado correctamente', 'success');
+                    } else {
+                        addLog(`⚠️ Versión desactualizada. Se esperaba 38.1.19`, 'warning');
+                        addLog('💡 Ejecute "Actualización Completa" para actualizar', 'info');
+                    }
+                } else {
+                    addLog('⚠️ No se pudo obtener información de versión', 'warning');
+                    addLog('💡 Esto puede indicar que el sistema necesita actualización', 'info');
+                }
+                
+                // Verificar localStorage
+                const storedVersion = localStorage.getItem('app_version');
+                if (storedVersion) {
+                    addLog(`💾 Versión en localStorage: ${storedVersion}`, 'info');
+                }
+                
+                // Verificar service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    addLog(`🔧 Service Workers activos: ${registrations.length}`, 'info');
+                }
+                
+                // Verificar caché
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    addLog(`💾 Cachés activos: ${cacheNames.length}`, 'info');
+                    cacheNames.forEach(name => {
+                        addLog(`  - ${name}`, 'info');
+                    });
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error al verificar versión: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
