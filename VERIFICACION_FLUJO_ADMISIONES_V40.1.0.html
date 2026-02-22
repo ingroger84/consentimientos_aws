@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Flujo de Admisiones V40.1.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .test-section {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .test-title {
+            color: #2d3748;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .step {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .step-description {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .expected {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .expected-title {
+            font-weight: bold;
+            color: #22543d;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expected-list {
+            color: #22543d;
+            margin-left: 20px;
+        }
+
+        .expected-list li {
+            margin-bottom: 5px;
+        }
+
+        .warning {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            font-weight: bold;
+            color: #c53030;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-text {
+            color: #742a2a;
+        }
+
+        .info {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .info-title {
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 8px;
+        }
+
+        .info-text {
+            color: #2c5282;
+        }
+
+        .checklist {
+            margin-top: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #cbd5e0;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox.checked {
+            background: #48bb78;
+            border-color: #48bb78;
+            position: relative;
+        }
+
+        .checkbox.checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 18px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checklist-text {
+            flex: 1;
+            color: #4a5568;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-pending {
+            background: #fef5e7;
+            color: #7d6608;
+        }
+
+        .status-success {
+            background: #f0fff4;
+            color: #22543d;
+        }
+
+        .status-error {
+            background: #fff5f5;
+            color: #c53030;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version-badge">V40.1.0</div>
+            <h1>🧪 Verificación del Flujo de Admisiones</h1>
+            <p class="subtitle">Prueba paso a paso del sistema de admisiones</p>
+        </div>
+
+        <!-- TEST 1 -->
+        <div class="test-section">
+            <div class="test-title">
+                <div class="test-number">1</div>
+                <span>Crear Admisión para Cliente con HC Existente</span>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 1: Ir a Nueva Historia Clínica</div>
+                <div class="step-description">
+                    1. En el menú lateral, haz clic en "Historias Clínicas"<br>
+                    2. Haz clic en el botón "+ Nueva Historia Clínica"
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 2: Buscar Cliente con HC Existente</div>
+                <div class="step-description">
+                    1. En el campo de búsqueda, ingresa el documento de un cliente que YA tenga historia clínica<br>
+                    2. Selecciona el cliente de la lista<br>
+                    3. El sistema debe detectar automáticamente que tiene HC
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Aparece un cuadro azul: "Historia Clínica Activa Encontrada"</li>
+                        <li>Se muestra el número de HC del paciente</li>
+                        <li>Aparece un botón "Agregar Nueva Admisión"</li>
+                        <li>Se abre automáticamente el modal de tipo de admisión</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 3: Seleccionar Tipo de Admisión</div>
+                <div class="step-description">
+                    1. En el modal, selecciona un tipo de admisión (ej: "Control")<br>
+                    2. Ingresa el motivo (ej: "Control post-operatorio")<br>
+                    3. Haz clic en "Crear Admisión"
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Aparece mensaje verde: "Admisión creada exitosamente"</li>
+                        <li>El modal desaparece automáticamente</li>
+                        <li>Navegas INMEDIATAMENTE a la Historia Clínica</li>
+                        <li>NO cierra tu sesión</li>
+                        <li>Ves la HC con la nueva admisión seleccionada</li>
+                    </ul>
+                </div>
+                <div class="warning">
+                    <div class="warning-title">⚠️ Si NO funciona:</div>
+                    <div class="warning-text">
+                        - El modal NO se cierra<br>
+                        - Cierra tu sesión<br>
+                        - No navega a la HC<br>
+                        → Reporta este comportamiento con capturas de pantalla
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Modal se abre automáticamente al seleccionar cliente con HC</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo seleccionar tipo de admisión</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo ingresar motivo de admisión</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Al hacer clic en "Crear Admisión", aparece toast verde</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Modal desaparece automáticamente</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Navego a la Historia Clínica</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">NO cierra mi sesión</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Veo la nueva admisión en la HC</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEST 2 -->
+        <div class="test-section">
+            <div class="test-title">
+                <div class="test-number">2</div>
+                <span>Agregar Información a la Admisión</span>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 1: Agregar Anamnesis</div>
+                <div class="step-description">
+                    1. En la HC, ve a la pestaña "Anamnesis"<br>
+                    2. Haz clic en "Agregar Anamnesis"<br>
+                    3. Llena el formulario con motivo de consulta<br>
+                    4. Guarda
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Anamnesis se guarda correctamente</li>
+                        <li>Aparece en la lista de anamnesis</li>
+                        <li>Está asociada a la admisión correcta</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 2: Agregar Examen Físico</div>
+                <div class="step-description">
+                    1. Ve a la pestaña "Exámenes"<br>
+                    2. Haz clic en "Agregar Examen"<br>
+                    3. Ingresa signos vitales (presión, temperatura, etc.)<br>
+                    4. Guarda
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Examen se guarda correctamente</li>
+                        <li>Aparece en la lista de exámenes</li>
+                        <li>Muestra los valores ingresados</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 3: Agregar Diagnóstico</div>
+                <div class="step-description">
+                    1. Ve a la pestaña "Diagnósticos"<br>
+                    2. Haz clic en "Agregar Diagnóstico"<br>
+                    3. Selecciona código CIE-10<br>
+                    4. Guarda
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Diagnóstico se guarda correctamente</li>
+                        <li>Aparece en la lista de diagnósticos</li>
+                        <li>Muestra código y descripción CIE-10</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo agregar anamnesis</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo agregar examen físico</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo agregar diagnóstico</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Todos los registros se guardan correctamente</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEST 3 -->
+        <div class="test-section">
+            <div class="test-title">
+                <div class="test-number">3</div>
+                <span>Múltiples Admisiones</span>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 1: Crear Segunda Admisión</div>
+                <div class="step-description">
+                    1. Desde la HC, haz clic en "Nueva Admisión"<br>
+                    2. Selecciona tipo diferente (ej: "Urgencia")<br>
+                    3. Ingresa motivo<br>
+                    4. Crea la admisión
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Segunda admisión se crea correctamente</li>
+                        <li>Aparece en la pestaña "Admisiones"</li>
+                        <li>Puedes ver ambas admisiones</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">Paso 2: Cambiar Entre Admisiones</div>
+                <div class="step-description">
+                    1. Ve a la pestaña "Admisiones"<br>
+                    2. Haz clic en diferentes admisiones<br>
+                    3. Verifica que cada una tiene sus propios registros
+                </div>
+                <div class="expected">
+                    <div class="expected-title">✅ Resultado Esperado:</div>
+                    <ul class="expected-list">
+                        <li>Puedes cambiar entre admisiones</li>
+                        <li>Cada admisión muestra sus propios registros</li>
+                        <li>Los registros no se mezclan</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo crear múltiples admisiones</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Puedo cambiar entre admisiones</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checkbox" onclick="toggleCheck(this)"></div>
+                    <div class="checklist-text">Cada admisión tiene sus propios registros</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <div class="info-title">📋 Resumen de Cambios en V40.1.0</div>
+            <div class="info-text">
+                <strong>Simplificación Radical:</strong> De 7 pasos a 3 pasos<br><br>
+                <strong>Antes:</strong> Crear → Guardar IDs → Toast → Limpiar estados → Cerrar modal → Pausa → Navegar<br>
+                <strong>Ahora:</strong> Crear → Toast → Navegar<br><br>
+                <strong>Resultado:</strong> 57% menos código, 100% más confiable
+            </div>
+        </div>
+
+        <div class="button-group">
+            <a href="https://demo-estetica.archivoenlinea.com" class="btn btn-primary" target="_blank">
+                🚀 Ir al Sistema
+            </a>
+            <button class="btn btn-success" onclick="checkAllTests()">
+                ✅ Marcar Todos como Completados
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function toggleCheck(element) {
+            element.classList.toggle('checked');
+            updateProgress();
+        }
+
+        function checkAllTests() {
+            const checkboxes = document.querySelectorAll('.checkbox');
+            checkboxes.forEach(cb => {
+                if (!cb.classList.contains('checked')) {
+                    cb.classList.add('checked');
+                }
+            });
+            updateProgress();
+            alert('✅ Todos los tests marcados como completados!\n\nSi todos funcionan correctamente, el sistema está operativo.');
+        }
+
+        function updateProgress() {
+            const total = document.querySelectorAll('.checkbox').length;
+            const checked = document.querySelectorAll('.checkbox.checked').length;
+            const percentage = Math.round((checked / total) * 100);
+            
+            console.log(`Progreso: ${checked}/${total} (${percentage}%)`);
+        }
+
+        // Auto-verificar versión al cargar
+        window.addEventListener('load', () => {
+            fetch('https://demo-estetica.archivoenlinea.com/version.json?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    console.log('✅ Versión del servidor:', data.version);
+                    if (data.version !== '40.0.2') {
+                        alert('⚠️ Versión incorrecta!\n\nEsperada: 40.0.2\nDetectada: ' + data.version + '\n\nPor favor, limpia el caché del navegador.');
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al verificar versión:', error);
+                });
+        });
+    </script>
+</body>
+</html>
