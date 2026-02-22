@@ -44,7 +44,7 @@ export default function AdmissionTypeModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedType) {
       setError('Debe seleccionar un tipo de admisión');
       return;
@@ -57,9 +57,8 @@ export default function AdmissionTypeModal({
     setIsSubmitting(true);
     setError('');
     
-    // Llamar a onSelect de forma síncrona
-    // El componente padre manejará el async y la navegación
-    onSelect(selectedType, reason);
+    // Llamar a onSelect - el componente padre manejará todo
+    await onSelect(selectedType, reason);
   };
 
   const handleClose = () => {

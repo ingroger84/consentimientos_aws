@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 40.0.2
+## Versión Actual: 40.1.1
 **Fecha:** 2026-02-21
 **Tipo de Cambio:** PATCH
 
@@ -18,10 +18,10 @@
 
 ## Historial de Versiones
 
-### 40.0.2 - 2026-02-21 [PATCH]
-- Documentación: 1 archivo(s) modificado(s)
+### 40.1.1 - 2026-02-21 [PATCH]
+- Frontend: 6 archivo(s) modificado(s)
 
-### 40.0.1 - 2026-02-21 [PATCH]
+### 40.0.2 - 2026-02-21 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
 
 ---
