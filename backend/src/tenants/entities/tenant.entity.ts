@@ -142,6 +142,9 @@ export class Tenant {
   @Column({ type: 'timestamp', nullable: true })
   subscriptionEndsAt: Date;
 
+  @Column({ type: 'timestamp', nullable: true, name: 'suspended_at' })
+  suspendedAt: Date;
+
   @Column({ type: 'jsonb', nullable: true })
   settings: Record<string, any>;
 

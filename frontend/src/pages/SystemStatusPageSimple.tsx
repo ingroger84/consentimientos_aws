@@ -1,8 +1,50 @@
+import { useState, useEffect } from 'react';
 import { 
   Activity, CheckCircle, Server, Database, HardDrive
 } from 'lucide-react';
 
+interface VersionInfo {
+  version: string;
+  buildDate: string;
+  fullVersion: string;
+}
+
+interface HealthData {
+  status: string;
+  version: string | VersionInfo;
+}
+
 export default function SystemStatusPageSimple() {
+  const [version, setVersion] = useState<string>('40.3.11');
+
+  useEffect(() => {
+    fetchVersion();
+  }, []);
+
+  const fetchVersion = async () => {
+    try {
+      const response = await fetch('/api/health/detailed');
+      if (!response.ok) return;
+      
+      const data: HealthData = await response.json();
+      
+      // Extraer versión (puede ser string u objeto)
+      let versionString: string;
+      if (typeof data.version === 'string') {
+        versionString = data.version;
+      } else if (data.version && typeof data.version === 'object') {
+        versionString = data.version.version;
+      } else {
+        versionString = '40.3.11';
+      }
+      
+      setVersion(versionString);
+    } catch (error) {
+      console.error('Error fetching version:', error);
+      // Mantener versión por defecto
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -104,7 +146,7 @@ export default function SystemStatusPageSimple() {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-600 mb-1">Versión del Sistema</p>
-              <p className="text-2xl font-bold text-gray-900">40.2.0</p>
+              <p className="text-2xl font-bold text-gray-900">{version}</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-1">Disponibilidad</p>

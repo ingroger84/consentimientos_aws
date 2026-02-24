@@ -15,6 +15,7 @@ import { SettingsService } from '../settings/settings.service';
 import { MailService } from '../mail/mail.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { getPlanConfig } from '../tenants/plans.config';
+import { AdmissionsService } from './admissions.service';
 
 @Injectable()
 export class MedicalRecordsService {
@@ -34,6 +35,8 @@ export class MedicalRecordsService {
     private mailService: MailService,
     @Inject(forwardRef(() => TenantsService))
     private tenantsService: TenantsService,
+    @Inject(forwardRef(() => AdmissionsService))
+    private admissionsService: AdmissionsService,
   ) {}
 
   async create(
@@ -178,6 +181,32 @@ export class MedicalRecordsService {
       userAgent,
     });
 
+    // ✅ CREAR AUTOMÁTICAMENTE LA PRIMERA ADMISIÓN
+    // Cuando se crea una HC nueva, se debe crear automáticamente la primera admisión
+    // con el tipo seleccionado en el formulario
+    try {
+      console.log('=== CREANDO PRIMERA ADMISIÓN AUTOMÁTICA ===');
+      console.log('HC ID:', saved.id);
+      console.log('Tipo de admisión:', createDto.admissionType);
+      
+      await this.admissionsService.create(
+        {
+          medicalRecordId: saved.id,
+          admissionDate: createDto.admissionDate,
+          admissionType: createDto.admissionType as any,
+          reason: 'Primera admisión - Apertura de Historia Clínica',
+        },
+        userId,
+        tenantId,
+      );
+      
+      console.log('✅ Primera admisión creada exitosamente');
+    } catch (error) {
+      console.error('❌ Error al crear primera admisión:', error);
+      // No lanzar error, la HC ya fue creada exitosamente
+      // Solo registrar el error para debugging
+    }
+
     return this.findOne(saved.id, tenantId, userId);
   }
 
@@ -257,6 +286,15 @@ export class MedicalRecordsService {
         'branch',
         'creator',
         'closer',
+        'admissions',
+        'admissions.creator',
+        'admissions.anamnesis',
+        'admissions.physicalExams',
+        'admissions.diagnoses',
+        'admissions.evolutions',
+        'admissions.evolutions.creator',
+        'admissions.consents',
+        'admissions.consents.creator',
         'anamnesis',
         'physicalExams',
         'diagnoses',
@@ -761,6 +799,7 @@ export class MedicalRecordsService {
     // IMPORTANTE: No guardamos consentId porque no existe en la tabla consents
     // Los consentimientos de HC son independientes de los consentimientos tradicionales
     console.log('Creando medical_record_consent con userId:', userId);
+    console.log('admissionId recibido:', dto.admissionId);
     
     const medicalRecordConsent = this.medicalRecordConsentsRepository.create({
       medicalRecordId,
@@ -774,6 +813,7 @@ export class MedicalRecordsService {
         generatedAt: new Date(),
       },
       evolutionId: dto.evolutionId || null,
+      admissionId: dto.admissionId || null, // ✅ AGREGAR: Guardar el admissionId si se proporciona
       createdDuringConsultation: true,
       requiredForProcedure: dto.requiredForProcedure || false,
       procedureName: dto.procedureName || null,

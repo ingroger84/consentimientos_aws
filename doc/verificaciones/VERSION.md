@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 41.0.0
-**Fecha:** 2026-02-24
-**Tipo de Cambio:** MAJOR
+## Versión Actual: 40.2.1
+**Fecha:** 2026-02-21
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,13 +18,11 @@
 
 ## Historial de Versiones
 
-### 41.0.0 - 2026-02-24 [MAJOR]
-- Backend: 13 archivo(s) modificado(s)
-- Frontend: 10 archivo(s) modificado(s)
-- Documentación: 163 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
+### 40.2.1 - 2026-02-21 [PATCH]
+- Frontend: 5 archivo(s) modificado(s)
 
-
+### 40.1.1 - 2026-02-21 [PATCH]
+- Frontend: 6 archivo(s) modificado(s)
 
 ---
 

@@ -59,22 +59,21 @@ export default function ViewMedicalRecordPage() {
       const activeAdmission = record.admissions.find((a: any) => a.status === 'active');
       if (activeAdmission) {
         setActiveAdmissionId(activeAdmission.id);
-      } else {
-        // Si no hay admisión activa y la HC está activa, mostrar modal para crear una
-        if (record.status === 'active') {
-          setShowAdmissionModal(true);
-        }
       }
-    } else if (record && record.status === 'active') {
-      // Si no hay admisiones y la HC está activa, mostrar modal para crear la primera
-      setShowAdmissionModal(true);
+      // NO abrir modal automáticamente - el usuario debe hacer clic en "Nueva Admisión"
     }
+    // NO abrir modal automáticamente cuando no hay admisiones
+    // El usuario debe hacer clic en el botón "Nueva Admisión" explícitamente
   }, [searchParams, record]);
 
   const loadRecord = async () => {
     try {
       setLoading(true);
       const data = await medicalRecordsService.getById(id!);
+      console.log('=== HC CARGADA ===');
+      console.log('ID:', data.id);
+      console.log('Admissions:', data.admissions);
+      console.log('Total admissions:', data.admissions?.length || 0);
       setRecord(data);
     } catch (error: any) {
       toast.error('Error al cargar historia clínica', error.response?.data?.message);
@@ -95,6 +94,11 @@ export default function ViewMedicalRecordPage() {
       setLoading(true);
       setShowAdmissionModal(false);
 
+      console.log('=== CREANDO ADMISIÓN ===');
+      console.log('HC ID:', record.id);
+      console.log('Tipo:', admissionType);
+      console.log('Razón:', reason);
+
       // Crear nueva admisión
       const admission = await admissionsService.create({
         medicalRecordId: record.id,
@@ -103,14 +107,21 @@ export default function ViewMedicalRecordPage() {
         admissionDate: new Date().toISOString(),
       });
 
+      console.log('=== ADMISIÓN CREADA ===');
+      console.log('Admission ID:', admission.id);
+      console.log('Admission Number:', admission.admissionNumber);
+
       toast.success('Nueva admisión creada', 'Puede comenzar a agregar registros a esta admisión');
       
       // Establecer como admisión activa
       setActiveAdmissionId(admission.id);
       
+      console.log('=== RECARGANDO HC ===');
       // Recargar la HC
       await loadRecord();
+      console.log('=== HC RECARGADA ===');
     } catch (error: any) {
+      console.error('=== ERROR AL CREAR ADMISIÓN ===', error);
       toast.error('Error al crear admisión', error.response?.data?.message);
     } finally {
       setLoading(false);

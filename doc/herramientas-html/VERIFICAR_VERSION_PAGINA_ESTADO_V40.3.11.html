@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Verificar Versión - Página de Estado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-title {
+            color: #2c5282;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: #2c5282;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        #status.success {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            color: #22543d;
+            display: block;
+        }
+
+        #status.error {
+            background: #fff5f5;
+            border: 2px solid #f56565;
+            color: #742a2a;
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .steps {
+            margin: 30px 0;
+        }
+
+        .step {
+            background: #f7fafc;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-content {
+            display: inline-block;
+            vertical-align: middle;
+            width: calc(100% - 60px);
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .step-description {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .comparison-card.before {
+            background: #fff5f5;
+            border: 2px solid #f56565;
+        }
+
+        .comparison-card.after {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+        }
+
+        .comparison-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .comparison-card.before .comparison-label {
+            color: #c53030;
+        }
+
+        .comparison-card.after .comparison-label {
+            color: #22543d;
+        }
+
+        .comparison-version {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .comparison-card.before .comparison-version {
+            color: #c53030;
+        }
+
+        .comparison-card.after .comparison-version {
+            color: #22543d;
+        }
+
+        .result-details {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #2d3748;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version-badge">✅ V40.3.11</div>
+            <h1>Verificación de Versión</h1>
+            <p class="subtitle">Página de Estado del Sistema</p>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">🔧 Corrección Aplicada</div>
+            <div class="info-text">
+                Se corrigió el bug que mostraba la versión <strong>40.3.3</strong> en la página 
+                de estado del sistema. Ahora el componente lee correctamente la versión del 
+                endpoint del backend, que devuelve un objeto anidado en lugar de un string simple.
+            </div>
+        </div>
+
+        <div class="comparison-grid">
+            <div class="comparison-card before">
+                <div class="comparison-label">❌ Antes (Bug)</div>
+                <div class="comparison-version">40.3.3</div>
+                <div style="font-size: 14px; color: #742a2a; margin-top: 10px;">
+                    Versión incorrecta mostrada
+                </div>
+            </div>
+            <div class="comparison-card after">
+                <div class="comparison-label">✅ Ahora (Corregido)</div>
+                <div class="comparison-version">40.3.11</div>
+                <div style="font-size: 14px; color: #22543d; margin-top: 10px;">
+                    Versión correcta del backend
+                </div>
+            </div>
+        </div>
+
+        <div class="steps">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">📋 Cómo Verificar</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <div class="step-title">Abre la Landing Page</div>
+                    <div class="step-description">
+                        Ve a: <a href="https://demo-estetica.archivoenlinea.com" target="_blank">
+                        https://demo-estetica.archivoenlinea.com</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <div class="step-title">Haz Clic en "Estado del Sistema"</div>
+                    <div class="step-description">
+                        Busca el enlace en el footer o en el menú principal
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <div class="step-title">Verifica la Versión</div>
+                    <div class="step-description">
+                        Busca la tarjeta de "Versión" en las métricas principales. 
+                        Debe mostrar <strong>40.3.11</strong> (o la versión actual del backend)
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <div class="step-content">
+                    <div class="step-title">Verifica en Información del Sistema</div>
+                    <div class="step-description">
+                        Desplázate hacia abajo hasta "Información del Sistema" → "Sistema Operativo". 
+                        La versión también debe aparecer ahí correctamente
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn btn-success" onclick="checkVersion()">
+                🔍 Verificar Versión Ahora
+            </button>
+            <a href="https://demo-estetica.archivoenlinea.com/status" target="_blank" class="btn">
+                🌐 Abrir Página de Estado
+            </a>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function checkVersion() {
+            const status = document.getElementById('status');
+            status.className = 'success';
+            status.innerHTML = '<div class="loading"></div><strong>Verificando versión...</strong>';
+
+            try {
+                const timestamp = Date.now();
+                
+                // Verificar endpoint detailed
+                const response = await fetch(`https://demo-estetica.archivoenlinea.com/api/health/detailed?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                // Extraer versión (puede ser string u objeto)
+                let backendVersion;
+                if (typeof data.version === 'string') {
+                    backendVersion = data.version;
+                } else if (data.version && typeof data.version === 'object') {
+                    backendVersion = data.version.version;
+                } else {
+                    backendVersion = 'No disponible';
+                }
+
+                // Verificar version.json del frontend
+                const frontendResponse = await fetch(`https://demo-estetica.archivoenlinea.com/version.json?v=${timestamp}`, {
+                    cache: 'no-store'
+                });
+                const frontendData = await frontendResponse.json();
+
+                // Mostrar resultados
+                status.className = 'success';
+                status.innerHTML = `
+                    <strong>✅ VERIFICACIÓN EXITOSA</strong>
+                    <div class="result-details">
+                        <div class="result-row">
+                            <span class="result-label">Backend Version:</span>
+                            <span class="result-value">${backendVersion}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Frontend Version:</span>
+                            <span class="result-value">${frontendData.version}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Build Date:</span>
+                            <span class="result-value">${frontendData.buildDate}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Build Hash:</span>
+                            <span class="result-value">${frontendData.buildHash}</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Estado del Sistema:</span>
+                            <span class="result-value">${data.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                    <br>
+                    <strong>🎉 La página de estado del sistema ahora mostrará la versión correcta!</strong><br><br>
+                    <a href="https://demo-estetica.archivoenlinea.com/status" target="_blank" class="btn">
+                        🌐 Abrir Página de Estado
+                    </a>
+                `;
+
+            } catch (error) {
+                status.className = 'error';
+                status.innerHTML = `
+                    <strong>❌ ERROR AL VERIFICAR</strong><br><br>
+                    ${error.message}<br><br>
+                    <strong>Posibles causas:</strong><br>
+                    • El servidor no está respondiendo<br>
+                    • Hay un problema de red<br>
+                    • El endpoint no está disponible<br><br>
+                    <strong>Solución:</strong> Intenta nuevamente en unos segundos o verifica 
+                    manualmente abriendo la página de estado del sistema.
+                `;
+            }
+        }
+
+        // Verificar automáticamente al cargar
+        window.addEventListener('load', function() {
+            setTimeout(checkVersion, 1000);
+        });
+    </script>
+</body>
+</html>

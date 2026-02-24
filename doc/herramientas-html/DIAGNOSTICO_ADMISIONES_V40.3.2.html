@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Admisiones V40.3.2</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .section h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+        .warning {
+            border-left: 4px solid #ffc107;
+            background: #fff3cd;
+        }
+        .info {
+            border-left: 4px solid #17a2b8;
+            background: #d1ecf1;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-ok {
+            background: #28a745;
+            color: white;
+        }
+        .status-error {
+            background: #dc3545;
+            color: white;
+        }
+        .status-pending {
+            background: #ffc107;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico de Admisiones V40.3.2</h1>
+        <p class="subtitle">Herramienta de diagnóstico para verificar por qué las admisiones no aparecen</p>
+
+        <div class="section warning">
+            <h2>⚠️ Problema Reportado</h2>
+            <p><strong>Usuario reporta:</strong> "Las admisiones se crean pero NO aparecen en la pestaña Admisiones"</p>
+            <p><strong>Versión actual:</strong> Frontend 40.3.1, Backend 40.3.2</p>
+            <p><strong>Correcciones previas:</strong></p>
+            <ul>
+                <li>✅ Modal eliminado de CreateMedicalRecordPage (V40.3.0)</li>
+                <li>✅ Modal no se abre automáticamente (V40.3.1)</li>
+                <li>✅ Backend actualizado con relaciones de admissions (V40.3.2)</li>
+                <li>❌ Las admisiones NO aparecen en la lista</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📋 Pasos de Diagnóstico</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Verificar que estás en una Historia Clínica</strong>
+                <p>Navega a una HC existente desde el menú "Historias Clínicas"</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Abrir Consola del Navegador</strong>
+                <p>Presiona <code>F12</code> y ve a la pestaña <strong>Console</strong></p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Ejecutar Diagnóstico</strong>
+                <div class="button-group">
+                    <button onclick="checkCurrentPage()">1. Verificar Página Actual</button>
+                    <button onclick="checkMedicalRecordData()">2. Verificar Datos de HC</button>
+                    <button onclick="checkNetworkRequest()">3. Verificar Petición API</button>
+                    <button onclick="checkAdmissionsComponent()">4. Verificar Componente</button>
+                    <button onclick="runFullDiagnostic()">🚀 Ejecutar Diagnóstico Completo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Resultados del Diagnóstico</h2>
+            <div id="results"></div>
+        </div>
+
+        <div class="section info">
+            <h2>💡 Posibles Causas</h2>
+            <ol>
+                <li><strong>Cache del navegador:</strong> El navegador está mostrando datos antiguos</li>
+                <li><strong>Problema de serialización:</strong> TypeORM no está incluyendo las relaciones correctamente</li>
+                <li><strong>Problema en el componente:</strong> AdmissionsSection no está recibiendo los datos</li>
+                <li><strong>Problema de estado:</strong> React no está actualizando el estado después de crear la admisión</li>
+                <li><strong>Problema de base de datos:</strong> Las admisiones no se están guardando correctamente</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Acciones Correctivas</h2>
+            <div class="button-group">
+                <button onclick="clearCache()">Limpiar Cache del Navegador</button>
+                <button onclick="forceReload()">Forzar Recarga (Ctrl+Shift+R)</button>
+                <button onclick="checkBackendLogs()">Ver Logs del Backend</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(title, content, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `<strong>${title}</strong>\n${content}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function checkCurrentPage() {
+            addResult('🔍 Verificando Página Actual', 'Ejecutando verificación...', 'info');
+            
+            setTimeout(() => {
+                const url = window.location.href;
+                const isViewMedicalRecord = url.includes('/medical-records/') && !url.includes('/create');
+                
+                if (isViewMedicalRecord) {
+                    const medicalRecordId = url.split('/medical-records/')[1]?.split('?')[0];
+                    addResult(
+                        '✅ Página Correcta',
+                        `Estás en la página de visualización de HC\nID de HC: ${medicalRecordId}\nURL: ${url}`,
+                        'success'
+                    );
+                } else {
+                    addResult(
+                        '❌ Página Incorrecta',
+                        `No estás en una página de visualización de HC\nURL actual: ${url}\n\nPor favor, navega a una HC existente desde el menú "Historias Clínicas"`,
+                        'error'
+                    );
+                }
+            }, 500);
+        }
+
+        function checkMedicalRecordData() {
+            addResult('🔍 Verificando Datos de HC en Memoria', 'Buscando datos en React DevTools...', 'info');
+            
+            setTimeout(() => {
+                // Intentar acceder al estado de React
+                const reactRoot = document.querySelector('#root');
+                
+                if (!reactRoot) {
+                    addResult(
+                        '❌ No se encontró React Root',
+                        'No se pudo acceder al estado de React.\n\nPor favor:\n1. Abre React DevTools (extensión de navegador)\n2. Ve a la pestaña "Components"\n3. Busca el componente "ViewMedicalRecordPage"\n4. Verifica el estado "record" y busca la propiedad "admissions"',
+                        'error'
+                    );
+                    return;
+                }
+
+                addResult(
+                    '⚠️ Verificación Manual Requerida',
+                    'Para verificar los datos en memoria:\n\n1. Abre React DevTools (F12 → pestaña "Components")\n2. Busca el componente "ViewMedicalRecordPage"\n3. Verifica el estado "record"\n4. Busca la propiedad "admissions"\n\n¿Qué deberías ver?\n- Si admissions es un array vacío [] → Las admisiones NO están llegando del backend\n- Si admissions tiene elementos → El problema está en el componente AdmissionsSection\n- Si admissions es undefined → El backend NO está enviando las relaciones',
+                    'warning'
+                );
+            }, 500);
+        }
+
+        function checkNetworkRequest() {
+            addResult('🔍 Verificando Petición API', 'Instrucciones para verificar...', 'info');
+            
+            setTimeout(() => {
+                const url = window.location.href;
+                const medicalRecordId = url.split('/medical-records/')[1]?.split('?')[0];
+                
+                if (!medicalRecordId) {
+                    addResult(
+                        '❌ No se pudo obtener ID de HC',
+                        'No estás en una página de HC válida',
+                        'error'
+                    );
+                    return;
+                }
+
+                addResult(
+                    '📡 Instrucciones para Verificar Network',
+                    `1. Abre DevTools (F12) → pestaña "Network"\n2. Filtra por "medical-records"\n3. Recarga la página (F5)\n4. Busca la petición: GET /api/medical-records/${medicalRecordId}\n5. Haz clic en la petición\n6. Ve a la pestaña "Response"\n7. Busca la propiedad "admissions" en el JSON\n\n¿Qué deberías ver?\n- Si "admissions": [] → Las admisiones NO existen en la BD\n- Si "admissions": [{ ... }] → Las admisiones SÍ están en la BD\n- Si NO hay propiedad "admissions" → El backend NO está incluyendo las relaciones\n\nURL de la petición:\nhttps://demo-estetica.archivoenlinea.com/api/medical-records/${medicalRecordId}`,
+                    'info'
+                );
+            }, 500);
+        }
+
+        function checkAdmissionsComponent() {
+            addResult('🔍 Verificando Componente AdmissionsSection', 'Analizando...', 'info');
+            
+            setTimeout(() => {
+                addResult(
+                    '🔧 Verificación del Componente',
+                    `El componente AdmissionsSection espera recibir:\n\nProps:\n- admissions: Admission[] (array de admisiones)\n- activeAdmissionId?: string | null\n- onAdmissionSelect?: (admissionId: string) => void\n- onRefresh?: () => void\n- onCloseAdmission?: (admissionId: string) => void\n- onReopenAdmission?: (admissionId: string) => void\n\nVerificaciones:\n1. ¿El componente está recibiendo el prop "admissions"?\n2. ¿El array "admissions" tiene elementos?\n3. ¿El componente está renderizando correctamente?\n\nPara verificar:\n1. Abre React DevTools\n2. Busca el componente "AdmissionsSection"\n3. Verifica los props que está recibiendo\n4. Si "admissions" es undefined o null → El problema está en ViewMedicalRecordPage\n5. Si "admissions" es [] → Las admisiones no están en la BD o no llegan del backend`,
+                    'info'
+                );
+            }, 500);
+        }
+
+        function runFullDiagnostic() {
+            document.getElementById('results').innerHTML = '';
+            addResult('🚀 Iniciando Diagnóstico Completo', 'Ejecutando todas las verificaciones...', 'info');
+            
+            setTimeout(() => checkCurrentPage(), 500);
+            setTimeout(() => checkMedicalRecordData(), 1500);
+            setTimeout(() => checkNetworkRequest(), 2500);
+            setTimeout(() => checkAdmissionsComponent(), 3500);
+            
+            setTimeout(() => {
+                addResult(
+                    '✅ Diagnóstico Completado',
+                    'Revisa los resultados arriba y sigue las instrucciones.\n\nSi necesitas ayuda adicional, comparte los resultados con el equipo de desarrollo.',
+                    'success'
+                );
+            }, 4500);
+        }
+
+        function clearCache() {
+            addResult('🧹 Limpiando Cache', 'Instrucciones...', 'info');
+            
+            setTimeout(() => {
+                addResult(
+                    '🧹 Cómo Limpiar el Cache',
+                    `Opción 1 - Recarga Forzada:\n1. Presiona Ctrl + Shift + R (Windows/Linux)\n2. O Cmd + Shift + R (Mac)\n\nOpción 2 - Limpiar Cache Manualmente:\n1. Abre DevTools (F12)\n2. Haz clic derecho en el botón de recarga\n3. Selecciona "Vaciar caché y volver a cargar de manera forzada"\n\nOpción 3 - Limpiar Todo:\n1. Presiona Ctrl + Shift + Delete\n2. Selecciona "Imágenes y archivos en caché"\n3. Haz clic en "Borrar datos"`,
+                    'info'
+                );
+            }, 500);
+        }
+
+        function forceReload() {
+            addResult('🔄 Forzando Recarga', 'Recargando página...', 'info');
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        }
+
+        function checkBackendLogs() {
+            addResult('📋 Ver Logs del Backend', 'Instrucciones...', 'info');
+            
+            setTimeout(() => {
+                addResult(
+                    '📋 Cómo Ver los Logs del Backend',
+                    `Para verificar los logs del backend en AWS:\n\n1. Conectarse al servidor:\nssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249\n\n2. Ver logs de PM2:\npm2 logs datagree\n\n3. Ver logs en tiempo real:\npm2 logs datagree --lines 100\n\n4. Buscar errores específicos:\npm2 logs datagree | grep -i "error"\n\n5. Verificar que el backend esté corriendo:\npm2 status\n\nBusca mensajes como:\n- "Admisión creada exitosamente"\n- "Error al crear admisión"\n- "Relaciones cargadas: admissions"\n- Cualquier error de TypeORM o base de datos`,
+                    'info'
+                );
+            }, 500);
+        }
+
+        // Ejecutar diagnóstico automático al cargar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addResult(
+                    '👋 Bienvenido al Diagnóstico de Admisiones',
+                    'Esta herramienta te ayudará a identificar por qué las admisiones no aparecen en la lista.\n\nHaz clic en "Ejecutar Diagnóstico Completo" para comenzar.',
+                    'info'
+                );
+            }, 500);
+        });
+    </script>
+</body>
+</html>

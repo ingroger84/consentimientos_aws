@@ -301,12 +301,14 @@ export class TenantsService {
   async suspend(id: string): Promise<Tenant> {
     const tenant = await this.findOne(id);
     tenant.status = TenantStatus.SUSPENDED;
+    tenant.suspendedAt = new Date();
     return await this.tenantsRepository.save(tenant);
   }
 
   async activate(id: string): Promise<Tenant> {
     const tenant = await this.findOne(id);
     tenant.status = TenantStatus.ACTIVE;
+    tenant.suspendedAt = null;
     return await this.tenantsRepository.save(tenant);
   }
 

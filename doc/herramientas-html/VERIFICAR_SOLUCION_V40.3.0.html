@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Verificación V40.3.0 - Modal Eliminado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .status-card.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .status-card.warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        
+        .status-card.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-value {
+            font-family: 'Courier New', monospace;
+            color: #666;
+        }
+        
+        .status-value.success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .status-value.error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .button.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .button.danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+        
+        .test-section {
+            background: #e3f2fd;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .test-section h3 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .test-step {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #1976d2;
+        }
+        
+        .test-step h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .test-step p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .result-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #ddd;
+        }
+        
+        .result-box.hidden {
+            display: none;
+        }
+        
+        .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .buttons-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .log-container {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-line {
+            margin-bottom: 5px;
+        }
+        
+        .log-line.success {
+            color: #50fa7b;
+        }
+        
+        .log-line.error {
+            color: #ff5555;
+        }
+        
+        .log-line.warning {
+            color: #f1fa8c;
+        }
+        
+        .log-line.info {
+            color: #8be9fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">✅</div>
+            <h1>Verificación V40.3.0</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">Modal de Admisiones Eliminado</p>
+        </div>
+        
+        <div class="content">
+            <!-- Estado del Servidor -->
+            <div class="status-card success">
+                <h2 style="margin-bottom: 20px; color: #155724;">🟢 Estado del Servidor</h2>
+                <div class="status-item">
+                    <span class="status-label">Versión Desplegada:</span>
+                    <span class="status-value success">40.3.0 ✓</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Build Timestamp:</span>
+                    <span class="status-value success">1771731651648 ✓</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Archivo Principal:</span>
+                    <span class="status-value success">index-BFFjwKjO.js ✓</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">CreateMedicalRecordPage:</span>
+                    <span class="status-value success">DJlmYesu.js (4.7K) ✓</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Archivos Antiguos:</span>
+                    <span class="status-value success">ELIMINADOS ✓</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Nginx:</span>
+                    <span class="status-value success">REINICIADO ✓</span>
+                </div>
+            </div>
+            
+            <!-- Verificación del Navegador -->
+            <div class="status-card" id="browserStatus">
+                <h2 style="margin-bottom: 20px;">🌐 Estado del Navegador</h2>
+                <div class="status-item">
+                    <span class="status-label">Versión en localStorage:</span>
+                    <span class="status-value" id="localVersion">Verificando...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Build Timestamp en localStorage:</span>
+                    <span class="status-value" id="localTimestamp">Verificando...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Service Workers:</span>
+                    <span class="status-value" id="serviceWorkers">Verificando...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Caché API:</span>
+                    <span class="status-value" id="cacheApi">Verificando...</span>
+                </div>
+            </div>
+            
+            <!-- Prueba del Flujo -->
+            <div class="test-section">
+                <h3>🧪 Prueba del Flujo de Admisiones</h3>
+                
+                <div class="test-step">
+                    <h4>Paso 1: Limpiar Caché</h4>
+                    <p>Antes de probar, asegúrate de limpiar el caché del navegador.</p>
+                    <button class="button danger" onclick="clearCache()">🗑️ Limpiar Caché Ahora</button>
+                </div>
+                
+                <div class="test-step">
+                    <h4>Paso 2: Abrir el Sistema</h4>
+                    <p>Abre el sistema en una nueva pestaña y verifica la versión en la consola.</p>
+                    <button class="button success" onclick="openSystem()">🚀 Abrir Sistema</button>
+                </div>
+                
+                <div class="test-step">
+                    <h4>Paso 3: Probar Flujo</h4>
+                    <p>1. Ir a "Nueva Historia Clínica"</p>
+                    <p>2. Buscar un cliente con HC existente</p>
+                    <p>3. Seleccionar el cliente</p>
+                    <p><strong>✅ Resultado esperado:</strong> NO debe aparecer modal, debe navegar directamente a la HC</p>
+                </div>
+                
+                <div class="test-step">
+                    <h4>Paso 4: Verificar en Consola</h4>
+                    <p>Abre F12 → Console y verifica que aparezca:</p>
+                    <div style="background: #2d2d2d; color: #50fa7b; padding: 10px; border-radius: 5px; margin-top: 10px; font-family: monospace;">
+                        ✅ Caché limpiado. Nueva versión: 40.3.0
+                    </div>
+                </div>
+                
+                <div class="test-step">
+                    <h4>Paso 5: Verificar Archivo Cargado</h4>
+                    <p>Abre F12 → Network → Busca "CreateMedicalRecordPage"</p>
+                    <p><strong>✅ Debe cargar:</strong> CreateMedicalRecordPage-DJlmYesu.js (4.7K)</p>
+                    <p><strong>❌ Si carga:</strong> Otro archivo (6.6K-6.7K) → Caché del navegador</p>
+                    <button class="button" onclick="checkNetwork()">🔍 Ver Instrucciones Detalladas</button>
+                </div>
+            </div>
+            
+            <!-- Resultado de Verificación -->
+            <div class="result-box hidden" id="resultBox">
+                <h3 id="resultTitle"></h3>
+                <p id="resultMessage"></p>
+            </div>
+            
+            <!-- Log de Verificación -->
+            <div class="log-container" id="logContainer">
+                <div class="log-line info">🔍 Iniciando verificación del sistema...</div>
+            </div>
+            
+            <!-- Botones de Acción -->
+            <div class="buttons-container">
+                <button class="button" onclick="runFullCheck()">🔍 Verificación Completa</button>
+                <button class="button danger" onclick="clearCache()">🗑️ Limpiar Caché</button>
+                <button class="button success" onclick="openSystem()">🚀 Abrir Sistema</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Agregar log
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logLine = document.createElement('div');
+            logLine.className = `log-line ${type}`;
+            logLine.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logLine);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Verificar estado del navegador
+        async function checkBrowserStatus() {
+            addLog('Verificando estado del navegador...', 'info');
+            
+            // Versión en localStorage
+            const localVersion = localStorage.getItem('app_version') || 'No encontrada';
+            document.getElementById('localVersion').textContent = localVersion;
+            document.getElementById('localVersion').className = localVersion === '40.3.0' ? 'status-value success' : 'status-value error';
+            addLog(`Versión en localStorage: ${localVersion}`, localVersion === '40.3.0' ? 'success' : 'warning');
+            
+            // Timestamp en localStorage
+            const localTimestamp = localStorage.getItem('build_timestamp') || 'No encontrado';
+            document.getElementById('localTimestamp').textContent = localTimestamp;
+            document.getElementById('localTimestamp').className = localTimestamp === '1771731651648' ? 'status-value success' : 'status-value error';
+            addLog(`Timestamp en localStorage: ${localTimestamp}`, localTimestamp === '1771731651648' ? 'success' : 'warning');
+            
+            // Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                const swStatus = registrations.length === 0 ? 'Ninguno (OK)' : `${registrations.length} activos`;
+                document.getElementById('serviceWorkers').textContent = swStatus;
+                document.getElementById('serviceWorkers').className = registrations.length === 0 ? 'status-value success' : 'status-value warning';
+                addLog(`Service Workers: ${swStatus}`, registrations.length === 0 ? 'success' : 'warning');
+            } else {
+                document.getElementById('serviceWorkers').textContent = 'No soportado';
+                addLog('Service Workers: No soportado', 'info');
+            }
+            
+            // Cache API
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                const cacheStatus = cacheNames.length === 0 ? 'Vacío (OK)' : `${cacheNames.length} cachés`;
+                document.getElementById('cacheApi').textContent = cacheStatus;
+                document.getElementById('cacheApi').className = cacheNames.length === 0 ? 'status-value success' : 'status-value warning';
+                addLog(`Cache API: ${cacheStatus}`, cacheNames.length === 0 ? 'success' : 'warning');
+            } else {
+                document.getElementById('cacheApi').textContent = 'No soportado';
+                addLog('Cache API: No soportado', 'info');
+            }
+            
+            // Actualizar color de la tarjeta
+            const browserCard = document.getElementById('browserStatus');
+            if (localVersion === '40.3.0' && localTimestamp === '1771731651648') {
+                browserCard.className = 'status-card success';
+                addLog('✅ Navegador actualizado correctamente', 'success');
+            } else {
+                browserCard.className = 'status-card warning';
+                addLog('⚠️ Navegador necesita actualización', 'warning');
+            }
+        }
+        
+        // Limpiar caché
+        async function clearCache() {
+            addLog('🗑️ Iniciando limpieza de caché...', 'info');
+            
+            try {
+                // Limpiar localStorage excepto datos de sesión
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                addLog('✅ localStorage limpiado', 'success');
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                addLog('✅ sessionStorage limpiado', 'success');
+                
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                    }
+                    addLog(`✅ ${registrations.length} Service Workers eliminados`, 'success');
+                }
+                
+                // Limpiar Cache API
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    for (const name of names) {
+                        await caches.delete(name);
+                    }
+                    addLog(`✅ ${names.length} cachés eliminados`, 'success');
+                }
+                
+                addLog('✅ Caché limpiado exitosamente', 'success');
+                alert('✅ Caché limpiado exitosamente!\n\nAhora:\n1. Cierra esta pestaña\n2. Abre el sistema en una nueva pestaña\n3. Presiona Ctrl+F5 para recargar');
+                
+                // Re-verificar
+                await checkBrowserStatus();
+                
+            } catch (error) {
+                addLog(`❌ Error al limpiar caché: ${error.message}`, 'error');
+                alert('⚠️ Error al limpiar caché automáticamente.\n\nPor favor, hazlo manualmente:\n1. Presiona Ctrl+Shift+Delete\n2. Selecciona "Desde siempre"\n3. Marca todas las opciones\n4. Haz clic en "Borrar datos"');
+            }
+        }
+        
+        // Abrir sistema
+        function openSystem() {
+            addLog('🚀 Abriendo sistema...', 'info');
+            window.open('https://demo-estetica.archivoenlinea.com', '_blank');
+        }
+        
+        // Verificación completa
+        async function runFullCheck() {
+            addLog('🔍 Ejecutando verificación completa...', 'info');
+            await checkBrowserStatus();
+            addLog('✅ Verificación completa finalizada', 'success');
+        }
+        
+        // Instrucciones de Network
+        function checkNetwork() {
+            addLog('📋 Mostrando instrucciones de verificación de Network...', 'info');
+            alert(`🔍 VERIFICAR ARCHIVO CARGADO
+
+1. Abre el sistema: https://demo-estetica.archivoenlinea.com
+2. Presiona F12 para abrir DevTools
+3. Ve a la pestaña "Network"
+4. Recarga la página (Ctrl+F5)
+5. En el filtro, escribe: CreateMedicalRecordPage
+6. Busca el archivo cargado
+
+✅ CORRECTO:
+   CreateMedicalRecordPage-DJlmYesu.js
+   Tamaño: 4.7K
+
+❌ INCORRECTO:
+   CreateMedicalRecordPage-*.js
+   Tamaño: 6.6K - 6.7K
+   
+Si carga el archivo incorrecto:
+→ Limpia el caché (Ctrl+Shift+Delete)
+→ Recarga con Ctrl+F5`);
+        }
+        
+        // Ejecutar verificación al cargar
+        window.addEventListener('load', async () => {
+            addLog('🚀 Página cargada', 'success');
+            await checkBrowserStatus();
+        });
+    </script>
+</body>
+</html>

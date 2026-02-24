@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 FORZAR ACTUALIZACIÓN V40.3.7 - URGENTE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .steps {
+            margin: 30px 0;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .step-content {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .progress {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        #status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .changelog {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .changelog h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .changelog ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .changelog li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .changelog li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🚨</div>
+            <h1>ACTUALIZACIÓN URGENTE REQUERIDA</h1>
+            <div class="version-badge">Versión 40.3.7</div>
+        </div>
+
+        <div class="alert alert-danger">
+            <strong>⚠️ PROBLEMA DETECTADO:</strong><br>
+            Estás viendo la versión <strong>40.3.3 (2026-02-22)</strong> pero la versión actual es <strong>40.3.7 (2026-02-23)</strong>.<br>
+            Esto indica que tu navegador está usando archivos en caché antiguos.
+        </div>
+
+        <div class="changelog">
+            <h3>📋 Cambios en la Versión 40.3.7</h3>
+            <ul>
+                <li><strong>Creación automática de primera admisión:</strong> Al crear una HC nueva, se crea automáticamente la primera admisión con el tipo seleccionado</li>
+                <li><strong>Corrección del flujo:</strong> Ya no es necesario crear manualmente la admisión después de crear la HC</li>
+                <li><strong>Mejora de experiencia:</strong> Los registros clínicos (anamnesis, exámenes, etc.) se pueden agregar inmediatamente después de crear la HC</li>
+            </ul>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    Limpiar Caché del Navegador
+                </div>
+                <div class="step-content">
+                    Presiona las siguientes teclas según tu navegador:
+                    <div class="code">
+                        Windows: Ctrl + Shift + Delete<br>
+                        Mac: Cmd + Shift + Delete
+                    </div>
+                    Selecciona "Todo el tiempo" y marca "Archivos e imágenes en caché"
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    Recarga Forzada
+                </div>
+                <div class="step-content">
+                    Después de limpiar el caché, haz una recarga forzada:
+                    <div class="code">
+                        Windows: Ctrl + F5 o Ctrl + Shift + R<br>
+                        Mac: Cmd + Shift + R
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    Verificar Versión
+                </div>
+                <div class="step-content">
+                    Después de recargar, verifica que la versión en el footer sea <strong>40.3.7</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-danger" onclick="clearCacheAndReload()">
+                🗑️ Limpiar Caché y Recargar
+            </button>
+            <button class="btn btn-success" onclick="forceReload()">
+                🔄 Recarga Forzada
+            </button>
+            <button class="btn" onclick="openInNewTab()">
+                🌐 Abrir en Nueva Pestaña
+            </button>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="alert alert-success" style="margin-top: 30px;">
+            <strong>✅ DESPUÉS DE ACTUALIZAR:</strong><br>
+            1. Verifica que la versión sea 40.3.7<br>
+            2. Crea una nueva Historia Clínica de prueba<br>
+            3. Verifica que la admisión se cree automáticamente<br>
+            4. Intenta agregar anamnesis/exámenes sin crear admisión manualmente
+        </div>
+    </div>
+
+    <script>
+        const APP_URL = 'https://demo-estetica.archivoenlinea.com';
+
+        function updateProgress(percent, message) {
+            const progressBar = document.getElementById('progressBar');
+            const status = document.getElementById('status');
+            
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+            
+            if (message) {
+                status.style.display = 'block';
+                status.className = 'alert alert-success';
+                status.innerHTML = '<strong>✓</strong> ' + message;
+            }
+        }
+
+        async function clearCacheAndReload() {
+            updateProgress(10, 'Iniciando limpieza de caché...');
+            
+            try {
+                // Limpiar localStorage
+                updateProgress(30, 'Limpiando localStorage...');
+                localStorage.clear();
+                
+                // Limpiar sessionStorage
+                updateProgress(50, 'Limpiando sessionStorage...');
+                sessionStorage.clear();
+                
+                // Limpiar cookies
+                updateProgress(70, 'Limpiando cookies...');
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                // Intentar limpiar caché de Service Worker
+                if ('serviceWorker' in navigator) {
+                    updateProgress(80, 'Limpiando Service Workers...');
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                // Intentar limpiar Cache API
+                if ('caches' in window) {
+                    updateProgress(90, 'Limpiando Cache API...');
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                }
+                
+                updateProgress(100, '¡Caché limpiado! Recargando en 2 segundos...');
+                
+                setTimeout(() => {
+                    window.location.href = APP_URL + '?v=' + Date.now();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                updateProgress(100, 'Limpieza completada con advertencias. Recargando...');
+                setTimeout(() => {
+                    window.location.href = APP_URL + '?v=' + Date.now();
+                }, 2000);
+            }
+        }
+
+        function forceReload() {
+            updateProgress(50, 'Forzando recarga...');
+            setTimeout(() => {
+                updateProgress(100, 'Recargando aplicación...');
+                window.location.href = APP_URL + '?v=' + Date.now() + '&force=true';
+            }, 1000);
+        }
+
+        function openInNewTab() {
+            const url = APP_URL + '?v=' + Date.now() + '&new=true';
+            window.open(url, '_blank');
+            updateProgress(100, 'Aplicación abierta en nueva pestaña');
+        }
+
+        // Auto-ejecutar limpieza al cargar la página
+        window.addEventListener('load', () => {
+            console.log('🚨 Página de actualización cargada');
+            console.log('📦 Versión actual en servidor: 40.3.7');
+            console.log('⚠️ Versión detectada en navegador: 40.3.3');
+            console.log('🔧 Ejecuta la limpieza de caché para actualizar');
+        });
+    </script>
+</body>
+</html>

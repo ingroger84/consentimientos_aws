@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Admisiones v40.3.3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .version {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .step {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .step-content {
+            display: inline-block;
+            vertical-align: top;
+            width: calc(100% - 60px);
+        }
+        
+        .step h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .step p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border-left: 5px solid #28a745;
+            color: #155724;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            color: #856404;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist li:before {
+            content: "✓";
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #28a745;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 3px solid #667eea;
+        }
+        
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Verificación de Admisiones</h1>
+            <div class="version">Versión 40.3.3</div>
+            <p style="margin-top: 20px; font-size: 1.1em;">Asociación de Registros a Admisiones</p>
+        </div>
+        
+        <div class="content">
+            <div class="alert alert-success">
+                <strong>✅ Corrección Implementada y Desplegada</strong><br>
+                Los registros ahora se asocian correctamente a las admisiones y aparecen en la interfaz.
+            </div>
+            
+            <div class="section">
+                <h2>🔍 ¿Qué se corrigió?</h2>
+                <p style="margin-bottom: 15px;">
+                    El método <code>findOne</code> del backend ahora incluye las relaciones anidadas dentro de las admisiones, 
+                    permitiendo que los registros de anamnesis, exámenes físicos, diagnósticos y evoluciones aparezcan 
+                    correctamente asociados a cada admisión.
+                </p>
+                
+                <ul class="checklist">
+                    <li>Relaciones anidadas agregadas en medical-records.service.ts</li>
+                    <li>Backend compilado y desplegado (v40.3.3)</li>
+                    <li>PM2 reiniciado correctamente</li>
+                    <li>Versión confirmada en el servidor</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🧪 Pasos para Verificar</h2>
+                
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <div class="step-content">
+                        <h3>Acceder a una Historia Clínica</h3>
+                        <p>Ingresa a <strong>https://demo-estetica.archivoenlinea.com</strong> y abre una historia clínica existente o crea una nueva.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <div class="step-content">
+                        <h3>Crear o Seleccionar una Admisión</h3>
+                        <p>Haz clic en <span class="highlight">Nueva Admisión</span> o selecciona una admisión activa existente.</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <div class="step-content">
+                        <h3>Agregar Registros</h3>
+                        <p>Agrega registros de:</p>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>📝 Anamnesis</li>
+                            <li>🩺 Examen Físico</li>
+                            <li>🔬 Diagnóstico</li>
+                            <li>📊 Evolución</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <span class="step-number">4</span>
+                    <div class="step-content">
+                        <h3>Verificar en la Pestaña "Admisiones"</h3>
+                        <p>Ve a la pestaña <strong>Admisiones</strong> y verifica que:</p>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Los contadores muestran los números correctos</li>
+                            <li>Al expandir la admisión, aparecen todos los registros</li>
+                            <li>Los registros están correctamente asociados</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🔧 Verificación Técnica (Opcional)</h2>
+                <p style="margin-bottom: 15px;">
+                    Si deseas verificar directamente en la base de datos, ejecuta el script de verificación:
+                </p>
+                
+                <div class="code-block">
+cd backend<br>
+node check-admission-records.js
+                </div>
+                
+                <p style="margin-top: 15px;">
+                    Este script mostrará:
+                </p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Lista de admisiones de la HC más reciente</li>
+                    <li>Contadores de registros asociados a cada admisión</li>
+                    <li>Detalles de los registros</li>
+                    <li>Alerta de registros huérfanos (sin admisión)</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Resultado Esperado</h2>
+                
+                <div class="alert alert-info">
+                    <strong>✅ Comportamiento Correcto:</strong><br><br>
+                    
+                    <strong>Antes:</strong><br>
+                    • Admisión #1: 0 anamnesis, 0 exámenes, 0 diagnósticos, 0 evoluciones<br><br>
+                    
+                    <strong>Ahora:</strong><br>
+                    • Admisión #1: 2 anamnesis, 3 exámenes, 1 diagnóstico, 4 evoluciones<br>
+                    • Al expandir la admisión, se ven todos los registros asociados<br>
+                    • Los contadores se actualizan en tiempo real
+                </div>
+            </div>
+            
+            <div class="alert alert-warning">
+                <strong>⚠️ Nota Importante:</strong><br>
+                Los registros creados ANTES de esta corrección pueden no estar asociados a ninguna admisión. 
+                Esto es normal y esperado. Los nuevos registros se asociarán correctamente.
+            </div>
+            
+            <div class="section">
+                <h2>📝 Cambios Técnicos</h2>
+                <p><strong>Archivo modificado:</strong></p>
+                <div class="code-block">
+backend/src/medical-records/medical-records.service.ts
+                </div>
+                
+                <p style="margin-top: 15px;"><strong>Relaciones agregadas:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><code>admissions.anamnesis</code></li>
+                    <li><code>admissions.physicalExams</code></li>
+                    <li><code>admissions.diagnoses</code></li>
+                    <li><code>admissions.evolutions</code></li>
+                    <li><code>admissions.evolutions.creator</code></li>
+                    <li><code>admissions.consents</code></li>
+                    <li><code>admissions.consents.creator</code></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Versión Backend:</strong> 40.3.3</p>
+            <p><strong>Versión Frontend:</strong> 40.3.3 (sin cambios)</p>
+            <p><strong>Estado:</strong> ✅ Desplegado y Funcionando</p>
+            <p style="margin-top: 20px; color: #999;">
+                Fecha: 2026-02-22 | Sistema de Historias Clínicas
+            </p>
+        </div>
+    </div>
+</body>
+</html>

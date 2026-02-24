@@ -22,10 +22,10 @@ export class MedicalRecordAudit {
   @JoinColumn({ name: 'medical_record_id' })
   medicalRecord: MedicalRecord;
 
-  @Column({ name: 'tenant_id' })
+  @Column({ name: 'tenant_id', nullable: true })
   tenantId: string;
 
-  @ManyToOne(() => Tenant)
+  @ManyToOne(() => Tenant, { nullable: true })
   @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 

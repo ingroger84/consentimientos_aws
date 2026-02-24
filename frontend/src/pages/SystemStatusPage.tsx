@@ -35,6 +35,12 @@ interface SystemInfo {
   };
 }
 
+interface VersionInfo {
+  version: string;
+  buildDate: string;
+  fullVersion: string;
+}
+
 interface HealthData {
   status: string;
   timestamp: string;
@@ -46,7 +52,7 @@ interface HealthData {
     storage: ServiceStatus;
   };
   system?: SystemInfo;
-  version: string;
+  version: string | VersionInfo;
 }
 
 export default function SystemStatusPage() {
@@ -81,7 +87,7 @@ export default function SystemStatusPage() {
           database: { status: 'unknown' },
           storage: { status: 'unknown', provider: 'AWS S3' }
         },
-        version: '38.1.7'
+        version: '40.3.10'
       });
     } finally {
       setLoading(false);
@@ -125,6 +131,12 @@ export default function SystemStatusPage() {
       default:
         return 'Desconocido';
     }
+  };
+
+  const getVersionString = (version: string | VersionInfo | undefined): string => {
+    if (!version) return '40.3.10';
+    if (typeof version === 'string') return version;
+    return version.version || '40.3.10';
   };
 
   // const formatUptime = (seconds: number) => {
@@ -235,7 +247,7 @@ export default function SystemStatusPage() {
               <div>
                 <p className="text-sm text-gray-600">Versión</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {healthData?.version || '19.0.0'}
+                  {getVersionString(healthData?.version)}
                 </p>
               </div>
             </div>
@@ -516,7 +528,7 @@ export default function SystemStatusPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Versión:</span>
                     <span className="font-medium text-gray-900">
-                      {healthData.version}
+                      {getVersionString(healthData.version)}
                     </span>
                   </div>
                 </div>

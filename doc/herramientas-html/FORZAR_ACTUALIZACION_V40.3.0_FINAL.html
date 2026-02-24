@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 ACTUALIZACIÓN CRÍTICA V40.3.0 - FLUJO ADMISIONES CORREGIDO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header .version {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .alert {
+            background: #fee;
+            border-left: 5px solid #f44;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .alert h2 {
+            color: #c00;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .success {
+            background: #efe;
+            border-left: 5px solid #4a4;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .success h2 {
+            color: #060;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h4 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .step-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+            margin: 10px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .button-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .button-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+        }
+        
+        .buttons-container {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .changes-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .changes-list li {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+        
+        .changes-list li::before {
+            content: "✅ ";
+            margin-right: 10px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            color: #1976d2;
+        }
+        
+        .status-value {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ACTUALIZACIÓN CRÍTICA</h1>
+            <div class="version">Versión 40.3.0</div>
+            <p style="margin-top: 15px; font-size: 1.1em;">Flujo de Admisiones Completamente Corregido</p>
+        </div>
+        
+        <div class="content">
+            <div class="alert">
+                <h2>⚠️ PROBLEMA RESUELTO</h2>
+                <p><strong>El modal de admisiones que no se cerraba ha sido ELIMINADO completamente.</strong></p>
+                <p style="margin-top: 10px;">Ahora cuando seleccionas un cliente con HC existente, el sistema navega DIRECTAMENTE a la historia clínica sin mostrar ningún modal.</p>
+            </div>
+            
+            <div class="success">
+                <h2>✅ CAMBIOS IMPLEMENTADOS</h2>
+                <ul class="changes-list">
+                    <li><strong>Modal eliminado:</strong> Ya no aparece el modal al seleccionar cliente con HC</li>
+                    <li><strong>Navegación directa:</strong> Redirección automática a la HC existente</li>
+                    <li><strong>Flujo simplificado:</strong> Crear admisiones desde la HC misma</li>
+                    <li><strong>Archivos antiguos eliminados:</strong> Solo queda la versión correcta en el servidor</li>
+                    <li><strong>Caché del servidor limpiado:</strong> Nginx reiniciado</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h3>📊 Estado del Despliegue</h3>
+                <div class="status">
+                    <div class="status-item">
+                        <span class="status-label">Versión desplegada:</span>
+                        <span class="status-value">40.3.0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Fecha de build:</span>
+                        <span class="status-value">2026-02-22</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Timestamp:</span>
+                        <span class="status-value">1771731471842</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Archivo correcto:</span>
+                        <span class="status-value">CreateMedicalRecordPage-Cpw6L0ue.js (4.7K)</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Archivos antiguos:</span>
+                        <span class="status-value" style="color: #4caf50; font-weight: bold;">ELIMINADOS ✓</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Nginx:</span>
+                        <span class="status-value" style="color: #4caf50; font-weight: bold;">REINICIADO ✓</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning-box">
+                <h3>⚠️ IMPORTANTE: Limpieza de Caché Obligatoria</h3>
+                <p>Tu navegador puede estar cargando archivos antiguos. Debes limpiar el caché COMPLETAMENTE.</p>
+            </div>
+            
+            <div class="section">
+                <h3>🔧 Pasos para Limpiar Caché (OBLIGATORIO)</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Cerrar TODAS las pestañas del sistema</h4>
+                            <p>Cierra todas las pestañas de demo-estetica.archivoenlinea.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Limpiar caché del navegador</h4>
+                            <p><strong>Presiona:</strong> Ctrl + Shift + Delete (Windows) o Cmd + Shift + Delete (Mac)</p>
+                            <p><strong>Selecciona:</strong></p>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>✅ Imágenes y archivos en caché</li>
+                                <li>✅ Cookies y datos de sitios</li>
+                                <li>✅ Intervalo de tiempo: "Desde siempre"</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><strong>Haz clic en "Borrar datos"</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Recarga forzada</h4>
+                            <p>Abre el sistema y presiona: <strong>Ctrl + F5</strong> (Windows) o <strong>Cmd + Shift + R</strong> (Mac)</p>
+                            <p style="margin-top: 10px;">Esto fuerza la descarga de todos los archivos nuevos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Verificar versión</h4>
+                            <p>Abre la consola del navegador (F12) y verifica que veas:</p>
+                            <div class="code">✅ Caché limpiado. Nueva versión: 40.3.0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🎯 Nuevo Flujo de Trabajo</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Cliente NUEVO (sin HC)</h4>
+                            <p>Ir a "Nueva Historia Clínica" → Buscar/crear cliente → Completar formulario → Crear HC</p>
+                            <p style="margin-top: 5px; color: #4caf50;"><strong>✓ Funciona normalmente</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Cliente con HC EXISTENTE</h4>
+                            <p>Ir a "Nueva Historia Clínica" → Buscar cliente → <strong>Sistema navega AUTOMÁTICAMENTE a la HC</strong></p>
+                            <p style="margin-top: 5px; color: #2196f3;"><strong>→ NO aparece modal</strong></p>
+                            <p style="margin-top: 5px; color: #2196f3;"><strong>→ Navegación directa a la HC</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Crear nueva admisión</h4>
+                            <p>Dentro de la HC → Botón "Nueva Admisión" → Completar formulario → Guardar</p>
+                            <p style="margin-top: 5px; color: #4caf50;"><strong>✓ Aquí SÍ aparece el modal (funciona correctamente)</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>🔍 Si el problema persiste</h3>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Modo incógnito</h4>
+                            <p>Abre el sistema en una ventana de incógnito (Ctrl + Shift + N)</p>
+                            <p>Esto garantiza que no hay caché del navegador.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Otro navegador</h4>
+                            <p>Prueba con Chrome, Firefox, Edge o Safari</p>
+                            <p>Si funciona en otro navegador, el problema es caché local.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Verificar en consola</h4>
+                            <p>Abre F12 → Pestaña "Network" → Busca "CreateMedicalRecordPage"</p>
+                            <p>Debe cargar: <strong>CreateMedicalRecordPage-Cpw6L0ue.js (4.7K)</strong></p>
+                            <p style="color: #f44; margin-top: 5px;">Si carga otro archivo (6.6K-6.7K) → Caché del navegador</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="buttons-container">
+                <h3 style="margin-bottom: 20px; color: #333;">Acciones Rápidas</h3>
+                <a href="https://demo-estetica.archivoenlinea.com" class="button button-success" target="_blank">
+                    🚀 Abrir Sistema
+                </a>
+                <button class="button button-danger" onclick="clearAllCache()">
+                    🗑️ Limpiar Caché Ahora
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function clearAllCache() {
+            try {
+                // Limpiar localStorage excepto datos de sesión
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                // Limpiar Cache API
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    for (const name of names) {
+                        await caches.delete(name);
+                    }
+                }
+                
+                alert('✅ Caché limpiado exitosamente!\n\nAhora:\n1. Cierra esta pestaña\n2. Abre el sistema en una nueva pestaña\n3. Presiona Ctrl+F5 para recargar');
+                
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                alert('⚠️ Error al limpiar caché automáticamente.\n\nPor favor, hazlo manualmente:\n1. Presiona Ctrl+Shift+Delete\n2. Selecciona "Desde siempre"\n3. Marca todas las opciones\n4. Haz clic en "Borrar datos"');
+            }
+        }
+        
+        // Auto-verificación al cargar
+        window.addEventListener('load', () => {
+            console.log('🔍 Verificando versión del sistema...');
+            console.log('📦 Versión esperada: 40.3.0');
+            console.log('📅 Build timestamp: 1771731471842');
+            console.log('📄 Archivo correcto: CreateMedicalRecordPage-Cpw6L0ue.js (4.7K)');
+            console.log('');
+            console.log('⚠️ Si ves el modal de admisiones, tu navegador está cargando archivos antiguos.');
+            console.log('✅ Solución: Limpia el caché con Ctrl+Shift+Delete');
+        });
+    </script>
+</body>
+</html>

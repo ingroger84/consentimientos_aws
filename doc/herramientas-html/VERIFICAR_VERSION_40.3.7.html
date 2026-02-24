@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Verificación de Versión 40.3.7</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .status-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-card.success {
+            border-left-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .status-card.error {
+            border-left-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .status-card h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .status-card p {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .info-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .code {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        #results {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🔍</div>
+            <h1>Verificación de Versión</h1>
+            <div class="version-badge">Versión Esperada: 40.3.7</div>
+        </div>
+
+        <div class="status-card">
+            <h3>📋 Información del Sistema</h3>
+            <p>Esta página verifica que estés usando la versión correcta del sistema.</p>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Versión Frontend</div>
+                <div class="info-value" id="frontendVersion">Verificando...</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Versión Backend</div>
+                <div class="info-value" id="backendVersion">Verificando...</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Fecha de Build</div>
+                <div class="info-value" id="buildDate">Verificando...</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Estado</div>
+                <div class="info-value" id="status">Verificando...</div>
+            </div>
+        </div>
+
+        <div id="results"></div>
+
+        <div class="button-group">
+            <button class="btn" onclick="verificarVersiones()">
+                🔄 Verificar Versiones
+            </button>
+            <button class="btn btn-success" onclick="abrirAplicacion()">
+                🌐 Abrir Aplicación
+            </button>
+        </div>
+
+        <div class="status-card">
+            <h3>✅ Pasos de Verificación</h3>
+            <ol style="padding-left: 20px; color: #4a5568; line-height: 1.8;">
+                <li>Haz clic en "Verificar Versiones" para comprobar las versiones actuales</li>
+                <li>Si la versión es correcta (40.3.7), haz clic en "Abrir Aplicación"</li>
+                <li>Si la versión es incorrecta, abre el archivo "FORZAR_ACTUALIZACION_V40.3.7_URGENTE.html"</li>
+                <li>Verifica que en el footer de la aplicación aparezca "Versión 40.3.7 - 2026-02-23"</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const APP_URL = 'https://demo-estetica.archivoenlinea.com';
+        const API_URL = 'https://demo-estetica.archivoenlinea.com/api';
+
+        async function verificarVersiones() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div class="status-card"><h3>🔄 Verificando versiones...</h3></div>';
+
+            try {
+                // Verificar versión del frontend
+                const frontendResponse = await fetch(`${APP_URL}/version.json?v=${Date.now()}`);
+                const frontendData = await frontendResponse.json();
+                
+                document.getElementById('frontendVersion').textContent = frontendData.version;
+                document.getElementById('buildDate').textContent = frontendData.buildDate;
+
+                // Verificar versión del backend
+                const backendResponse = await fetch(`${API_URL}/health/version`);
+                const backendData = await backendResponse.json();
+                
+                document.getElementById('backendVersion').textContent = backendData.version;
+
+                // Verificar si las versiones son correctas
+                const frontendOK = frontendData.version === '40.3.7';
+                const backendOK = backendData.version === '40.3.7';
+
+                if (frontendOK && backendOK) {
+                    document.getElementById('status').textContent = '✅ OK';
+                    document.getElementById('status').style.color = '#48bb78';
+                    
+                    resultsDiv.innerHTML = `
+                        <div class="status-card success">
+                            <h3>✅ Versiones Correctas</h3>
+                            <p><strong>Frontend:</strong> ${frontendData.version} ✓</p>
+                            <p><strong>Backend:</strong> ${backendData.version} ✓</p>
+                            <p><strong>Fecha de Build:</strong> ${frontendData.buildDate}</p>
+                            <p style="margin-top: 15px;">Todas las versiones son correctas. Puedes usar la aplicación normalmente.</p>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('status').textContent = '❌ ERROR';
+                    document.getElementById('status').style.color = '#f56565';
+                    
+                    resultsDiv.innerHTML = `
+                        <div class="status-card error">
+                            <h3>❌ Versiones Incorrectas</h3>
+                            <p><strong>Frontend:</strong> ${frontendData.version} ${frontendOK ? '✓' : '❌ (Esperado: 40.3.7)'}</p>
+                            <p><strong>Backend:</strong> ${backendData.version} ${backendOK ? '✓' : '❌ (Esperado: 40.3.7)'}</p>
+                            <p style="margin-top: 15px; color: #c53030;">
+                                <strong>⚠️ ACCIÓN REQUERIDA:</strong><br>
+                                Abre el archivo <strong>FORZAR_ACTUALIZACION_V40.3.7_URGENTE.html</strong> para limpiar el caché y actualizar.
+                            </p>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Error al verificar versiones:', error);
+                document.getElementById('status').textContent = '❌ ERROR';
+                document.getElementById('status').style.color = '#f56565';
+                
+                resultsDiv.innerHTML = `
+                    <div class="status-card error">
+                        <h3>❌ Error de Conexión</h3>
+                        <p>No se pudo conectar con el servidor para verificar las versiones.</p>
+                        <p style="margin-top: 10px;"><strong>Error:</strong> ${error.message}</p>
+                        <p style="margin-top: 10px;">Verifica que el servidor esté funcionando correctamente.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function abrirAplicacion() {
+            window.open(APP_URL + '?v=' + Date.now(), '_blank');
+        }
+
+        // Verificar automáticamente al cargar la página
+        window.addEventListener('load', () => {
+            setTimeout(verificarVersiones, 500);
+        });
+    </script>
+</body>
+</html>

@@ -76,6 +76,10 @@ export class CreateConsentFromMedicalRecordDto {
 
   @IsOptional()
   @IsString()
+  admissionId?: string;
+
+  @IsOptional()
+  @IsString()
   notes?: string;
 
   @IsOptional()

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 ACTUALIZACIÓN URGENTE V40.3.9 - Consentimientos Admisiones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .alert {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .alert-title {
+            color: #c53030;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .alert-text {
+            color: #742a2a;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .info-title {
+            color: #2c5282;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: #2c5282;
+            line-height: 1.6;
+        }
+
+        .success-box {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .success-title {
+            color: #22543d;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .success-text {
+            color: #22543d;
+            line-height: 1.6;
+        }
+
+        .steps {
+            margin: 30px 0;
+        }
+
+        .step {
+            background: #f7fafc;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .step-content {
+            display: inline-block;
+            vertical-align: middle;
+            width: calc(100% - 60px);
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .step-description {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #2d3748;
+        }
+
+        .feature-list li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+        }
+
+        .warning {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .warning-title {
+            color: #7c2d12;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .warning-text {
+            color: #7c2d12;
+            line-height: 1.6;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #status.success {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            color: #22543d;
+            display: block;
+        }
+
+        #status.error {
+            background: #fff5f5;
+            border: 2px solid #f56565;
+            color: #742a2a;
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="version-badge">🚀 V40.3.9</div>
+            <h1>Actualización Urgente Desplegada</h1>
+            <p class="subtitle">Corrección: Consentimientos en Admisiones</p>
+        </div>
+
+        <div class="alert">
+            <div class="alert-title">⚠️ ACCIÓN REQUERIDA INMEDIATA</div>
+            <div class="alert-text">
+                Se ha desplegado la versión 40.3.9 que corrige el problema donde los consentimientos 
+                NO aparecían en la lista de la admisión después de crearlos. Debes limpiar el caché 
+                de tu navegador para ver la nueva versión.
+            </div>
+        </div>
+
+        <div class="success-box">
+            <div class="success-title">✅ Problema Corregido</div>
+            <div class="success-text">
+                <strong>Antes:</strong> Los consentimientos se creaban pero NO aparecían en la admisión (mostraba "0 Consentimientos")<br><br>
+                <strong>Ahora:</strong> Los consentimientos se asocian correctamente a la admisión y aparecen en la lista
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div class="info-title">🔧 Cambios Implementados</div>
+            <ul class="feature-list">
+                <li>Backend ahora guarda el <code>admissionId</code> al crear consentimientos</li>
+                <li>Columna <code>admission_id</code> en base de datos ahora es nullable</li>
+                <li>Los consentimientos aparecen correctamente en la lista de la admisión</li>
+                <li>El contador de consentimientos se actualiza correctamente</li>
+            </ul>
+        </div>
+
+        <div class="steps">
+            <h2 style="color: #2d3748; margin-bottom: 20px;">📋 Pasos para Actualizar</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <div class="step-title">Limpia el Caché del Navegador</div>
+                    <div class="step-description">Presiona Ctrl+Shift+Delete (Windows) o Cmd+Shift+Delete (Mac)</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <div class="step-title">Selecciona "Todo el tiempo"</div>
+                    <div class="step-description">Asegúrate de limpiar TODO el historial, no solo la última hora</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <div class="step-title">Marca estas opciones</div>
+                    <div class="step-description">
+                        ✅ Imágenes y archivos en caché<br>
+                        ✅ Cookies y otros datos de sitios
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <div class="step-content">
+                    <div class="step-title">Recarga la Página</div>
+                    <div class="step-description">Presiona Ctrl+F5 (Windows) o Cmd+Shift+R (Mac) para forzar recarga</div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">5</span>
+                <div class="step-content">
+                    <div class="step-title">Verifica la Versión</div>
+                    <div class="step-description">Debes ver "Versión 40.3.9 - 2026-02-23" en el footer</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <div class="warning-title">⚡ Importante</div>
+            <div class="warning-text">
+                Si después de limpiar el caché sigues viendo la versión 40.3.7, intenta:
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Cerrar TODAS las pestañas del sistema</li>
+                    <li>Cerrar completamente el navegador</li>
+                    <li>Abrir el navegador de nuevo</li>
+                    <li>Acceder al sistema en modo incógnito para verificar</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button class="btn" onclick="clearCacheAndReload()">
+                🔄 Limpiar Caché y Recargar
+            </button>
+            <button class="btn btn-secondary" onclick="checkVersion()">
+                🔍 Verificar Versión Actual
+            </button>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="info-box" style="margin-top: 30px;">
+            <div class="info-title">📝 Notas Técnicas</div>
+            <div class="info-text">
+                <strong>Versión Backend:</strong> 40.3.9<br>
+                <strong>Versión Frontend:</strong> 40.3.9<br>
+                <strong>Fecha de Despliegue:</strong> 2026-02-23<br>
+                <strong>Migración DB:</strong> Aplicada (admission_id nullable)<br>
+                <strong>PM2 Status:</strong> Reiniciado correctamente
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function clearCacheAndReload() {
+            const status = document.getElementById('status');
+            status.className = 'success';
+            status.innerHTML = '<div class="loading"></div>Limpiando caché y recargando...';
+            
+            // Limpiar localStorage
+            localStorage.clear();
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            
+            // Intentar limpiar caché del service worker si existe
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Limpiar caché de la API de caché
+            if ('caches' in window) {
+                caches.keys().then(function(names) {
+                    for (let name of names) {
+                        caches.delete(name);
+                    }
+                });
+            }
+            
+            // Recargar después de 2 segundos
+            setTimeout(function() {
+                window.location.href = 'https://demo-estetica.archivoenlinea.com/?v=' + Date.now();
+            }, 2000);
+        }
+
+        function checkVersion() {
+            const status = document.getElementById('status');
+            status.className = 'success';
+            status.innerHTML = '<div class="loading"></div>Verificando versión...';
+            
+            fetch('https://demo-estetica.archivoenlinea.com/version.json?v=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.version === '40.3.9') {
+                        status.className = 'success';
+                        status.innerHTML = `
+                            ✅ <strong>¡Versión Correcta!</strong><br>
+                            Versión: ${data.version}<br>
+                            Fecha: ${data.buildDate}<br>
+                            Hash: ${data.buildHash}
+                        `;
+                    } else {
+                        status.className = 'error';
+                        status.innerHTML = `
+                            ❌ <strong>Versión Incorrecta</strong><br>
+                            Versión actual: ${data.version}<br>
+                            Versión esperada: 40.3.9<br>
+                            <br>
+                            <strong>Acción requerida:</strong> Limpia el caché del navegador manualmente
+                        `;
+                    }
+                })
+                .catch(error => {
+                    status.className = 'error';
+                    status.innerHTML = `
+                        ❌ <strong>Error al verificar versión</strong><br>
+                        ${error.message}<br>
+                        <br>
+                        Intenta acceder directamente al sistema
+                    `;
+                });
+        }
+
+        // Verificar versión automáticamente al cargar
+        window.addEventListener('load', function() {
+            setTimeout(checkVersion, 1000);
+        });
+    </script>
+</body>
+</html>

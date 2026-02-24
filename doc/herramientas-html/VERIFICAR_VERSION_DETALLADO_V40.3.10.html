@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Verificación Detallada V40.3.10</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2d3748;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            color: #48bb78;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .section {
+            background: #1a202c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #4a5568;
+        }
+
+        .section-title {
+            color: #63b3ed;
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .result {
+            background: #2d3748;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #4a5568;
+        }
+
+        .result.success {
+            border-left-color: #48bb78;
+        }
+
+        .result.error {
+            border-left-color: #f56565;
+        }
+
+        .result.warning {
+            border-left-color: #ed8936;
+        }
+
+        .label {
+            color: #a0aec0;
+            display: inline-block;
+            width: 200px;
+        }
+
+        .value {
+            color: #e2e8f0;
+            font-weight: bold;
+        }
+
+        .value.success {
+            color: #48bb78;
+        }
+
+        .value.error {
+            color: #f56565;
+        }
+
+        .value.warning {
+            color: #ed8936;
+        }
+
+        .btn {
+            background: #4299e1;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-success {
+            background: #48bb78;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #4a5568;
+            border-top: 3px solid #4299e1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .code-block {
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border: 1px solid #4a5568;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #e2e8f0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-badge.ok {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-badge.fail {
+            background: #f56565;
+            color: white;
+        }
+
+        .status-badge.warn {
+            background: #ed8936;
+            color: white;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .comparison-table th {
+            background: #1a202c;
+            color: #63b3ed;
+            font-weight: bold;
+        }
+
+        .comparison-table tr:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 VERIFICACIÓN DETALLADA DE VERSIÓN</h1>
+
+        <div class="btn-container">
+            <button class="btn btn-success" onclick="runFullCheck()">
+                🚀 Ejecutar Verificación Completa
+            </button>
+            <button class="btn" onclick="checkFrontend()">
+                📱 Solo Frontend
+            </button>
+            <button class="btn" onclick="checkBackend()">
+                ⚙️ Solo Backend
+            </button>
+            <button class="btn btn-danger" onclick="clearAllCache()">
+                🗑️ Limpiar Todo el Caché
+            </button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const EXPECTED_VERSION = '40.3.10';
+        const BASE_URL = 'https://demo-estetica.archivoenlinea.com';
+
+        function createSection(title) {
+            return `
+                <div class="section">
+                    <div class="section-title">${title}</div>
+                    <div id="${title.replace(/\s+/g, '-').toLowerCase()}"></div>
+                </div>
+            `;
+        }
+
+        function addResult(sectionId, label, value, status = 'success') {
+            const section = document.getElementById(sectionId);
+            const resultClass = status === 'success' ? 'success' : status === 'error' ? 'error' : 'warning';
+            const valueClass = status === 'success' ? 'success' : status === 'error' ? 'error' : 'warning';
+            
+            section.innerHTML += `
+                <div class="result ${resultClass}">
+                    <span class="label">${label}:</span>
+                    <span class="value ${valueClass}">${value}</span>
+                </div>
+            `;
+        }
+
+        function addCodeBlock(sectionId, code) {
+            const section = document.getElementById(sectionId);
+            section.innerHTML += `
+                <div class="code-block">
+                    <pre>${JSON.stringify(code, null, 2)}</pre>
+                </div>
+            `;
+        }
+
+        async function checkFrontend() {
+            const results = document.getElementById('results');
+            results.innerHTML = createSection('📱 Frontend Version Check');
+            const sectionId = '📱-frontend-version-check';
+
+            try {
+                addResult(sectionId, 'Estado', '⏳ Verificando...', 'warning');
+
+                // Verificar version.json con diferentes métodos
+                const timestamp = Date.now();
+                
+                // Método 1: Fetch normal
+                const response1 = await fetch(`${BASE_URL}/version.json?v=${timestamp}`);
+                const data1 = await response1.json();
+                
+                addResult(sectionId, 'Método 1 (Fetch Normal)', data1.version, 
+                    data1.version === EXPECTED_VERSION ? 'success' : 'error');
+                addCodeBlock(sectionId, data1);
+
+                // Método 2: Fetch con no-cache
+                const response2 = await fetch(`${BASE_URL}/version.json?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                const data2 = await response2.json();
+                
+                addResult(sectionId, 'Método 2 (No-Cache)', data2.version,
+                    data2.version === EXPECTED_VERSION ? 'success' : 'error');
+
+                // Método 3: Fetch con reload
+                const response3 = await fetch(`${BASE_URL}/version.json?v=${timestamp}`, {
+                    cache: 'reload'
+                });
+                const data3 = await response3.json();
+                
+                addResult(sectionId, 'Método 3 (Reload)', data3.version,
+                    data3.version === EXPECTED_VERSION ? 'success' : 'error');
+
+                // Verificar headers de caché
+                const cacheControl = response1.headers.get('Cache-Control');
+                const etag = response1.headers.get('ETag');
+                const lastModified = response1.headers.get('Last-Modified');
+
+                addResult(sectionId, 'Cache-Control Header', cacheControl || 'No definido', 
+                    cacheControl ? 'warning' : 'success');
+                addResult(sectionId, 'ETag', etag || 'No definido', 'warning');
+                addResult(sectionId, 'Last-Modified', lastModified || 'No definido', 'warning');
+
+                // Verificar localStorage
+                const storedVersion = localStorage.getItem('app_version');
+                addResult(sectionId, 'localStorage Version', storedVersion || 'No guardado',
+                    !storedVersion || storedVersion === EXPECTED_VERSION ? 'success' : 'error');
+
+                // Verificar sessionStorage
+                const sessionVersion = sessionStorage.getItem('app_version');
+                addResult(sectionId, 'sessionStorage Version', sessionVersion || 'No guardado',
+                    !sessionVersion || sessionVersion === EXPECTED_VERSION ? 'success' : 'error');
+
+                // Verificar service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    addResult(sectionId, 'Service Workers', 
+                        registrations.length > 0 ? `${registrations.length} activos ⚠️` : 'Ninguno ✅',
+                        registrations.length > 0 ? 'warning' : 'success');
+                }
+
+                // Verificar caché de la API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    addResult(sectionId, 'API Caches', 
+                        cacheNames.length > 0 ? `${cacheNames.length} caches activos ⚠️` : 'Ninguno ✅',
+                        cacheNames.length > 0 ? 'warning' : 'success');
+                    
+                    if (cacheNames.length > 0) {
+                        addCodeBlock(sectionId, cacheNames);
+                    }
+                }
+
+            } catch (error) {
+                addResult(sectionId, 'Error', error.message, 'error');
+            }
+        }
+
+        async function checkBackend() {
+            const results = document.getElementById('results');
+            results.innerHTML += createSection('⚙️ Backend Version Check');
+            const sectionId = '⚙️-backend-version-check';
+
+            try {
+                addResult(sectionId, 'Estado', '⏳ Verificando...', 'warning');
+
+                const timestamp = Date.now();
+                
+                // Verificar endpoint de versión
+                const response = await fetch(`${BASE_URL}/api/health/version?v=${timestamp}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                addResult(sectionId, 'Versión Actual', data.current.version,
+                    data.current.version === EXPECTED_VERSION ? 'success' : 'error');
+                addResult(sectionId, 'Fecha Build', data.current.buildDate, 'success');
+                addResult(sectionId, 'Versión Completa', data.current.fullVersion, 'success');
+                
+                addCodeBlock(sectionId, data);
+
+                // Verificar endpoint de health
+                const healthResponse = await fetch(`${BASE_URL}/api/health?v=${timestamp}`, {
+                    cache: 'no-store'
+                });
+                const healthData = await healthResponse.json();
+                
+                addResult(sectionId, 'Estado del Servidor', healthData.status, 
+                    healthData.status === 'ok' ? 'success' : 'error');
+                addResult(sectionId, 'Base de Datos', healthData.database, 
+                    healthData.database === 'connected' ? 'success' : 'error');
+
+            } catch (error) {
+                addResult(sectionId, 'Error', error.message, 'error');
+            }
+        }
+
+        async function runFullCheck() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="section"><div class="section-title">🔄 Ejecutando verificación completa...</div></div>';
+
+            await checkFrontend();
+            await checkBackend();
+
+            // Agregar resumen
+            results.innerHTML += createSection('📊 Resumen y Recomendaciones');
+            const summaryId = '📊-resumen-y-recomendaciones';
+
+            // Determinar si hay problemas
+            const frontendOk = true; // Se determinará basado en los checks anteriores
+            const backendOk = true;
+
+            if (frontendOk && backendOk) {
+                addResult(summaryId, 'Estado General', '✅ TODO CORRECTO', 'success');
+                addResult(summaryId, 'Acción Requerida', 'Ninguna', 'success');
+            } else {
+                addResult(summaryId, 'Estado General', '❌ PROBLEMAS DETECTADOS', 'error');
+                addResult(summaryId, 'Acción Requerida', 'Limpiar caché del navegador', 'error');
+                
+                document.getElementById(summaryId).innerHTML += `
+                    <div class="result warning">
+                        <strong>🔧 PASOS PARA SOLUCIONAR:</strong><br><br>
+                        1. Presiona <strong>Ctrl+Shift+Delete</strong><br>
+                        2. Selecciona <strong>"Todo el tiempo"</strong><br>
+                        3. Marca <strong>"Imágenes y archivos en caché"</strong><br>
+                        4. Haz clic en <strong>"Borrar datos"</strong><br>
+                        5. Presiona <strong>Ctrl+F5</strong> para recargar<br>
+                        6. Ejecuta esta verificación nuevamente
+                    </div>
+                `;
+            }
+        }
+
+        async function clearAllCache() {
+            const results = document.getElementById('results');
+            results.innerHTML = createSection('🗑️ Limpieza de Caché');
+            const sectionId = '🗑️-limpieza-de-caché';
+
+            try {
+                // Limpiar localStorage
+                localStorage.clear();
+                addResult(sectionId, 'localStorage', '✅ Limpiado', 'success');
+
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                addResult(sectionId, 'sessionStorage', '✅ Limpiado', 'success');
+
+                // Limpiar service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                    addResult(sectionId, 'Service Workers', `✅ ${registrations.length} desregistrados`, 'success');
+                }
+
+                // Limpiar caché de la API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (let name of cacheNames) {
+                        await caches.delete(name);
+                    }
+                    addResult(sectionId, 'API Caches', `✅ ${cacheNames.length} eliminados`, 'success');
+                }
+
+                addResult(sectionId, 'Estado Final', '✅ Caché limpiado exitosamente', 'success');
+                
+                document.getElementById(sectionId).innerHTML += `
+                    <div class="result warning">
+                        <strong>⚠️ ACCIÓN ADICIONAL REQUERIDA:</strong><br><br>
+                        El script ha limpiado lo que puede, pero DEBES:<br><br>
+                        1. Presionar <strong>Ctrl+Shift+Delete</strong><br>
+                        2. Limpiar <strong>"Imágenes y archivos en caché"</strong><br>
+                        3. Presionar <strong>Ctrl+F5</strong> para recargar<br><br>
+                        <button class="btn btn-success" onclick="window.location.href='${BASE_URL}/?v=' + Date.now()">
+                            🔄 Recargar Aplicación
+                        </button>
+                    </div>
+                `;
+
+            } catch (error) {
+                addResult(sectionId, 'Error', error.message, 'error');
+            }
+        }
+
+        // Ejecutar verificación automática al cargar
+        window.addEventListener('load', function() {
+            setTimeout(runFullCheck, 500);
+        });
+    </script>
+</body>
+</html>

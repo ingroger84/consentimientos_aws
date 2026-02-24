@@ -57,6 +57,7 @@ export interface Tenant {
   features?: PlanFeatures;
   trialEndsAt: string | null;
   subscriptionEndsAt: string | null;
+  suspendedAt: string | null;
   settings: Record<string, any> | null;
   metadata: Record<string, any> | null;
   createdAt: string;

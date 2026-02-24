@@ -25,31 +25,17 @@ export class Role extends BaseEntity {
     default: '',
     transformer: {
       to: (value: string[]) => {
+        // Convertir array a string separado por comas
         if (!value || value.length === 0) return '';
-        // Si ya es un string, retornarlo tal cual
         if (typeof value === 'string') return value;
-        // Si es un array, convertirlo a string separado por comas
-        return value.join(',');
+        if (Array.isArray(value)) return value.join(',');
+        return '';
       },
       from: (value: string) => {
-        if (!value) return [];
-        // Si es un string separado por comas, convertirlo a array
-        if (typeof value === 'string') {
-          // Intentar parsear como JSON primero (por compatibilidad)
-          if (value.startsWith('[') || value.startsWith('{')) {
-            try {
-              const parsed = JSON.parse(value);
-              return Array.isArray(parsed) ? parsed : [];
-            } catch {
-              // Si falla, asumir que es un string separado por comas
-              return value.split(',').map(p => p.trim()).filter(p => p.length > 0);
-            }
-          }
-          // String separado por comas
-          return value.split(',').map(p => p.trim()).filter(p => p.length > 0);
-        }
-        // Si ya es un array, retornarlo
-        return Array.isArray(value) ? value : [];
+        // Convertir string separado por comas a array
+        if (!value || typeof value !== 'string') return [];
+        // Simplemente dividir por comas y limpiar
+        return value.split(',').map(p => p.trim()).filter(p => p.length > 0);
       }
     }
   })

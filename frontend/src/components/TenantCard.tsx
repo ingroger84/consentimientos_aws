@@ -351,16 +351,28 @@ export default function TenantCard({ tenant, onEdit, onViewStats, onSuspend, onA
 
       {/* Billing Information */}
       <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
-        {/* Fecha de Creación */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span className="text-xs text-gray-600">Fecha de Creación</span>
+        {/* Fecha de Creación o Suspensión */}
+        {tenant.status === TenantStatus.SUSPENDED && tenant.suspendedAt ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Ban className="w-4 h-4 text-red-500" />
+              <span className="text-xs text-gray-600">Fecha de Suspensión</span>
+            </div>
+            <span className="text-xs font-medium text-red-600">
+              {formatDate(tenant.suspendedAt)}
+            </span>
           </div>
-          <span className="text-xs font-medium text-gray-900">
-            {formatDate(tenant.createdAt)}
-          </span>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <span className="text-xs text-gray-600">Fecha de Creación</span>
+            </div>
+            <span className="text-xs font-medium text-gray-900">
+              {formatDate(tenant.createdAt)}
+            </span>
+          </div>
+        )}
 
         {/* Próxima Factura */}
         <div className="flex items-center justify-between">
