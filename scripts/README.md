@@ -1,247 +1,293 @@
-# Scripts de Despliegue Automatizado
+# 📜 Scripts del Proyecto
 
-Este directorio contiene todos los scripts necesarios para desplegar la aplicación DatAgree en producción de forma completamente automatizada.
+Este directorio contiene todos los scripts organizados por categoría para gestionar el proyecto DatAgree.
+
+## 📁 Estructura de Carpetas
+
+```
+scripts/
+├── deployment/     # Scripts de despliegue a producción
+├── setup/          # Scripts de configuración inicial
+├── maintenance/    # Scripts de mantenimiento y correcciones
+└── utils/          # Utilidades y herramientas auxiliares
+```
+
+---
+
+## 🚀 Deployment (Despliegue)
+
+Scripts para desplegar la aplicación en producción.
+
+### Scripts Principales
+
+**`deploy-master.ps1`** - Script maestro de despliegue
+```powershell
+.\scripts\deployment\deploy-master.ps1 -All
+```
+
+**`deploy-production-complete.ps1`** - Despliegue completo
+```powershell
+.\scripts\deployment\deploy-production-complete.ps1
+```
+
+**`simple-deploy.ps1`** - Despliegue simple y rápido
+```powershell
+.\scripts\deployment\simple-deploy.ps1
+```
+
+### Scripts Específicos
+
+- `deploy-aws-auto.ps1` - Despliegue automático a AWS
+- `deploy-direct.ps1` - Despliegue directo sin intermediarios
+- `deploy-backend-*.ps1` - Despliegue solo backend
+- `deploy-frontend-*.ps1` - Despliegue solo frontend
+- `deploy-landing-*.ps1` - Despliegue de landing page
+- `deploy-multi-region.*` - Despliegue multi-región
+- `deploy-with-cache-busting.ps1` - Despliegue con limpieza de caché
+- `upload-and-deploy.ps1` - Subir y desplegar
+- `verify-deployment.sh` - Verificar despliegue exitoso
+
+### Scripts de Versiones Específicas
+
+- `deploy-v31.1.1-complete.ps1`
+- `deploy-admissions-v39.ps1`
+- `deploy-planes-precios-fix.ps1`
+- `deploy-wildcard-ssl.ps1`
+
+---
+
+## ⚙️ Setup (Configuración)
+
+Scripts para configuración inicial del servidor y proyecto.
+
+**`setup-production-server.ps1`** - Configurar servidor desde cero
+```powershell
+.\scripts\setup\setup-production-server.ps1 -InstanceName "servidor" -Domain "dominio.com"
+```
+
+**`configure-nginx-ssl.sh`** - Configurar Nginx con SSL
+```bash
+sudo bash configure-nginx-ssl.sh
+```
+
+**`setup-auto-version.ps1`** - Configurar versionamiento automático
+```powershell
+.\scripts\setup\setup-auto-version.ps1
+```
+
+### Otros Scripts de Setup
+
+- `setup-wildcard-ssl.ps1` - Configurar SSL wildcard
+- `setup-wildcard-simple.ps1` - Configurar SSL wildcard simplificado
+- `create-settings-page.ps1` - Crear página de configuración
+
+---
+
+## 🔧 Maintenance (Mantenimiento)
+
+Scripts para mantenimiento, correcciones y optimizaciones.
+
+### Limpieza de Caché
+
+- `fix-frontend-cache.ps1` - Corregir caché del frontend
+- `fix-nginx-cache.ps1` - Corregir caché de Nginx
+- `force-cache-bust.ps1` - Forzar limpieza de caché
+- `force-cache-clear.ps1` - Limpiar caché completamente
+- `force-clean-deploy.ps1` - Despliegue con limpieza total
+
+### Correcciones
+
+- `fix-nginx-root.ps1` - Corregir configuración root de Nginx
+- `fix-production-version.ps1` - Corregir versión en producción
+
+### Optimizaciones
+
+- `apply-optimizations.ps1` - Aplicar optimizaciones
+- `implement-optimizations.sh` - Implementar optimizaciones
+
+### Verificación y Mantenimiento
+
+- `check-backend.ps1` - Verificar estado del backend
+- `pre-deployment-check.ps1` - Verificación pre-despliegue
+- `update-versions-production.sh` - Actualizar versiones en producción
+- `clean-aws-credentials.ps1` - Limpiar credenciales AWS
+
+### Reinicio de Servicios
+
+- `REINICIAR_TODO.ps1` - Reiniciar todos los servicios
+- `REINICIAR_FRONTEND_LIMPIO.ps1` - Reiniciar frontend limpio
+- `restart-frontend-clean.ps1` - Reiniciar frontend
+- `verificar-sistema.ps1` - Verificar estado del sistema
+- `MIGRACION_COMPLETA_NOTIFICACIONES.ps1` - Migración de notificaciones
+
+---
+
+## 🛠️ Utils (Utilidades)
+
+Herramientas auxiliares y scripts de utilidad.
+
+### Versionamiento
+
+- `bump-version.js` - Incrementar versión
+- `smart-version.js` - Versionamiento inteligente
+- `update-version-auto.js` - Actualizar versión automáticamente
+- `update-version.ps1` - Actualizar versión manual
+- `show-version.js` - Mostrar versión actual
+- `verify-version-sync.js` - Verificar sincronización de versiones
+- `version.ps1` - Gestión de versiones
+- `version-help.ps1` - Ayuda de versionamiento
+- `patch-schedule.js` - Programar parches
+
+### Permisos y Configuración
+
+- `apply-permissions-aws.ps1` - Aplicar permisos en AWS
+- `apply-permissions-direct.ps1` - Aplicar permisos directamente
+- `apply-permissions-simple.ps1` - Aplicar permisos simple
+- `agregar-admin-localhost.ps1` - Agregar admin local
+- `agregar-permiso-correo.ps1` - Agregar permiso de correo
+- `add-tenant-ssl.ps1` - Agregar SSL a tenant
+
+### Documentación y Organización
+
+- `organize-docs.ps1` - Organizar documentación
+- `rotate-credentials.md` - Guía de rotación de credenciales
+
+### Otros
+
+- `cambio-dominio.ps1` - Cambiar dominio
+
+---
 
 ## 🚀 Inicio Rápido
 
-### Opción 1: Despliegue Completo (Recomendado)
-```powershell
-# 1. Verificar que todo esté listo
-.\scripts\pre-deployment-check.ps1
-
-# 2. Desplegar todo
-.\scripts\deploy-master.ps1 -All
-```
-
-### Opción 2: Solo Actualizar Aplicación
-```powershell
-.\scripts\deploy-production-complete.ps1
-```
-
-## 📁 Scripts Disponibles
-
-### 1. `pre-deployment-check.ps1`
-**Propósito:** Verificar que todo esté listo antes de desplegar
-
-**Uso:**
-```powershell
-.\scripts\pre-deployment-check.ps1
-```
-
-**Verifica:**
-- AWS CLI instalado
-- Credenciales AWS válidas
-- Git instalado
-- Repositorio Git configurado
-- Scripts de despliegue presentes
-- Conexión a Lightsail
-
----
-
-### 2. `deploy-master.ps1`
-**Propósito:** Script maestro que ejecuta todo el proceso
-
-**Uso:**
-```powershell
-# Despliegue completo
-.\scripts\deploy-master.ps1 -All
-
-# Solo configurar servidor
-.\scripts\deploy-master.ps1 -SetupServer
-
-# Solo configurar Nginx
-.\scripts\deploy-master.ps1 -ConfigureNginx
-
-# Solo desplegar aplicación
-.\scripts\deploy-master.ps1 -Deploy
-
-# Con dominio personalizado
-.\scripts\deploy-master.ps1 -All -Domain "midominio.com"
-```
-
-**Parámetros:**
-- `-All`: Ejecutar todo el proceso
-- `-SetupServer`: Solo configurar servidor
-- `-ConfigureNginx`: Solo configurar Nginx y SSL
-- `-Deploy`: Solo desplegar aplicación
-- `-Domain`: Dominio a usar (default: archivoenlinea.com)
-- `-InstanceName`: Nombre de instancia Lightsail (default: datagree-prod)
-
----
-
-### 3. `setup-production-server.ps1`
-**Propósito:** Configurar servidor desde cero
-
-**Uso:**
-```powershell
-.\scripts\setup-production-server.ps1 -InstanceName "mi-servidor" -Domain "midominio.com"
-```
-
-**Qué hace:**
-- Crea/verifica instancia de Lightsail
-- Instala Node.js, PostgreSQL, Nginx, PM2
-- Crea base de datos
-- Genera credenciales seguras
-- Clona repositorio
-- Crea archivo .env
-
-**Salida:**
-- `server_credentials_YYYYMMDD_HHMMSS.txt` - Credenciales generadas
-- `temp_backend.env` - Archivo .env para el backend
-
----
-
-### 4. `deploy-production-complete.ps1`
-**Propósito:** Desplegar/actualizar la aplicación
-
-**Uso:**
-```powershell
-# Despliegue normal
-.\scripts\deploy-production-complete.ps1
-
-# Sin backup
-.\scripts\deploy-production-complete.ps1 -SkipBackup
-
-# Sin tests
-.\scripts\deploy-production-complete.ps1 -SkipTests
-```
-
-**Qué hace:**
-- Crea backup de base de datos
-- Detiene aplicación
-- Actualiza código (git pull)
-- Instala dependencias
-- Compila backend y frontend
-- Ejecuta migraciones
-- Reinicia aplicación
-- Verifica health check
-
-**Parámetros:**
-- `-SkipBackup`: Omitir backup de base de datos
-- `-SkipTests`: Omitir health check
-
----
-
-### 5. `configure-nginx-ssl.sh`
-**Propósito:** Configurar Nginx con SSL/TLS
-
-**Uso:**
-```bash
-# Ejecutar en el servidor
-sudo bash /tmp/configure-nginx-ssl.sh
-```
-
-**Qué hace:**
-- Configura Nginx como reverse proxy
-- Obtiene certificado SSL de Let's Encrypt
-- Configura renovación automática
-- Optimiza configuración
-- Habilita HTTPS
-
----
-
-## 🔧 Configuración
-
-### Credenciales AWS
-Los scripts usan las siguientes credenciales (ya configuradas):
-
-```powershell
-$env:AWS_ACCESS_KEY_ID = "TU_AWS_ACCESS_KEY_LIGHTSAIL"
-$env:AWS_SECRET_ACCESS_KEY = "TU_AWS_SECRET_KEY_LIGHTSAIL"
-$env:AWS_DEFAULT_REGION = "us-east-1"
-```
-
-### Configuración por Defecto
-- **Dominio:** archivoenlinea.com
-- **Instancia:** datagree-prod
-- **Región:** us-east-1
-- **Directorio:** /var/www/consentimientos
-
-## 📋 Flujo de Trabajo
-
 ### Primer Despliegue
-```
-1. pre-deployment-check.ps1
-   ↓
-2. deploy-master.ps1 -All
-   ↓
-3. Verificar aplicación
-```
 
-### Actualizaciones
-```
-1. Hacer cambios en código
-   ↓
-2. Commit y push a Git
-   ↓
-3. deploy-production-complete.ps1
-   ↓
-4. Verificar aplicación
-```
-
-## 🔍 Verificación
-
-### Health Check
 ```powershell
-curl https://archivoenlinea.com/api/health
+# 1. Verificar requisitos
+.\scripts\maintenance\pre-deployment-check.ps1
+
+# 2. Configurar servidor (solo primera vez)
+.\scripts\setup\setup-production-server.ps1
+
+# 3. Desplegar aplicación
+.\scripts\deployment\deploy-master.ps1 -All
 ```
 
-### Ver Logs
-```bash
-# Conectar al servidor
-ssh ubuntu@IP_DEL_SERVIDOR
+### Actualización Rápida
 
-# Ver logs de aplicación
-pm2 logs
-
-# Ver logs de Nginx
-tail -f /var/log/nginx/consentimientos_access.log
-```
-
-### Ver Estado
-```bash
-pm2 status
-pm2 monit
-```
-
-## 🚨 Troubleshooting
-
-### Error: "AWS CLI no encontrado"
 ```powershell
-winget install Amazon.AWSCLI
+# Despliegue simple
+.\scripts\deployment\simple-deploy.ps1
+
+# O despliegue completo
+.\scripts\deployment\deploy-production-complete.ps1
 ```
 
-### Error: "Credenciales inválidas"
-Verifica que las credenciales en el script sean correctas.
+### Mantenimiento
 
-### Error: "Instancia no encontrada"
-Verifica el nombre de la instancia en AWS Lightsail.
+```powershell
+# Verificar sistema
+.\scripts\maintenance\verificar-sistema.ps1
 
-### Error: "DNS no resuelve"
-Espera a que el DNS se propague (puede tomar hasta 48h).
+# Limpiar caché si hay problemas
+.\scripts\maintenance\force-cache-clear.ps1
 
-## 📚 Documentación
+# Reiniciar servicios
+.\scripts\maintenance\REINICIAR_TODO.ps1
+```
 
-- **Guía completa:** `doc/DESPLIEGUE_AUTOMATIZADO.md`
-- **Deployment manual:** `DEPLOYMENT.md`
-- **Troubleshooting:** `doc/90-auditoria-produccion/`
+---
+
+## 📋 Flujo de Trabajo Recomendado
+
+### Desarrollo → Producción
+
+1. **Desarrollo Local**
+   ```powershell
+   # Iniciar proyecto
+   .\scripts\deployment\start-project.ps1
+   ```
+
+2. **Verificación Pre-Despliegue**
+   ```powershell
+   .\scripts\maintenance\pre-deployment-check.ps1
+   ```
+
+3. **Despliegue**
+   ```powershell
+   .\scripts\deployment\deploy-production-complete.ps1
+   ```
+
+4. **Verificación Post-Despliegue**
+   ```powershell
+   .\scripts\deployment\verify-deployment.sh
+   ```
+
+---
 
 ## 🔐 Seguridad
 
 ⚠️ **IMPORTANTE:**
-- Los archivos de credenciales generados contienen información sensible
-- Guárdalos de forma segura
-- Elimínalos después de usarlos
-- No los subas a Git
+
+- Muchos scripts contienen o generan credenciales sensibles
+- Los scripts de despliegue están excluidos de Git por seguridad
+- Guarda las credenciales generadas de forma segura
+- Usa `rotate-credentials.md` para rotación periódica
+
+### Scripts Sensibles (No en Git)
+
+- Scripts con credenciales AWS
+- Scripts con credenciales de base de datos
+- Archivos de configuración con secretos
+
+---
+
+## 📚 Documentación Adicional
+
+- **Guía completa de despliegue:** `/doc/despliegues/`
+- **Versionamiento:** `/doc/versiones/SISTEMA_VERSIONAMIENTO_AUTOMATICO.md`
+- **Troubleshooting:** `/doc/correcciones/`
+- **Configuración:** `/config/README.md`
+
+---
+
+## 🔍 Troubleshooting
+
+### Error: Script no encontrado
+```powershell
+# Verificar que estás en la raíz del proyecto
+Get-Location
+```
+
+### Error: Permisos denegados
+```powershell
+# Ejecutar PowerShell como administrador
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### Error: AWS CLI no encontrado
+```powershell
+winget install Amazon.AWSCLI
+```
+
+### Error: Conexión SSH fallida
+```bash
+# Verificar permisos de clave
+chmod 400 credentials/AWS-ISSABEL.pem
+```
+
+---
 
 ## 📞 Soporte
 
 Si encuentras problemas:
-1. Revisa los logs: `pm2 logs`
-2. Consulta la documentación
-3. Contacta al equipo de desarrollo
+
+1. Revisa los logs: `pm2 logs` (en servidor)
+2. Consulta `/doc/correcciones/`
+3. Verifica `/doc/despliegues/`
+4. Contacta al equipo de desarrollo
 
 ---
 
-**Creado:** 2026-01-27  
-**Versión:** 1.0
+**Última actualización:** 2026-02-24  
+**Versión del proyecto:** 42.0.0

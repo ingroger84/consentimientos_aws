@@ -2,7 +2,7 @@
 
 > Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
 
-[![Version](https://img.shields.io/badge/version-41.1.0-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-42.0.0-blue.svg)](VERSION.md)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](#)
@@ -181,47 +181,68 @@ Password: Ver archivo CREDENCIALES.md
 │   ├── public/                # Archivos estáticos
 │   └── dist/                  # Build de producción
 │
-├── config/                     # Configuración del proyecto
-│   ├── nginx/                 # Configuraciones de Nginx
-│   ├── ecosystem/             # Configuraciones de PM2
-│   └── README.md              # Documentación de config
+├── config/                     # ⚙️ Configuración del proyecto
+│   ├── nginx/                 # Configuraciones de Nginx (5 archivos)
+│   ├── ecosystem/             # Configuraciones de PM2 (3 archivos)
+│   ├── package.json           # Dependencias del proyecto
+│   └── README.md              # Documentación de configuración
 │
-├── database/                   # Scripts y datos de BD
-│   ├── scripts/               # Scripts de utilidad
-│   ├── seeds/                 # Datos iniciales
+├── database/                   # 🗄️ Scripts y datos de BD
+│   ├── scripts/               # Scripts de utilidad (15 archivos)
+│   ├── seeds/                 # Datos iniciales y plantillas
 │   ├── migrations/            # Migraciones adicionales
-│   └── README.md              # Documentación de BD
+│   └── README.md              # Documentación de base de datos
 │
-├── deploy/                     # Scripts de despliegue
-│   ├── archives/              # Archivos comprimidos
+├── deploy/                     # 🚀 Scripts de despliegue
+│   ├── archives/              # Archivos comprimidos (.tar.gz, .zip)
+│   ├── deploy-*.ps1           # Scripts de despliegue PowerShell
+│   ├── install.sh             # Script de instalación
 │   └── README.md              # Guía de despliegue
 │
-├── credentials/                # Credenciales (NO en Git)
+├── credentials/                # 🔐 Credenciales (NO en Git)
+│   ├── AWS-ISSABEL.pem        # Clave SSH AWS (protegida)
+│   ├── credentials*.txt       # Archivos de credenciales
+│   ├── CREDENCIALES.md        # Documentación de credenciales
 │   └── README.md              # Guía de seguridad
 │
-├── tests/                      # Tests adicionales
+├── tests/                      # 🧪 Tests adicionales
+│   ├── test-*.js              # Scripts de prueba
 │   └── README.md              # Documentación de tests
 │
-├── scripts/                    # Scripts de automatización
-│   ├── start.ps1              # Iniciar proyecto
-│   ├── stop.ps1               # Detener proyecto
-│   └── organize-docs.ps1      # Organizar documentación
+├── scripts/                    # 📜 Scripts organizados por categoría
+│   ├── deployment/            # Scripts de despliegue (27 archivos)
+│   ├── setup/                 # Scripts de configuración (7 archivos)
+│   ├── maintenance/           # Scripts de mantenimiento (18 archivos)
+│   ├── utils/                 # Utilidades y herramientas (19 archivos)
+│   └── README.md              # Documentación completa de scripts
 │
-├── doc/                        # Documentación completa
-│   ├── versiones/             # Documentación por versión
-│   ├── despliegues/           # Guías de despliegue
-│   ├── correcciones/          # Soluciones aplicadas
-│   ├── verificaciones/        # Scripts de verificación
-│   ├── instrucciones/         # Procedimientos
-│   ├── implementaciones/      # Features implementadas
-│   ├── resumen-sesiones/      # Resúmenes de trabajo
-│   ├── herramientas-html/     # Herramientas de diagnóstico
-│   └── README.md              # Índice completo
+├── doc/                        # 📚 Documentación completa (200+ archivos)
+│   ├── 01-inicio/             # Guías de inicio rápido
+│   ├── 02-multitenant/        # Arquitectura multi-tenant
+│   ├── 03-permisos/           # Sistema de permisos
+│   ├── 04-personalizacion/    # Personalización
+│   ├── 05-consentimientos/    # Gestión de consentimientos
+│   ├── 06-historias-clinicas/ # Historias clínicas
+│   ├── 07-planes-facturacion/ # Planes y facturación
+│   ├── 27-landing-page-saas/  # Landing page comercial
+│   ├── 90-auditoria-produccion/ # Auditoría y seguridad
+│   ├── 98-estrategia-multi-mercado/ # Estrategia de mercado
+│   ├── versiones/             # Documentación por versión (40+ archivos)
+│   ├── despliegues/           # Guías de despliegue (15+ archivos)
+│   ├── correcciones/          # Soluciones aplicadas (50+ archivos)
+│   ├── verificaciones/        # Scripts de verificación (20+ archivos)
+│   ├── instrucciones/         # Procedimientos (25+ archivos)
+│   ├── implementaciones/      # Features implementadas (15+ archivos)
+│   ├── resumen-sesiones/      # Resúmenes de trabajo (30+ archivos)
+│   ├── herramientas-html/     # Herramientas de diagnóstico (50+ archivos)
+│   └── README.md              # Índice completo de documentación
 │
 ├── .gitignore                  # Archivos ignorados por Git
 ├── VERSION.md                  # Historial de versiones
 └── README.md                   # Este archivo
 ```
+
+> 📝 **Nota:** Solo los archivos esenciales permanecen en la raíz. Todo está organizado en carpetas temáticas.
 
 ---
 

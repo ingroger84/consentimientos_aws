@@ -127,13 +127,21 @@ frontend/uploads/
 deploy-server.sh
 install.sh
 scripts/deploy-aws-auto.ps1
+scripts/deployment/deploy-aws-auto.ps1
 scripts/deploy-direct.ps1
+scripts/deployment/deploy-direct.ps1
 scripts/deploy-production-complete.ps1
+scripts/deployment/deploy-production-complete.ps1
 scripts/setup-production-server.ps1
+scripts/setup/setup-production-server.ps1
 scripts/simple-deploy.ps1
+scripts/deployment/simple-deploy.ps1
 scripts/deploy-wildcard-*.ps1
+scripts/deployment/deploy-wildcard-*.ps1
 scripts/upload-and-deploy.ps1
+scripts/deployment/upload-and-deploy.ps1
 scripts/clean-aws-credentials.ps1
+scripts/maintenance/clean-aws-credentials.ps1
 
 # ============================================
 # TEMPORARY DOCUMENTATION (Not for repo)
