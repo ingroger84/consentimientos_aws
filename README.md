@@ -2,7 +2,7 @@
 
 > Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
 
-[![Version](https://img.shields.io/badge/version-15.1.3-blue.svg)](VERSION.md)
+[![Version](https://img.shields.io/badge/version-41.1.0-blue.svg)](VERSION.md)
 [![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](#)
@@ -170,59 +170,56 @@ Password: Ver archivo CREDENCIALES.md
 ## 📁 Estructura del Proyecto
 
 ```
-datagree/
+/
 ├── backend/                    # API NestJS
-│   ├── src/
-│   │   ├── auth/              # Autenticación y autorización
-│   │   ├── users/             # Gestión de usuarios
-│   │   ├── tenants/           # Gestión de tenants
-│   │   ├── settings/          # Configuración personalizada
-│   │   ├── consents/          # Consentimientos informados
-│   │   ├── branches/          # Sedes/Sucursales
-│   │   ├── services/          # Servicios médicos
-│   │   ├── roles/             # Roles y permisos
-│   │   ├── invoices/          # Facturación
-│   │   ├── payments/          # Pagos (Bold/Wompi)
-│   │   ├── webhooks/          # Webhooks de pagos
-│   │   ├── mail/              # Servicio de correos
-│   │   └── common/            # Middleware, guards, decorators
+│   ├── src/                   # Código fuente
 │   ├── uploads/               # Archivos subidos (local)
 │   └── dist/                  # Build de producción
 │
 ├── frontend/                   # Aplicación React
-│   ├── src/
-│   │   ├── components/        # Componentes reutilizables
-│   │   ├── pages/             # Páginas de la aplicación
-│   │   ├── services/          # Servicios API
-│   │   ├── store/             # Estado global (Zustand)
-│   │   ├── contexts/          # Contextos de React
-│   │   ├── hooks/             # Custom hooks
-│   │   ├── utils/             # Utilidades
-│   │   └── config/            # Configuración
+│   ├── src/                   # Código fuente
 │   ├── public/                # Archivos estáticos
 │   └── dist/                  # Build de producción
 │
-├── doc/                        # Documentación completa
-│   ├── 01-inicio/             # Guías de inicio
-│   ├── 02-multitenant/        # Sistema multi-tenant
-│   ├── 03-permisos/           # Roles y permisos
-│   ├── 04-personalizacion/    # Personalización
-│   ├── 14-impuestos/          # Sistema de impuestos
-│   ├── 17-facturacion-manual/ # Facturación
-│   ├── 18-pago-facturas-tenant/ # Pagos
-│   ├── 19-aws-s3-storage/     # Almacenamiento S3
-│   ├── 22-integracion-bold/   # Integración Bold
-│   ├── 23-despliegue-aws/     # Despliegue en AWS
-│   └── README.md              # Índice completo
+├── config/                     # Configuración del proyecto
+│   ├── nginx/                 # Configuraciones de Nginx
+│   ├── ecosystem/             # Configuraciones de PM2
+│   └── README.md              # Documentación de config
 │
-├── scripts/                    # Scripts de utilidad
+├── database/                   # Scripts y datos de BD
+│   ├── scripts/               # Scripts de utilidad
+│   ├── seeds/                 # Datos iniciales
+│   ├── migrations/            # Migraciones adicionales
+│   └── README.md              # Documentación de BD
+│
+├── deploy/                     # Scripts de despliegue
+│   ├── archives/              # Archivos comprimidos
+│   └── README.md              # Guía de despliegue
+│
+├── credentials/                # Credenciales (NO en Git)
+│   └── README.md              # Guía de seguridad
+│
+├── tests/                      # Tests adicionales
+│   └── README.md              # Documentación de tests
+│
+├── scripts/                    # Scripts de automatización
 │   ├── start.ps1              # Iniciar proyecto
 │   ├── stop.ps1               # Detener proyecto
-│   └── lightsail-helper.ps1   # Helper para AWS Lightsail
+│   └── organize-docs.ps1      # Organizar documentación
+│
+├── doc/                        # Documentación completa
+│   ├── versiones/             # Documentación por versión
+│   ├── despliegues/           # Guías de despliegue
+│   ├── correcciones/          # Soluciones aplicadas
+│   ├── verificaciones/        # Scripts de verificación
+│   ├── instrucciones/         # Procedimientos
+│   ├── implementaciones/      # Features implementadas
+│   ├── resumen-sesiones/      # Resúmenes de trabajo
+│   ├── herramientas-html/     # Herramientas de diagnóstico
+│   └── README.md              # Índice completo
 │
 ├── .gitignore                  # Archivos ignorados por Git
 ├── VERSION.md                  # Historial de versiones
-├── ESTRUCTURA_PROYECTO.md      # Estructura detallada
 └── README.md                   # Este archivo
 ```
 
@@ -299,7 +296,7 @@ datagree/
 
 El sistema utiliza versionamiento automático mediante Git Hooks.
 
-**Versión Actual:** 15.1.3 - 2026-01-27
+**Versión Actual:** 41.1.0 - 2026-02-24
 
 Ver [VERSION.md](VERSION.md) para el historial completo de cambios.
 

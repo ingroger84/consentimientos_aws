@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 41.1.0
+## Versión Actual: 42.0.0
 **Fecha:** 2026-02-24
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,14 +18,11 @@
 
 ## Historial de Versiones
 
+### 42.0.0 - 2026-02-24 [MAJOR]
+- Documentación: 15 archivo(s) modificado(s)
+
 ### 41.1.0 - 2026-02-24 [MINOR]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 41.0.0 - 2026-02-24 [MAJOR]
-- Backend: 13 archivo(s) modificado(s)
-- Frontend: 10 archivo(s) modificado(s)
-- Documentación: 163 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
 
 ---
 

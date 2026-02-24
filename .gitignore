@@ -28,12 +28,14 @@ ecosystem.config.production.js
 !ecosystem.config.example.js
 
 # Credentials files (CRITICAL)
+credentials/
 credentials*.txt
 *credentials*.txt
 *password*.txt
 *secret*.txt
 server_credentials*
 deployment_credentials*
+!credentials/README.md
 
 # AWS Credentials (CRITICAL)
 .aws/
