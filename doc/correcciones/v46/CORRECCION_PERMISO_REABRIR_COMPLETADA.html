@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ Corrección Permiso Reabrir Admisiones - COMPLETADA</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #10b981;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        h2 {
+            color: #3b82f6;
+            margin-top: 30px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #6366f1;
+            margin-top: 20px;
+        }
+        .status {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .problem {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .solution {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+        .error {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        tr:hover {
+            background: #f9fafb;
+        }
+        .steps {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .steps ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        .steps li {
+            margin: 8px 0;
+        }
+        .info-box {
+            background: #fef9c3;
+            border: 2px solid #eab308;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .deployment {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .deployment h3 {
+            color: white;
+            margin-top: 0;
+        }
+        .checkmark {
+            color: #10b981;
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        .version-badge {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span style="font-size: 2em;">✅</span>
+            Corrección: Permiso para Reabrir Admisiones - COMPLETADA
+        </h1>
+
+        <div class="status">
+            ✅ CORREGIDO Y DESPLEGADO (Backend + Frontend)
+            <br>
+            <span class="version-badge">v46.0.0</span>
+            <span class="version-badge">Build: 1772169940779</span>
+        </div>
+
+        <h2>📋 Problema Reportado</h2>
+        <div class="problem">
+            <p><strong>El usuario Operador podía reabrir admisiones a pesar de no tener el permiso correspondiente en su rol.</strong></p>
+            
+            <p><strong>Permisos del rol Operador en Historias Clínicas:</strong></p>
+            <ul>
+                <li><span class="success">✅</span> Ver historias clínicas (<code>view_medical_records</code>)</li>
+                <li><span class="success">✅</span> Crear historias clínicas (<code>create_medical_records</code>)</li>
+                <li><span class="success">✅</span> Vista previa de historias clínicas (<code>preview_medical_records</code>)</li>
+                <li><span class="success">✅</span> Enviar historias clínicas por email (<code>send_email_medical_records</code>)</li>
+                <li><span class="error">❌</span> NO tiene <code>edit_medical_records</code></li>
+                <li><span class="error">❌</span> NO tiene <code>reopen_medical_records</code></li>
+            </ul>
+        </div>
+
+        <h2>🔍 Causa Raíz</h2>
+        
+        <h3>Problema 1: Backend - Permiso incorrecto</h3>
+        <div class="problem">
+            <p>El endpoint de reabrir admisiones estaba usando el permiso <span class="highlight">EDIT_MEDICAL_RECORDS</span>, que es muy amplio.</p>
+            
+            <div class="code">
+@Patch(':id/reopen')
+@RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)  // ❌ Permiso muy amplio
+async reopen(@Param('id') id: string, @Request() req) {
+  return this.admissionsService.reopen(id, req.user.tenantId);
+}
+            </div>
+        </div>
+
+        <h3>Problema 2: Frontend - Botón visible sin verificar permiso</h3>
+        <div class="problem">
+            <p>El componente pasaba la función <code>onReopenAdmission</code> sin verificar si el usuario tenía el permiso, haciendo que el botón apareciera para todos.</p>
+            
+            <div class="code">
+&lt;AdmissionsSection
+  admissions={record.admissions || []}
+  onReopenAdmission={handleReopenAdmission}  // ❌ Siempre pasaba la función
+/&gt;
+            </div>
+        </div>
+
+        <h2>✅ Solución Implementada</h2>
+
+        <h3>Solución 1: Backend - Permiso específico</h3>
+        <div class="solution">
+            <p>Cambié el endpoint para usar el permiso específico <span class="highlight">REOPEN_MEDICAL_RECORDS</span>:</p>
+            
+            <div class="code">
+@Patch(':id/reopen')
+@RequirePermissions(PERMISSIONS.REOPEN_MEDICAL_RECORDS)  // ✅ Permiso específico
+async reopen(@Param('id') id: string, @Request() req) {
+  return this.admissionsService.reopen(id, req.user.tenantId);
+}
+            </div>
+            
+            <p><strong>Archivo modificado:</strong> <code>backend/src/medical-records/admissions.controller.ts</code></p>
+        </div>
+
+        <h3>Solución 2: Frontend - Verificar permiso antes de mostrar botón</h3>
+        <div class="solution">
+            <p>Modifiqué el componente para solo pasar la función si el usuario tiene el permiso:</p>
+            
+            <div class="code">
+const canReopenRecords = hasPermission('reopen_medical_records');
+
+&lt;AdmissionsSection
+  admissions={record.admissions || []}
+  onReopenAdmission={canReopenRecords ? handleReopenAdmission : undefined}  // ✅ Solo si tiene permiso
+/&gt;
+            </div>
+            
+            <p><strong>Archivo modificado:</strong> <code>frontend/src/pages/ViewMedicalRecordPage.tsx</code> (línea 530)</p>
+            <p>Cuando <code>onReopenAdmission</code> es <code>undefined</code>, el componente no muestra el botón "Reabrir Admisión".</p>
+        </div>
+
+        <h2>📊 Verificación en Base de Datos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rol</th>
+                    <th>reopen_medical_records</th>
+                    <th>edit_medical_records</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Super Administrador</td>
+                    <td><span class="success">✅ SÍ</span></td>
+                    <td><span class="success">✅ SÍ</span></td>
+                </tr>
+                <tr>
+                    <td>Administrador General</td>
+                    <td><span class="success">✅ SÍ</span></td>
+                    <td><span class="success">✅ SÍ</span></td>
+                </tr>
+                <tr>
+                    <td>Administrador de Sede</td>
+                    <td><span class="error">❌ NO</span></td>
+                    <td><span class="success">✅ SÍ</span></td>
+                </tr>
+                <tr>
+                    <td>Operador</td>
+                    <td><span class="error">❌ NO</span></td>
+                    <td><span class="error">❌ NO</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>🎯 Resultado</h2>
+        
+        <h3>Antes del cambio:</h3>
+        <ul>
+            <li><span class="error">❌</span> Backend: Endpoint usaba permiso <code>EDIT_MEDICAL_RECORDS</code> (muy amplio)</li>
+            <li><span class="error">❌</span> Frontend: Botón "Reabrir Admisión" visible para todos los usuarios</li>
+            <li><span class="error">❌</span> Operador podía reabrir admisiones</li>
+        </ul>
+
+        <h3>Después del cambio:</h3>
+        <ul>
+            <li><span class="success">✅</span> Backend: Endpoint usa permiso específico <code>REOPEN_MEDICAL_RECORDS</code></li>
+            <li><span class="success">✅</span> Frontend: Botón solo visible si el usuario tiene el permiso</li>
+            <li><span class="success">✅</span> Solo Super Administrador y Administrador General pueden reabrir admisiones</li>
+            <li><span class="success">✅</span> Administrador de Sede NO puede reabrir admisiones (no ve el botón)</li>
+            <li><span class="success">✅</span> Operador NO puede reabrir admisiones (no ve el botón)</li>
+        </ul>
+
+        <h2>🚀 Despliegue</h2>
+        
+        <div class="deployment">
+            <h3>Backend</h3>
+            <ul>
+                <li><span class="checkmark">✅</span> Código modificado en <code>admissions.controller.ts</code></li>
+                <li><span class="checkmark">✅</span> Backend compilado: <code>npm run build</code></li>
+                <li><span class="checkmark">✅</span> Archivos desplegados al servidor</li>
+                <li><span class="checkmark">✅</span> PM2 reiniciado: <code>pm2 restart datagree</code></li>
+            </ul>
+
+            <h3>Frontend</h3>
+            <ul>
+                <li><span class="checkmark">✅</span> Código modificado en <code>ViewMedicalRecordPage.tsx</code></li>
+                <li><span class="checkmark">✅</span> Frontend compilado: <code>npm run build</code></li>
+                <li><span class="checkmark">✅</span> Archivos desplegados: <code>sudo cp -r /tmp/dist/* /var/www/html/</code></li>
+                <li><span class="checkmark">✅</span> Permisos corregidos: <code>sudo chown -R www-data:www-data /var/www/html</code></li>
+            </ul>
+
+            <p style="text-align: center; margin-top: 20px; font-size: 1.1em;">
+                <strong>Servidor:</strong> demo-estetica.archivoenlinea.com (100.28.198.249)
+            </p>
+        </div>
+
+        <h2>📝 Instrucciones para el Usuario</h2>
+        
+        <div class="steps">
+            <h3>Para que los cambios surtan efecto:</h3>
+            <ol>
+                <li><strong>Recargar la página con caché limpio:</strong> Presiona <code>Ctrl+Shift+R</code> (o <code>Cmd+Shift+R</code> en Mac)</li>
+                <li><strong>Cerrar sesión</strong> en el sistema</li>
+                <li><strong>Volver a iniciar sesión</strong> para obtener un nuevo token JWT con los permisos actualizados</li>
+                <li><strong>Verificar</strong> que el botón "Reabrir Admisión" ya no aparece para usuarios Operador</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <h3>⚠️ Si el botón aún aparece:</h3>
+            <ol>
+                <li><strong>Verificar la versión desplegada:</strong> Abrir consola del navegador (F12) y buscar el mensaje de versión</li>
+                <li><strong>Limpiar caché manualmente:</strong> Ir a Configuración > Privacidad > Borrar datos de navegación</li>
+                <li><strong>Cerrar sesión y volver a iniciar</strong></li>
+                <li><strong>Verificar en modo incógnito</strong> si es necesario</li>
+            </ol>
+        </div>
+
+        <div class="steps">
+            <h3>Verificación de versión:</h3>
+            <p>Abrir la consola del navegador (F12) y buscar:</p>
+            <div class="code">
+✅ Caché limpiado. Nueva versión: 46.0.0
+            </div>
+            
+            <p>O verificar en el código fuente (Ver > Código fuente):</p>
+            <div class="code">
+&lt;meta name="app-version" content="46.0.0" /&gt;
+&lt;meta name="build-timestamp" content="1772169940779" /&gt;
+            </div>
+        </div>
+
+        <h2>📚 Archivos Modificados</h2>
+        
+        <h3>Backend</h3>
+        <ul>
+            <li><code>backend/src/medical-records/admissions.controller.ts</code> - Controlador de admisiones (permiso específico)</li>
+            <li><code>backend/src/auth/constants/permissions.ts</code> - Definición de permisos</li>
+        </ul>
+
+        <h3>Frontend</h3>
+        <ul>
+            <li><code>frontend/src/pages/ViewMedicalRecordPage.tsx</code> - Vista de HC con verificación de permiso (línea 530)</li>
+            <li><code>frontend/src/components/medical-records/AdmissionsSection.tsx</code> - Sección de admisiones (recibe onReopenAdmission condicional)</li>
+        </ul>
+
+        <h2>✅ Conclusión</h2>
+        <div class="solution">
+            <p><strong>El problema se solucionó con dos cambios complementarios:</strong></p>
+            <ol>
+                <li><strong>Backend:</strong> Cambié el permiso requerido en el endpoint de reabrir admisiones a <code>REOPEN_MEDICAL_RECORDS</code></li>
+                <li><strong>Frontend:</strong> Modifiqué el componente para solo mostrar el botón si el usuario tiene el permiso</li>
+            </ol>
+
+            <p><strong>Ahora solo los roles con el permiso <code>reopen_medical_records</code> pueden:</strong></p>
+            <ul>
+                <li>Ver el botón "Reabrir Admisión" en el frontend</li>
+                <li>Ejecutar la acción de reabrir en el backend</li>
+            </ul>
+
+            <p><strong>El rol Operador ya NO puede reabrir admisiones (ni ve el botón ni puede ejecutar la acción).</strong></p>
+            
+            <p style="margin-top: 20px; font-size: 1.1em; text-align: center;">
+                <span class="success">✅ Los cambios están desplegados en producción (Backend + Frontend)</span>
+            </p>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f3f4f6; border-radius: 10px; text-align: center;">
+            <p style="margin: 0; color: #6b7280;">
+                <strong>Corrección realizada por:</strong> Kiro AI Assistant<br>
+                <strong>Fecha de despliegue:</strong> 27 de febrero de 2026
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización Forzada v46.0.0 - Sistema de Consentimientos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        
+        .description {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .changes {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .changes h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .changes ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .changes li {
+            color: #555;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .changes li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .progress {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚀</div>
+        <h1>Actualización Disponible</h1>
+        <div class="version">Versión 46.0.0</div>
+        
+        <p class="description">
+            Hemos mejorado la página de gestión de precios con un diseño más organizado y mejor uso del espacio.
+        </p>
+        
+        <div class="changes">
+            <h3>✨ Mejoras en esta versión:</h3>
+            <ul>
+                <li>Diseño más limpio y espacioso en gestión de precios</li>
+                <li>Grid de 2 columnas para mejor visualización</li>
+                <li>Cards más grandes con mejor separación</li>
+                <li>Inputs más legibles y accesibles</li>
+                <li>Precios formateados más visibles</li>
+                <li>Mejor organización de campos de impuestos</li>
+                <li>Botones con mejor feedback visual</li>
+                <li>Espaciado optimizado en toda la interfaz</li>
+            </ul>
+        </div>
+        
+        <button class="button" onclick="forceUpdate()">
+            Actualizar Ahora
+        </button>
+        
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="status" id="status"></div>
+        
+        <div class="footer">
+            Build: 1772158936143 | Hash: mm49oaj3<br>
+            Fecha: 27 de febrero de 2026
+        </div>
+    </div>
+    
+    <script>
+        async function forceUpdate() {
+            const button = document.querySelector('.button');
+            const status = document.getElementById('status');
+            const progress = document.getElementById('progress');
+            const progressFill = document.getElementById('progressFill');
+            
+            button.disabled = true;
+            button.textContent = 'Actualizando...';
+            progress.style.display = 'block';
+            status.style.display = 'none';
+            
+            try {
+                // Paso 1: Limpiar localStorage (excepto sesión)
+                progressFill.style.width = '20%';
+                await sleep(300);
+                
+                const keysToKeep = ['auth_token', 'user_data', 'tenant_data'];
+                const storage = {};
+                keysToKeep.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) storage[key] = value;
+                });
+                
+                localStorage.clear();
+                
+                keysToKeep.forEach(key => {
+                    if (storage[key]) localStorage.setItem(key, storage[key]);
+                });
+                
+                localStorage.setItem('app_version', '46.0.0');
+                localStorage.setItem('build_timestamp', '1772158936143');
+                
+                // Paso 2: Limpiar sessionStorage
+                progressFill.style.width = '40%';
+                await sleep(300);
+                sessionStorage.clear();
+                
+                // Paso 3: Limpiar Service Workers
+                progressFill.style.width = '60%';
+                await sleep(300);
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+                
+                // Paso 4: Limpiar Cache API
+                progressFill.style.width = '80%';
+                await sleep(300);
+                if ('caches' in window) {
+                    const names = await caches.keys();
+                    for (let name of names) {
+                        await caches.delete(name);
+                    }
+                }
+                
+                // Paso 5: Completar
+                progressFill.style.width = '100%';
+                await sleep(500);
+                
+                status.className = 'status success';
+                status.textContent = '✅ Actualización completada. Redirigiendo...';
+                status.style.display = 'block';
+                
+                // Redirigir con parámetros anti-caché y forzar recarga completa
+                await sleep(1000);
+                const timestamp = new Date().getTime();
+                window.location.replace(`/?v=46.0.0&t=${timestamp}&nocache=true&force=${Math.random()}`);
+                
+            } catch (error) {
+                console.error('Error durante la actualización:', error);
+                status.className = 'status error';
+                status.textContent = '❌ Error durante la actualización. Por favor, intenta de nuevo.';
+                status.style.display = 'block';
+                button.disabled = false;
+                button.textContent = 'Reintentar';
+                progress.style.display = 'none';
+            }
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        // Auto-actualizar después de 5 segundos si el usuario no hace clic
+        setTimeout(() => {
+            const button = document.querySelector('.button');
+            if (!button.disabled) {
+                forceUpdate();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>

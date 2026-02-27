@@ -150,44 +150,47 @@ export default function PlanPricingManagementPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Globe className="w-8 h-8 text-primary-600" />
-          Gestión de Precios Multi-Región
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Administra los precios de los planes para diferentes regiones geográficas
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Globe className="w-8 h-8 text-primary-600" />
+            <h1 className="text-3xl font-bold text-gray-900">
+              Gestión de Precios Multi-Región
+            </h1>
+          </div>
+          <p className="text-gray-600">
+            Administra los precios de los planes para diferentes regiones geográficas
+          </p>
+        </div>
 
       {message && (
         <div
-          className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+          className={`mb-6 p-4 rounded-lg flex items-center gap-3 shadow-sm ${
             message.type === 'success'
               ? 'bg-green-50 text-green-800 border border-green-200'
               : 'bg-red-50 text-red-800 border border-red-200'
           }`}
         >
           {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5" />
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5" />
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
           )}
           <span>{message.text}</span>
         </div>
       )}
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {plans.map(plan => (
-          <div key={plan.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-primary-600 to-purple-600 p-4">
+          <div key={plan.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary-600 to-purple-600 px-6 py-4">
               <h2 className="text-xl font-bold text-white">{plan.name}</h2>
-              <p className="text-primary-100 text-sm">{plan.description}</p>
+              <p className="text-primary-100 text-sm mt-1">{plan.description}</p>
             </div>
 
             <div className="p-6">
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid lg:grid-cols-2 gap-5">
                 {regions.map(region => {
                   const key = `${plan.id}-${region.region}`;
                   const isSaving = saving === key;
@@ -196,17 +199,17 @@ export default function PlanPricingManagementPage() {
                   return (
                     <div
                       key={region.region}
-                      className={`border-2 rounded-lg p-4 transition ${
+                      className={`border-2 rounded-lg p-5 transition-all ${
                         hasEdits
-                          ? 'border-yellow-400 bg-yellow-50'
-                          : 'border-gray-200 hover:border-primary-300'
+                          ? 'border-yellow-400 bg-yellow-50 shadow-md'
+                          : 'border-gray-200 hover:border-primary-300 hover:shadow-sm'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{region.regionName}</h3>
-                          <p className="text-sm text-gray-600">
-                            {region.currency} ({region.currencySymbol})
+                          <h3 className="font-semibold text-gray-900 text-lg">{region.regionName}</h3>
+                          <p className="text-sm text-gray-500 mt-0.5">
+                            {region.currency} • {region.currencySymbol}
                           </p>
                         </div>
                         <DollarSign className="w-6 h-6 text-primary-600" />
@@ -214,11 +217,11 @@ export default function PlanPricingManagementPage() {
 
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-xs font-medium text-gray-700 mb-1.5">
                             Precio Mensual
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
                               {region.currencySymbol}
                             </span>
                             <input
@@ -233,10 +236,10 @@ export default function PlanPricingManagementPage() {
                                   parseFloat(e.target.value) || 0
                                 )
                               }
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-600 mt-1.5 font-medium">
                             {formatCurrency(
                               getCurrentValue(plan.id, region.region, 'priceMonthly'),
                               region.currency
@@ -245,11 +248,11 @@ export default function PlanPricingManagementPage() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                          <label className="block text-xs font-medium text-gray-700 mb-1.5">
                             Precio Anual
                           </label>
                           <div className="relative">
-                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
                               {region.currencySymbol}
                             </span>
                             <input
@@ -264,10 +267,10 @@ export default function PlanPricingManagementPage() {
                                   parseFloat(e.target.value) || 0
                                 )
                               }
-                              className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="w-full pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-600 mt-1.5 font-medium">
                             {formatCurrency(
                               getCurrentValue(plan.id, region.region, 'priceAnnual'),
                               region.currency
@@ -275,10 +278,10 @@ export default function PlanPricingManagementPage() {
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 gap-3 pt-2">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Tasa Impuesto
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                              Tasa (%)
                             </label>
                             <input
                               type="number"
@@ -294,16 +297,16 @@ export default function PlanPricingManagementPage() {
                                   parseFloat(e.target.value) || 0
                                 )
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                             />
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-600 mt-1.5 font-medium">
                               {(getCurrentValue(plan.id, region.region, 'taxRate') * 100).toFixed(0)}%
                             </p>
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Nombre Impuesto
+                            <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                              Impuesto
                             </label>
                             <input
                               type="text"
@@ -316,7 +319,8 @@ export default function PlanPricingManagementPage() {
                                   e.target.value
                                 )
                               }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                              placeholder="IVA"
                             />
                           </div>
                         </div>
@@ -324,10 +328,10 @@ export default function PlanPricingManagementPage() {
                         <button
                           onClick={() => handleSave(plan.id, region.region)}
                           disabled={!hasEdits || isSaving}
-                          className={`w-full py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition ${
+                          className={`w-full mt-4 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
                             hasEdits && !isSaving
-                              ? 'bg-primary-600 text-white hover:bg-primary-700'
-                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow'
+                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           }`}
                         >
                           {isSaving ? (
@@ -352,14 +356,30 @@ export default function PlanPricingManagementPage() {
         ))}
       </div>
 
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-semibold text-blue-900 mb-2">ℹ️ Información Importante</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Los cambios en los precios se reflejan inmediatamente en la landing page</li>
-          <li>• Los precios se muestran automáticamente según la ubicación del usuario</li>
-          <li>• La tasa de impuesto se muestra como información, no se aplica automáticamente</li>
-          <li>• Los cambios no afectan a tenants existentes, solo a nuevas suscripciones</li>
+      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-5 shadow-sm">
+        <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
+          Información Importante
+        </h3>
+        <ul className="text-sm text-blue-800 space-y-2">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">•</span>
+            <span>Los cambios se reflejan inmediatamente en la landing page</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">•</span>
+            <span>Los precios se muestran automáticamente según la ubicación del usuario</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">•</span>
+            <span>La tasa de impuesto es informativa, no se aplica automáticamente</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-600 mt-0.5">•</span>
+            <span>Los cambios no afectan a tenants existentes, solo a nuevas suscripciones</span>
+          </li>
         </ul>
+      </div>
       </div>
     </div>
   );

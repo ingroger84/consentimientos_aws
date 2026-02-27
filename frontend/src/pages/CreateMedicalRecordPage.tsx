@@ -203,16 +203,11 @@ export default function CreateMedicalRecordPage() {
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Seleccionar tipo...</option>
-              <option value="primera_vez">🆕 Primera Vez</option>
+              <option value="consulta">🩺 Consulta</option>
               <option value="control">📋 Control</option>
               <option value="urgencia">🚨 Urgencia</option>
               <option value="hospitalizacion">🏥 Hospitalización</option>
-              <option value="cirugia">⚕️ Cirugía</option>
-              <option value="procedimiento">💉 Procedimiento</option>
               <option value="telemedicina">💻 Telemedicina</option>
-              <option value="domiciliaria">🏠 Domiciliaria</option>
-              <option value="interconsulta">👨‍⚕️ Interconsulta</option>
-              <option value="otro">📝 Otro</option>
             </select>
             {errors.admissionType && (
               <p className="mt-1 text-sm text-red-600">{errors.admissionType.message}</p>

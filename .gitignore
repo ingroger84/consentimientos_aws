@@ -264,3 +264,23 @@ ACCIONES_PENDIENTES_URGENTES.md
 INSTRUCCIONES_PUSH_GITHUB.md
 INSTRUCCIONES_PUSH_GITHUB_SECRETOS.md
 credentials*.txt
+
+# ============================================
+# TEMPORARY FILES (Added v46.1.0)
+# ============================================
+*.temp.*
+*.backup
+*.bak
+*_TEMP.md
+*_TEMP.html
+*.temp.html
+frontend/index.temp.html
+
+# ============================================
+# ANALYSIS FILES (Temporary)
+# ============================================
+ANALISIS_*.md
+DIAGNOSTICO_*.html
+PROBLEMA_*.html
+FORZAR_*.html
+LIMPIAR_*.html
