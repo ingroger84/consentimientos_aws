@@ -111,7 +111,11 @@ export class MedicalRecordsController {
 
   @Get()
   async findAll(@Request() req: any, @Query() filters: any) {
-    return this.medicalRecordsService.findAll(req.user.tenantId, filters);
+    // Si es Super Admin (no tiene tenant), puede ver todas las HC
+    const isSuperAdmin = !req.user.tenantId;
+    const tenantId = isSuperAdmin ? filters.tenantId : req.user.tenantId;
+    
+    return this.medicalRecordsService.findAll(tenantId, filters);
   }
 
   @Get(':id')
@@ -184,9 +188,13 @@ export class MedicalRecordsController {
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.DELETE_MEDICAL_RECORDS)
   async delete(@Param('id') id: string, @Request() req: any) {
+    // Si es Super Admin (no tiene tenant), puede eliminar cualquier HC
+    const isSuperAdmin = !req.user.tenantId;
+    const tenantId = isSuperAdmin ? null : req.user.tenantId;
+    
     await this.medicalRecordsService.delete(
       id,
-      req.user.tenantId,
+      tenantId,
       req.user.sub,
       req.ip,
       req.headers['user-agent'],

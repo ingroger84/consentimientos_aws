@@ -14,10 +14,10 @@ const admissionTypes = [
   { value: 'urgencia', label: 'Urgencia', icon: '🚨', description: 'Atención de urgencia' },
   { value: 'hospitalizacion', label: 'Hospitalización', icon: '🏥', description: 'Ingreso hospitalario' },
   { value: 'cirugia', label: 'Cirugía', icon: '⚕️', description: 'Procedimiento quirúrgico' },
-  { value: 'procedimiento', label: 'Procedimiento', icon: '💉', description: 'Procedimiento ambulatorio' },
+  { value: 'procedimiento', label: 'Procedimiento', icon: '💉', description: 'Procedimiento médico' },
   { value: 'telemedicina', label: 'Telemedicina', icon: '💻', description: 'Consulta virtual' },
-  { value: 'domiciliaria', label: 'Domiciliaria', icon: '🏠', description: 'Atención domiciliaria' },
-  { value: 'interconsulta', label: 'Interconsulta', icon: '👨‍⚕️', description: 'Interconsulta con especialista' },
+  { value: 'domiciliaria', label: 'Domiciliaria', icon: '🏠', description: 'Atención a domicilio' },
+  { value: 'interconsulta', label: 'Interconsulta', icon: '👨‍⚕️', description: 'Consulta con especialista' },
   { value: 'otro', label: 'Otro', icon: '📝', description: 'Otro tipo de admisión' },
 ];
 

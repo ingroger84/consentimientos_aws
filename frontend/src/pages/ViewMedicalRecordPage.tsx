@@ -527,7 +527,7 @@ export default function ViewMedicalRecordPage() {
               activeAdmissionId={activeAdmissionId}
               onRefresh={loadRecord}
               onCloseAdmission={handleCloseAdmission}
-              onReopenAdmission={handleReopenAdmission}
+              onReopenAdmission={canReopenRecords ? handleReopenAdmission : undefined}
             />
           )}
 

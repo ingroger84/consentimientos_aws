@@ -74,7 +74,7 @@ export class AdmissionsController {
   }
 
   @Patch(':id/close')
-  @RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)
+  @RequirePermissions(PERMISSIONS.CLOSE_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Cerrar una admisión' })
   @ApiResponse({ status: 200, description: 'Admisión cerrada' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })
@@ -92,7 +92,7 @@ export class AdmissionsController {
   }
 
   @Patch(':id/reopen')
-  @RequirePermissions(PERMISSIONS.EDIT_MEDICAL_RECORDS)
+  @RequirePermissions(PERMISSIONS.REOPEN_MEDICAL_RECORDS)
   @ApiOperation({ summary: 'Reabrir una admisión cerrada' })
   @ApiResponse({ status: 200, description: 'Admisión reabierta' })
   @ApiResponse({ status: 404, description: 'Admisión no encontrada' })

@@ -4,6 +4,17 @@ import { Repository, In } from 'typeorm';
 import { MedicalRecord } from './entities/medical-record.entity';
 import { MedicalRecordAudit } from './entities/medical-record-audit.entity';
 import { MedicalRecordConsent } from './entities/medical-record-consent.entity';
+import { Anamnesis } from './entities/anamnesis.entity';
+import { PhysicalExam } from './entities/physical-exam.entity';
+import { Diagnosis } from './entities/diagnosis.entity';
+import { Evolution } from './entities/evolution.entity';
+import { MedicalOrder } from './entities/medical-order.entity';
+import { Prescription } from './entities/prescription.entity';
+import { Procedure } from './entities/procedure.entity';
+import { TreatmentPlan } from './entities/treatment-plan.entity';
+import { Epicrisis } from './entities/epicrisis.entity';
+import { MedicalRecordDocument } from './entities/medical-record-document.entity';
+import { Admission } from './entities/admission.entity';
 import { CreateMedicalRecordDto, UpdateMedicalRecordDto } from './dto';
 import { ClientsService } from '../clients/clients.service';
 import { ClientDocumentType } from '../clients/entities/client.entity';
@@ -26,6 +37,28 @@ export class MedicalRecordsService {
     private auditRepository: Repository<MedicalRecordAudit>,
     @InjectRepository(MedicalRecordConsent)
     private medicalRecordConsentsRepository: Repository<MedicalRecordConsent>,
+    @InjectRepository(Anamnesis)
+    private anamnesisRepository: Repository<Anamnesis>,
+    @InjectRepository(PhysicalExam)
+    private physicalExamsRepository: Repository<PhysicalExam>,
+    @InjectRepository(Diagnosis)
+    private diagnosesRepository: Repository<Diagnosis>,
+    @InjectRepository(Evolution)
+    private evolutionsRepository: Repository<Evolution>,
+    @InjectRepository(MedicalOrder)
+    private medicalOrdersRepository: Repository<MedicalOrder>,
+    @InjectRepository(Prescription)
+    private prescriptionsRepository: Repository<Prescription>,
+    @InjectRepository(Procedure)
+    private proceduresRepository: Repository<Procedure>,
+    @InjectRepository(TreatmentPlan)
+    private treatmentPlansRepository: Repository<TreatmentPlan>,
+    @InjectRepository(Epicrisis)
+    private epicrisisRepository: Repository<Epicrisis>,
+    @InjectRepository(MedicalRecordDocument)
+    private medicalRecordDocumentsRepository: Repository<MedicalRecordDocument>,
+    @InjectRepository(Admission)
+    private admissionsRepository: Repository<Admission>,
     private clientsService: ClientsService,
     private mrConsentTemplatesService: MRConsentTemplatesService,
     private templateRendererService: TemplateRendererService,
@@ -239,8 +272,13 @@ export class MedicalRecordsService {
       .createQueryBuilder('mr')
       .leftJoinAndSelect('mr.client', 'client')
       .leftJoinAndSelect('mr.branch', 'branch')
-      .leftJoinAndSelect('mr.creator', 'creator')
-      .where('mr.tenant_id = :tenantId', { tenantId });
+      .leftJoinAndSelect('mr.creator', 'creator');
+
+    // Si tenantId está definido, filtrar por tenant (usuarios normales)
+    // Si tenantId es null/undefined, mostrar todas las HC (Super Admin)
+    if (tenantId) {
+      query.where('mr.tenant_id = :tenantId', { tenantId });
+    }
 
     if (filters?.clientId) {
       query.andWhere('mr.client_id = :clientId', { clientId: filters.clientId });
@@ -505,8 +543,11 @@ export class MedicalRecordsService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<void> {
+    // Si tenantId es null (Super Admin), buscar sin restricción de tenant
+    const whereCondition = tenantId ? { id, tenantId } : { id };
+    
     const medicalRecord = await this.medicalRecordsRepository.findOne({
-      where: { id, tenantId },
+      where: whereCondition,
       relations: ['consents'],
     });
 
@@ -524,7 +565,6 @@ export class MedicalRecordsService {
     // Guardar datos para auditoría antes de eliminar
     const oldValues = { ...medicalRecord };
 
-    // Eliminar consentimientos asociados primero
     // Auditoría ANTES de eliminar (para evitar error de foreign key)
     await this.logAudit({
       action: 'delete',
@@ -532,19 +572,45 @@ export class MedicalRecordsService {
       entityId: id,
       medicalRecordId: id,
       userId,
-      tenantId,
+      tenantId: tenantId || medicalRecord.tenantId, // Usar el tenantId de la HC si no se proporciona
       oldValues,
       ipAddress,
       userAgent,
     });
 
-    // Eliminar consentimientos asociados
-    if (medicalRecord.consents && medicalRecord.consents.length > 0) {
-      await this.medicalRecordConsentsRepository.remove(medicalRecord.consents);
-    }
+    // Eliminar TODOS los registros relacionados usando el query builder
+    // Esto evita problemas de foreign key constraints
+    const queryRunner = this.medicalRecordsRepository.manager.connection.createQueryRunner();
+    
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-    // Eliminar la historia clínica
-    await this.medicalRecordsRepository.remove(medicalRecord);
+      // Eliminar en orden para respetar las foreign keys (usando snake_case)
+      await queryRunner.query('DELETE FROM medical_record_consents WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM anamnesis WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM physical_exams WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM diagnoses WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM evolutions WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM medical_orders WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM prescriptions WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM procedures WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM treatment_plans WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM epicrisis WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM medical_record_documents WHERE medical_record_id = $1', [id]);
+      await queryRunner.query('DELETE FROM admissions WHERE medical_record_id = $1', [id]);
+      // Eliminar registros de auditoría relacionados con esta HC
+      await queryRunner.query('DELETE FROM medical_record_audit WHERE medical_record_id = $1', [id]);
+      // Finalmente eliminar la historia clínica
+      await queryRunner.query('DELETE FROM medical_records WHERE id = $1', [id]);
+
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   private async generateRecordNumber(tenantId: string): Promise<string> {
@@ -585,6 +651,11 @@ export class MedicalRecordsService {
     const groupedMap = new Map<string, any>();
 
     allRecords.forEach(record => {
+      // Manejar el caso donde tenant puede ser null
+      if (!record.tenant) {
+        return; // Saltar registros sin tenant
+      }
+
       const tenantId = record.tenantId;
       
       if (!groupedMap.has(tenantId)) {

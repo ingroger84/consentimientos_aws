@@ -1,7 +1,7 @@
 # Versión del Sistema
 
-## Versión Actual: 46.0.0
-**Fecha:** 2026-02-26
+## Versión Actual: 47.0.0
+**Fecha:** 2026-02-27
 **Tipo de Cambio:** MAJOR
 
 ---
@@ -18,13 +18,15 @@
 
 ## Historial de Versiones
 
+### 47.0.0 - 2026-02-27 [MAJOR]
+- Backend: 6 archivo(s) modificado(s)
+- Frontend: 3 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 46.0.0 - 2026-02-26 [MAJOR]
 - Backend: 7 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 4 archivo(s) modificado(s)
-
-### 45.0.2 - 2026-02-26 [PATCH]
-- Mejoras y correcciones generales
 
 ---
 
