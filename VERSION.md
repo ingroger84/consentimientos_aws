@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 42.5.0
+## Versión Actual: 42.6.0
 **Fecha:** 2026-02-26
 **Tipo de Cambio:** MINOR
 
@@ -18,11 +18,11 @@
 
 ## Historial de Versiones
 
-### 42.5.0 - 2026-02-26 [MINOR]
-- Backend: 1 archivo(s) modificado(s)
+### 42.6.0 - 2026-02-26 [MINOR]
 - Documentación: 1 archivo(s) modificado(s)
 
-### 42.4.1 - 2026-02-26 [PATCH]
+### 42.5.0 - 2026-02-26 [MINOR]
+- Backend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
 ---
