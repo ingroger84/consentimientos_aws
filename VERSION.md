@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 49.0.1
+## Versión Actual: 50.0.0
 **Fecha:** 2026-02-27
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,13 +18,13 @@
 
 ## Historial de Versiones
 
-### 49.0.1 - 2026-02-27 [PATCH]
-- Documentación: 2 archivo(s) modificado(s)
-
-### 49.0.0 - 2026-02-27 [MAJOR]
+### 50.0.0 - 2026-02-27 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
+### 49.0.2 - 2026-02-27 [PATCH]
+- Mejoras y correcciones generales
 
 ---
 
