@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 43.0.0
+## Versión Actual: 43.2.0
 **Fecha:** 2026-02-26
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,15 @@
 
 ## Historial de Versiones
 
+### 43.2.0 - 2026-02-26 [MINOR]
+- Backend: 4 archivo(s) modificado(s)
+- Frontend: 1 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 43.0.0 - 2026-02-26 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
-
-### 42.6.1 - 2026-02-26 [PATCH]
-- Mejoras y correcciones generales
 
 ---
 
