@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Actualización a Versión 51.0.0 - DatAgree</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .version {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        
+        .message {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .message p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .steps {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .steps h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .step:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .keyboard {
+            display: inline-block;
+            background: #333;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🚀</div>
+            <h1>¡Nueva Versión Disponible!</h1>
+            <div class="version">Versión 51.0.0</div>
+        </div>
+        
+        <div class="message success">
+            <p><strong>✅ El servidor se ha actualizado exitosamente</strong></p>
+            <p>Si aún ves la versión 46.0.0, necesitas limpiar el caché de tu navegador.</p>
+        </div>
+        
+        <div class="steps">
+            <h3>📋 Opciones para Ver la Nueva Versión</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">Recarga Forzada (Más Rápido)</div>
+                    <div class="step-desc">
+                        Windows: <span class="keyboard">Ctrl</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span><br>
+                        Mac: <span class="keyboard">Cmd</span> + <span class="keyboard">Shift</span> + <span class="keyboard">R</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">Herramientas de Desarrollador</div>
+                    <div class="step-desc">
+                        Presiona <span class="keyboard">F12</span>, haz clic derecho en el botón recargar y selecciona "Vaciar caché y recargar"
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">Modo Incógnito</div>
+                    <div class="step-desc">
+                        Abre una ventana de incógnito/privada y accede al sitio
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <div class="step-title">Limpiar Caché Completo</div>
+                    <div class="step-desc">
+                        Ve a Configuración → Privacidad → Borrar datos de navegación → Imágenes y archivos en caché
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="message info">
+            <p><strong>ℹ️ ¿Por qué necesito hacer esto?</strong></p>
+            <p>Tu navegador guarda una copia de los archivos del sitio para cargar más rápido. Al actualizar el sistema, necesitas descargar los nuevos archivos.</p>
+        </div>
+        
+        <button class="button" onclick="forceReload()">
+            🔄 Recargar y Limpiar Caché Ahora
+        </button>
+        
+        <div class="progress-bar" id="progressBar" style="display: none;">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="countdown" id="countdown" style="display: none;"></div>
+        
+        <div class="footer">
+            <p><strong>DatAgree - Sistema de Consentimientos Digitales</strong></p>
+            <p>Versión 51.0.0 | 27 de febrero de 2026</p>
+            <p>🌐 <a href="https://demo-estetica.archivoenlinea.com" style="color: #667eea;">demo-estetica.archivoenlinea.com</a></p>
+        </div>
+    </div>
+    
+    <script>
+        function forceReload() {
+            const button = document.querySelector('.button');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const countdown = document.getElementById('countdown');
+            
+            button.disabled = true;
+            button.textContent = '⏳ Limpiando caché...';
+            progressBar.style.display = 'block';
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    countdown.style.display = 'block';
+                    
+                    let count = 3;
+                    countdown.textContent = count;
+                    
+                    const countInterval = setInterval(() => {
+                        count--;
+                        if (count > 0) {
+                            countdown.textContent = count;
+                        } else {
+                            clearInterval(countInterval);
+                            countdown.textContent = '🚀';
+                            
+                            // Limpiar caché y recargar
+                            if ('caches' in window) {
+                                caches.keys().then(names => {
+                                    names.forEach(name => {
+                                        caches.delete(name);
+                                    });
+                                });
+                            }
+                            
+                            // Agregar timestamp para evitar caché
+                            const timestamp = new Date().getTime();
+                            window.location.href = 'https://demo-estetica.archivoenlinea.com?v=' + timestamp + '&nocache=' + Math.random();
+                        }
+                    }, 1000);
+                }
+            }, 100);
+        }
+        
+        // Auto-detectar versión actual
+        window.addEventListener('load', () => {
+            fetch('/version.json?t=' + new Date().getTime())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.version === '51.0.0') {
+                        const message = document.querySelector('.message.success');
+                        message.innerHTML = '<p><strong>✅ ¡Ya estás en la versión más reciente!</strong></p><p>Tu navegador tiene la versión 51.0.0 correctamente cargada.</p>';
+                        
+                        const button = document.querySelector('.button');
+                        button.textContent = '✅ Ya tienes la versión 51.0.0';
+                        button.style.background = '#28a745';
+                        button.disabled = true;
+                    }
+                })
+                .catch(err => {
+                    console.log('No se pudo verificar la versión:', err);
+                });
+        });
+    </script>
+</body>
+</html>

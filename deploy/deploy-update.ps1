@@ -2,7 +2,7 @@
 $ErrorActionPreference = "Stop"
 
 $ServerIP = "100.28.198.249"
-$KeyFile = "AWS-ISSABEL.pem"
+$KeyFile = "..\credentials\AWS-ISSABEL.pem"
 $ServerUser = "ubuntu"
 $AppPath = "/home/ubuntu/consentimientos_aws"
 
