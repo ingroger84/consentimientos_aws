@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 42.1.2
-**Fecha:** 2026-02-24
-**Tipo de Cambio:** PATCH
+## Versión Actual: 42.2.0
+**Fecha:** 2026-02-26
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,11 +18,12 @@
 
 ## Historial de Versiones
 
+### 42.2.0 - 2026-02-26 [MINOR]
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 4 archivo(s) modificado(s)
+
 ### 42.1.2 - 2026-02-24 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 42.1.1 - 2026-02-24 [PATCH]
-- Scripts: 7 archivo(s) modificado(s)
 
 ---
 
