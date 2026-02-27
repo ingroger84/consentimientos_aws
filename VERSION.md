@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 44.0.0
+## Versión Actual: 45.0.0
 **Fecha:** 2026-02-26
 **Tipo de Cambio:** MAJOR
 
@@ -18,12 +18,12 @@
 
 ## Historial de Versiones
 
-### 44.0.0 - 2026-02-26 [MAJOR]
+### 45.0.0 - 2026-02-26 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
 
-### 43.3.0 - 2026-02-26 [MINOR]
+### 44.0.1 - 2026-02-26 [PATCH]
 - Mejoras y correcciones generales
 
 ---

@@ -348,4 +348,53 @@ Se pobló exitosamente la base de datos Supabase con todos los datos necesarios.
 
 ---
 
-**Versión actualizada:** 43.0.0 → 43.1.0
+**Versión actualizada:** 43.0.0 → 43.1.0 → 44.0.0
+
+---
+
+## 🔧 CORRECCIÓN ADICIONAL: Precios de México Eliminados
+
+### Problema Reportado por el Usuario
+
+El usuario notó que aparecían precios para México (MXN) en la página de "Gestión de Precios Multi-Región", pero esto NO estaba en el plan original.
+
+### Verificación
+
+Según la documentación `ESTRATEGIA_PRECIOS_MULTI_MERCADO.md` del 7 de febrero 2026, el plan original contemplaba:
+
+✅ Colombia (CO) - COP  
+✅ Estados Unidos (US) - USD  
+❌ México (MX) - NO estaba incluido
+
+### Causa
+
+El script `seed-plan-pricing.js` agregó precios para México pensando en una futura expansión, pero esto no estaba en el plan estratégico original.
+
+### Solución
+
+Se eliminaron los 4 registros de precios para México (MX):
+
+**Antes:**
+- Colombia (CO): 4 planes
+- México (MX): 4 planes ❌
+- USA (US): 4 planes
+- Total: 12 registros
+
+**Después:**
+- Colombia (CO): 4 planes ✅
+- USA (US): 4 planes ✅
+- Total: 8 registros
+
+### Script Creado
+
+`backend/fix-plan-pricing-remove-mexico.js` - Elimina precios de México
+
+### Documentación
+
+- `doc/CORRECCION_PRECIOS_MEXICO_ELIMINADO.md` - Documentación completa de la corrección
+- `RESUMEN_CORRECCION_MEXICO.md` - Resumen para el usuario
+
+### Resultado
+
+✅ El sistema ahora muestra solo Colombia y USA como estaba planeado originalmente  
+✅ Versión actualizada: 43.1.0 → 44.0.0
