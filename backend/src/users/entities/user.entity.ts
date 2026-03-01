@@ -6,12 +6,14 @@ import {
   JoinTable,
   BeforeInsert,
   BeforeUpdate,
+  JoinColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Branch } from '../../branches/entities/branch.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
+import { Profile } from '../../profiles/entities/profile.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -35,6 +37,13 @@ export class User extends BaseEntity {
 
   @ManyToOne(() => Role, (role) => role.users)
   role: Role;
+
+  @Column({ name: 'profile_id', type: 'uuid', nullable: true })
+  profileId: string;
+
+  @ManyToOne(() => Profile, (profile) => profile.users, { nullable: true })
+  @JoinColumn({ name: 'profile_id' })
+  profile: Profile;
 
   @ManyToOne(() => Tenant, (tenant) => tenant.users, { nullable: true })
   tenant: Tenant;

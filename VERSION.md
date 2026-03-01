@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 52.0.0
-**Fecha:** 2026-02-27
-**Tipo de Cambio:** MAJOR
+## Versión Actual: 52.1.0
+**Fecha:** 2026-03-01
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,13 +18,15 @@
 
 ## Historial de Versiones
 
+### 52.1.0 - 2026-03-01 [MINOR]
+- Backend: 17 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 52.0.0 - 2026-02-27 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
-
-### 51.0.2 - 2026-02-27 [PATCH]
-- Mejoras y correcciones generales
 
 ---
 

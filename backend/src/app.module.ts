@@ -23,6 +23,7 @@ import { ClientsModule } from './clients/clients.module';
 import { ConsentTemplatesModule } from './consent-templates/consent-templates.module';
 import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { MRConsentTemplatesModule } from './medical-record-consent-templates/mr-consent-templates.module';
+import { ProfilesModule } from './profiles/profiles.module';
 import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
 import { Role } from './roles/entities/role.entity';
@@ -53,6 +54,10 @@ import { Admission } from './medical-records/entities/admission.entity';
 import { MRConsentTemplate } from './medical-record-consent-templates/entities/mr-consent-template.entity';
 import { UserSession } from './auth/entities/user-session.entity';
 import { PlanPricing } from './plans/entities/plan-pricing.entity';
+import { Profile } from './profiles/entities/profile.entity';
+import { SystemModule } from './profiles/entities/system-module.entity';
+import { ModuleAction } from './profiles/entities/module-action.entity';
+import { PermissionAudit } from './profiles/entities/permission-audit.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { SessionGuard } from './auth/guards/session.guard';
@@ -107,6 +112,10 @@ import { SessionGuard } from './auth/guards/session.guard';
             Admission,
             MRConsentTemplate,
             PlanPricing,
+            Profile,
+            SystemModule,
+            ModuleAction,
+            PermissionAudit,
           ],
           synchronize: configService.get('NODE_ENV') === 'development',
           logging: configService.get('NODE_ENV') === 'development',
@@ -151,6 +160,7 @@ import { SessionGuard } from './auth/guards/session.guard';
     ConsentTemplatesModule,
     MedicalRecordsModule,
     MRConsentTemplatesModule,
+    ProfilesModule,
     HealthModule,
   ],
   providers: [
