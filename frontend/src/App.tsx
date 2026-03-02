@@ -46,6 +46,9 @@ const SuperAdminMedicalRecordsPage = lazy(() => import('./pages/SuperAdminMedica
 const SuperAdminConsentsPage = lazy(() => import('./pages/SuperAdminConsentsPage'));
 const CreateMedicalRecordPage = lazy(() => import('./pages/CreateMedicalRecordPage'));
 const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage'));
+const ProfilesPage = lazy(() => import('./pages/ProfilesPage'));
+const CreateProfilePage = lazy(() => import('./pages/CreateProfilePage'));
+const ProfileDetailPage = lazy(() => import('./pages/ProfileDetailPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -155,6 +158,10 @@ function App() {
               <Route path="/medical-records/new" element={<CreateMedicalRecordPage />} />
               <Route path="/medical-records/:id" element={<ViewMedicalRecordPage />} />
               <Route path="/users" element={<UsersPage />} />
+              <Route path="/profiles" element={<ProfilesPage />} />
+              <Route path="/profiles/new" element={<CreateProfilePage />} />
+              <Route path="/profiles/:id" element={<ProfileDetailPage />} />
+              <Route path="/profiles/:id/edit" element={<CreateProfilePage />} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/questions" element={<QuestionsPage />} />

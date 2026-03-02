@@ -245,6 +245,13 @@ export default function Layout() {
       icon: Shield,
       permission: 'view_roles'
     });
+    
+    orgItems.push({
+      name: 'Perfiles',
+      href: '/profiles',
+      icon: Shield,
+      permission: 'view_roles'
+    });
 
     if (orgItems.length > 0) {
       sections.push({

@@ -5,6 +5,53 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Versionamiento Semántico](https://semver.org/lang/es/).
 
+## [52.2.0] - 2026-03-01
+
+### Agregado
+- **[ALTO]** Sistema de Perfiles y Permisos - Frontend completado
+- **[ALTO]** Página ProfilesPage.tsx con lista de perfiles y filtros
+- **[ALTO]** Página CreateProfilePage.tsx para crear/editar perfiles
+- **[ALTO]** Página ProfileDetailPage.tsx con tabs de permisos, usuarios y auditoría
+- **[ALTO]** Componente PermissionSelector.tsx con selector visual de permisos
+- **[ALTO]** Componente ProfileCard.tsx para tarjetas de perfiles
+- **[MEDIO]** Servicio profiles.service.ts con métodos de API
+- **[MEDIO]** Tipos TypeScript en profile.types.ts
+- **[MEDIO]** Rutas configuradas en App.tsx
+- **[MEDIO]** Enlace de navegación en Layout.tsx
+
+### Mejorado
+- **[ALTO]** Validaciones de seguridad en ProfilesService (backend)
+- **[ALTO]** Solo super admins pueden crear perfiles con permisos globales
+- **[ALTO]** Solo super admins pueden asignar permisos de super_admin
+- **[ALTO]** Solo super admins pueden crear/editar/eliminar perfiles
+- **[MEDIO]** Administrador General puede ver y asignar perfiles existentes
+- **[MEDIO]** Permisos del perfil "Administrador General" actualizados
+
+### Documentación
+- **[MEDIO]** IMPLEMENTACION_PERFILES_PERMISOS_COMPLETADA.md actualizado
+- **[MEDIO]** Checklist de implementación completado
+
+## [52.1.0] - 2026-03-01
+
+### Agregado
+- **[ALTO]** Sistema de Perfiles y Permisos - Backend completado
+- **[ALTO]** Entidades: Profile, SystemModule, ModuleAction, PermissionAudit
+- **[ALTO]** DTOs: CreateProfileDto, UpdateProfileDto, AssignProfileDto, CheckPermissionDto
+- **[ALTO]** ProfilesService con 12 métodos completos
+- **[ALTO]** ProfilesController con 10 endpoints
+- **[ALTO]** ModulesController con 3 endpoints
+- **[ALTO]** PermissionsGuard para validación automática
+- **[ALTO]** @RequirePermission decorator para endpoints
+- **[MEDIO]** ProfilesModule creado e integrado en AppModule
+- **[MEDIO]** Migración SQL ejecutada en Supabase
+- **[MEDIO]** 5 perfiles predeterminados creados
+- **[MEDIO]** 64 módulos del sistema configurados
+- **[MEDIO]** 45 acciones disponibles
+
+### Documentación
+- **[MEDIO]** SISTEMA_PERFILES_PERMISOS.md creado
+- **[MEDIO]** IMPLEMENTACION_PERFILES_PERMISOS_COMPLETADA.md creado
+
 ## [49.0.0] - 2026-02-27
 
 ### Optimizado

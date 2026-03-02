@@ -238,7 +238,7 @@ VALUES (
 INSERT INTO profiles (name, description, is_system, permissions)
 VALUES (
   'Administrador General',
-  'Administrador con acceso a la mayoría de funciones excepto super admin',
+  'Administrador con acceso a la mayoría de funciones excepto super admin y gestión de perfiles',
   TRUE,
   '[
     {"module": "dashboard", "actions": ["view"]},
@@ -246,7 +246,7 @@ VALUES (
     {"module": "consents", "actions": ["view", "create", "edit", "delete", "sign"]},
     {"module": "clients", "actions": ["view", "create", "edit", "delete", "export"]},
     {"module": "users", "actions": ["view", "create", "edit", "delete", "reset_password"]},
-    {"module": "profiles", "actions": ["view", "create", "edit", "assign"]},
+    {"module": "profiles", "actions": ["view", "assign"]},
     {"module": "branches", "actions": ["view", "create", "edit", "delete"]},
     {"module": "templates", "actions": ["view", "create", "edit", "delete"]},
     {"module": "reports", "actions": ["view", "export"]},

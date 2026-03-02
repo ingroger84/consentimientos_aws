@@ -38,8 +38,55 @@ export class ProfilesService {
     ipAddress?: string,
     userAgent?: string,
   ): Promise<Profile> {
+    // Obtener el usuario que está creando el perfil
+    const performingUser = await this.userRepository.findOne({
+      where: { id: performedBy },
+      relations: ['profile', 'role'],
+    });
+
+    if (!performingUser) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
     // Validar que los módulos y acciones existan
     await this.validatePermissions(createProfileDto.permissions);
+
+    // SEGURIDAD: Verificar que no se intente crear un perfil con permisos de super admin
+    // Solo super admins pueden crear perfiles con permisos globales (*)
+    const hasGlobalPermissions = createProfileDto.permissions.some(
+      (p) => p.module === '*' || p.actions.includes('*'),
+    );
+
+    const isSuperAdmin = performingUser.role?.name === 'super_admin';
+
+    if (hasGlobalPermissions && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Solo los super administradores pueden crear perfiles con permisos globales',
+      );
+    }
+
+    // SEGURIDAD: Verificar que no se intente crear perfiles con permisos de super_admin
+    const hasSuperAdminPermissions = createProfileDto.permissions.some(
+      (p) => p.module === 'super_admin',
+    );
+
+    if (hasSuperAdminPermissions && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Solo los super administradores pueden crear perfiles con acceso a funciones de super admin',
+      );
+    }
+
+    // SEGURIDAD: Verificar que no se intente crear perfiles con permisos de gestión de perfiles
+    // si el usuario no es super admin
+    const hasProfileManagementPermissions = createProfileDto.permissions.some(
+      (p) => p.module === 'profiles' && (p.actions.includes('create') || p.actions.includes('delete')),
+    );
+
+    if (hasProfileManagementPermissions && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Solo los super administradores pueden crear perfiles con permisos de gestión de perfiles',
+      );
+    }
 
     // Verificar que no exista un perfil con el mismo nombre en el mismo tenant
     const existing = await this.profileRepository.findOne({
@@ -130,9 +177,54 @@ export class ProfilesService {
       throw new ForbiddenException('No se pueden editar perfiles del sistema');
     }
 
+    // Obtener el usuario que está actualizando el perfil
+    const performingUser = await this.userRepository.findOne({
+      where: { id: performedBy },
+      relations: ['profile', 'role'],
+    });
+
+    if (!performingUser) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    const isSuperAdmin = performingUser.role?.name === 'super_admin';
+
     // Validar permisos si se están actualizando
     if (updateProfileDto.permissions) {
       await this.validatePermissions(updateProfileDto.permissions);
+
+      // SEGURIDAD: Verificar que no se intente agregar permisos de super admin
+      const hasGlobalPermissions = updateProfileDto.permissions.some(
+        (p) => p.module === '*' || p.actions.includes('*'),
+      );
+
+      if (hasGlobalPermissions && !isSuperAdmin) {
+        throw new ForbiddenException(
+          'Solo los super administradores pueden asignar permisos globales',
+        );
+      }
+
+      // SEGURIDAD: Verificar que no se intente agregar permisos de super_admin
+      const hasSuperAdminPermissions = updateProfileDto.permissions.some(
+        (p) => p.module === 'super_admin',
+      );
+
+      if (hasSuperAdminPermissions && !isSuperAdmin) {
+        throw new ForbiddenException(
+          'Solo los super administradores pueden asignar acceso a funciones de super admin',
+        );
+      }
+
+      // SEGURIDAD: Verificar que no se intente agregar permisos de gestión de perfiles
+      const hasProfileManagementPermissions = updateProfileDto.permissions.some(
+        (p) => p.module === 'profiles' && (p.actions.includes('create') || p.actions.includes('delete')),
+      );
+
+      if (hasProfileManagementPermissions && !isSuperAdmin) {
+        throw new ForbiddenException(
+          'Solo los super administradores pueden asignar permisos de gestión de perfiles',
+        );
+      }
     }
 
     const oldProfile = { ...profile };
