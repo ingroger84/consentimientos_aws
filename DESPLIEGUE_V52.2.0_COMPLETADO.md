@@ -93,24 +93,68 @@ curl https://admin.archivoenlinea.com/version.json
 
 ---
 
-## ⚠️ Importante: Limpiar Caché del Navegador
+## ⚠️ PROBLEMA RESUELTO: Caché Persistente
 
-Para ver la nueva versión, los usuarios deben limpiar el caché:
+### Problema Identificado
+Los usuarios reportaron ver versión 51.0.0 en múltiples computadores y navegadores, aunque los archivos en el servidor estaban correctos (52.2.0).
 
-### Método 1: Manual
+**Causa:** Caché del navegador muy persistente.
+
+### Solución Implementada
+
+#### 1. Script de Detección y Recarga Automática
+Se modificó `index.html` para incluir un script que:
+- Detecta automáticamente si el usuario tiene una versión antigua
+- Limpia el caché (localStorage, sessionStorage, Service Workers, Cache API)
+- Fuerza una recarga dura de la página (bypass cache)
+- Se ejecuta automáticamente al cargar la página
+
+#### 2. Página de Actualización Automática
+Se creó `actualizar.html` que:
+- Proporciona una interfaz visual del proceso de actualización
+- Ejecuta 4 pasos de limpieza automática
+- Muestra progreso en tiempo real
+- Redirige al sistema al completar
+
+**URL:** https://admin.archivoenlinea.com/actualizar.html
+
+### Instrucciones para Usuarios
+
+#### Método 1: Página de Actualización (RECOMENDADO)
+1. Abrir: https://admin.archivoenlinea.com/actualizar.html
+2. Esperar ~5 segundos a que complete
+3. Hacer clic en "🚀 Ir al Sistema"
+4. Verificar versión 52.2.0 en el footer
+
+#### Método 2: Actualización Automática
+1. Simplemente entrar a: https://admin.archivoenlinea.com
+2. El sistema detectará la versión antigua
+3. Limpiará el caché automáticamente
+4. Recargará la página
+5. Mostrará la versión 52.2.0
+
+#### Método 3: Manual (si los anteriores fallan)
 1. Presionar `Ctrl + Shift + Delete` (Windows) o `Cmd + Shift + Delete` (Mac)
-2. Seleccionar "Imágenes y archivos en caché"
-3. Hacer clic en "Borrar datos"
-4. Recargar la página con `Ctrl + F5` o `Cmd + Shift + R`
+2. Seleccionar "Imágenes y archivos en caché" + "Cookies"
+3. Rango: "Desde siempre"
+4. Hacer clic en "Borrar datos"
+5. Cerrar el navegador completamente
+6. Abrir nuevamente y entrar al sistema
+7. Presionar `Ctrl + F5` para forzar recarga
 
-### Método 2: Forzar recarga
-1. Abrir: https://admin.archivoenlinea.com/FORZAR_RECARGA_V52.2.0.html
-2. El script limpiará el caché automáticamente
-
-### Método 3: Modo incógnito
+#### Método 4: Modo Incógnito (para verificar)
 1. Abrir ventana de incógnito (Ctrl + Shift + N)
 2. Ir a: https://admin.archivoenlinea.com
 3. Verificar que muestre v52.2.0
+
+### Archivos Actualizados en Servidor
+- ✅ `index.html` - Con script de detección y recarga automática
+- ✅ `actualizar.html` - Página de actualización visual
+- ✅ `version.json` - Versión 52.2.0
+- ✅ Todos los assets (JS, CSS) - Versión 52.2.0
+
+### Documentación Creada
+- ✅ `INSTRUCCIONES_ACTUALIZACION_V52.2.0.md` - Guía completa para usuarios
 
 ---
 
@@ -127,7 +171,13 @@ tar -czf dist-v52.2.0.tar.gz -C dist .
 scp -i credentials/AWS-ISSABEL.pem frontend/dist-v52.2.0.tar.gz ubuntu@100.28.198.249:/home/ubuntu/
 ```
 
-### 3. Desplegar en Servidor
+### 3. Desplegar en Servidor (DIRECTORIO CORRECTO)
+
+**IMPORTANTE:** Nginx está configurado para servir desde:
+```
+/home/ubuntu/consentimientos_aws/frontend/dist
+```
+
 ```bash
 # Crear directorio temporal
 ssh ubuntu@100.28.198.249 "mkdir -p /home/ubuntu/dist-temp"
@@ -136,13 +186,13 @@ ssh ubuntu@100.28.198.249 "mkdir -p /home/ubuntu/dist-temp"
 ssh ubuntu@100.28.198.249 "cd /home/ubuntu && tar -xzf dist-v52.2.0.tar.gz -C dist-temp"
 
 # Hacer backup
-ssh ubuntu@100.28.198.249 "sudo mkdir -p /var/www/html_backup_51.0.0 && sudo cp -r /var/www/html/* /var/www/html_backup_51.0.0/"
+ssh ubuntu@100.28.198.249 "sudo cp -r /home/ubuntu/consentimientos_aws/frontend/dist /home/ubuntu/consentimientos_aws/frontend/dist.backup.51.0.0"
 
-# Reemplazar archivos
-ssh ubuntu@100.28.198.249 "sudo rm -rf /var/www/html/* && sudo cp -r /home/ubuntu/dist-temp/* /var/www/html/"
+# Reemplazar archivos en el directorio CORRECTO
+ssh ubuntu@100.28.198.249 "sudo cp -r /home/ubuntu/dist-temp/* /home/ubuntu/consentimientos_aws/frontend/dist/"
 
 # Configurar permisos
-ssh ubuntu@100.28.198.249 "sudo chown -R www-data:www-data /var/www/html"
+ssh ubuntu@100.28.198.249 "sudo chown -R ubuntu:ubuntu /home/ubuntu/consentimientos_aws/frontend/dist"
 
 # Limpiar caché y reiniciar Nginx
 ssh ubuntu@100.28.198.249 "sudo rm -rf /var/cache/nginx/* && sudo systemctl reload nginx"

@@ -36,6 +36,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { CommonModule } from '../common/common.module';
 import { TenantsModule } from '../tenants/tenants.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { TenantsModule } from '../tenants/tenants.module';
     MailModule,
     CommonModule,
     forwardRef(() => TenantsModule),
+    ProfilesModule,
   ],
   controllers: [MedicalRecordsController, AdmissionsController],
   providers: [

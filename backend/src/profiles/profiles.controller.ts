@@ -19,6 +19,7 @@ import { CheckPermissionDto } from './dto/check-permission.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
 import { RequirePermission } from './decorators/require-permission.decorator';
+import { RequireSuperAdmin } from './decorators/require-super-admin.decorator';
 
 @ApiTags('Perfiles y Permisos')
 @ApiBearerAuth()
@@ -28,10 +29,10 @@ export class ProfilesController {
   constructor(private readonly profilesService: ProfilesService) {}
 
   @Post()
-  @RequirePermission('profiles', 'create')
-  @ApiOperation({ summary: 'Crear un nuevo perfil' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Crear un nuevo perfil (Solo Super Admin)' })
   @ApiResponse({ status: 201, description: 'Perfil creado exitosamente' })
-  @ApiResponse({ status: 403, description: 'Sin permisos' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async create(@Body() createProfileDto: CreateProfileDto, @Request() req) {
     return this.profilesService.create(
       createProfileDto,
@@ -42,27 +43,29 @@ export class ProfilesController {
   }
 
   @Get()
-  @RequirePermission('profiles', 'view')
-  @ApiOperation({ summary: 'Listar todos los perfiles' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Listar todos los perfiles (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Lista de perfiles' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async findAll(@Query('tenantId') tenantId?: string) {
     return this.profilesService.findAll(tenantId);
   }
 
   @Get(':id')
-  @RequirePermission('profiles', 'view')
-  @ApiOperation({ summary: 'Obtener un perfil por ID' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Obtener un perfil por ID (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Perfil encontrado' })
   @ApiResponse({ status: 404, description: 'Perfil no encontrado' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async findOne(@Param('id') id: string) {
     return this.profilesService.findOne(id);
   }
 
   @Patch(':id')
-  @RequirePermission('profiles', 'edit')
-  @ApiOperation({ summary: 'Actualizar un perfil' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Actualizar un perfil (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Perfil actualizado' })
-  @ApiResponse({ status: 403, description: 'No se pueden editar perfiles del sistema' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador o no se pueden editar perfiles del sistema' })
   @ApiResponse({ status: 404, description: 'Perfil no encontrado' })
   async update(
     @Param('id') id: string,
@@ -79,10 +82,10 @@ export class ProfilesController {
   }
 
   @Delete(':id')
-  @RequirePermission('profiles', 'delete')
-  @ApiOperation({ summary: 'Eliminar un perfil' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Eliminar un perfil (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Perfil eliminado' })
-  @ApiResponse({ status: 403, description: 'No se pueden eliminar perfiles del sistema' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador o no se pueden eliminar perfiles del sistema' })
   @ApiResponse({ status: 404, description: 'Perfil no encontrado' })
   async remove(@Param('id') id: string, @Request() req) {
     await this.profilesService.remove(
@@ -95,9 +98,10 @@ export class ProfilesController {
   }
 
   @Post('assign')
-  @RequirePermission('profiles', 'assign')
-  @ApiOperation({ summary: 'Asignar un perfil a un usuario' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Asignar un perfil a un usuario (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Perfil asignado exitosamente' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async assignToUser(@Body() assignProfileDto: AssignProfileDto, @Request() req) {
     return this.profilesService.assignToUser(
       assignProfileDto.profileId,
@@ -109,9 +113,10 @@ export class ProfilesController {
   }
 
   @Delete('revoke/:userId')
-  @RequirePermission('profiles', 'assign')
-  @ApiOperation({ summary: 'Revocar el perfil de un usuario' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Revocar el perfil de un usuario (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Perfil revocado exitosamente' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async revokeFromUser(@Param('userId') userId: string, @Request() req) {
     return this.profilesService.revokeFromUser(
       userId,
@@ -122,9 +127,10 @@ export class ProfilesController {
   }
 
   @Get(':id/audit')
-  @RequirePermission('profiles', 'view')
-  @ApiOperation({ summary: 'Obtener auditoría de un perfil' })
+  @RequireSuperAdmin()
+  @ApiOperation({ summary: 'Obtener auditoría de un perfil (Solo Super Admin)' })
   @ApiResponse({ status: 200, description: 'Auditoría del perfil' })
+  @ApiResponse({ status: 403, description: 'Se requiere ser super administrador' })
   async getAudit(@Param('id') id: string) {
     return this.profilesService.getProfileAudit(id);
   }

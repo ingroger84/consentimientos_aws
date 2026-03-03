@@ -19,9 +19,9 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { SearchClientDto } from './dto/search-client.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { TenantSlug } from '../common/decorators/tenant-slug.decorator';
 import { TenantsService } from '../tenants/tenants.service';
 
@@ -36,6 +36,7 @@ export class ClientsController {
     private readonly clientsService: ClientsService,
     @Inject(forwardRef(() => TenantsService))
     private readonly tenantsService: TenantsService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   /**
@@ -52,7 +53,7 @@ export class ClientsController {
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_CLIENTS)
+  @RequirePermission('clients', 'create')
   async create(
     @Body() createClientDto: CreateClientDto,
     @TenantSlug() tenantSlug: string,
@@ -77,7 +78,7 @@ export class ClientsController {
 
   @Get()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CLIENTS)
+  @RequirePermission('clients', 'view')
   async findAll(@TenantSlug() tenantSlug: string) {
     // Si no hay tenant slug, verificar si es super admin
     if (!tenantSlug) {
@@ -90,7 +91,7 @@ export class ClientsController {
 
   @Get('search')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CLIENTS)
+  @RequirePermission('clients', 'view')
   async search(
     @Query() searchDto: SearchClientDto,
     @TenantSlug() tenantSlug: string,
@@ -104,7 +105,7 @@ export class ClientsController {
 
   @Get('stats')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CLIENTS)
+  @RequirePermission('clients', 'view')
   async getStats(@TenantSlug() tenantSlug: string) {
     if (!tenantSlug) {
       throw new BadRequestException('No se pudo identificar el tenant. Asegúrate de acceder desde el subdominio correcto.');
@@ -115,7 +116,7 @@ export class ClientsController {
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CLIENTS)
+  @RequirePermission('clients', 'view')
   async findOne(@Param('id') id: string, @TenantSlug() tenantSlug: string) {
     if (!tenantSlug) {
       throw new BadRequestException('No se pudo identificar el tenant. Asegúrate de acceder desde el subdominio correcto.');
@@ -126,7 +127,7 @@ export class ClientsController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_CLIENTS)
+  @RequirePermission('clients', 'edit')
   async update(
     @Param('id') id: string,
     @Body() updateClientDto: UpdateClientDto,
@@ -141,7 +142,7 @@ export class ClientsController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_CLIENTS)
+  @RequirePermission('clients', 'delete')
   async remove(@Param('id') id: string, @TenantSlug() tenantSlug: string) {
     if (!tenantSlug) {
       throw new BadRequestException('No se pudo identificar el tenant. Asegúrate de acceder desde el subdominio correcto.');

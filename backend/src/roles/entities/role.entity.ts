@@ -14,6 +14,9 @@ export class Role extends BaseEntity {
   @Column({ unique: true })
   name: string;
 
+  @Column({ unique: true, length: 50 })
+  code: string;
+
   @Column({ type: 'enum', enum: RoleType })
   type: RoleType;
 

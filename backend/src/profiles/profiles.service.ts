@@ -13,6 +13,7 @@ import { PermissionAudit } from './entities/permission-audit.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { PermissionsCacheService } from './services/permissions-cache.service';
 
 @Injectable()
 export class ProfilesService {
@@ -27,7 +28,18 @@ export class ProfilesService {
     private auditRepository: Repository<PermissionAudit>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private readonly permissionsCache: PermissionsCacheService,
   ) {}
+
+  /**
+   * Verificar si un usuario es super administrador
+   */
+  private isSuperAdmin(user: User): boolean {
+    return (
+      user.role?.code === 'super_admin' ||
+      user.profile?.code === 'super_admin'
+    );
+  }
 
   /**
    * Crear un nuevo perfil
@@ -57,7 +69,7 @@ export class ProfilesService {
       (p) => p.module === '*' || p.actions.includes('*'),
     );
 
-    const isSuperAdmin = performingUser.role?.name === 'super_admin';
+    const isSuperAdmin = this.isSuperAdmin(performingUser);
 
     if (hasGlobalPermissions && !isSuperAdmin) {
       throw new ForbiddenException(
@@ -187,7 +199,7 @@ export class ProfilesService {
       throw new BadRequestException('Usuario no encontrado');
     }
 
-    const isSuperAdmin = performingUser.role?.name === 'super_admin';
+    const isSuperAdmin = this.isSuperAdmin(performingUser);
 
     // Validar permisos si se están actualizando
     if (updateProfileDto.permissions) {
@@ -231,6 +243,9 @@ export class ProfilesService {
 
     Object.assign(profile, updateProfileDto);
     const updatedProfile = await this.profileRepository.save(profile);
+
+    // Invalidar caché de todos los usuarios con este perfil
+    this.permissionsCache.invalidateProfile(id);
 
     // Auditar la actualización
     await this.auditRepository.save({
@@ -316,6 +331,9 @@ export class ProfilesService {
     user.profileId = profileId;
     const updatedUser = await this.userRepository.save(user);
 
+    // Invalidar caché de permisos del usuario
+    this.permissionsCache.invalidateUser(userId);
+
     // Auditar la asignación
     await this.auditRepository.save({
       profileId,
@@ -352,6 +370,9 @@ export class ProfilesService {
     user.profileId = null;
     const updatedUser = await this.userRepository.save(user);
 
+    // Invalidar caché de permisos del usuario
+    this.permissionsCache.invalidateUser(userId);
+
     // Auditar la revocación
     if (oldProfileId) {
       await this.auditRepository.save({
@@ -370,12 +391,21 @@ export class ProfilesService {
 
   /**
    * Verificar si un usuario tiene un permiso específico
+   * Con caché para optimizar rendimiento
    */
   async checkUserPermission(
     userId: string,
     moduleCode: string,
     action: string,
   ): Promise<boolean> {
+    // Intentar obtener del caché
+    const cacheKey = `${userId}:${moduleCode}:${action}`;
+    const cached = this.permissionsCache.get(cacheKey);
+    
+    if (cached !== null) {
+      return cached === 'true';
+    }
+
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['profile', 'role'],
@@ -386,17 +416,21 @@ export class ProfilesService {
     }
 
     // Super admin tiene todos los permisos
-    if (user.role?.name === 'super_admin') {
+    if (this.isSuperAdmin(user)) {
+      this.permissionsCache.set(cacheKey, ['true']);
       return true;
     }
 
     // Si no tiene perfil asignado, usar permisos del rol (legacy)
     if (!user.profile) {
-      // Aquí podrías implementar lógica de permisos basada en roles
+      this.permissionsCache.set(cacheKey, ['false']);
       return false;
     }
 
-    return user.profile.hasPermission(moduleCode, action);
+    const hasPermission = user.profile.hasPermission(moduleCode, action);
+    this.permissionsCache.set(cacheKey, [hasPermission ? 'true' : 'false']);
+    
+    return hasPermission;
   }
 
   /**

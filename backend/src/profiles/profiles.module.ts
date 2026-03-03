@@ -9,7 +9,14 @@ import { ModuleAction } from './entities/module-action.entity';
 import { PermissionAudit } from './entities/permission-audit.entity';
 import { User } from '../users/entities/user.entity';
 import { PermissionsGuard } from './guards/permissions.guard';
+import { PermissionsCacheService } from './services/permissions-cache.service';
 
+/**
+ * Módulo de Perfiles y Permisos
+ * 
+ * Gestiona perfiles de usuario, módulos del sistema y permisos
+ * Usa PermissionsCacheService para caché en memoria de permisos
+ */
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -21,7 +28,7 @@ import { PermissionsGuard } from './guards/permissions.guard';
     ]),
   ],
   controllers: [ProfilesController, ModulesController],
-  providers: [ProfilesService, PermissionsGuard],
-  exports: [ProfilesService, PermissionsGuard],
+  providers: [ProfilesService, PermissionsGuard, PermissionsCacheService],
+  exports: [ProfilesService, PermissionsGuard, PermissionsCacheService],
 })
 export class ProfilesModule {}

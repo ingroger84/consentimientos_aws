@@ -16,9 +16,9 @@ import {
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { MedicalRecordsService } from './medical-records.service';
 import { AnamnesisService } from './anamnesis.service';
 import { PhysicalExamService } from './physical-exam.service';
@@ -71,11 +71,12 @@ export class MedicalRecordsController {
     private readonly epicrisisService: EpicrisisService,
     private readonly medicalRecordDocumentsService: MedicalRecordDocumentsService,
     private readonly storageService: StorageService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'create')
   async create(
     @Body() createDto: CreateMedicalRecordDto,
     @Request() req: any,
@@ -97,22 +98,27 @@ export class MedicalRecordsController {
   // Endpoint para Super Admin: obtener todas las historias clínicas agrupadas por tenant
   @Get('all/grouped')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_GLOBAL_STATS)
+  @RequirePermission('dashboard', 'view_global_stats')
   async getAllGrouped(@Request() req: any) {
     return this.medicalRecordsService.getAllGroupedByTenant();
   }
 
   @Get('stats/overview')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
+  @RequirePermission('dashboard', 'view')
   async getStats(@Request() req: any) {
     return this.medicalRecordsService.getStatistics(req.user.tenantId);
   }
 
   @Get()
   async findAll(@Request() req: any, @Query() filters: any) {
-    // Si es Super Admin (no tiene tenant), puede ver todas las HC
-    const isSuperAdmin = !req.user.tenantId;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
     const tenantId = isSuperAdmin ? filters.tenantId : req.user.tenantId;
     
     return this.medicalRecordsService.findAll(tenantId, filters);
@@ -147,7 +153,7 @@ export class MedicalRecordsController {
 
   @Post(':id/close')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CLOSE_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'close')
   async close(@Param('id') id: string, @Request() req: any) {
     return this.medicalRecordsService.close(
       id,
@@ -160,7 +166,7 @@ export class MedicalRecordsController {
 
   @Post(':id/archive')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.ARCHIVE_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'archive')
   async archive(@Param('id') id: string, @Request() req: any) {
     return this.medicalRecordsService.archive(
       id,
@@ -173,7 +179,7 @@ export class MedicalRecordsController {
 
   @Post(':id/reopen')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.REOPEN_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'reopen')
   async reopen(@Param('id') id: string, @Request() req: any) {
     return this.medicalRecordsService.reopen(
       id,
@@ -186,10 +192,15 @@ export class MedicalRecordsController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'delete')
   async delete(@Param('id') id: string, @Request() req: any) {
-    // Si es Super Admin (no tiene tenant), puede eliminar cualquier HC
-    const isSuperAdmin = !req.user.tenantId;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
     const tenantId = isSuperAdmin ? null : req.user.tenantId;
     
     await this.medicalRecordsService.delete(
@@ -467,15 +478,20 @@ export class MedicalRecordsController {
 
   @Get(':id/pdf')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.PREVIEW_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'preview')
   async getMedicalRecordPdf(
     @Param('id') id: string,
     @Request() req: any,
     @Res() res: Response,
   ) {
     try {
-      // Detectar si es Super Admin (no tiene tenant)
-      const isSuperAdmin = !req.user.tenantId;
+      // Cargar usuario completo con relaciones
+      const user = await this.profilesService['userRepository'].findOne({
+        where: { id: req.user.id },
+        relations: ['profile', 'role', 'tenant'],
+      });
+      
+      const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
       
       let tenantId: string;
       let medicalRecord: any;
@@ -518,13 +534,18 @@ export class MedicalRecordsController {
 
   @Post(':id/send-email')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.SEND_EMAIL_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'send_email')
   async sendMedicalRecordEmail(
     @Param('id') id: string,
     @Request() req: any,
   ) {
-    // Detectar si es Super Admin (no tiene tenant)
-    const isSuperAdmin = !req.user.tenantId;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
     
     let tenantId: string;
     
@@ -813,7 +834,7 @@ export class MedicalRecordsController {
   }
   @Get('client/:clientId/active')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_MEDICAL_RECORDS)
+  @RequirePermission('medical_records', 'view')
   async findActiveByClient(
     @Param('clientId') clientId: string,
     @Request() req: any,

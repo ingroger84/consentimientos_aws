@@ -1,0 +1,355 @@
+import { Injectable, Inject } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { User } from '../../users/entities/user.entity';
+
+/**
+ * Servicio centralizado para gestión de permisos
+ * 
+ * Este servicio es la ÚNICA fuente de verdad para verificar permisos
+ * Implementa caché para optimizar rendimiento
+ */
+@Injectable()
+export class PermissionsService {
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+  ) {}
+
+  /**
+   * Verificar si un usuario es super administrador
+   * ÚNICA fuente de verdad para esta verificación
+   * 
+   * @param userId ID del usuario
+   * @returns true si es super admin, false en caso contrario
+   */
+  async isSuperAdmin(userId: string): Promise<boolean> {
+    const cacheKey = `user:${userId}:is_super_admin`;
+    
+    try {
+      // Intentar obtener del caché
+      const cached = await this.cacheManager.get<boolean>(cacheKey);
+      if (cached !== undefined) {
+        return cached;
+      }
+    } catch (error) {
+      // Si falla el caché, continuar sin él
+      console.warn('Cache error in isSuperAdmin:', error);
+    }
+
+    // Obtener de la base de datos
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile', 'role'],
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    // Verificar por perfil (preferido)
+    let isSuperAdmin = false;
+
+    // 1. Verificar por perfil con permisos globales
+    if (user.profile) {
+      isSuperAdmin = user.profile.permissions.some(
+        (p) => p.module === '*' && p.actions.includes('*'),
+      );
+    }
+
+    // 2. Verificar por nombre de perfil
+    if (!isSuperAdmin && user.profile?.name === 'Super Administrador') {
+      isSuperAdmin = true;
+    }
+
+    // 3. Verificar por rol (fallback para compatibilidad)
+    if (!isSuperAdmin && user.role) {
+      isSuperAdmin =
+        user.role.name === 'Super Administrador' ||
+        user.role.name === 'super_admin' ||
+        user.role.type === 'super_admin';
+    }
+
+    // 4. Verificar por ausencia de tenant (legacy)
+    if (!isSuperAdmin && !user.tenant) {
+      isSuperAdmin = true;
+    }
+
+    try {
+      // Guardar en caché por 5 minutos
+      await this.cacheManager.set(cacheKey, isSuperAdmin, 300000);
+    } catch (error) {
+      console.warn('Cache error in isSuperAdmin (set):', error);
+    }
+
+    return isSuperAdmin;
+  }
+
+  /**
+   * Verificar si un usuario tiene un permiso específico
+   * Con caché y fallback a roles legacy
+   * 
+   * @param userId ID del usuario
+   * @param module Código del módulo (ej: 'clients', 'profiles')
+   * @param action Acción (ej: 'view', 'create', 'edit', 'delete')
+   * @returns true si tiene el permiso, false en caso contrario
+   */
+  async hasPermission(
+    userId: string,
+    module: string,
+    action: string,
+  ): Promise<boolean> {
+    const cacheKey = `user:${userId}:permission:${module}:${action}`;
+    
+    try {
+      // Intentar obtener del caché
+      const cached = await this.cacheManager.get<boolean>(cacheKey);
+      if (cached !== undefined) {
+        return cached;
+      }
+    } catch (error) {
+      console.warn('Cache error in hasPermission:', error);
+    }
+
+    // Super admin tiene todos los permisos
+    if (await this.isSuperAdmin(userId)) {
+      try {
+        await this.cacheManager.set(cacheKey, true, 300000);
+      } catch (error) {
+        console.warn('Cache error in hasPermission (set):', error);
+      }
+      return true;
+    }
+
+    // Obtener usuario con perfil
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile', 'role'],
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    let hasPermission = false;
+
+    // 1. Verificar en perfil (preferido)
+    if (user.profile) {
+      hasPermission = user.profile.hasPermission(module, action);
+    }
+
+    // 2. Fallback a rol legacy (para compatibilidad)
+    if (!hasPermission && user.role?.permissions) {
+      const permissionString = `${module}:${action}`;
+      const permissionWildcard = `${module}:*`;
+      const globalPermission = '*:*';
+      
+      hasPermission =
+        user.role.permissions.includes(permissionString) ||
+        user.role.permissions.includes(permissionWildcard) ||
+        user.role.permissions.includes(globalPermission);
+    }
+
+    try {
+      // Guardar en caché por 5 minutos
+      await this.cacheManager.set(cacheKey, hasPermission, 300000);
+    } catch (error) {
+      console.warn('Cache error in hasPermission (set):', error);
+    }
+
+    return hasPermission;
+  }
+
+  /**
+   * Verificar si un usuario tiene al menos uno de los permisos especificados
+   * 
+   * @param userId ID del usuario
+   * @param permissions Array de permisos {module, action}
+   * @returns true si tiene al menos uno, false en caso contrario
+   */
+  async hasAnyPermission(
+    userId: string,
+    permissions: Array<{ module: string; action: string }>,
+  ): Promise<boolean> {
+    // Super admin tiene todos los permisos
+    if (await this.isSuperAdmin(userId)) {
+      return true;
+    }
+
+    // Verificar cada permiso
+    for (const permission of permissions) {
+      if (await this.hasPermission(userId, permission.module, permission.action)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Verificar si un usuario tiene todos los permisos especificados
+   * 
+   * @param userId ID del usuario
+   * @param permissions Array de permisos {module, action}
+   * @returns true si tiene todos, false en caso contrario
+   */
+  async hasAllPermissions(
+    userId: string,
+    permissions: Array<{ module: string; action: string }>,
+  ): Promise<boolean> {
+    // Super admin tiene todos los permisos
+    if (await this.isSuperAdmin(userId)) {
+      return true;
+    }
+
+    // Verificar cada permiso
+    for (const permission of permissions) {
+      if (!(await this.hasPermission(userId, permission.module, permission.action))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * Obtener todos los permisos de un usuario
+   * Para mostrar en UI o debugging
+   * 
+   * @param userId ID del usuario
+   * @returns Array de permisos en formato 'module:action'
+   */
+  async getUserPermissions(userId: string): Promise<string[]> {
+    const cacheKey = `user:${userId}:all_permissions`;
+    
+    try {
+      // Intentar obtener del caché
+      const cached = await this.cacheManager.get<string[]>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    } catch (error) {
+      console.warn('Cache error in getUserPermissions:', error);
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile', 'role'],
+    });
+
+    if (!user) {
+      return [];
+    }
+
+    let permissions: string[] = [];
+
+    // 1. Obtener de perfil (preferido)
+    if (user.profile) {
+      permissions = user.profile.getFlatPermissions();
+    }
+
+    // 2. Fallback a rol legacy
+    if (permissions.length === 0 && user.role?.permissions) {
+      permissions = user.role.permissions;
+    }
+
+    try {
+      // Guardar en caché por 5 minutos
+      await this.cacheManager.set(cacheKey, permissions, 300000);
+    } catch (error) {
+      console.warn('Cache error in getUserPermissions (set):', error);
+    }
+
+    return permissions;
+  }
+
+  /**
+   * Invalidar caché de permisos de un usuario
+   * Llamar cuando se actualiza el perfil o se asigna uno nuevo
+   * 
+   * @param userId ID del usuario
+   */
+  async invalidateUserPermissions(userId: string): Promise<void> {
+    try {
+      // Invalidar caché de super admin
+      await this.cacheManager.del(`user:${userId}:is_super_admin`);
+      
+      // Invalidar caché de todos los permisos
+      await this.cacheManager.del(`user:${userId}:all_permissions`);
+      
+      // Nota: Para invalidar permisos específicos necesitaríamos un patrón
+      // Esto depende de la implementación del cache manager
+      // Por ahora, los permisos específicos expirarán en 5 minutos
+    } catch (error) {
+      console.warn('Cache error in invalidateUserPermissions:', error);
+    }
+  }
+
+  /**
+   * Verificar si un usuario puede acceder a un tenant específico
+   * 
+   * @param userId ID del usuario
+   * @param tenantId ID del tenant
+   * @returns true si puede acceder, false en caso contrario
+   */
+  async canAccessTenant(userId: string, tenantId: string): Promise<boolean> {
+    // Super admin puede acceder a todos los tenants
+    if (await this.isSuperAdmin(userId)) {
+      return true;
+    }
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['tenant'],
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    // Verificar si el usuario pertenece al tenant
+    return user.tenant?.id === tenantId;
+  }
+
+  /**
+   * Obtener información resumida de permisos de un usuario
+   * Útil para debugging y auditoría
+   * 
+   * @param userId ID del usuario
+   * @returns Objeto con información de permisos
+   */
+  async getUserPermissionsInfo(userId: string): Promise<{
+    isSuperAdmin: boolean;
+    profileName: string | null;
+    roleName: string | null;
+    permissions: string[];
+    tenantId: string | null;
+  }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profile', 'role', 'tenant'],
+    });
+
+    if (!user) {
+      return {
+        isSuperAdmin: false,
+        profileName: null,
+        roleName: null,
+        permissions: [],
+        tenantId: null,
+      };
+    }
+
+    return {
+      isSuperAdmin: await this.isSuperAdmin(userId),
+      profileName: user.profile?.name || null,
+      roleName: user.role?.name || null,
+      permissions: await this.getUserPermissions(userId),
+      tenantId: user.tenant?.id || null,
+    };
+  }
+}

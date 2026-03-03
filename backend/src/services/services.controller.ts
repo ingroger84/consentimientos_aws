@@ -12,20 +12,23 @@ import { ServicesService } from './services.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 
 @Controller('services')
 @UseGuards(JwtAuthGuard)
 export class ServicesController {
-  constructor(private readonly servicesService: ServicesService) {}
+  constructor(
+    private readonly servicesService: ServicesService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_SERVICES)
+  @RequirePermission('services', 'create')
   create(@Body() createServiceDto: CreateServiceDto, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.servicesService.create(createServiceDto, tenantId);
@@ -33,7 +36,7 @@ export class ServicesController {
 
   @Get()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_SERVICES)
+  @RequirePermission('services', 'view')
   findAll(@CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.servicesService.findAll(tenantId);
@@ -41,7 +44,7 @@ export class ServicesController {
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_SERVICES)
+  @RequirePermission('services', 'view')
   findOne(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.servicesService.findOne(id, tenantId);
@@ -49,7 +52,7 @@ export class ServicesController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_SERVICES)
+  @RequirePermission('services', 'edit')
   update(
     @Param('id') id: string,
     @Body() updateServiceDto: UpdateServiceDto,
@@ -61,7 +64,7 @@ export class ServicesController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_SERVICES)
+  @RequirePermission('services', 'delete')
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.servicesService.remove(id, tenantId);

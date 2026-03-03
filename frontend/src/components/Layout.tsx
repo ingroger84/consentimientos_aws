@@ -52,7 +52,7 @@ interface NavItem {
 export default function Layout() {
   const { user, logout, setUser } = useAuthStore();
   const { settings } = useTheme();
-  const { hasPermission } = usePermissions();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -246,12 +246,15 @@ export default function Layout() {
       permission: 'view_roles'
     });
     
-    orgItems.push({
-      name: 'Perfiles',
-      href: '/profiles',
-      icon: Shield,
-      permission: 'view_roles'
-    });
+    // Perfiles solo para Super Admin
+    if (isSuperAdmin()) {
+      orgItems.push({
+        name: 'Perfiles',
+        href: '/profiles',
+        icon: Shield,
+        permission: 'super_admin' // Permiso especial para super admin
+      });
+    }
 
     if (orgItems.length > 0) {
       sections.push({

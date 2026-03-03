@@ -15,9 +15,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
 
@@ -26,11 +26,14 @@ import { User } from './entities/user.entity';
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_USERS)
+  @RequirePermission('users', 'create')
   @ApiOperation({ 
     summary: 'Crear usuario',
     description: 'Crea un nuevo usuario en el tenant actual. Requiere permiso CREATE_USERS.'
@@ -46,7 +49,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_USERS)
+  @RequirePermission('users', 'view')
   @ApiOperation({ 
     summary: 'Listar usuarios',
     description: 'Obtiene todos los usuarios del tenant actual. Super Admin ve todos los usuarios.'
@@ -64,7 +67,7 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_USERS)
+  @RequirePermission('users', 'view')
   @ApiOperation({ 
     summary: 'Obtener usuario por ID',
     description: 'Obtiene los detalles de un usuario específico'
@@ -81,7 +84,7 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_USERS)
+  @RequirePermission('users', 'edit')
   @ApiOperation({ 
     summary: 'Actualizar usuario',
     description: 'Actualiza los datos de un usuario existente'
@@ -103,7 +106,7 @@ export class UsersController {
 
   @Patch(':id/change-password')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CHANGE_PASSWORDS)
+  @RequirePermission('users', 'change_password')
   @ApiOperation({ 
     summary: 'Cambiar contraseña',
     description: 'Cambia la contraseña de un usuario'
@@ -125,7 +128,7 @@ export class UsersController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_USERS)
+  @RequirePermission('users', 'delete')
   @ApiOperation({ 
     summary: 'Eliminar usuario',
     description: 'Elimina un usuario del sistema'

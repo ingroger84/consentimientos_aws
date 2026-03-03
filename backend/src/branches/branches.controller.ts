@@ -12,20 +12,23 @@ import { BranchesService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 
 @Controller('branches')
 @UseGuards(JwtAuthGuard)
 export class BranchesController {
-  constructor(private readonly branchesService: BranchesService) {}
+  constructor(
+    private readonly branchesService: BranchesService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_BRANCHES)
+  @RequirePermission('branches', 'create')
   create(@Body() createBranchDto: CreateBranchDto, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.branchesService.create(createBranchDto, tenantId);
@@ -41,7 +44,7 @@ export class BranchesController {
 
   @Get('all')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_BRANCHES)
+  @RequirePermission('branches', 'view')
   findAllBranches(@CurrentUser() user: User) {
     // Endpoint para administración de sedes
     // Requiere permiso view_branches
@@ -53,7 +56,7 @@ export class BranchesController {
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_BRANCHES)
+  @RequirePermission('branches', 'view')
   findOne(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.branchesService.findOne(id, tenantId);
@@ -61,7 +64,7 @@ export class BranchesController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_BRANCHES)
+  @RequirePermission('branches', 'edit')
   update(
     @Param('id') id: string,
     @Body() updateBranchDto: UpdateBranchDto,
@@ -73,7 +76,7 @@ export class BranchesController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_BRANCHES)
+  @RequirePermission('branches', 'delete')
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.branchesService.remove(id, tenantId);

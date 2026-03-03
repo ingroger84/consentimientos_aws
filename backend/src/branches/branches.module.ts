@@ -5,9 +5,13 @@ import { BranchesController } from './branches.controller';
 import { Branch } from './entities/branch.entity';
 import { User } from '../users/entities/user.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Branch, User, Tenant])],
+  imports: [
+    TypeOrmModule.forFeature([Branch, User, Tenant]),
+    ProfilesModule,
+  ],
   controllers: [BranchesController],
   providers: [BranchesService],
   exports: [BranchesService],

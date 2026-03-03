@@ -15,9 +15,9 @@ import { ConsentsService } from './consents.service';
 import { CreateConsentDto } from './dto/create-consent.dto';
 import { SignConsentDto } from './dto/sign-consent.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { StorageService } from '../common/services/storage.service';
@@ -30,60 +30,61 @@ export class ConsentsController {
   constructor(
     private readonly consentsService: ConsentsService,
     private readonly storageService: StorageService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_CONSENTS)
+  @RequirePermission('consents', 'create')
   create(@Body() createConsentDto: CreateConsentDto, @CurrentUser() user: User) {
     return this.consentsService.create(createConsentDto, user);
   }
 
   @Get('stats/overview')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
+  @RequirePermission('dashboard', 'view')
   getStats(@CurrentUser() user?: User) {
     return this.consentsService.getStatistics(user);
   }
 
   @Get('all/grouped')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
+  @RequirePermission('dashboard', 'view')
   getAllGrouped(@CurrentUser() user?: User) {
     return this.consentsService.getAllGroupedByTenant(user);
   }
 
   @Get()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)
+  @RequirePermission('consents', 'view')
   findAll(@Query('search') search?: string, @CurrentUser() user?: User) {
     return this.consentsService.findAll(search, user);
   }
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)
+  @RequirePermission('consents', 'view')
   findOne(@Param('id') id: string) {
     return this.consentsService.findOne(id);
   }
 
   @Get(':id/pdf')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)
+  @RequirePermission('consents', 'view')
   async getPdf(@Param('id') id: string, @Res() res: Response) {
     return this.servePdf(id, 'procedure', res);
   }
 
   @Get(':id/pdf-data-treatment')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)
+  @RequirePermission('consents', 'view')
   async getDataTreatmentPdf(@Param('id') id: string, @Res() res: Response) {
     return this.servePdf(id, 'data-treatment', res);
   }
 
   @Get(':id/pdf-image-rights')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_CONSENTS)
+  @RequirePermission('consents', 'view')
   async getImageRightsPdf(@Param('id') id: string, @Res() res: Response) {
     return this.servePdf(id, 'image-rights', res);
   }
@@ -146,28 +147,28 @@ export class ConsentsController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_CONSENTS)
+  @RequirePermission('consents', 'create')
   update(@Param('id') id: string, @Body() updateConsentDto: CreateConsentDto) {
     return this.consentsService.update(id, updateConsentDto);
   }
 
   @Patch(':id/sign')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.SIGN_CONSENTS)
+  @RequirePermission('consents', 'sign')
   sign(@Param('id') id: string, @Body() signConsentDto: SignConsentDto) {
     return this.consentsService.sign(id, signConsentDto);
   }
 
   @Post(':id/resend-email')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.RESEND_CONSENT_EMAIL)
+  @RequirePermission('consents', 'resend_email')
   resendEmail(@Param('id') id: string) {
     return this.consentsService.sendConsentEmail(id);
   }
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_CONSENTS)
+  @RequirePermission('consents', 'delete')
   remove(@Param('id') id: string) {
     return this.consentsService.remove(id);
   }

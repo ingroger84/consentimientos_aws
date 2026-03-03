@@ -2,7 +2,16 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { ProfilesService } from '../profiles.service';
 import { PERMISSION_KEY } from '../decorators/require-permission.decorator';
+import { SUPER_ADMIN_KEY } from '../decorators/require-super-admin.decorator';
 
+/**
+ * Guard unificado para verificación de permisos
+ * Usa ProfilesService con caché en memoria
+ * 
+ * Soporta múltiples tipos de verificación:
+ * - @RequireSuperAdmin() - Solo super administradores
+ * - @RequirePermission(module, action) - Permiso específico
+ */
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
@@ -11,17 +20,6 @@ export class PermissionsGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Obtener los permisos requeridos del decorator
-    const requiredPermission = this.reflector.getAllAndOverride<{ module: string; action: string }>(
-      PERMISSION_KEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    // Si no hay permisos requeridos, permitir acceso
-    if (!requiredPermission) {
-      return true;
-    }
-
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
@@ -30,19 +28,52 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('Usuario no autenticado');
     }
 
-    // Verificar si el usuario tiene el permiso
-    const hasPermission = await this.profilesService.checkUserPermission(
-      user.id,
-      requiredPermission.module,
-      requiredPermission.action,
+    // 1. Verificar si requiere super admin
+    const requireSuperAdmin = this.reflector.getAllAndOverride<boolean>(
+      SUPER_ADMIN_KEY,
+      [context.getHandler(), context.getClass()],
     );
 
-    if (!hasPermission) {
-      throw new ForbiddenException(
-        `No tienes permiso para realizar esta acción (${requiredPermission.module}:${requiredPermission.action})`,
-      );
+    if (requireSuperAdmin) {
+      // Cargar usuario completo con relaciones
+      const fullUser = await this.profilesService['userRepository'].findOne({
+        where: { id: user.id },
+        relations: ['profile', 'role'],
+      });
+
+      if (!fullUser) {
+        throw new ForbiddenException('Usuario no encontrado');
+      }
+
+      const isSuperAdmin = this.profilesService['isSuperAdmin'](fullUser);
+      if (!isSuperAdmin) {
+        throw new ForbiddenException('Se requiere ser super administrador');
+      }
+      return true;
     }
 
+    // 2. Verificar permisos específicos
+    const requiredPermission = this.reflector.getAllAndOverride<{
+      module: string;
+      action: string;
+    }>(PERMISSION_KEY, [context.getHandler(), context.getClass()]);
+
+    if (requiredPermission) {
+      const hasPermission = await this.profilesService.checkUserPermission(
+        user.id,
+        requiredPermission.module,
+        requiredPermission.action,
+      );
+
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          `No tienes permiso para realizar esta acción (${requiredPermission.module}:${requiredPermission.action})`,
+        );
+      }
+      return true;
+    }
+
+    // Si no hay requisitos, permitir acceso
     return true;
   }
 }

@@ -10,6 +10,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { CommonModule } from '../common/common.module';
 import { ClientsModule } from '../clients/clients.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ClientsModule } from '../clients/clients.module';
     MailModule,
     CommonModule,
     ClientsModule,
+    ProfilesModule,
   ],
   controllers: [ConsentsController],
   providers: [ConsentsService, PdfService],

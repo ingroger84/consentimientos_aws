@@ -4,6 +4,7 @@ import { useAuthStore } from './store/authStore';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ToastContainer from './components/ui/ToastContainer';
 import ConfirmDialogContainer from './components/ui/ConfirmDialogContainer';
@@ -49,6 +50,7 @@ const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage')
 const ProfilesPage = lazy(() => import('./pages/ProfilesPage'));
 const CreateProfilePage = lazy(() => import('./pages/CreateProfilePage'));
 const ProfileDetailPage = lazy(() => import('./pages/ProfileDetailPage'));
+const UnauthorizedPage = lazy(() => import('./pages/UnauthorizedPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -143,6 +145,7 @@ function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/suspended" element={<SuspendedAccountPage />} />
             <Route path="/status" element={<SystemStatusPage />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />
@@ -158,10 +161,10 @@ function App() {
               <Route path="/medical-records/new" element={<CreateMedicalRecordPage />} />
               <Route path="/medical-records/:id" element={<ViewMedicalRecordPage />} />
               <Route path="/users" element={<UsersPage />} />
-              <Route path="/profiles" element={<ProfilesPage />} />
-              <Route path="/profiles/new" element={<CreateProfilePage />} />
-              <Route path="/profiles/:id" element={<ProfileDetailPage />} />
-              <Route path="/profiles/:id/edit" element={<CreateProfilePage />} />
+              <Route path="/profiles" element={<ProtectedRoute requireSuperAdmin><ProfilesPage /></ProtectedRoute>} />
+              <Route path="/profiles/new" element={<ProtectedRoute requireSuperAdmin><CreateProfilePage /></ProtectedRoute>} />
+              <Route path="/profiles/:id" element={<ProtectedRoute requireSuperAdmin><ProfileDetailPage /></ProtectedRoute>} />
+              <Route path="/profiles/:id/edit" element={<ProtectedRoute requireSuperAdmin><CreateProfilePage /></ProtectedRoute>} />
               <Route path="/branches" element={<BranchesPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/questions" element={<QuestionsPage />} />

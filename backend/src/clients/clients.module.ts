@@ -4,11 +4,13 @@ import { ClientsService } from './clients.service';
 import { ClientsController } from './clients.controller';
 import { Client } from './entities/client.entity';
 import { TenantsModule } from '../tenants/tenants.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Client]),
     forwardRef(() => TenantsModule),
+    ProfilesModule,
   ],
   controllers: [ClientsController],
   providers: [ClientsService],

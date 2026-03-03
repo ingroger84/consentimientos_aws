@@ -13,20 +13,23 @@ import { QuestionsService } from './questions.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../auth/guards/permissions.guard';
-import { RequirePermissions } from '../auth/decorators/permissions.decorator';
-import { PERMISSIONS } from '../auth/constants/permissions';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequirePermission } from '../profiles/decorators/require-permission.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 
 @Controller('questions')
 @UseGuards(JwtAuthGuard)
 export class QuestionsController {
-  constructor(private readonly questionsService: QuestionsService) {}
+  constructor(
+    private readonly questionsService: QuestionsService,
+    private readonly profilesService: ProfilesService,
+  ) {}
 
   @Post()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.CREATE_QUESTIONS)
+  @RequirePermission('questions', 'create')
   create(@Body() createQuestionDto: CreateQuestionDto, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.questionsService.create(createQuestionDto, tenantId);
@@ -34,7 +37,7 @@ export class QuestionsController {
 
   @Get()
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_QUESTIONS)
+  @RequirePermission('questions', 'view')
   findAll(@Query('serviceId') serviceId?: string, @CurrentUser() user?: User) {
     const tenantId = user?.tenant?.id;
     if (serviceId) {
@@ -45,7 +48,7 @@ export class QuestionsController {
 
   @Get(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.VIEW_QUESTIONS)
+  @RequirePermission('questions', 'view')
   findOne(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.questionsService.findOne(id, tenantId);
@@ -53,7 +56,7 @@ export class QuestionsController {
 
   @Patch(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.EDIT_QUESTIONS)
+  @RequirePermission('questions', 'edit')
   update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.questionsService.update(id, updateQuestionDto, tenantId);
@@ -61,7 +64,7 @@ export class QuestionsController {
 
   @Delete(':id')
   @UseGuards(PermissionsGuard)
-  @RequirePermissions(PERMISSIONS.DELETE_QUESTIONS)
+  @RequirePermission('questions', 'delete')
   remove(@Param('id') id: string, @CurrentUser() user: User) {
     const tenantId = user.tenant?.id;
     return this.questionsService.remove(id, tenantId);

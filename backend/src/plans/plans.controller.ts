@@ -3,9 +3,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam } 
 import { Request } from 'express';
 import { PlansService } from './plans.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { RoleType } from '../roles/entities/role.entity';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequireSuperAdmin } from '../profiles/decorators/require-super-admin.decorator';
+import { ProfilesService } from '../profiles/profiles.service';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { UpdatePlanPricingDto } from './dto/update-plan-pricing.dto';
 import { GeoDetectionService } from '../common/services/geo-detection.service';
@@ -15,6 +15,7 @@ export class PlansController {
   constructor(
     private readonly plansService: PlansService,
     private readonly geoDetectionService: GeoDetectionService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   // ==================== ENDPOINTS DE GESTIÓN DE PRECIOS POR REGIÓN ====================
@@ -24,8 +25,8 @@ export class PlansController {
    * Obtiene todas las regiones disponibles
    */
   @Get('regions/available')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   async getAvailableRegions() {
     return this.plansService.getAvailableRegions();
   }
@@ -34,15 +35,15 @@ export class PlansController {
    * Obtiene todos los precios de todos los planes agrupados por región
    */
   @Get('pricing/all')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   async getAllPlansPricing() {
     return this.plansService.getAllPlansPricing();
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   findAll() {
     return this.plansService.findAll();
   }
@@ -112,8 +113,8 @@ export class PlansController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   findOne(@Param('id') id: string) {
     return this.plansService.findOne(id);
   }
@@ -122,15 +123,15 @@ export class PlansController {
    * Obtiene los precios de un plan específico para todas las regiones
    */
   @Get(':id/pricing')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   async getPlanPricing(@Param('id') id: string) {
     return this.plansService.getPlanPricingByRegion(id);
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   update(@Param('id') id: string, @Body() updatePlanDto: UpdatePlanDto) {
     return this.plansService.update(id, updatePlanDto);
   }
@@ -139,8 +140,8 @@ export class PlansController {
    * Actualiza el precio de un plan para una región específica
    */
   @Put(':id/pricing/:region')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleType.SUPER_ADMIN)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequireSuperAdmin()
   async updatePlanPricing(
     @Param('id') planId: string,
     @Param('region') region: string,

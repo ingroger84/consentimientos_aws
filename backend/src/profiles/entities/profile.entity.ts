@@ -25,6 +25,9 @@ export class Profile {
   @Column({ length: 100 })
   name: string;
 
+  @Column({ unique: true, length: 50 })
+  code: string;
+
   @Column({ type: 'text', nullable: true })
   description: string;
 

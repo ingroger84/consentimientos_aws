@@ -19,23 +19,24 @@ import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { CreateTaxConfigDto } from './dto/create-tax-config.dto';
 import { UpdateTaxConfigDto } from './dto/update-tax-config.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
+import { PermissionsGuard } from '../profiles/guards/permissions.guard';
+import { RequireSuperAdmin } from '../profiles/decorators/require-super-admin.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { RoleType } from '../roles/entities/role.entity';
+import { ProfilesService } from '../profiles/profiles.service';
 import { InvoiceStatus } from './entities/invoice.entity';
 
 @Controller('invoices')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class InvoicesController {
   constructor(
     private readonly invoicesService: InvoicesService,
     private readonly invoicePdfService: InvoicePdfService,
     private readonly taxConfigService: TaxConfigService,
+    private readonly profilesService: ProfilesService,
   ) {}
 
   @Post()
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async create(@Body() createInvoiceDto: CreateInvoiceDto) {
     return await this.invoicesService.create(createInvoiceDto);
   }
@@ -48,9 +49,14 @@ export class InvoicesController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    // Si no es Super Admin, solo puede ver facturas de su tenant
-    const userTenantId = req.user.tenant?.id;
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const userTenantId = user.tenant?.id;
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
 
     const filters: any = {};
 
@@ -81,7 +87,7 @@ export class InvoicesController {
    * Crear configuración de impuesto
    */
   @Post('tax-configs')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async createTaxConfig(@Body() createTaxConfigDto: CreateTaxConfigDto) {
     return await this.taxConfigService.create(createTaxConfigDto);
   }
@@ -90,7 +96,7 @@ export class InvoicesController {
    * Obtener todas las configuraciones de impuestos
    */
   @Get('tax-configs')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async getAllTaxConfigs() {
     return await this.taxConfigService.findAll();
   }
@@ -115,7 +121,7 @@ export class InvoicesController {
    * Obtener una configuración de impuesto
    */
   @Get('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async getTaxConfig(@Param('id') id: string) {
     return await this.taxConfigService.findOne(id);
   }
@@ -124,7 +130,7 @@ export class InvoicesController {
    * Actualizar configuración de impuesto
    */
   @Patch('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async updateTaxConfig(
     @Param('id') id: string,
     @Body() updateTaxConfigDto: UpdateTaxConfigDto,
@@ -136,7 +142,7 @@ export class InvoicesController {
    * Eliminar configuración de impuesto
    */
   @Delete('tax-configs/:id')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async deleteTaxConfig(@Param('id') id: string) {
     await this.taxConfigService.remove(id);
     return { message: 'Configuración de impuesto eliminada correctamente' };
@@ -146,7 +152,7 @@ export class InvoicesController {
    * Establecer impuesto por defecto
    */
   @Patch('tax-configs/:id/set-default')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async setDefaultTaxConfig(@Param('id') id: string) {
     return await this.taxConfigService.setDefault(id);
   }
@@ -177,7 +183,7 @@ export class InvoicesController {
   }
 
   @Get('overdue')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async findOverdue() {
     return await this.invoicesService.findOverdue();
   }
@@ -186,9 +192,14 @@ export class InvoicesController {
   async findOne(@Request() req, @Param('id') id: string) {
     const invoice = await this.invoicesService.findOne(id);
 
-    // Verificar permisos
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
-    const userTenantId = req.user.tenant?.id;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
+    const userTenantId = user.tenant?.id;
 
     if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
       throw new Error('No tienes permisos para ver esta factura');
@@ -198,25 +209,25 @@ export class InvoicesController {
   }
 
   @Patch(':id/mark-as-paid')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async markAsPaid(@Param('id') id: string) {
     return await this.invoicesService.markAsPaid(id);
   }
 
   @Patch(':id/cancel')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async cancel(@Param('id') id: string, @Body('reason') reason?: string) {
     return await this.invoicesService.cancel(id, reason);
   }
 
   @Get('stats')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async getStats() {
     return await this.invoicesService.getInvoiceStats();
   }
 
   @Get('by-status/:status')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async getByStatus(@Param('status') status: InvoiceStatus) {
     return await this.invoicesService.getInvoicesByStatus(status);
   }
@@ -225,9 +236,14 @@ export class InvoicesController {
   async resendEmail(@Request() req, @Param('id') id: string) {
     const invoice = await this.invoicesService.findOne(id);
 
-    // Verificar permisos
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
-    const userTenantId = req.user.tenant?.id;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
+    const userTenantId = user.tenant?.id;
 
     if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
       throw new Error('No tienes permisos para reenviar esta factura');
@@ -244,9 +260,14 @@ export class InvoicesController {
   async createPaymentLink(@Request() req, @Param('id') id: string) {
     const invoice = await this.invoicesService.findOne(id);
 
-    // Verificar permisos
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
-    const userTenantId = req.user.tenant?.id;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
+    const userTenantId = user.tenant?.id;
 
     if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
       throw new Error('No tienes permisos para crear un link de pago para esta factura');
@@ -262,7 +283,7 @@ export class InvoicesController {
   }
 
   @Get('tenant/:tenantId')
-  @Roles(RoleType.SUPER_ADMIN)
+  @RequireSuperAdmin()
   async findByTenant(@Param('tenantId') tenantId: string) {
     return await this.invoicesService.findByTenant(tenantId);
   }
@@ -274,9 +295,14 @@ export class InvoicesController {
   async downloadPdf(@Request() req, @Param('id') id: string, @Res() res: Response) {
     const invoice = await this.invoicesService.findOne(id);
 
-    // Verificar permisos
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
-    const userTenantId = req.user.tenant?.id;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
+    const userTenantId = user.tenant?.id;
 
     if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
       throw new Error('No tienes permisos para descargar esta factura');
@@ -336,9 +362,14 @@ export class InvoicesController {
   async previewPdf(@Request() req, @Param('id') id: string, @Res() res: Response) {
     const invoice = await this.invoicesService.findOne(id);
 
-    // Verificar permisos
-    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
-    const userTenantId = req.user.tenant?.id;
+    // Cargar usuario completo con relaciones
+    const user = await this.profilesService['userRepository'].findOne({
+      where: { id: req.user.id },
+      relations: ['profile', 'role', 'tenant'],
+    });
+    
+    const isSuperAdmin = this.profilesService['isSuperAdmin'](user);
+    const userTenantId = user.tenant?.id;
 
     if (!isSuperAdmin && invoice.tenantId !== userTenantId) {
       throw new Error('No tienes permisos para ver esta factura');
