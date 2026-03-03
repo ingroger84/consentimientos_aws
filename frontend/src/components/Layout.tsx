@@ -357,7 +357,14 @@ export default function Layout() {
   const filteredSections = navigationSections
     .map(section => ({
       ...section,
-      items: section.items.filter(item => hasPermission(item.permission))
+      items: section.items.filter(item => {
+        // Permiso especial para super admin
+        if (item.permission === 'super_admin') {
+          return isSuperAdmin();
+        }
+        // Permisos normales
+        return hasPermission(item.permission);
+      })
     }))
     .filter(section => section.items.length > 0);
 

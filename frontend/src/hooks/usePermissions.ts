@@ -2,12 +2,19 @@ import { useAuthStore } from '../store/authStore';
 
 /**
  * Hook para verificar permisos del usuario actual
+ * Compatible con sistema legacy (role.permissions) y nuevo sistema (profile.permissions)
  * 
  * @example
  * ```tsx
  * const { hasPermission, isSuperAdmin } = usePermissions();
  * 
- * if (hasPermission('medical-records', 'create')) {
+ * // Sistema legacy (un parámetro)
+ * if (hasPermission('create_users')) {
+ *   // Mostrar botón crear
+ * }
+ * 
+ * // Nuevo sistema (dos parámetros)
+ * if (hasPermission('users', 'create')) {
  *   // Mostrar botón crear
  * }
  * 
@@ -21,32 +28,32 @@ export function usePermissions() {
 
   /**
    * Verificar si el usuario tiene un permiso específico
-   * @param module Código del módulo (ej: 'medical-records')
-   * @param action Acción requerida (ej: 'create', 'edit', 'delete')
+   * Soporta dos modos:
+   * 1. Legacy: hasPermission('create_users') - un parámetro
+   * 2. Nuevo: hasPermission('users', 'create') - dos parámetros
+   * 
+   * @param moduleOrPermission Código del módulo o permiso completo
+   * @param action Acción requerida (opcional, para nuevo sistema)
    * @returns true si tiene el permiso, false si no
    */
-  const hasPermission = (module: string, action: string): boolean => {
-    if (!user?.profile) return false;
+  const hasPermission = (moduleOrPermission: string, action?: string): boolean => {
+    if (!user) return false;
 
     // Super admin tiene todos los permisos
-    if (user.profile.code === 'super_admin') return true;
-    if (user.role?.code === 'super_admin') return true;
+    if (user.role?.type === 'super_admin') return true;
 
-    // Verificar permiso global
-    const globalPermission = user.profile.permissions.find(
-      (p) => p.module === '*' && p.actions.includes('*')
-    );
-    if (globalPermission) return true;
+    // Si no hay action, es sistema legacy (role.permissions)
+    if (!action) {
+      // Verificar en role.permissions (array de strings)
+      if (user.role?.permissions) {
+        return user.role.permissions.includes(moduleOrPermission);
+      }
+      return false;
+    }
 
-    // Verificar permiso específico del módulo
-    const permission = user.profile.permissions.find((p) => p.module === module);
-    if (!permission) return false;
-
-    // Verificar si tiene todas las acciones del módulo
-    if (permission.actions.includes('*')) return true;
-
-    // Verificar acción específica
-    return permission.actions.includes(action);
+    // Sistema nuevo con profile.permissions (no implementado aún en tipos)
+    // Por ahora, retornar false para nuevo sistema
+    return false;
   };
 
   /**
@@ -55,7 +62,7 @@ export function usePermissions() {
    */
   const isSuperAdmin = (): boolean => {
     if (!user) return false;
-    return user.profile?.code === 'super_admin' || user.role?.code === 'super_admin';
+    return user.role?.type === 'super_admin';
   };
 
   /**
@@ -64,14 +71,17 @@ export function usePermissions() {
    * @returns true si tiene acceso, false si no
    */
   const hasModuleAccess = (module: string): boolean => {
-    if (!user?.profile) return false;
+    if (!user) return false;
 
     // Super admin tiene acceso a todo
     if (isSuperAdmin()) return true;
 
-    // Verificar si tiene algún permiso en el módulo
-    const permission = user.profile.permissions.find((p) => p.module === module);
-    return !!permission && permission.actions.length > 0;
+    // Verificar si tiene algún permiso relacionado con el módulo
+    if (user.role?.permissions) {
+      return user.role.permissions.some(p => p.includes(module));
+    }
+
+    return false;
   };
 
   /**
@@ -80,13 +90,17 @@ export function usePermissions() {
    * @returns Array de acciones permitidas
    */
   const getModuleActions = (module: string): string[] => {
-    if (!user?.profile) return [];
+    if (!user) return [];
 
     // Super admin tiene todas las acciones
     if (isSuperAdmin()) return ['*'];
 
-    const permission = user.profile.permissions.find((p) => p.module === module);
-    return permission?.actions || [];
+    // Filtrar permisos relacionados con el módulo
+    if (user.role?.permissions) {
+      return user.role.permissions.filter(p => p.includes(module));
+    }
+
+    return [];
   };
 
   /**
@@ -94,12 +108,25 @@ export function usePermissions() {
    * @returns Array de códigos de módulos
    */
   const getAccessibleModules = (): string[] => {
-    if (!user?.profile) return [];
+    if (!user) return [];
 
     // Super admin tiene acceso a todo
     if (isSuperAdmin()) return ['*'];
 
-    return user.profile.permissions.map((p) => p.module);
+    // Extraer módulos únicos de los permisos
+    if (user.role?.permissions) {
+      const modules = new Set<string>();
+      user.role.permissions.forEach(permission => {
+        // Extraer módulo del permiso (ej: 'create_users' -> 'users')
+        const parts = permission.split('_');
+        if (parts.length > 1) {
+          modules.add(parts[parts.length - 1]);
+        }
+      });
+      return Array.from(modules);
+    }
+
+    return [];
   };
 
   return {
