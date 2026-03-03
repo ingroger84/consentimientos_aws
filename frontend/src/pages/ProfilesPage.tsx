@@ -4,12 +4,14 @@ import { Profile } from '../types/profile.types';
 import profilesService from '../services/profiles.service';
 import ProfileCard from '../components/profiles/ProfileCard';
 import { useAuthStore } from '../store/authStore';
+import { usePermissions } from '../hooks/usePermissions';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 
 export default function ProfilesPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { isSuperAdmin } = usePermissions();
   const toast = useToast();
   const confirm = useConfirm();
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -34,9 +36,15 @@ export default function ProfilesPage() {
   };
 
   const handleDelete = async (profile: Profile) => {
+    // Validar que no sea un perfil del sistema
+    if (profile.isSystem) {
+      toast.error('No se pueden eliminar perfiles del sistema');
+      return;
+    }
+
     const confirmed = await confirm({
       title: 'Eliminar perfil',
-      message: `¿Estás seguro de que deseas eliminar el perfil "${profile.name}"?`,
+      message: `¿Estás seguro de que deseas eliminar el perfil "${profile.name}"? Esta acción no se puede deshacer.`,
       confirmText: 'Eliminar',
       cancelText: 'Cancelar',
       type: 'danger',
@@ -88,6 +96,31 @@ export default function ProfilesPage() {
           <span>Crear perfil</span>
         </button>
       </div>
+
+      {/* Info Banner for Super Admin */}
+      {isSuperAdmin() && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-start space-x-3">
+            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                Permisos de Super Administrador
+              </h3>
+              <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                Como Super Admin, puedes:
+              </p>
+              <ul className="mt-2 text-sm text-blue-700 dark:text-blue-300 list-disc list-inside space-y-1">
+                <li>Crear perfiles personalizados con permisos específicos</li>
+                <li>Editar todos los perfiles (incluyendo los del sistema)</li>
+                <li>Eliminar perfiles personalizados (los del sistema están protegidos)</li>
+                <li>Asignar perfiles a usuarios desde la gestión de usuarios</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex space-x-2">
