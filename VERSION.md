@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 41.1.1
+## Versión Actual: 41.1.2
 **Fecha:** 2026-03-14
 **Tipo de Cambio:** PATCH
 
@@ -18,11 +18,11 @@
 
 ## Historial de Versiones
 
+### 41.1.2 - 2026-03-14 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 41.1.1 - 2026-03-14 [PATCH]
 - Documentación: 2 archivo(s) modificado(s)
-
-### 41.1.0 - 2026-03-14 [MINOR]
-- Backend: 1 archivo(s) modificado(s)
 
 ---
 
