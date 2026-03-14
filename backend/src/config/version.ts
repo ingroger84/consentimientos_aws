@@ -8,9 +8,9 @@
  * - PATCH: Correcciones y mejoras
  */
 export const APP_VERSION = {
-  version: '41.1.0',
+  version: '41.1.1',
   date: '2026-03-14',
-  fullVersion: '41.1.0 - 2026-03-14',
+  fullVersion: '41.1.1 - 2026-03-14',
   buildDate: new Date('2026-03-14').toISOString(),
 } as const;
 

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Sistema V41.1.0 - Producción</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .test-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .test-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .test-item p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .test-item ul {
+            margin-left: 20px;
+            color: #666;
+        }
+
+        .test-item li {
+            margin-bottom: 5px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .status.pending {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .button.secondary {
+            background: #6c757d;
+        }
+
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert.info {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+        }
+
+        .alert.warning {
+            background: #fff3cd;
+            border-left: 4px solid #856404;
+            color: #856404;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            border-left: 4px solid #155724;
+            color: #155724;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checklist li:before {
+            content: "☐";
+            font-size: 1.5em;
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Verificación Sistema V41.1.0</h1>
+            <p>Servidor de Producción - AWS DatAgree</p>
+            <p><strong>Fecha:</strong> 2026-03-14</p>
+        </div>
+
+        <div class="card">
+            <h2>📋 Estado del Despliegue</h2>
+            <div class="alert info">
+                <strong>ℹ️ Información:</strong> Este documento te ayudará a verificar que el despliegue de v41.1.0 fue exitoso.
+            </div>
+            <div class="test-item">
+                <h3>1. Verificar Backend en PM2</h3>
+                <p>Conecta al servidor y verifica que el backend está corriendo:</p>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 "pm2 list"</div>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>Proceso "datagree" con status: <strong>online</strong></li>
+                    <li>Sin errores en la columna "status"</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>2. Verificar Versión Desplegada</h3>
+                <p>Verifica que la versión en producción es 41.1.0:</p>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 "cat /home/ubuntu/consentimientos_aws/backend/package.json | grep version"</div>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>"version": "41.1.0"</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>3. Verificar Logs del Backend</h3>
+                <p>Revisa los logs para asegurarte de que no hay errores:</p>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 "pm2 logs datagree --lines 50 --nostream"</div>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>Sin errores en rojo</li>
+                    <li>Mensaje: "Application is running on: http://[::]:3000"</li>
+                    <li>Sin errores de conexión a base de datos</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Verificación de Base de Datos</h2>
+            <div class="alert warning">
+                <strong>⚠️ Importante:</strong> Verifica que las tablas de perfiles fueron eliminadas correctamente.
+            </div>
+
+            <div class="test-item">
+                <h3>4. Verificar Eliminación de Tablas de Perfiles</h3>
+                <p>Conecta a PostgreSQL y verifica que las tablas NO existen:</p>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249
+PGPASSWORD='DataGree2026!Secure' psql -h localhost -U datagree_admin -d consentimientos -c "\dt profiles"
+PGPASSWORD='DataGree2026!Secure' psql -h localhost -U datagree_admin -d consentimientos -c "\dt system_modules"
+PGPASSWORD='DataGree2026!Secure' psql -h localhost -U datagree_admin -d consentimientos -c "\dt module_actions"
+PGPASSWORD='DataGree2026!Secure' psql -h localhost -U datagree_admin -d consentimientos -c "\dt permission_audit"</div>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>Mensaje: "Did not find any relation named..."</li>
+                    <li>Las tablas NO deben existir</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>5. Verificar Columna profile_id Eliminada</h3>
+                <p>Verifica que la columna profile_id fue eliminada de la tabla users:</p>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249
+PGPASSWORD='DataGree2026!Secure' psql -h localhost -U datagree_admin -d consentimientos -c "\d users"</div>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>La columna "profile_id" NO debe aparecer en la lista</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🌐 Pruebas en el Navegador</h2>
+            <div class="alert success">
+                <strong>✅ Pruebas funcionales:</strong> Verifica que todas las funcionalidades principales funcionan correctamente.
+            </div>
+
+            <div class="test-item">
+                <h3>6. Probar Login</h3>
+                <p>Abre el navegador y prueba el login:</p>
+                <a href="https://admin.archivoenlinea.com" target="_blank" class="button">Abrir Sistema</a>
+                <p><strong>Pasos:</strong></p>
+                <ul>
+                    <li>Iniciar sesión con usuario Super Admin</li>
+                    <li>Verificar que el login funciona correctamente</li>
+                    <li>Verificar que NO aparece el menú "Perfiles"</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>7. Probar Crear Historia Clínica</h3>
+                <p><strong>Pasos:</strong></p>
+                <ul>
+                    <li>Ir a "Historias Clínicas"</li>
+                    <li>Hacer clic en "Nueva Historia Clínica"</li>
+                    <li>Buscar un cliente</li>
+                    <li>Llenar el formulario</li>
+                    <li>Seleccionar tipo de admisión</li>
+                    <li>Guardar</li>
+                </ul>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>La HC se crea correctamente</li>
+                    <li>Se abre la HC sin errores</li>
+                    <li>La primera admisión se crea automáticamente</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>8. Probar Crear Admisión</h3>
+                <p><strong>Pasos:</strong></p>
+                <ul>
+                    <li>Abrir una HC existente</li>
+                    <li>Ir a la pestaña "Admisiones"</li>
+                    <li>Hacer clic en "Nueva Admisión"</li>
+                    <li>Seleccionar tipo de admisión</li>
+                    <li>Ingresar motivo</li>
+                    <li>Guardar</li>
+                </ul>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>La admisión se crea correctamente</li>
+                    <li>Aparece en la lista de admisiones</li>
+                    <li>Sin errores en consola</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+
+            <div class="test-item">
+                <h3>9. Probar Aislamiento de Tenants</h3>
+                <p><strong>Pasos:</strong></p>
+                <ul>
+                    <li>Como Super Admin: Verificar que ves datos de TODOS los tenants</li>
+                    <li>Como usuario de tenant: Verificar que SOLO ves datos de TU tenant</li>
+                </ul>
+                <p><strong>Resultado esperado:</strong></p>
+                <ul>
+                    <li>Super Admin: Acceso completo a todos los datos</li>
+                    <li>Usuario de tenant: Acceso limitado a su tenant</li>
+                </ul>
+                <span class="status pending">⏳ Pendiente</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>✅ Checklist Final</h2>
+            <p>Marca cada item cuando lo hayas verificado:</p>
+            <ul class="checklist">
+                <li>Backend corriendo en PM2 (status: online)</li>
+                <li>Versión en package.json: 41.1.0</li>
+                <li>Sin errores en logs de PM2</li>
+                <li>Tablas de perfiles eliminadas (profiles, system_modules, etc.)</li>
+                <li>Columna profile_id eliminada de tabla users</li>
+                <li>Login funciona correctamente</li>
+                <li>NO aparece menú "Perfiles"</li>
+                <li>Puedes crear historias clínicas</li>
+                <li>Puedes crear admisiones</li>
+                <li>Aislamiento de tenants funciona correctamente</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🆘 Si Algo Sale Mal</h2>
+            <div class="alert warning">
+                <strong>⚠️ Restaurar Backup:</strong> Si encuentras problemas, puedes restaurar el backup creado durante el despliegue.
+            </div>
+            <div class="test-item">
+                <h3>Restaurar Backup</h3>
+                <div class="code-block">ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249
+cd /home/ubuntu/consentimientos_aws
+ls -la | grep backend-backup
+rm -rf backend/dist
+cp -r backend-backup-v41-YYYYMMDD-HHMMSS/dist backend/
+pm2 restart datagree
+pm2 logs datagree --lines 50</div>
+                <p><strong>Nota:</strong> Reemplaza YYYYMMDD-HHMMSS con la fecha del backup que quieres restaurar.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>📅 Última actualización: 2026-03-14</p>
+            <p>🔧 Versión: 41.1.0</p>
+            <p>✅ Sistema restaurado sin perfiles - HC y admisiones funcionando perfectamente</p>
+        </div>
+    </div>
+</body>
+</html>
