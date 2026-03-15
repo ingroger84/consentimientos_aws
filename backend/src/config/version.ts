@@ -1,6 +1,6 @@
 /**
  * Configuración de versión de la aplicación
- * Actualizado automáticamente: 2026-03-14
+ * Actualizado automáticamente: 2026-03-15
  * 
  * Formato: MAJOR.MINOR.PATCH
  * - MAJOR: Cambios incompatibles (breaking changes)
@@ -8,10 +8,10 @@
  * - PATCH: Correcciones y mejoras
  */
 export const APP_VERSION = {
-  version: '41.1.3',
-  date: '2026-03-14',
-  fullVersion: '41.1.3 - 2026-03-14',
-  buildDate: new Date('2026-03-14').toISOString(),
+  version: '41.1.4',
+  date: '2026-03-15',
+  fullVersion: '41.1.4 - 2026-03-15',
+  buildDate: new Date('2026-03-15').toISOString(),
 } as const;
 
 export const getAppVersion = () => APP_VERSION.fullVersion;
