@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 41.1.5
-**Fecha:** 2026-03-15
-**Tipo de Cambio:** PATCH
+## Versión Actual: 76.0.0
+**Fecha:** 2026-03-27
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,12 +18,13 @@
 
 ## Historial de Versiones
 
+### 76.0.0 - 2026-03-27 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 3 archivo(s) modificado(s)
+
 ### 41.1.5 - 2026-03-15 [PATCH]
 - Backend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
-
-### 41.1.4 - 2026-03-15 [PATCH]
-- Backend: 1 archivo(s) modificado(s)
 
 ---
 

@@ -7,7 +7,6 @@ import { useSessionCheck } from '@/hooks/useSessionCheck';
 import { getResourceUrl } from '@/utils/api-url';
 import { getAppVersion } from '@/config/version';
 import PaymentReminderBanner from '@/components/billing/PaymentReminderBanner';
-import ResourceLimitNotifications from '@/components/ResourceLimitNotifications';
 import {
   FileText,
   Users,
@@ -31,6 +30,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronRight,
+  Database,
 } from 'lucide-react';
 
 // Tipo para las secciones de navegación
@@ -156,7 +156,7 @@ export default function Layout() {
 
     if (clinicalItems.length > 0) {
       sections.push({
-        title: 'Gestión Clínica',
+        title: 'Gestión Documentos',
         items: clinicalItems,
         collapsible: true,
         defaultOpen: true
@@ -182,7 +182,7 @@ export default function Layout() {
 
     if (templateItems.length > 0) {
       sections.push({
-        title: 'Plantillas',
+        title: 'Gestión de Plantillas',
         items: templateItems,
         collapsible: true,
         defaultOpen: false
@@ -193,18 +193,28 @@ export default function Layout() {
     const dataItems: NavItem[] = [];
     
     dataItems.push({
-      name: 'Clientes',
+      name: 'Clientes o Pacientes',
       href: '/clients',
       icon: UserCircle,
       permission: 'view_clients'
     });
     
     dataItems.push({
-      name: 'Usuarios',
+      name: 'Usuarios Sistema',
       href: '/users',
       icon: Users,
       permission: 'view_users'
     });
+
+    // Solo para Super Admin
+    if (user?.role.type === 'super_admin') {
+      dataItems.push({
+        name: 'Tipos de Documentos',
+        href: '/document-types',
+        icon: FileText,
+        permission: 'manage_tenants'
+      });
+    }
 
     if (dataItems.length > 0) {
       sections.push({
@@ -324,19 +334,43 @@ export default function Layout() {
       });
     }
 
-    // Sección: Configuración (siempre al final)
-    sections.push({
-      title: 'Configuración',
-      items: [
-        {
-          name: 'Configuración',
-          href: '/settings',
-          icon: Settings,
-          permission: 'view_settings'
-        },
-      ],
-      defaultOpen: true
-    });
+    // Sección: Sistema (solo para super_admin)
+    if (user?.role.type === 'super_admin') {
+      sections.push({
+        title: 'Sistema',
+        items: [
+          {
+            name: 'Configuración',
+            href: '/settings',
+            icon: Settings,
+            permission: 'view_settings'
+          },
+          {
+            name: 'Backups',
+            href: '/backups',
+            icon: Database,
+            permission: 'manage_tenants'
+          },
+        ],
+        collapsible: true,
+        defaultOpen: false
+      });
+    } else {
+      // Para usuarios no super_admin, mostrar solo Configuración
+      sections.push({
+        title: 'Sistema',
+        items: [
+          {
+            name: 'Configuración',
+            href: '/settings',
+            icon: Settings,
+            permission: 'view_settings'
+          },
+        ],
+        collapsible: true,
+        defaultOpen: false
+      });
+    }
 
     return sections;
   };
@@ -541,7 +575,6 @@ export default function Layout() {
       <div className="lg:ml-64 pt-16 lg:pt-0">
         <main className="p-4 sm:p-6 lg:p-8">
           <PaymentReminderBanner />
-          <ResourceLimitNotifications />
           <Outlet />
         </main>
       </div>

@@ -1,6 +1,6 @@
 {
   "name": "consentimientos-backend",
-  "version": "41.1.5",
+  "version": "76.0.0",
   "description": "API REST para Sistema de Consentimientos Digitales",
   "author": "",
   "private": true,
@@ -37,6 +37,7 @@
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/throttler": "^5.1.1",
     "@nestjs/typeorm": "^10.0.1",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@types/compression": "^1.8.1",
     "@types/pdfkit": "^0.17.4",
     "aws-sdk": "^2.1540.0",
