@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 78.1.0
+## Versión Actual: 79.0.0
 **Fecha:** 2026-03-28
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,14 +18,13 @@
 
 ## Historial de Versiones
 
-### 78.1.0 - 2026-03-28 [MINOR]
-- Documentación: 1 archivo(s) modificado(s)
-
-### 78.0.0 - 2026-03-28 [MAJOR]
-- Backend: 1 archivo(s) modificado(s)
+### 79.0.0 - 2026-03-28 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
 - Frontend: 2 archivo(s) modificado(s)
-- Documentación: 50 archivo(s) modificado(s)
-- Scripts: 1 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
+### 78.1.1 - 2026-03-28 [PATCH]
+- Mejoras y correcciones generales
 
 ---
 
