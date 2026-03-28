@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 77.0.0
+## Versión Actual: 77.1.0
 **Fecha:** 2026-03-28
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** MINOR
 
 ---
 
@@ -18,15 +18,15 @@
 
 ## Historial de Versiones
 
+### 77.1.0 - 2026-03-28 [MINOR]
+- Backend: 4 archivo(s) modificado(s)
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 77.0.0 - 2026-03-28 [MAJOR]
 - Backend: 92 archivo(s) modificado(s)
 - Frontend: 32 archivo(s) modificado(s)
 - Documentación: 106 archivo(s) modificado(s)
 - Scripts: 40 archivo(s) modificado(s)
-
-### 76.0.0 - 2026-03-27 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 3 archivo(s) modificado(s)
 
 ---
 
