@@ -55,6 +55,12 @@ export class MRConsentTemplatesController {
     return this.templatesService.findAll(tenantId);
   }
 
+  @Get('all/grouped')
+  @RequirePermissions('view_global_stats')
+  getAllGrouped() {
+    return this.templatesService.getAllGroupedByTenant();
+  }
+
   @Get('stats/overview')
   @RequirePermissions('view_dashboard')
   async getStats(@TenantSlug() tenantSlug: string | null) {

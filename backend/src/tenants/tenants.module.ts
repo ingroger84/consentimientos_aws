@@ -9,6 +9,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { MRConsentTemplatesModule } from '../medical-record-consent-templates/mr-consent-templates.module';
+import { InvoicesModule } from '../invoices/invoices.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { MRConsentTemplatesModule } from '../medical-record-consent-templates/mr
     MailModule,
     NotificationsModule,
     forwardRef(() => MRConsentTemplatesModule),
+    forwardRef(() => InvoicesModule),
   ],
   controllers: [TenantsController],
   providers: [TenantsService],

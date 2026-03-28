@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository, LessThan, In, DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Invoice, InvoiceStatus } from './entities/invoice.entity';
 import { TaxConfig } from './entities/tax-config.entity';
@@ -29,6 +29,7 @@ export class InvoicesService {
     private mailService: MailService,
     private boldService: BoldService,
     private configService: ConfigService,
+    private dataSource: DataSource,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
@@ -116,7 +117,8 @@ export class InvoicesService {
       console.error('Error al enviar email de factura:', error);
     }
 
-    return savedInvoice;
+    // Retornar la factura con todas las relaciones cargadas
+    return this.findOne(savedInvoice.id);
   }
 
   async generateMonthlyInvoice(tenant: Tenant): Promise<Invoice> {
@@ -127,7 +129,23 @@ export class InvoicesService {
     }
 
     // Calcular precio según ciclo de facturación
-    const amount = calculatePrice(tenant.plan, tenant.billingCycle);
+    // Si el tenant tiene precios personalizados, usarlos; de lo contrario, usar los del plan
+    let amount: number;
+    if (tenant.useCustomPrice) {
+      if (tenant.billingCycle === 'annual' && tenant.customPriceAnnual) {
+        amount = tenant.customPriceAnnual;
+        this.logger.log(`✅ Usando precio anual personalizado para tenant ${tenant.name}: ${amount}`);
+      } else if (tenant.billingCycle === 'monthly' && tenant.customPriceMonthly) {
+        amount = tenant.customPriceMonthly;
+        this.logger.log(`✅ Usando precio mensual personalizado para tenant ${tenant.name}: ${amount}`);
+      } else {
+        // Fallback al precio del plan si no hay precio personalizado configurado
+        amount = calculatePrice(tenant.plan, tenant.billingCycle);
+        this.logger.warn(`⚠️ Tenant ${tenant.name} tiene useCustomPrice=true pero no tiene precio personalizado configurado. Usando precio del plan.`);
+      }
+    } else {
+      amount = calculatePrice(tenant.plan, tenant.billingCycle);
+    }
 
     // Obtener configuración de impuesto por defecto
     const taxConfig = await this.taxConfigService.findDefault();
@@ -199,6 +217,7 @@ export class InvoicesService {
   }): Promise<Invoice[]> {
     const query = this.invoicesRepository.createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.tenant', 'tenant')
+      .leftJoinAndSelect('tenant.documentType', 'documentType')
       .leftJoinAndSelect('invoice.payments', 'payments')
       .orderBy('invoice.createdAt', 'DESC');
 
@@ -225,6 +244,7 @@ export class InvoicesService {
     const invoice = await this.invoicesRepository
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.tenant', 'tenant')
+      .leftJoinAndSelect('tenant.documentType', 'documentType')
       .leftJoinAndSelect('invoice.payments', 'payments')
       .leftJoinAndSelect('invoice.taxConfig', 'taxConfig')
       .where('invoice.id = :id', { id })
@@ -243,12 +263,43 @@ export class InvoicesService {
   }
 
   async findByTenant(tenantId: string): Promise<Invoice[]> {
-    return await this.invoicesRepository.find({
-      where: { tenantId },
-      relations: ['payments'],
-      order: { createdAt: 'DESC' },
-    });
+    return await this.invoicesRepository
+      .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.tenant', 'tenant')
+      .leftJoinAndSelect('tenant.documentType', 'documentType')
+      .leftJoinAndSelect('invoice.payments', 'payments')
+      .where('invoice.tenantId = :tenantId', { tenantId })
+      .orderBy('invoice.createdAt', 'DESC')
+      .getMany();
   }
+
+  async getPublicPendingInvoices(tenantSlug: string): Promise<{ invoices: Invoice[]; tenantName: string }> {
+    // Buscar el tenant por slug
+    const tenant = await this.dataSource
+      .getRepository(Tenant)
+      .findOne({ where: { slug: tenantSlug } });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant no encontrado');
+    }
+
+    // Obtener solo facturas pendientes o vencidas
+    const invoices = await this.invoicesRepository.find({
+      where: {
+        tenantId: tenant.id,
+        status: In(['pending', 'overdue']),
+      },
+      order: {
+        dueDate: 'ASC',
+      },
+    });
+
+    return {
+      invoices,
+      tenantName: tenant.name,
+    };
+  }
+
 
   async findOverdue(): Promise<Invoice[]> {
     const now = new Date();
@@ -411,14 +462,48 @@ export class InvoicesService {
       throw new BadRequestException('Solo se pueden crear links de pago para facturas pendientes o vencidas');
     }
 
-    // Verificar que no tenga ya un link de pago
-    if (invoice.boldPaymentLink) {
-      this.logger.log(`Factura ${invoice.invoiceNumber} ya tiene un link de pago: ${invoice.boldPaymentLink}`);
+    // Función para validar si un link de Bold es válido
+    const isValidBoldLink = (link: string): boolean => {
+      if (!link) return false;
+      
+      // Verificar que no contenga "undefined"
+      if (link.includes('undefined')) return false;
+      
+      // Verificar que tenga el formato correcto de Bold API Link de Pagos
+      // Formato esperado: https://checkout.bold.co/payment/LNK_XXXXXX
+      const boldLinkPattern = /^https:\/\/checkout\.bold\.co\/payment\/LNK_[A-Z0-9]+$/i;
+      
+      if (!boldLinkPattern.test(link)) {
+        this.logger.warn(`⚠️ Link de pago con formato inválido detectado: ${link}`);
+        this.logger.warn(`   Formato esperado: https://checkout.bold.co/payment/LNK_XXXXXX`);
+        return false;
+      }
+      
+      return true;
+    };
+
+    // Verificar que no tenga ya un link de pago válido
+    if (invoice.boldPaymentLink && isValidBoldLink(invoice.boldPaymentLink)) {
+      this.logger.log(`✅ Factura ${invoice.invoiceNumber} ya tiene un link de pago válido: ${invoice.boldPaymentLink}`);
       return invoice.boldPaymentLink;
+    }
+
+    // Si el link es inválido, regenerarlo
+    if (invoice.boldPaymentLink && !isValidBoldLink(invoice.boldPaymentLink)) {
+      this.logger.warn(`⚠️ Factura ${invoice.invoiceNumber} tiene un link inválido, regenerando...`);
+      this.logger.warn(`   Link anterior: ${invoice.boldPaymentLink}`);
     }
 
     // Generar referencia única para Bold
     const reference = `INV-${invoice.invoiceNumber}-${Date.now()}`;
+
+    // Generar URL de redirección usando el slug del tenant
+    const baseUrl = this.configService.get('FRONTEND_BASE_URL') || 'https://archivoenlinea.com';
+    const tenantSlug = invoice.tenant.slug;
+    const redirectUrl = `https://${tenantSlug}.archivoenlinea.com/invoices/${invoice.id}/payment-success`;
+
+    this.logger.log(`🔗 Generando link de pago para tenant: ${tenantSlug}`);
+    this.logger.log(`   Redirect URL: ${redirectUrl}`);
 
     // Crear link de pago en Bold
     const paymentLink = await this.boldService.createPaymentLink({
@@ -428,7 +513,7 @@ export class InvoicesService {
       reference,
       customerEmail: invoice.tenant.contactEmail,
       customerName: invoice.tenant.name,
-      redirectUrl: `${this.configService.get('FRONTEND_URL')}/invoices/${invoice.id}/payment-success`,
+      redirectUrl,
       expirationDate: invoice.dueDate,
     });
 

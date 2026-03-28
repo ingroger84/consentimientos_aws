@@ -67,6 +67,7 @@ export class SettingsService {
       companyPhone: settingsMap['companyPhone'] || '',
       companyEmail: settingsMap['companyEmail'] || '',
       companyWebsite: settingsMap['companyWebsite'] || '',
+      supportEmail: settingsMap['supportEmail'] || 'soporte@innovasystems.com',
       
       // Configuración de logo
       logoSize: parseInt(settingsMap['logoSize']) || 60,

@@ -8,6 +8,12 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { APP_VERSION } from './config/version';
+import * as crypto from 'crypto';
+
+// Fix para el error "crypto is not defined" en @nestjs/schedule
+if (typeof global.crypto === 'undefined') {
+  (global as any).crypto = crypto;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);

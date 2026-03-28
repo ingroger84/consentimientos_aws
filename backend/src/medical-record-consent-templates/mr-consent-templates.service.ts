@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
+import { Repository, IsNull, Not } from 'typeorm';
 import { MRConsentTemplate } from './entities/mr-consent-template.entity';
 import { CreateMRConsentTemplateDto } from './dto/create-mr-consent-template.dto';
 import { UpdateMRConsentTemplateDto } from './dto/update-mr-consent-template.dto';
@@ -335,6 +335,83 @@ export class MRConsentTemplatesService {
         `Has alcanzado el límite de ${plan.limits.mrConsentTemplates} plantillas de HC de tu plan ${plan.name}. Actualiza tu plan para crear más.`
       );
     }
+  }
+
+  /**
+   * Método para Super Admin: obtener todas las plantillas HC agrupadas por tenant
+   */
+  async getAllGroupedByTenant() {
+    // Usar QueryBuilder para asegurar que solo se obtienen plantillas con tenant
+    const allTemplates = await this.templatesRepository
+      .createQueryBuilder('template')
+      .leftJoinAndSelect('template.tenant', 'tenant')
+      .where('template.tenantId IS NOT NULL') // Filtro SQL directo
+      .andWhere('template.deletedAt IS NULL') // Excluir soft deleted
+      .andWhere('tenant.id IS NOT NULL') // Asegurar que el tenant existe
+      .orderBy('template.createdAt', 'DESC')
+      .getMany();
+
+    // Agrupar por tenant
+    const groupedMap = new Map<string, any>();
+
+    allTemplates.forEach(template => {
+      const tenantId = template.tenantId;
+      
+      // Saltar si no tiene tenant (doble verificación)
+      if (!tenantId || !template.tenant) {
+        return;
+      }
+
+      const tenantName = template.tenant.name;
+      const tenantSlug = template.tenant.slug;
+
+      if (!groupedMap.has(tenantId)) {
+        groupedMap.set(tenantId, {
+          tenantId,
+          tenantName,
+          tenantSlug,
+          totalTemplates: 0,
+          activeTemplates: 0,
+          inactiveTemplates: 0,
+          defaultTemplates: 0,
+          templates: [],
+        });
+      }
+
+      const group = groupedMap.get(tenantId);
+      group.totalTemplates++;
+
+      if (template.isActive) {
+        group.activeTemplates++;
+      } else {
+        group.inactiveTemplates++;
+      }
+
+      if (template.isDefault) {
+        group.defaultTemplates++;
+      }
+
+      group.templates.push({
+        id: template.id,
+        name: template.name,
+        category: template.category,
+        content: template.content,
+        description: template.description,
+        isActive: template.isActive,
+        isDefault: template.isDefault,
+        requiresSignature: template.requiresSignature,
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        tenantName,
+        tenantSlug,
+      });
+    });
+
+    // Convertir Map a Array y ordenar por total de plantillas
+    const grouped = Array.from(groupedMap.values())
+      .sort((a, b) => b.totalTemplates - a.totalTemplates);
+
+    return grouped;
   }
 
   /**

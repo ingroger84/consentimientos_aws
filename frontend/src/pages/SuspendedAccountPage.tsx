@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Mail, Phone, ArrowLeft, CreditCard, Clock } from 'lucide-react';
+import { AlertCircle, Mail, Phone, ArrowLeft, CreditCard, Clock, Receipt, Loader2, ExternalLink } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getResourceUrl } from '@/utils/api-url';
 import { useEffect, useState } from 'react';
 import api from '@/services/api';
+import { invoicesService, Invoice } from '@/services/invoices.service';
 
 interface PlanInfo {
   id: string;
@@ -19,11 +20,15 @@ export default function SuspendedAccountPage() {
   const { settings } = useTheme();
   const [plans, setPlans] = useState<PlanInfo[]>([]);
   const [isFreeAccount, setIsFreeAccount] = useState(false);
+  const [pendingInvoices, setPendingInvoices] = useState<Invoice[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(true);
+  const [generatingPaymentLink, setGeneratingPaymentLink] = useState<string | null>(null);
 
   useEffect(() => {
     // Verificar si es cuenta gratuita
     if (user?.tenant) {
       checkAccountType();
+      loadPendingInvoices();
     }
     // Cargar planes disponibles
     loadPlans();
@@ -46,6 +51,42 @@ export default function SuspendedAccountPage() {
       setPlans(paidPlans);
     } catch (error) {
       console.error('Error loading plans:', error);
+    }
+  };
+
+  const loadPendingInvoices = async () => {
+    try {
+      setLoadingInvoices(true);
+      const invoices = await invoicesService.getByTenant(user?.tenant?.id || '');
+      // Filtrar solo facturas pendientes o vencidas
+      const pending = invoices.filter(inv => inv.status === 'pending' || inv.status === 'overdue');
+      setPendingInvoices(pending);
+    } catch (error) {
+      console.error('Error loading pending invoices:', error);
+    } finally {
+      setLoadingInvoices(false);
+    }
+  };
+
+  const handlePayNow = async (invoiceId: string) => {
+    try {
+      setGeneratingPaymentLink(invoiceId);
+      
+      // Generar link de pago de Bold
+      const response = await api.post(`/invoices/${invoiceId}/create-payment-link`);
+      const { paymentLink } = response.data;
+      
+      if (paymentLink) {
+        // Redirigir al checkout de Bold
+        window.location.href = paymentLink;
+      } else {
+        alert('No se pudo generar el link de pago. Por favor, contacta a soporte.');
+      }
+    } catch (error: any) {
+      console.error('Error generating payment link:', error);
+      alert(error.response?.data?.message || 'Error al generar el link de pago');
+    } finally {
+      setGeneratingPaymentLink(null);
     }
   };
 
@@ -122,11 +163,117 @@ export default function SuspendedAccountPage() {
                   Tu cuenta ha sido suspendida temporalmente debido a facturas pendientes de pago.
                 </p>
                 <p className="text-gray-700">
-                  Para reactivar tu cuenta, por favor realiza el pago de las facturas vencidas o contacta al administrador del sistema.
+                  Para reactivar tu cuenta, por favor realiza el pago de las facturas vencidas. Una vez procesado el pago, tu cuenta se reactivará automáticamente.
                 </p>
               </>
             )}
           </div>
+
+          {/* Facturas pendientes (solo para cuentas suspendidas) */}
+          {!isFreeAccount && (
+            <div className="bg-white rounded-lg border-2 border-red-200 p-6 mb-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Receipt className="w-6 h-6 text-red-600" />
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Facturas Pendientes de Pago
+                </h2>
+              </div>
+
+              {loadingInvoices ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+                  <span className="ml-3 text-gray-600">Cargando facturas...</span>
+                </div>
+              ) : pendingInvoices.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">
+                    No se encontraron facturas pendientes. Si crees que esto es un error, contacta a soporte.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pendingInvoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-5 border border-red-200"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-lg font-bold text-gray-900">
+                              {invoice.invoiceNumber}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              invoice.status === 'overdue' 
+                                ? 'bg-red-100 text-red-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {invoice.status === 'overdue' ? 'Vencida' : 'Pendiente'}
+                            </span>
+                          </div>
+                          <div className="space-y-1 text-sm text-gray-700">
+                            <p>
+                              <span className="font-medium">Monto:</span>{' '}
+                              <span className="text-xl font-bold text-red-600">
+                                {invoicesService.formatCurrency(invoice.total)}
+                              </span>
+                            </p>
+                            <p>
+                              <span className="font-medium">Fecha de vencimiento:</span>{' '}
+                              {new Date(invoice.dueDate).toLocaleDateString('es-CO')}
+                              {invoice.status === 'overdue' && (
+                                <span className="ml-2 text-red-600 font-medium">
+                                  (Vencida hace {Math.abs(invoicesService.getDaysUntilDue(invoice.dueDate))} días)
+                                </span>
+                              )}
+                            </p>
+                            <p>
+                              <span className="font-medium">Período:</span>{' '}
+                              {new Date(invoice.periodStart).toLocaleDateString('es-CO')} -{' '}
+                              {new Date(invoice.periodEnd).toLocaleDateString('es-CO')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <button
+                            onClick={() => handlePayNow(invoice.id)}
+                            disabled={generatingPaymentLink === invoice.id}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                          >
+                            {generatingPaymentLink === invoice.id ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Generando...
+                              </>
+                            ) : (
+                              <>
+                                <CreditCard className="w-5 h-5" />
+                                Pagar Ahora
+                                <ExternalLink className="w-4 h-4" />
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-blue-800">
+                        <p className="font-medium mb-1">Reactivación Automática</p>
+                        <p>
+                          Una vez que completes el pago, tu cuenta se reactivará automáticamente en pocos segundos. 
+                          No necesitas contactar a soporte.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Planes disponibles (solo para cuentas gratuitas) */}
           {isFreeAccount && plans.length > 0 && (
@@ -173,7 +320,7 @@ export default function SuspendedAccountPage() {
           </div>
 
           {/* Pasos para reactivar */}
-          {!isFreeAccount && (
+          {!isFreeAccount && pendingInvoices.length === 0 && !loadingInvoices && (
             <div className="bg-blue-50 rounded-lg p-6 mb-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Pasos para reactivar tu cuenta:
@@ -181,8 +328,7 @@ export default function SuspendedAccountPage() {
               <ol className="list-decimal list-inside space-y-2 text-gray-700">
                 <li>Revisa las facturas pendientes en tu correo electrónico</li>
                 <li>Realiza el pago correspondiente</li>
-                <li>Notifica al administrador sobre el pago realizado</li>
-                <li>Tu cuenta será reactivada en las próximas horas</li>
+                <li>Tu cuenta se reactivará automáticamente después del pago</li>
               </ol>
             </div>
           )}
@@ -213,7 +359,7 @@ export default function SuspendedAccountPage() {
               </p>
             ) : (
               <p>
-                Una vez realizado el pago, tu cuenta será reactivada automáticamente.
+                Una vez realizado el pago, tu cuenta será reactivada automáticamente en pocos segundos.
               </p>
             )}
           </div>

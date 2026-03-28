@@ -37,6 +37,9 @@ export interface Tenant {
   status: TenantStatus;
   plan: TenantPlan;
   planPrice?: number;
+  customPriceMonthly?: number;
+  customPriceAnnual?: number;
+  useCustomPrice?: boolean;
   billingCycle?: BillingCycle;
   billingDay?: number; // Día del mes para corte de facturación (1-28)
   planStartedAt?: string;
@@ -45,6 +48,13 @@ export interface Tenant {
   contactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  documentTypeId?: string | null;
+  documentNumber?: string | null;
+  documentType?: {
+    id: string;
+    code: string;
+    name: string;
+  };
   maxUsers: number;
   maxConsents: number;
   maxBranches: number;
@@ -187,12 +197,17 @@ export interface CreateTenantDto {
   status?: TenantStatus;
   plan?: TenantPlan;
   planPrice?: number;
+  customPriceMonthly?: number;
+  customPriceAnnual?: number;
+  useCustomPrice?: boolean;
   billingCycle?: BillingCycle;
   billingDay?: number; // Día del mes para corte de facturación (1-28)
   autoRenew?: boolean;
   contactName?: string;
   contactEmail?: string;
   contactPhone?: string;
+  documentTypeId?: string | null; // ID del tipo de documento
+  documentNumber?: string | null; // Número de documento
   maxUsers?: number;
   maxConsents?: number;
   maxBranches?: number;

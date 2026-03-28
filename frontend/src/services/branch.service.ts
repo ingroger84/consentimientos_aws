@@ -29,6 +29,12 @@ export const branchService = {
     return data;
   },
 
+  async getByTenant(tenantId: string): Promise<Branch[]> {
+    // Para Super Admin - obtener sedes de un tenant específico
+    const { data } = await api.get<Branch[]>(`/branches/by-tenant/${tenantId}`);
+    return data;
+  },
+
   async getOne(id: string): Promise<Branch> {
     const { data } = await api.get<Branch>(`/branches/${id}`);
     return data;

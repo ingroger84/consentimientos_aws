@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Payment, PaymentStatus } from './entities/payment.entity';
+import { Payment, PaymentStatus, PaymentMethod } from './entities/payment.entity';
 import { Invoice, InvoiceStatus } from '../invoices/entities/invoice.entity';
 import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
 import { BillingHistory, BillingAction } from '../billing/entities/billing-history.entity';
@@ -205,6 +205,89 @@ export class PaymentsService {
       relations: ['invoice'],
       order: { createdAt: 'DESC' },
     });
+  }
+
+  /**
+   * Procesar pago de Bold manualmente cuando el webhook no llega
+   * Esto es común en sandbox o cuando hay problemas de red
+   */
+  async processBoldPaymentManually(
+    invoiceId: string,
+    boldOrderId: string,
+    boldTxStatus: string,
+  ): Promise<{ success: boolean; message: string; invoice?: any }> {
+    try {
+      console.log(`📥 Procesando pago manual de Bold`);
+      console.log(`   Invoice ID: ${invoiceId}`);
+      console.log(`   Bold Order ID: ${boldOrderId}`);
+      console.log(`   Status: ${boldTxStatus}`);
+
+      // Solo procesar si el estado es aprobado
+      if (boldTxStatus !== 'approved') {
+        return {
+          success: false,
+          message: `Pago no aprobado. Estado: ${boldTxStatus}`,
+        };
+      }
+
+      // Buscar la factura
+      const invoice = await this.invoicesRepository.findOne({
+        where: { id: invoiceId },
+        relations: ['tenant'],
+      });
+
+      if (!invoice) {
+        throw new NotFoundException(`Factura ${invoiceId} no encontrada`);
+      }
+
+      // Verificar si ya está pagada
+      if (invoice.status === InvoiceStatus.PAID) {
+        console.log(`✅ Factura ${invoice.invoiceNumber} ya está pagada`);
+        return {
+          success: true,
+          message: 'La factura ya está marcada como pagada',
+          invoice,
+        };
+      }
+
+      console.log(`💰 Procesando pago para factura ${invoice.invoiceNumber}`);
+
+      // Crear el registro de pago
+      const payment = await this.create({
+        amount: invoice.total,
+        paymentMethod: PaymentMethod.OTHER,
+        paymentDate: new Date().toISOString(),
+        invoiceId: invoice.id,
+        tenantId: invoice.tenantId,
+        notes: `Pago procesado manualmente desde página de confirmación - Bold Order ID: ${boldOrderId}`,
+        boldTransactionId: boldOrderId,
+        boldPaymentMethod: 'Bold Checkout',
+        boldPaymentData: {
+          boldOrderId,
+          boldTxStatus,
+          processedManually: true,
+          processedAt: new Date().toISOString(),
+        },
+      });
+
+      console.log(`✅ Pago registrado: ${payment.id}`);
+      console.log(`✅ Factura ${invoice.invoiceNumber} marcada como pagada`);
+
+      // Recargar la factura actualizada
+      const updatedInvoice = await this.invoicesRepository.findOne({
+        where: { id: invoiceId },
+        relations: ['tenant'],
+      });
+
+      return {
+        success: true,
+        message: 'Pago procesado exitosamente',
+        invoice: updatedInvoice,
+      };
+    } catch (error) {
+      console.error(`❌ Error al procesar pago manual:`, error);
+      throw error;
+    }
   }
 
   private formatCurrency(amount: number): string {

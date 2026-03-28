@@ -78,6 +78,10 @@ export class UpdateSettingsDto {
   @IsString()
   companyWebsite?: string;
 
+  @IsOptional()
+  @IsString()
+  supportEmail?: string;
+
   // Configuración de logo
   @IsOptional()
   @IsNumber()
@@ -107,4 +111,13 @@ export class UpdateSettingsDto {
   @IsOptional()
   @IsString()
   imageRightsTitle?: string;
+
+  // Configuración de backups automáticos
+  @IsOptional()
+  @IsString()
+  backupSchedule1?: string; // Formato: "HH:MM" (ej: "12:00")
+
+  @IsOptional()
+  @IsString()
+  backupSchedule2?: string; // Formato: "HH:MM" (ej: "19:00")
 }

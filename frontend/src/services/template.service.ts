@@ -47,7 +47,12 @@ class TemplateService {
   }
 
   async initializeDefaults(): Promise<{ message: string; count: number }> {
-    const { data } = await api.post<{ message: string; count: number }>('/consent-templates/initialize-defaults', {});
+    const { data} = await api.post<{ message: string; count: number }>('/consent-templates/initialize-defaults', {});
+    return data;
+  }
+
+  async getAllGroupedByTenant(): Promise<any[]> {
+    const { data } = await api.get<any[]>('/consent-templates/all/grouped');
     return data;
   }
 }

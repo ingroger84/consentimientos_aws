@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConsentsService } from './consents.service';
 import { ConsentsController } from './consents.controller';
@@ -10,6 +10,7 @@ import { SettingsModule } from '../settings/settings.module';
 import { MailModule } from '../mail/mail.module';
 import { CommonModule } from '../common/common.module';
 import { ClientsModule } from '../clients/clients.module';
+import { ConsentTemplatesModule } from '../consent-templates/consent-templates.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ClientsModule } from '../clients/clients.module';
     MailModule,
     CommonModule,
     ClientsModule,
+    forwardRef(() => ConsentTemplatesModule),
   ],
   controllers: [ConsentsController],
   providers: [ConsentsService, PdfService],

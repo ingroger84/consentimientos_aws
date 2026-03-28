@@ -120,11 +120,35 @@ export class AuthService {
       // Validar que el tenant existe y está activo
       const tenant = await this.tenantsService.findBySlug(tenantSlug);
       
+      // Si el tenant está suspendido, bloquear login y retornar info de facturas
       if (tenant.status === 'suspended') {
-        throw new ForbiddenException('Esta cuenta está suspendida. Contacta al administrador.');
+        this.logger.warn(`Login blocked - tenant suspended: ${tenantSlug}`);
+        
+        // Obtener facturas pendientes
+        const pendingInvoices = await this.tenantsService.getPendingInvoices(tenant.id);
+        
+        // Lanzar excepción con información estructurada usando el formato correcto de NestJS
+        throw new ForbiddenException({
+          statusCode: 403,
+          message: 'Cuenta suspendida por falta de pago',
+          error: 'TENANT_SUSPENDED',
+          data: {
+            tenantId: tenant.id,
+            tenantName: tenant.name,
+            tenantSlug: tenant.slug,
+            pendingInvoices: pendingInvoices.map(inv => ({
+              id: inv.id,
+              invoiceNumber: inv.invoiceNumber,
+              total: inv.total,
+              dueDate: inv.dueDate,
+              status: inv.status,
+            })),
+          },
+        });
       }
 
       if (tenant.status === 'expired') {
+        this.logger.warn(`Login blocked - tenant expired: ${tenantSlug}`);
         throw new ForbiddenException('Esta cuenta ha expirado. Contacta al administrador.');
       }
 
@@ -138,7 +162,7 @@ export class AuthService {
         );
       }
 
-      this.logger.log(`User ${user.email} logged in to tenant: ${tenantSlug}`);
+      this.logger.log(`User ${user.email} logged in to tenant: ${tenantSlug} (status: ${tenant.status})`);
     }
   }
 

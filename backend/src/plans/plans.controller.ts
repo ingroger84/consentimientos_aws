@@ -5,6 +5,7 @@ import { PlansService } from './plans.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { RoleType } from '../roles/entities/role.entity';
 import { UpdatePlanDto } from './dto/update-plan.dto';
 import { UpdatePlanPricingDto } from './dto/update-plan-pricing.dto';
@@ -47,6 +48,7 @@ export class PlansController {
     return this.plansService.findAll();
   }
 
+  @Public()
   @Get('public')
   async findAllPublic(@Req() req: Request) {
     // Detectar país del usuario
@@ -82,6 +84,7 @@ export class PlansController {
     };
   }
 
+  @Public()
   @Get('public/:id')
   async findOnePublic(@Param('id') id: string, @Req() req: Request) {
     // Detectar país del usuario

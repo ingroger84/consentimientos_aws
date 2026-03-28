@@ -8,6 +8,7 @@ import {
   Delete,
   Put,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -16,6 +17,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/permissions.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { AllowAnyTenant } from '../common/decorators/allow-any-tenant.decorator';
 import { PERMISSIONS } from '../auth/constants/permissions';
 import { getAllPlans } from './plans.config';
 
@@ -62,8 +64,18 @@ export class TenantsController {
   }
 
   @Get(':id')
-  @RequirePermissions(PERMISSIONS.MANAGE_TENANTS)
-  findOne(@Param('id') id: string) {
+  @AllowAnyTenant()
+  async findOne(@Param('id') id: string, @Request() req) {
+    // Permitir que usuarios vean su propio tenant (incluso si está suspendido)
+    // o que el Super Admin vea cualquier tenant
+    const user = req.user;
+    const isSuperAdmin = user?.permissions?.includes(PERMISSIONS.MANAGE_TENANTS);
+    const isOwnTenant = user?.tenant?.id === id;
+
+    if (!isSuperAdmin && !isOwnTenant) {
+      throw new Error('No tienes permisos para ver este tenant');
+    }
+
     return this.tenantsService.findOne(id);
   }
 

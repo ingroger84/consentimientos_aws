@@ -12,6 +12,7 @@ interface SettingsForm {
   companyPhone: string;
   companyEmail: string;
   companyWebsite: string;
+  supportEmail: string;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -102,6 +103,7 @@ export default function SettingsPage() {
         companyPhone: settings.companyPhone || '',
         companyEmail: settings.companyEmail || '',
         companyWebsite: settings.companyWebsite || '',
+        supportEmail: settings.supportEmail || 'soporte@innovasystems.com',
         primaryColor: settings.primaryColor || '#3B82F6',
         secondaryColor: settings.secondaryColor || '#10B981',
         accentColor: settings.accentColor || '#F59E0B',
@@ -398,6 +400,24 @@ export default function SettingsPage() {
                     placeholder="www.empresa.com"
                   />
                 </div>
+
+                {/* Email de Soporte - Solo visible para Super Admin */}
+                {user && !user.tenant && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email de Soporte
+                    </label>
+                    <input
+                      type="email"
+                      {...register('supportEmail')}
+                      className="input"
+                      placeholder="soporte@empresa.com"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Este correo se usará en facturas y documentos del sistema
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

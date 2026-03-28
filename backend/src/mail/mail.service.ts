@@ -2004,4 +2004,248 @@ export class MailService {
       </html>
     `;
   }
+
+  /**
+   * Enviar alerta cuando el sistema de monitoreo detecta un pago
+   */
+  async sendPaymentMonitoringAlert(data: {
+    invoiceNumber: string;
+    tenantName: string;
+    amount: number;
+    paymentLinkId: string;
+    message: string;
+  }): Promise<void> {
+    try {
+      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || this.configService.get('SMTP_FROM');
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: superAdminEmail,
+        subject: `⚠️ Pago Detectado por Monitoreo - ${data.invoiceNumber}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .container {
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 2 4px rgba(0,0,0,0.1);
+                overflow: hidden;
+              }
+              .header {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+              }
+              .content {
+                padding: 30px;
+              }
+              .alert-box {
+                background-color: #fef3c7;
+                border-left: 4px solid #f59e0b;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 4px;
+              }
+              .info-item {
+                margin: 10px 0;
+                padding: 10px;
+                background-color: #f9fafb;
+                border-radius: 4px;
+              }
+              .info-item strong {
+                color: #d97706;
+                display: inline-block;
+                min-width: 150px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>⚠️ Pago Detectado por Monitoreo</h1>
+                <p style="margin: 10px 0 0 0; opacity: 0.9;">Sistema de Respaldo Activado</p>
+              </div>
+
+              <div class="content">
+                <p>Hola Super Admin,</p>
+
+                <div class="alert-box">
+                  <strong>⚠️ IMPORTANTE:</strong> ${data.message}
+                </div>
+
+                <p>El sistema de monitoreo automático detectó y procesó un pago que no fue recibido vía webhook de Bold.</p>
+
+                <h3>Detalles del Pago:</h3>
+                <div class="info-item">
+                  <strong>Factura:</strong> ${data.invoiceNumber}
+                </div>
+                <div class="info-item">
+                  <strong>Tenant:</strong> ${data.tenantName}
+                </div>
+                <div class="info-item">
+                  <strong>Monto:</strong> ${this.formatCurrency(data.amount)}
+                </div>
+                <div class="info-item">
+                  <strong>Bold Payment Link:</strong> ${data.paymentLinkId}
+                </div>
+
+                <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                  <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                    <strong>Acción Requerida:</strong> Verifica la configuración de webhooks en Bold para evitar que esto vuelva a suceder.
+                  </p>
+                </div>
+
+                <h3>Próximos Pasos:</h3>
+                <ol>
+                  <li>Verificar que el webhook esté configurado en Bold Dashboard</li>
+                  <li>Confirmar que la URL del webhook sea correcta</li>
+                  <li>Revisar logs del servidor para ver si hay intentos de webhook bloqueados</li>
+                  <li>Contactar a Bold si el problema persiste</li>
+                </ol>
+              </div>
+
+              ${this.BRANDING_FOOTER}
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Payment monitoring alert sent to ${superAdminEmail}`);
+    } catch (error) {
+      this.logger.error('Error sending payment monitoring alert:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar alerta de pagos atascados
+   */
+  async sendStuckPaymentsAlert(pendingLinks: Array<{
+    invoiceNumber: string;
+    tenantName: string;
+    amount: number;
+    minutesSinceCreation: number;
+    boldPaymentLink: string;
+  }>): Promise<void> {
+    try {
+      const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || this.configService.get('SMTP_FROM');
+
+      const linksHtml = pendingLinks.map(link => `
+        <div class="info-item">
+          <strong>Factura:</strong> ${link.invoiceNumber}<br>
+          <strong>Tenant:</strong> ${link.tenantName}<br>
+          <strong>Monto:</strong> ${this.formatCurrency(link.amount)}<br>
+          <strong>Tiempo transcurrido:</strong> ${link.minutesSinceCreation} minutos<br>
+          <strong>Link:</strong> <a href="${link.boldPaymentLink}">${link.boldPaymentLink}</a>
+        </div>
+      `).join('');
+
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: superAdminEmail,
+        subject: `🚨 Alerta: ${pendingLinks.length} Pago(s) Atascado(s)`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .container {
+                background-color: #ffffff;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                overflow: hidden;
+              }
+              .header {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+              }
+              .content {
+                padding: 30px;
+              }
+              .alert-box {
+                background-color: #fee2e2;
+                border-left: 4px solid #ef4444;
+                padding: 15px;
+                margin: 20px 0;
+                border-radius: 4px;
+              }
+              .info-item {
+                margin: 15px 0;
+                padding: 15px;
+                background-color: #f9fafb;
+                border-radius: 4px;
+                border-left: 3px solid #ef4444;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>🚨 Pagos Atascados Detectados</h1>
+                <p style="margin: 10px 0 0 0; opacity: 0.9;">Requiere Atención Inmediata</p>
+              </div>
+
+              <div class="content">
+                <p>Hola Super Admin,</p>
+
+                <div class="alert-box">
+                  <strong>🚨 ALERTA:</strong> Se detectaron ${pendingLinks.length} pago(s) con links de Bold creados hace más de 10 minutos pero sin procesar.
+                </div>
+
+                <p>Esto puede indicar que:</p>
+                <ul>
+                  <li>Los webhooks de Bold no están llegando</li>
+                  <li>Hay un problema con la configuración de Bold</li>
+                  <li>Los usuarios están teniendo problemas para completar el pago</li>
+                </ul>
+
+                <h3>Pagos Pendientes:</h3>
+                ${linksHtml}
+
+                <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                  <p style="margin: 0; color: #1e40af; font-size: 14px;">
+                    <strong>Acción Recomendada:</strong> Verifica manualmente el estado de estos pagos en el dashboard de Bold y procesa los que estén completados.
+                  </p>
+                </div>
+              </div>
+
+              ${this.BRANDING_FOOTER}
+            </div>
+          </body>
+          </html>
+        `,
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Stuck payments alert sent to ${superAdminEmail}`);
+    } catch (error) {
+      this.logger.error('Error sending stuck payments alert:', error);
+      throw error;
+    }
+  }
 }

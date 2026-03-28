@@ -2,13 +2,19 @@ import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { Invoice } from './entities/invoice.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class InvoicePdfService {
+  constructor(private settingsService: SettingsService) {}
   /**
    * Generar PDF de factura
    */
   async generateInvoicePdf(invoice: Invoice, tenant: Tenant): Promise<Buffer> {
+    // Obtener configuración del Super Admin para el correo de soporte
+    const settings = await this.settingsService.getSettings();
+    const supportEmail = settings.supportEmail || 'soporte@innovasystems.com';
+
     return new Promise((resolve, reject) => {
       try {
         const doc = new PDFDocument({
@@ -29,7 +35,7 @@ export class InvoicePdfService {
         this.addHeader(doc, invoice);
 
         // Información del tenant y emisor
-        this.addPartyInfo(doc, tenant);
+        this.addPartyInfo(doc, tenant, supportEmail);
 
         // Información de la factura
         this.addInvoiceInfo(doc, invoice);
@@ -79,7 +85,7 @@ export class InvoicePdfService {
       .stroke();
   }
 
-  private addPartyInfo(doc: PDFKit.PDFDocument, tenant: Tenant) {
+  private addPartyInfo(doc: PDFKit.PDFDocument, tenant: Tenant, supportEmail: string) {
     const startY = 100;
 
     // Facturado a (izquierda)
@@ -89,15 +95,52 @@ export class InvoicePdfService {
       .font('Helvetica-Bold')
       .text('FACTURADO A:', 40, startY);
 
+    let currentY = startY + 15;
+
+    // Nombre de la empresa
     doc
       .font('Helvetica')
       .fontSize(10)
       .fillColor('#374151')
-      .text(tenant.name, 40, startY + 15)
-      .fontSize(9)
-      .text(tenant.contactName || '', 40, startY + 30)
-      .text(tenant.contactEmail || '', 40, startY + 43)
-      .text(tenant.contactPhone || '', 40, startY + 56);
+      .text(tenant.name, 40, currentY);
+    currentY += 15;
+
+    // Nombre de contacto
+    if (tenant.contactName) {
+      doc
+        .fontSize(9)
+        .text(tenant.contactName, 40, currentY);
+      currentY += 13;
+    }
+
+    // Tipo y número de documento
+    if (tenant.documentType && tenant.documentNumber) {
+      const docTypeText = `${tenant.documentType.code}: ${tenant.documentNumber}`;
+      doc
+        .fontSize(9)
+        .text(docTypeText, 40, currentY);
+      currentY += 13;
+    } else if (tenant.documentNumber) {
+      doc
+        .fontSize(9)
+        .text(`Doc: ${tenant.documentNumber}`, 40, currentY);
+      currentY += 13;
+    }
+
+    // Email
+    if (tenant.contactEmail) {
+      doc
+        .fontSize(9)
+        .text(tenant.contactEmail, 40, currentY);
+      currentY += 13;
+    }
+
+    // Teléfono
+    if (tenant.contactPhone) {
+      doc
+        .fontSize(9)
+        .text(tenant.contactPhone, 40, currentY);
+    }
 
     // Emitido por (derecha)
     doc
@@ -113,7 +156,7 @@ export class InvoicePdfService {
       .text('Innova Systems', 350, startY + 15)
       .fontSize(9)
       .text('Sistema de Consentimientos', 350, startY + 30)
-      .text('soporte@innovasystems.com', 350, startY + 43);
+      .text(supportEmail, 350, startY + 43);
   }
 
   private addInvoiceInfo(doc: PDFKit.PDFDocument, invoice: Invoice) {

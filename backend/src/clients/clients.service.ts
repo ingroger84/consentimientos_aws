@@ -209,6 +209,49 @@ export class ClientsService {
   }
 
   /**
+   * Decrementar contador de consentimientos
+   * Llamado cuando se elimina un consentimiento
+   */
+  async decrementConsentsCount(clientId: string): Promise<void> {
+    const client = await this.clientsRepository.findOne({
+      where: { id: clientId },
+    });
+
+    if (client && client.consentsCount > 0) {
+      await this.clientsRepository.decrement(
+        { id: clientId },
+        'consentsCount',
+        1
+      );
+    }
+  }
+
+  /**
+   * Recalcular contador de consentimientos basado en consentimientos activos
+   * Útil para corregir inconsistencias
+   */
+  async recalculateConsentsCount(clientId: string, tenantId: string): Promise<void> {
+    const client = await this.clientsRepository.findOne({
+      where: { id: clientId, tenantId },
+      relations: ['consents'],
+    });
+
+    if (!client) {
+      throw new NotFoundException(`Cliente con ID ${clientId} no encontrado`);
+    }
+
+    // Contar solo consentimientos NO eliminados
+    const activeConsentsCount = client.consents?.filter(c => !c.deletedAt).length || 0;
+
+    // Actualizar el contador
+    await this.clientsRepository.update(
+      { id: clientId },
+      { consentsCount: activeConsentsCount }
+    );
+  }
+
+
+  /**
    * Obtener estadísticas de clientes
    */
   async getStats(tenantId: string) {

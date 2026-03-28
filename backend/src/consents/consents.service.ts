@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Consent, ConsentStatus } from './entities/consent.entity';
 import { Answer } from '../answers/entities/answer.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
@@ -349,9 +349,16 @@ export class ConsentsService {
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
-    await this.consentsRepository.softDelete(id);
-  }
+      const consent = await this.findOne(id);
+
+      // Decrementar contador del cliente si existe
+      if (consent.client?.id) {
+        await this.clientsService.decrementConsentsCount(consent.client.id);
+      }
+
+      await this.consentsRepository.softDelete(id);
+    }
+
 
   async getStatistics(user?: User) {
     // MULTI-TENANT: Crear query builder base con filtro de tenant
@@ -481,25 +488,56 @@ export class ConsentsService {
 
   /**
    * Verificar límite de consentimientos del tenant antes de crear
+   * Solo cuenta consentimientos del mes actual (se reinicia cada mes)
    */
   private async checkConsentLimit(tenantId: string): Promise<void> {
     const tenant = await this.tenantsRepository.findOne({
       where: { id: tenantId },
-      relations: ['consents'],
     });
 
     if (!tenant) {
       throw new NotFoundException('Tenant no encontrado');
     }
 
-    const currentCount = tenant.consents?.filter(c => !c.deletedAt).length || 0;
+    // Calcular inicio y fin del mes actual
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+    // Contar solo consentimientos del mes actual
+    const currentMonthCount = await this.consentsRepository.count({
+      where: {
+        tenant: { id: tenantId },
+        deletedAt: null,
+        createdAt: Between(startOfMonth, endOfMonth),
+      },
+    });
+
     const maxLimit = tenant.maxConsents;
 
-    if (currentCount >= maxLimit) {
-      throw new ForbiddenException(
-        `Has alcanzado el límite máximo de consentimientos permitidos (${currentCount}/${maxLimit}). ` +
-        `Por favor, contacta al administrador para aumentar tu límite o considera actualizar tu plan.`
-      );
+    if (currentMonthCount >= maxLimit) {
+      throw new ForbiddenException({
+        message: `Has alcanzado el límite mensual de consentimientos (${currentMonthCount}/${maxLimit}). ` +
+          `El límite se reiniciará el 1 de ${this.getNextMonthName()}. ` +
+          `Para aumentar tu límite, actualiza tu plan.`,
+        error: 'MONTHLY_RESOURCE_LIMIT_REACHED',
+        resourceType: 'consents',
+        current: currentMonthCount,
+        max: maxLimit,
+        resetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
+      });
     }
+  }
+
+  /**
+   * Obtiene el nombre del próximo mes en español
+   */
+  private getNextMonthName(): string {
+    const months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    const nextMonth = new Date().getMonth() + 1;
+    return months[nextMonth % 12];
   }
 }

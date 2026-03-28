@@ -41,6 +41,18 @@ export class CreateTenantDto {
   @IsOptional()
   planPrice?: number;
 
+  @IsNumber()
+  @IsOptional()
+  customPriceMonthly?: number;
+
+  @IsNumber()
+  @IsOptional()
+  customPriceAnnual?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  useCustomPrice?: boolean;
+
   @IsEnum(BillingCycle)
   @IsOptional()
   billingCycle?: BillingCycle;
@@ -67,58 +79,66 @@ export class CreateTenantDto {
   @IsOptional()
   contactPhone?: string;
 
+  @IsString()
+  @IsOptional()
+  documentTypeId?: string;
+
+  @IsString()
+  @IsOptional()
+  documentNumber?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(10000)
-  @IsOptional()
   maxUsers?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000000)
-  @IsOptional()
   maxConsents?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  @IsOptional()
   maxBranches?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  @IsOptional()
   maxServices?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  @IsOptional()
   maxQuestions?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(10000)
-  @IsOptional()
   maxMedicalRecords?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  @IsOptional()
   maxMRConsentTemplates?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(1000)
-  @IsOptional()
   maxConsentTemplates?: number;
 
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(999999)
-  @IsOptional()
   storageLimitMb?: number;
 
   @IsOptional()

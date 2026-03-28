@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import api from '../../services/api';
+import { documentTypesService, DocumentType } from '../../services/document-types.service';
 
 interface SignupModalProps {
   selectedPlan: any;
@@ -11,6 +12,7 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
   const [step, setStep] = useState<'form' | 'success' | 'error'>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [formData, setFormData] = useState({
     // Datos de la empresa
     companyName: '',
@@ -18,6 +20,8 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
     contactName: '',
     contactEmail: '',
     contactPhone: '',
+    documentTypeId: '',
+    documentNumber: '',
     // Datos del administrador
     adminName: '',
     adminEmail: '',
@@ -25,7 +29,20 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
     adminPasswordConfirm: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    loadDocumentTypes();
+  }, []);
+
+  const loadDocumentTypes = async () => {
+    try {
+      const data = await documentTypesService.getAll({ isActive: true });
+      setDocumentTypes(data);
+    } catch (error) {
+      console.error('Error loading document types:', error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
@@ -97,7 +114,9 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
         slug: formData.slug,
         contactName: formData.contactName,
         contactEmail: formData.contactEmail,
-        contactPhone: formData.contactPhone,
+        contactPhone: formData.contactPhone || null,
+        documentTypeId: formData.documentTypeId || null,
+        documentNumber: formData.documentNumber || null,
         plan: selectedPlan.id,
         planPrice: price,
         billingCycle: selectedPlan.billingCycle,
@@ -109,8 +128,17 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
         },
       };
 
-      await api.post('/tenants', tenantData);
-      setStep('success');
+      const response = await api.post('/tenants', tenantData);
+      
+      // Si el plan tiene precio > 0 y se generó una factura, redirigir a página de pago
+      if (response.data.firstInvoice && response.data.firstInvoice.paymentLink) {
+        const invoice = response.data.firstInvoice;
+        const paymentUrl = `/signup-payment?tenantName=${encodeURIComponent(formData.companyName)}&tenantSlug=${formData.slug}&invoiceId=${invoice.id}&invoiceNumber=${invoice.invoiceNumber}&total=${invoice.total}&dueDate=${invoice.dueDate}&paymentLink=${encodeURIComponent(invoice.paymentLink)}`;
+        window.location.href = paymentUrl;
+      } else {
+        // Plan gratuito o sin factura, mostrar éxito normal
+        setStep('success');
+      }
     } catch (err: any) {
       console.error('Error creating tenant:', err);
       const errorMessage = err.response?.data?.message || 'Error al crear la cuenta. Por favor intenta nuevamente.';
@@ -239,6 +267,42 @@ export default function SignupModal({ selectedPlan, onClose }: SignupModalProps)
                       className="input"
                       placeholder="+57 300 123 4567"
                     />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo de Documento
+                      </label>
+                      <select
+                        name="documentTypeId"
+                        value={formData.documentTypeId || ''}
+                        onChange={handleChange}
+                        className="input"
+                      >
+                        <option value="">Seleccionar tipo...</option>
+                        {documentTypes.map((docType) => (
+                          <option key={docType.id} value={docType.id}>
+                            {docType.code} - {docType.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Número de Documento
+                      </label>
+                      <input
+                        type="text"
+                        name="documentNumber"
+                        value={formData.documentNumber || ''}
+                        onChange={handleChange}
+                        className="input"
+                        placeholder="Ej: 1234567890"
+                        maxLength={50}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

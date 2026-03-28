@@ -4,11 +4,12 @@ import { ConsentTemplatesService } from './consent-templates.service';
 import { ConsentTemplatesController } from './consent-templates.controller';
 import { ConsentTemplate } from './entities/consent-template.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { Service } from '../services/entities/service.entity';
 import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ConsentTemplate, Tenant]),
+    TypeOrmModule.forFeature([ConsentTemplate, Tenant, Service]),
     forwardRef(() => TenantsModule),
   ],
   controllers: [ConsentTemplatesController],

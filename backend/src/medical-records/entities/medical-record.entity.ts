@@ -48,7 +48,9 @@ export class MedicalRecord {
   branch: Branch;
 
   // Datos básicos
-  @Column({ name: 'record_number', unique: true })
+  // NOTA: El constraint único está definido en la BD como (tenant_id, record_number)
+  // No usar unique: true aquí porque crearía un constraint global
+  @Column({ name: 'record_number' })
   recordNumber: string;
 
   @Column({ name: 'admission_date' })

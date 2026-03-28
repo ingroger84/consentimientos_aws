@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull, In } from 'typeorm';
 import { ConsentTemplate, TemplateType } from './entities/consent-template.entity';
 import { CreateConsentTemplateDto } from './dto/create-consent-template.dto';
 import { UpdateConsentTemplateDto } from './dto/update-consent-template.dto';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import { TenantsService } from '../tenants/tenants.service';
 import { getPlanConfig } from '../tenants/plans.config';
+import { Service } from '../services/entities/service.entity';
 
 @Injectable()
 export class ConsentTemplatesService {
@@ -15,6 +16,8 @@ export class ConsentTemplatesService {
     private templatesRepository: Repository<ConsentTemplate>,
     @InjectRepository(Tenant)
     private tenantsRepository: Repository<Tenant>,
+    @InjectRepository(Service)
+    private servicesRepository: Repository<Service>,
     @Inject(forwardRef(() => TenantsService))
     private tenantsService: TenantsService,
   ) {}
@@ -49,6 +52,9 @@ export class ConsentTemplatesService {
       await this.checkTemplatesLimit(tenantId);
     }
 
+    // Validar que los servicios existan y pertenezcan al tenant
+    const services = await this.validateServices(createDto.serviceIds, tenantId);
+
     // Si se marca como default, desactivar otros defaults del mismo tipo
     if (createDto.isDefault) {
       await this.templatesRepository.update(
@@ -62,8 +68,14 @@ export class ConsentTemplatesService {
     }
 
     const template = this.templatesRepository.create({
-      ...createDto,
+      name: createDto.name,
+      type: createDto.type,
+      content: createDto.content,
+      description: createDto.description,
+      isActive: createDto.isActive,
+      isDefault: createDto.isDefault,
       tenantId: tenantId || null,
+      services,
     });
 
     return this.templatesRepository.save(template);
@@ -74,6 +86,7 @@ export class ConsentTemplatesService {
     
     return this.templatesRepository.find({
       where: { tenantId: tenantId || null },
+      relations: ['services'],
       order: { type: 'ASC', createdAt: 'DESC' },
     });
   }
@@ -90,27 +103,78 @@ export class ConsentTemplatesService {
         type,
         isActive: true,
       },
+      relations: ['services'],
       order: { isDefault: 'DESC', createdAt: 'DESC' },
     });
   }
 
-  async findDefaultByType(
-    type: TemplateType,
-    tenantSlug?: string,
-  ): Promise<ConsentTemplate> {
-    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
-    
-    const template = await this.templatesRepository.findOne({
-      where: {
-        tenantId: tenantId || null,
-        type,
-        isDefault: true,
-        isActive: true,
-      },
-    });
+  /**
+     * Buscar plantilla por tipo y servicio
+     * Prioriza plantillas asociadas al servicio específico
+     */
+    async findByTypeAndService(
+      type: TemplateType,
+      serviceId: string,
+      tenantSlug?: string,
+    ): Promise<ConsentTemplate> {
+      const tenantId = await this.getTenantIdFromSlug(tenantSlug);
 
-    if (!template) {
-      // Si no hay plantilla default, buscar la primera activa
+      // Buscar plantilla activa asociada al servicio específico
+      const queryBuilder = this.templatesRepository
+        .createQueryBuilder('template')
+        .leftJoinAndSelect('template.services', 'service')
+        .where('template.type = :type', { type })
+        .andWhere('template.isActive = :isActive', { isActive: true })
+        .andWhere('service.id = :serviceId', { serviceId })
+        .orderBy('template.createdAt', 'DESC');
+
+      // Agregar condición de tenant correctamente
+      if (tenantId) {
+        queryBuilder.andWhere('template.tenantId = :tenantId', { tenantId });
+      } else {
+        queryBuilder.andWhere('template.tenantId IS NULL');
+      }
+
+      const templateWithService = await queryBuilder.getOne();
+
+      if (templateWithService) {
+        console.log(`[ConsentTemplates] ✅ Plantilla encontrada para servicio ${serviceId} y tipo ${type}:`, templateWithService.name);
+        console.log(`[ConsentTemplates] Contenido de la plantilla (primeros 100 chars):`, templateWithService.content.substring(0, 100));
+        return templateWithService;
+      }
+
+      // Si no hay plantilla asociada al servicio, buscar la primera activa del tipo
+      console.log(`[ConsentTemplates] ⚠️ No se encontró plantilla para servicio ${serviceId}, buscando plantilla activa del tipo ${type}`);
+      const firstActive = await this.templatesRepository.findOne({
+        where: {
+          tenantId: tenantId || null,
+          type,
+          isActive: true,
+        },
+        order: { createdAt: 'ASC' },
+      });
+
+      if (!firstActive) {
+        throw new NotFoundException(
+          `No se encontró plantilla activa para el tipo ${type}`,
+        );
+      }
+
+      console.log(`[ConsentTemplates] ℹ️ Usando plantilla activa por defecto:`, firstActive.name);
+      return firstActive;
+    }
+
+    /**
+     * @deprecated Usar findByTypeAndService en su lugar
+     * Buscar plantilla predeterminada por tipo (método legacy)
+     */
+    async findDefaultByType(
+      type: TemplateType,
+      tenantSlug?: string,
+    ): Promise<ConsentTemplate> {
+      const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+
+      // Buscar la primera plantilla activa del tipo
       const firstActive = await this.templatesRepository.findOne({
         where: {
           tenantId: tenantId || null,
@@ -129,8 +193,6 @@ export class ConsentTemplatesService {
       return firstActive;
     }
 
-    return template;
-  }
 
   async findOne(id: string, tenantSlug?: string): Promise<ConsentTemplate> {
     const tenantId = await this.getTenantIdFromSlug(tenantSlug);
@@ -140,6 +202,7 @@ export class ConsentTemplatesService {
         id,
         tenantId: tenantId || null,
       },
+      relations: ['services'],
     });
 
     if (!template) {
@@ -157,6 +220,12 @@ export class ConsentTemplatesService {
     const tenantId = await this.getTenantIdFromSlug(tenantSlug);
     const template = await this.findOne(id, tenantSlug);
 
+    // Si se actualizan los servicios, validarlos
+    if (updateDto.serviceIds) {
+      const services = await this.validateServices(updateDto.serviceIds, tenantId);
+      template.services = services;
+    }
+
     // Si se marca como default, desactivar otros defaults del mismo tipo
     if (updateDto.isDefault && !template.isDefault) {
       await this.templatesRepository.update(
@@ -169,7 +238,14 @@ export class ConsentTemplatesService {
       );
     }
 
-    Object.assign(template, updateDto);
+    // Actualizar campos básicos
+    if (updateDto.name !== undefined) template.name = updateDto.name;
+    if (updateDto.type !== undefined) template.type = updateDto.type;
+    if (updateDto.content !== undefined) template.content = updateDto.content;
+    if (updateDto.description !== undefined) template.description = updateDto.description;
+    if (updateDto.isActive !== undefined) template.isActive = updateDto.isActive;
+    if (updateDto.isDefault !== undefined) template.isDefault = updateDto.isDefault;
+
     return this.templatesRepository.save(template);
   }
 
@@ -399,6 +475,131 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
   }
 
   /**
+   * Valida que los servicios existan y pertenezcan al tenant
+   */
+  private async validateServices(serviceIds: string[], tenantId: string | null): Promise<Service[]> {
+    if (!serviceIds || serviceIds.length === 0) {
+      throw new BadRequestException('Debe asociar al menos un servicio a la plantilla');
+    }
+
+    const services = await this.servicesRepository.find({
+      where: {
+        id: In(serviceIds),
+        ...(tenantId && { tenant: { id: tenantId } }),
+      },
+    });
+
+    if (services.length !== serviceIds.length) {
+      throw new BadRequestException('Uno o más servicios no existen o no pertenecen a tu cuenta');
+    }
+
+    return services;
+  }
+
+  /**
+   * Obtiene plantillas por servicio
+   */
+  async findByService(serviceId: string, tenantSlug?: string): Promise<ConsentTemplate[]> {
+    const tenantId = await this.getTenantIdFromSlug(tenantSlug);
+
+    return this.templatesRepository
+      .createQueryBuilder('template')
+      .leftJoinAndSelect('template.services', 'service')
+      .where('template.tenantId = :tenantId', { tenantId: tenantId || null })
+      .andWhere('template.isActive = :isActive', { isActive: true })
+      .andWhere('service.id = :serviceId', { serviceId })
+      .orderBy('template.isDefault', 'DESC')
+      .addOrderBy('template.createdAt', 'DESC')
+      .getMany();
+  }
+
+  /**
+   * Método para Super Admin: obtener todas las plantillas CN agrupadas por tenant
+   */
+  async getAllGroupedByTenant() {
+    // Usar QueryBuilder para asegurar que solo se obtienen plantillas con tenant
+    const allTemplates = await this.templatesRepository
+      .createQueryBuilder('template')
+      .leftJoinAndSelect('template.tenant', 'tenant')
+      .where('template.tenantId IS NOT NULL') // Filtro SQL directo
+      .andWhere('tenant.id IS NOT NULL') // Asegurar que el tenant existe
+      .orderBy('template.createdAt', 'DESC')
+      .getMany();
+
+    // Agrupar por tenant
+    const groupedMap = new Map<string, any>();
+
+    allTemplates.forEach(template => {
+      const tenantId = template.tenantId;
+      
+      // Saltar si no tiene tenant (doble verificación)
+      if (!tenantId || !template.tenant) {
+        return;
+      }
+
+      const tenantName = template.tenant.name;
+      const tenantSlug = template.tenant.slug;
+
+      if (!groupedMap.has(tenantId)) {
+        groupedMap.set(tenantId, {
+          tenantId,
+          tenantName,
+          tenantSlug,
+          totalTemplates: 0,
+          activeTemplates: 0,
+          inactiveTemplates: 0,
+          procedureTemplates: 0,
+          dataTreatmentTemplates: 0,
+          imageRightsTemplates: 0,
+          templates: [],
+        });
+      }
+
+      const group = groupedMap.get(tenantId);
+      group.totalTemplates++;
+
+      if (template.isActive) {
+        group.activeTemplates++;
+      } else {
+        group.inactiveTemplates++;
+      }
+
+      // Contar por tipo
+      switch (template.type) {
+        case 'procedure':
+          group.procedureTemplates++;
+          break;
+        case 'data_treatment':
+          group.dataTreatmentTemplates++;
+          break;
+        case 'image_rights':
+          group.imageRightsTemplates++;
+          break;
+      }
+
+      group.templates.push({
+        id: template.id,
+        name: template.name,
+        type: template.type,
+        content: template.content,
+        description: template.description,
+        isActive: template.isActive,
+        isDefault: template.isDefault,
+        createdAt: template.createdAt,
+        updatedAt: template.updatedAt,
+        tenantName,
+        tenantSlug,
+      });
+    });
+
+    // Convertir Map a Array y ordenar por total de plantillas
+    const grouped = Array.from(groupedMap.values())
+      .sort((a, b) => b.totalTemplates - a.totalTemplates);
+
+    return grouped;
+  }
+
+  /**
    * Obtener estadísticas de plantillas de consentimientos convencionales
    */
   async getStatistics(tenantId: string) {
@@ -418,20 +619,20 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
       where: { tenantId, isActive: true },
     });
 
-    // Plantillas por categoría
-    const byCategory = await this.templatesRepository
+    // Plantillas por tipo
+    const byType = await this.templatesRepository
       .createQueryBuilder('template')
-      .select('template.category', 'category')
+      .select('template.type', 'type')
       .addSelect('COUNT(*)', 'count')
       .where('template."tenantId" = :tenantId', { tenantId })
-      .groupBy('template.category')
+      .groupBy('template.type')
       .getRawMany();
 
     return {
       total,
       active,
-      byCategory: byCategory.map(item => ({
-        category: item.category || 'Sin categoría',
+      byType: byType.map(item => ({
+        type: item.type || 'Sin tipo',
         count: parseInt(item.count),
       })),
     };

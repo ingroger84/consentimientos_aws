@@ -13,6 +13,7 @@ import { CreatePaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { RoleType } from '../roles/entities/role.entity';
 import { PaymentStatus } from './entities/payment.entity';
 
@@ -81,5 +82,21 @@ export class PaymentsController {
   @Roles(RoleType.SUPER_ADMIN)
   async findByTenant(@Param('tenantId') tenantId: string) {
     return await this.paymentsService.findByTenant(tenantId);
+  }
+
+  /**
+   * Procesar pago de Bold manualmente (cuando el webhook no llega)
+   * Este endpoint es público para permitir que la página de confirmación lo llame
+   */
+  @Public()
+  @Post('process-bold-payment')
+  async processBoldPayment(
+    @Body() body: { invoiceId: string; boldOrderId: string; boldTxStatus: string },
+  ) {
+    return await this.paymentsService.processBoldPaymentManually(
+      body.invoiceId,
+      body.boldOrderId,
+      body.boldTxStatus,
+    );
   }
 }

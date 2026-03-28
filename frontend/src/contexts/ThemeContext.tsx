@@ -131,6 +131,7 @@ export interface ThemeSettings {
   companyPhone: string;
   companyEmail: string;
   companyWebsite: string;
+  supportEmail: string;
   logoSize: number;
   logoPosition: 'left' | 'center' | 'right';
   watermarkOpacity: number;
@@ -169,6 +170,7 @@ const defaultSettings: ThemeSettings = {
   companyPhone: '',
   companyEmail: '',
   companyWebsite: '',
+  supportEmail: 'soporte@innovasystems.com',
   logoSize: 60,
   logoPosition: 'left',
   watermarkOpacity: 0.1,

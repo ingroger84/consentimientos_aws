@@ -26,28 +26,31 @@ export class TenantGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Verificar si la ruta permite bypass del tenant guard
-    const allowAnyTenant = this.reflector.get<boolean>(
-      'allowAnyTenant',
-      context.getHandler(),
-    );
-
-    if (allowAnyTenant) {
-      return true;
-    }
-
     const request = context.switchToHttp().getRequest();
+    const requestUrl = request.url || '';
+    const requestPath = requestUrl.split('?')[0]; // Remover query params
     const tenantSlug = request.tenantSlug; // Del middleware
     const user = request.user; // Del JwtAuthGuard
+
+    this.logger.debug(
+      `TenantGuard - Path: ${requestPath}, Tenant: ${tenantSlug || 'null'}, User: ${user?.email || 'null'}`,
+    );
 
     // Si no hay usuario autenticado, dejar que JwtAuthGuard lo maneje
     if (!user) {
       return true;
     }
 
-    this.logger.debug(
-      `Validando acceso - Subdominio: ${tenantSlug || 'null (admin o base)'}, Usuario: ${user.email}, Tenant del usuario: ${user.tenant?.slug || 'null'}`,
+    // Verificar si la ruta permite bypass del tenant guard
+    const allowAnyTenant = this.reflector.getAllAndOverride<boolean>(
+      'allowAnyTenant',
+      [context.getHandler(), context.getClass()],
     );
+
+    if (allowAnyTenant) {
+      this.logger.debug('✅ Bypassing TenantGuard due to @AllowAnyTenant() decorator');
+      return true;
+    }
 
     // Caso 1: Sin subdominio (dominio base o 'admin') - Solo Super Admin
     if (!tenantSlug) {
@@ -76,26 +79,47 @@ export class TenantGuard implements CanActivate {
         );
       }
 
-      // ✅ NUEVA VALIDACIÓN: Verificar el estado del tenant
+      // ✅ VERIFICAR ESTADO DEL TENANT
       try {
         const tenant = await this.tenantsService.findBySlug(tenantSlug);
         
-        if (tenant.status === 'suspended') {
-          this.logger.warn(
-            `Usuario ${user.email} intentó acceder a tenant suspendido: ${tenantSlug}`,
-          );
-          throw new ForbiddenException(
-            '⛔ Esta cuenta está suspendida por falta de pago. Por favor contacta al administrador o realiza el pago pendiente para reactivar tu cuenta.',
-          );
-        }
+        // Lista de endpoints que deben funcionar incluso con tenant suspendido
+        // Usar regex para matching más preciso
+        const suspendedAllowedPatterns = [
+          /^\/api\/invoices\/tenant\/[^\/]+$/,  // GET /api/invoices/tenant/:id
+          /^\/api\/invoices\/[^\/]+\/create-payment-link$/,  // POST /api/invoices/:id/create-payment-link
+          /^\/api\/tenants\/[^\/]+$/,  // GET /api/tenants/:id
+        ];
 
-        if (tenant.status === 'expired') {
-          this.logger.warn(
-            `Usuario ${user.email} intentó acceder a tenant expirado: ${tenantSlug}`,
-          );
-          throw new ForbiddenException(
-            '⏰ Esta cuenta ha expirado. Por favor contacta al administrador para renovar tu suscripción.',
-          );
+        const isSuspendedAllowedEndpoint = suspendedAllowedPatterns.some(pattern => 
+          pattern.test(requestPath)
+        );
+
+        // Si el tenant está suspendido o expirado, verificar si el endpoint está permitido
+        if (tenant.status === 'suspended' || tenant.status === 'expired') {
+          if (isSuspendedAllowedEndpoint) {
+            this.logger.debug(`✅ Allowing ${tenant.status} tenant access to: ${requestPath}`);
+            return true;
+          }
+
+          // Si no está en la lista permitida, bloquear acceso
+          if (tenant.status === 'suspended') {
+            this.logger.warn(
+              `❌ Usuario ${user.email} bloqueado - tenant suspendido: ${tenantSlug}, Path: ${requestPath}`,
+            );
+            throw new ForbiddenException(
+              '⛔ Esta cuenta está suspendida por falta de pago. Por favor contacta al administrador o realiza el pago pendiente para reactivar tu cuenta.',
+            );
+          }
+
+          if (tenant.status === 'expired') {
+            this.logger.warn(
+              `❌ Usuario ${user.email} bloqueado - tenant expirado: ${tenantSlug}, Path: ${requestPath}`,
+            );
+            throw new ForbiddenException(
+              '⏰ Esta cuenta ha expirado. Por favor contacta al administrador para renovar tu suscripción.',
+            );
+          }
         }
       } catch (error) {
         // Si el error ya es un ForbiddenException, re-lanzarlo

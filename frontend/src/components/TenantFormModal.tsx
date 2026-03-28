@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Check, Info } from 'lucide-react';
 import { tenantsService } from '../services/tenants';
 import { plansService, PlanConfig } from '../services/plans.service';
+import { documentTypesService, DocumentType } from '../services/document-types.service';
 import { Tenant, TenantStatus, TenantPlan, BillingCycle, CreateTenantDto } from '../types/tenant';
 
 interface TenantFormModalProps {
@@ -14,6 +15,7 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [plans, setPlans] = useState<PlanConfig[]>([]);
+  const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<PlanConfig | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(BillingCycle.MONTHLY);
   const [customizeLimits, setCustomizeLimits] = useState(false);
@@ -27,6 +29,11 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
     contactName: '',
     contactEmail: '',
     contactPhone: '',
+    documentTypeId: '',
+    documentNumber: '',
+    customPriceMonthly: undefined,
+    customPriceAnnual: undefined,
+    useCustomPrice: false,
     maxUsers: 2,
     maxBranches: 1,
     maxConsents: 50,
@@ -50,6 +57,7 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
 
   useEffect(() => {
     loadPlans();
+    loadDocumentTypes();
   }, []);
 
   useEffect(() => {
@@ -64,6 +72,11 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
         contactName: tenant.contactName || '',
         contactEmail: tenant.contactEmail || '',
         contactPhone: tenant.contactPhone || '',
+        documentTypeId: tenant.documentTypeId || '',
+        documentNumber: tenant.documentNumber || '',
+        customPriceMonthly: tenant.customPriceMonthly,
+        customPriceAnnual: tenant.customPriceAnnual,
+        useCustomPrice: tenant.useCustomPrice || false,
         maxUsers: tenant.maxUsers,
         maxBranches: tenant.maxBranches,
         maxConsents: tenant.maxConsents,
@@ -125,6 +138,15 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
     }
   };
 
+  const loadDocumentTypes = async () => {
+    try {
+      const data = await documentTypesService.getAll({ isActive: true });
+      setDocumentTypes(data);
+    } catch (error) {
+      console.error('Error loading document types:', error);
+    }
+  };
+
   const applyPlanLimits = (plan: PlanConfig) => {
     // Solo aplicar límites si no están personalizados
     if (!customizeLimits) {
@@ -179,7 +201,15 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
       if (tenant) {
         // Al editar, no enviamos adminUser
         const { adminUser, ...updateData } = formData;
-        await tenantsService.update(tenant.id, updateData);
+        
+        // Limpiar strings vacíos y convertirlos en null
+        const cleanedData = {
+          ...updateData,
+          documentTypeId: updateData.documentTypeId || null,
+          documentNumber: updateData.documentNumber || null,
+        };
+        
+        await tenantsService.update(tenant.id, cleanedData);
       } else {
         // Al crear, validamos que adminUser esté completo
         if (!formData.adminUser.name || !formData.adminUser.email || !formData.adminUser.password) {
@@ -192,8 +222,20 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
           setLoading(false);
           return;
         }
-        await tenantsService.create(formData);
+        
+        // Limpiar strings vacíos y convertirlos en null
+        const cleanedData = {
+          ...formData,
+          documentTypeId: formData.documentTypeId || null,
+          documentNumber: formData.documentNumber || null,
+        };
+        
+        await tenantsService.create(cleanedData);
       }
+      
+      // Mostrar mensaje de éxito
+      alert(tenant ? 'Tenant actualizado correctamente' : 'Tenant creado correctamente');
+      
       onSuccess();
     } catch (err: any) {
       console.error('Error al guardar tenant:', err);
@@ -542,6 +584,39 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
                   placeholder="Ej: +57 300 123 4567"
                 />
               </div>
+
+              {/* Campos de identificación */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Documento
+                </label>
+                <select
+                  value={formData.documentTypeId || ''}
+                  onChange={(e) => setFormData({ ...formData, documentTypeId: e.target.value })}
+                  className="input"
+                >
+                  <option value="">Seleccionar tipo...</option>
+                  {documentTypes.map((docType) => (
+                    <option key={docType.id} value={docType.id}>
+                      {docType.code} - {docType.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Número de Documento
+                </label>
+                <input
+                  type="text"
+                  value={formData.documentNumber || ''}
+                  onChange={(e) => setFormData({ ...formData, documentNumber: e.target.value })}
+                  className="input"
+                  placeholder="Ej: 1234567890"
+                  maxLength={50}
+                />
+              </div>
             </div>
           </div>
 
@@ -857,6 +932,105 @@ export default function TenantFormModal({ tenant, onClose, onSuccess }: TenantFo
               </div>
             </div>
           </div>
+
+          {/* Precios Personalizados */}
+          {selectedPlan && selectedPlan.id !== 'free' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Precio Personalizado</h3>
+                  <p className="text-sm text-gray-600">
+                    {formData.useCustomPrice
+                      ? 'Precio personalizado activo. Este tenant pagará el precio que establezcas aquí.'
+                      : `Precio del plan: ${plansService.formatPrice(selectedPlan.priceMonthly)}/mes o ${plansService.formatPrice(selectedPlan.priceAnnual)}/año`}
+                  </p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.useCustomPrice || false}
+                    onChange={(e) => setFormData(prev => ({ ...prev, useCustomPrice: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Usar precio personalizado
+                  </span>
+                </label>
+              </div>
+
+              {formData.useCustomPrice && (
+                <div className="space-y-4">
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm text-yellow-800 font-medium">
+                          Precios base del plan {selectedPlan.name}:
+                        </p>
+                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-yellow-700">
+                          <div>Mensual: {plansService.formatPrice(selectedPlan.priceMonthly)}</div>
+                          <div>Anual: {plansService.formatPrice(selectedPlan.priceAnnual)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Precio Mensual Personalizado (COP)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.customPriceMonthly || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          customPriceMonthly: e.target.value ? parseFloat(e.target.value) : undefined 
+                        }))}
+                        min="0"
+                        step="1000"
+                        className="input"
+                        placeholder={`Por defecto: ${plansService.formatPrice(selectedPlan.priceMonthly)}`}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Deja vacío para usar el precio del plan
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Precio Anual Personalizado (COP)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.customPriceAnnual || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          customPriceAnnual: e.target.value ? parseFloat(e.target.value) : undefined 
+                        }))}
+                        min="0"
+                        step="1000"
+                        className="input"
+                        placeholder={`Por defecto: ${plansService.formatPrice(selectedPlan.priceAnnual)}`}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Deja vacío para usar el precio del plan
+                      </p>
+                    </div>
+                  </div>
+
+                  {formData.customPriceMonthly && formData.customPriceAnnual && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <strong>Ahorro anual:</strong> {plansService.formatPrice((formData.customPriceMonthly * 12) - formData.customPriceAnnual)}
+                        {' '}({Math.round(((formData.customPriceMonthly * 12 - formData.customPriceAnnual) / (formData.customPriceMonthly * 12)) * 100)}% de descuento)
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-end space-x-3 pt-6 border-t">

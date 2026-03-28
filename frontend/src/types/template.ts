@@ -10,6 +10,13 @@ export const TEMPLATE_TYPE_LABELS: Record<TemplateType, string> = {
   [TemplateType.IMAGE_RIGHTS]: 'Derechos de Imagen',
 };
 
+export interface Service {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
 export interface ConsentTemplate {
   id: string;
   tenantId?: string;
@@ -19,6 +26,7 @@ export interface ConsentTemplate {
   description?: string;
   isActive: boolean;
   isDefault: boolean;
+  services?: Service[];
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +38,7 @@ export interface CreateTemplateDto {
   description?: string;
   isActive?: boolean;
   isDefault?: boolean;
+  serviceIds: string[];
 }
 
 export interface UpdateTemplateDto {
@@ -38,6 +47,7 @@ export interface UpdateTemplateDto {
   description?: string;
   isActive?: boolean;
   isDefault?: boolean;
+  serviceIds?: string[];
 }
 
 export interface TemplateVariable {

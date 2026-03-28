@@ -88,6 +88,16 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       const message = error.response?.data?.message || '';
       
+      // NO redirigir si es un endpoint público
+      const isPublicEndpoint = originalRequest.url?.includes('/plans/public') || 
+                               originalRequest.url?.includes('/tenants/plans') ||
+                               originalRequest.url?.includes('/document-types');
+      
+      if (isPublicEndpoint) {
+        console.log('[API] Endpoint público retornó 401, no redirigiendo al login');
+        return Promise.reject(error);
+      }
+      
       // Verificar si es un error de sesión cerrada por otro dispositivo
       if (message.includes('sesión ha sido cerrada') || message.includes('iniciaste sesión en otro dispositivo')) {
         // Mostrar alerta antes de redirigir
@@ -110,19 +120,36 @@ api.interceptors.response.use(
     // Manejar cuenta suspendida o expirada (403)
     if (error.response?.status === 403) {
       const message = error.response?.data?.message || '';
+      const errorCode = error.response?.data?.error || '';
       
-      // Verificar si es un error de cuenta suspendida o expirada
+      // IMPORTANTE: Verificar TENANT_SUSPENDED PRIMERO antes de verificar el mensaje
+      // Si es un error de TENANT_SUSPENDED desde el login, NO interceptar
+      // Dejar que el LoginPage maneje la redirección a /public-suspended
+      if (errorCode === 'TENANT_SUSPENDED') {
+        console.log('[API] TENANT_SUSPENDED detectado, dejando que el componente maneje la redirección');
+        return Promise.reject(error);
+      }
+      
+      // Solo verificar el mensaje si NO es TENANT_SUSPENDED
+      // Verificar si es un error de cuenta suspendida o expirada (para usuarios ya autenticados)
       if (message.includes('suspendida') || message.includes('suspended')) {
-        // Redirigir a la página de cuenta suspendida
-        if (!window.location.pathname.includes('/suspended')) {
-          window.location.href = '/suspended';
+        // Si ya estamos en la página de suspendida, NO redirigir y dejar que el componente maneje el error
+        if (window.location.pathname.includes('/suspended')) {
+          console.log('[API] Ya estamos en /suspended, permitiendo que el componente maneje el error');
+          return Promise.reject(error);
         }
+        // Redirigir a la página de cuenta suspendida (para usuarios autenticados)
+        console.log('[API] Cuenta suspendida detectada (usuario autenticado), redirigiendo a /suspended');
+        window.location.href = '/suspended';
         return Promise.reject(error);
       } else if (message.includes('expirado') || message.includes('expired')) {
-        // Redirigir a la página de cuenta expirada (o suspendida)
-        if (!window.location.pathname.includes('/suspended')) {
-          window.location.href = '/suspended';
+        // Si ya estamos en la página de suspendida, NO redirigir
+        if (window.location.pathname.includes('/suspended')) {
+          console.log('[API] Ya estamos en /suspended, permitiendo que el componente maneje el error');
+          return Promise.reject(error);
         }
+        // Redirigir a la página de cuenta expirada (o suspendida)
+        window.location.href = '/suspended';
         return Promise.reject(error);
       }
       

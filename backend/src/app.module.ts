@@ -2,6 +2,7 @@ import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -25,6 +26,8 @@ import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { MRConsentTemplatesModule } from './medical-record-consent-templates/mr-consent-templates.module';
 import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
+import { BackupsModule } from './backups/backups.module';
+import { DocumentTypesModule } from './document-types/document-types.module';
 import { Role } from './roles/entities/role.entity';
 import { User } from './users/entities/user.entity';
 import { Branch } from './branches/entities/branch.entity';
@@ -53,6 +56,8 @@ import { Admission } from './medical-records/entities/admission.entity';
 import { MRConsentTemplate } from './medical-record-consent-templates/entities/mr-consent-template.entity';
 import { UserSession } from './auth/entities/user-session.entity';
 import { PlanPricing } from './plans/entities/plan-pricing.entity';
+import { DocumentType } from './document-types/entities/document-type.entity';
+import { WebhookLog } from './webhooks/entities/webhook-log.entity';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { TenantGuard } from './common/guards/tenant.guard';
 import { SessionGuard } from './auth/guards/session.guard';
@@ -64,6 +69,9 @@ import { SessionGuard } from './auth/guards/session.guard';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    // Schedule (Cron jobs)
+    ScheduleModule.forRoot(),
 
     // Database
     TypeOrmModule.forRootAsync({
@@ -107,6 +115,8 @@ import { SessionGuard } from './auth/guards/session.guard';
             Admission,
             MRConsentTemplate,
             PlanPricing,
+            DocumentType,
+            WebhookLog,
           ],
           synchronize: configService.get('NODE_ENV') === 'development',
           logging: configService.get('NODE_ENV') === 'development',
@@ -152,6 +162,8 @@ import { SessionGuard } from './auth/guards/session.guard';
     MedicalRecordsModule,
     MRConsentTemplatesModule,
     HealthModule,
+    BackupsModule,
+    DocumentTypesModule,
   ],
   providers: [
     // Registrar TenantGuard globalmente

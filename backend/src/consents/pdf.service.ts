@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PDFDocument, PDFPage, rgb, StandardFonts, PDFImage } from 'pdf-lib';
+import { PDFDocument, PDFPage, rgb, StandardFonts, PDFImage, PDFFont } from 'pdf-lib';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as fontkit from '@pdf-lib/fontkit';
 import { Consent } from './entities/consent.entity';
 import { SettingsService } from '../settings/settings.service';
 import { StorageService } from '../common/services/storage.service';
+import { ConsentTemplatesService } from '../consent-templates/consent-templates.service';
+import { ConsentTemplate, TemplateType } from '../consent-templates/entities/consent-template.entity';
 
 interface PdfGenerationResult {
   procedurePdfUrl: string;
@@ -43,6 +46,8 @@ export class PdfService {
     private configService: ConfigService,
     private settingsService: SettingsService,
     private storageService: StorageService,
+    @Inject(forwardRef(() => ConsentTemplatesService))
+    private consentTemplatesService: ConsentTemplatesService,
   ) {}
 
   async generateAllConsentPdfs(consent: Consent): Promise<PdfGenerationResult> {
@@ -58,17 +63,64 @@ export class PdfService {
 
   async generateUnifiedConsentPdf(consent: Consent): Promise<string> {
     const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    
+    // Register fontkit to support custom fonts
+    pdfDoc.registerFontkit(fontkit);
+    
+    // Load Roboto fonts (support UTF-8 and Spanish characters)
+    const fontPath = path.join(process.cwd(), 'assets', 'fonts');
+    const fontRegularBytes = await fs.readFile(path.join(fontPath, 'Roboto-Regular.ttf'));
+    const fontBoldBytes = await fs.readFile(path.join(fontPath, 'Roboto-Bold.ttf'));
+    
+    const font = await pdfDoc.embedFont(fontRegularBytes);
+    const fontBold = await pdfDoc.embedFont(fontBoldBytes);
 
     // Cargar tema personalizado con el tenantId del consentimiento
     const tenantId = consent.tenant?.id;
     const theme = await this.loadPdfTheme(pdfDoc, tenantId);
 
-    // Add all 3 sections to the same PDF
-    await this.addProcedureSection(pdfDoc, consent, font, fontBold, theme);
-    await this.addDataTreatmentSection(pdfDoc, consent, font, fontBold, theme);
-    await this.addImageRightsSection(pdfDoc, consent, font, fontBold, theme);
+    // Obtener plantillas del tenant basándose en el servicio del consentimiento
+    const tenantSlug = consent.tenant?.slug;
+    const serviceId = consent.service?.id;
+    console.log('[PDF Service] Obteniendo plantillas para tenant:', tenantSlug || 'Super Admin');
+    console.log('[PDF Service] Servicio del consentimiento:', serviceId);
+    
+    if (!serviceId) {
+      throw new Error('El consentimiento no tiene un servicio asociado');
+    }
+    
+    let procedureTemplate: ConsentTemplate;
+    let dataTreatmentTemplate: ConsentTemplate;
+    let imageRightsTemplate: ConsentTemplate;
+
+    try {
+      procedureTemplate = await this.consentTemplatesService.findByTypeAndService(TemplateType.PROCEDURE, serviceId, tenantSlug);
+      console.log('[PDF Service] Plantilla procedure encontrada:', procedureTemplate.name);
+    } catch (error) {
+      console.error('[PDF Service] Error obteniendo plantilla procedure:', error.message);
+      throw new Error('No se encontró plantilla de procedimiento para este servicio');
+    }
+
+    try {
+      dataTreatmentTemplate = await this.consentTemplatesService.findByTypeAndService(TemplateType.DATA_TREATMENT, serviceId, tenantSlug);
+      console.log('[PDF Service] Plantilla data_treatment encontrada:', dataTreatmentTemplate.name);
+    } catch (error) {
+      console.error('[PDF Service] Error obteniendo plantilla data_treatment:', error.message);
+      throw new Error('No se encontró plantilla de tratamiento de datos para este servicio');
+    }
+
+    try {
+      imageRightsTemplate = await this.consentTemplatesService.findByTypeAndService(TemplateType.IMAGE_RIGHTS, serviceId, tenantSlug);
+      console.log('[PDF Service] Plantilla image_rights encontrada:', imageRightsTemplate.name);
+    } catch (error) {
+      console.error('[PDF Service] Error obteniendo plantilla image_rights:', error.message);
+      throw new Error('No se encontró plantilla de derechos de imagen para este servicio');
+    }
+
+    // Add all 3 sections to the same PDF usando las plantillas del tenant
+    await this.addProcedureSection(pdfDoc, consent, font, fontBold, theme, procedureTemplate);
+    await this.addDataTreatmentSection(pdfDoc, consent, font, fontBold, theme, dataTreatmentTemplate);
+    await this.addImageRightsSection(pdfDoc, consent, font, fontBold, theme, imageRightsTemplate);
 
     // Save unified PDF
     const pdfBytes = await pdfDoc.save();
@@ -234,19 +286,19 @@ export class PdfService {
   private addFooter(page: PDFPage, font: any, theme: PdfTheme): void {
     const { width, height } = page.getSize();
     const margin = 50;
-    const footerY = 30;
+    const footerY = 40; // Aumentado de 30 a 40 para más espacio
 
     // Línea separadora
     page.drawLine({
-      start: { x: margin, y: footerY + 20 },
-      end: { x: width - margin, y: footerY + 20 },
+      start: { x: margin, y: footerY + 25 },
+      end: { x: width - margin, y: footerY + 25 },
       thickness: 0.5,
       color: rgb(theme.borderColor.r, theme.borderColor.g, theme.borderColor.b),
     });
 
     // Logo del footer (si existe)
     if (theme.footerLogoImage) {
-      const logoSize = 30;
+      const logoSize = 25; // Reducido de 30 a 25 para ocupar menos espacio
       const imgWidth = theme.footerLogoImage.width;
       const imgHeight = theme.footerLogoImage.height;
       let drawWidth = logoSize;
@@ -260,26 +312,30 @@ export class PdfService {
 
       page.drawImage(theme.footerLogoImage, {
         x: margin,
-        y: footerY - 5,
+        y: footerY,
         width: drawWidth,
         height: drawHeight,
       });
     }
 
     // Información de contacto
-    const contactX = theme.footerLogoImage ? margin + 40 : margin;
-    let currentY = footerY + 10;
+    const contactX = theme.footerLogoImage ? margin + 35 : margin;
+    let currentY = footerY + 15;
 
     if (theme.companyAddress) {
       const addressText = this.removeEmojis(`Direccion: ${theme.companyAddress}`);
-      page.drawText(addressText, {
+      const maxWidth = width - contactX - margin - 100; // Reservar espacio para el texto del footer
+      const addressLines = this.wrapText(addressText, font, 7, maxWidth);
+      
+      // Solo mostrar la primera línea si es muy largo
+      page.drawText(addressLines[0], {
         x: contactX,
         y: currentY,
         size: 7,
         font,
         color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
       });
-      currentY -= 10;
+      currentY -= 9;
     }
 
     const contactInfo: string[] = [];
@@ -288,7 +344,12 @@ export class PdfService {
     if (theme.companyWebsite) contactInfo.push(this.removeEmojis(`Web: ${theme.companyWebsite}`));
 
     if (contactInfo.length > 0) {
-      page.drawText(contactInfo.join('  |  '), {
+      const contactText = contactInfo.join('  |  ');
+      const maxWidth = width - contactX - margin - 100;
+      const contactLines = this.wrapText(contactText, font, 7, maxWidth);
+      
+      // Solo mostrar la primera línea
+      page.drawText(contactLines[0], {
         x: contactX,
         y: currentY,
         size: 7,
@@ -297,12 +358,17 @@ export class PdfService {
       });
     }
 
-    // Texto personalizado del footer
+    // Texto personalizado del footer (alineado a la derecha)
     if (theme.footerText) {
       const cleanFooterText = this.removeEmojis(theme.footerText);
-      page.drawText(cleanFooterText, {
-        x: width - margin - font.widthOfTextAtSize(cleanFooterText, 7),
-        y: footerY + 5,
+      const maxWidth = 200; // Ancho máximo para el texto del footer
+      const footerLines = this.wrapText(cleanFooterText, font, 7, maxWidth);
+      
+      // Solo mostrar la primera línea
+      const textWidth = font.widthOfTextAtSize(footerLines[0], 7);
+      page.drawText(footerLines[0], {
+        x: width - margin - textWidth,
+        y: footerY + 10,
         size: 7,
         font,
         color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
@@ -316,6 +382,7 @@ export class PdfService {
     font: any,
     fontBold: any,
     theme: PdfTheme,
+    template: ConsentTemplate,
   ): Promise<void> {
     let page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
@@ -460,9 +527,18 @@ export class PdfService {
 
     yPosition -= 15;
 
-    // Questions and answers
+    // Questions and answers - DYNAMIC TEXT HANDLING
+    let currentPage = page;
     if (consent.answers && consent.answers.length > 0) {
-      page.drawText('PREGUNTAS Y RESPUESTAS', {
+      // Verificar espacio para el título de la sección
+      if (yPosition < 180) {
+        this.addFooter(currentPage, font, theme);
+        currentPage = pdfDoc.addPage([595, 842]);
+        this.addWatermark(currentPage, theme);
+        yPosition = height - 50;
+      }
+
+      currentPage.drawText('PREGUNTAS Y RESPUESTAS', {
         x: margin,
         y: yPosition,
         size: 14,
@@ -471,7 +547,7 @@ export class PdfService {
       });
 
       yPosition -= 5;
-      page.drawLine({
+      currentPage.drawLine({
         start: { x: margin, y: yPosition },
         end: { x: width - margin, y: yPosition },
         thickness: 2,
@@ -481,24 +557,35 @@ export class PdfService {
       yPosition -= 25;
 
       for (const answer of consent.answers) {
-        if (yPosition < 150) {
-          // Agregar footer a la página actual
-          this.addFooter(page, font, theme);
-          
-          page = pdfDoc.addPage([595, 842]);
-          this.addWatermark(page, theme);
-          yPosition = height - 50;
-        }
-
+        console.log('=== PROCESANDO PREGUNTA/RESPUESTA ===');
+        console.log('Pregunta:', answer.question.questionText);
+        console.log('Respuesta:', answer.value);
+        console.log('yPosition INICIAL:', yPosition);
+        
+        // Wrap question text into multiple lines
         const questionLines = this.wrapText(
           answer.question.questionText,
           font,
           10,
           contentWidth - 20,
         );
+        
+        console.log('Pregunta dividida en', questionLines.length, 'lineas');
 
-        for (const line of questionLines) {
-          page.drawText(line, {
+        // Draw each line of the question, checking space BEFORE each line
+        for (let i = 0; i < questionLines.length; i++) {
+          const line = questionLines[i];
+          console.log(`  Linea pregunta ${i + 1}/${questionLines.length}: "${line}" en y=${yPosition}`);
+          
+          if (yPosition < 180) {
+            console.log('  -> Creando nueva pagina (yPosition < 180)');
+            this.addFooter(currentPage, font, theme);
+            currentPage = pdfDoc.addPage([595, 842]);
+            this.addWatermark(currentPage, theme);
+            yPosition = height - 50;
+          }
+          
+          currentPage.drawText(line, {
             x: margin + 5,
             y: yPosition,
             size: 10,
@@ -506,20 +593,49 @@ export class PdfService {
             color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
           });
           yPosition -= 15;
+          console.log(`  -> yPosition despues de dibujar: ${yPosition}`);
         }
 
-        page.drawText(`Respuesta: ${answer.value}`, {
-          x: margin + 10,
-          y: yPosition,
-          size: 10,
-          font,
-          color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
-        });
-        yPosition -= 20;
+        // Wrap answer text into multiple lines
+        const answerText = `Respuesta: ${answer.value}`;
+        const answerLines = this.wrapText(answerText, font, 10, contentWidth - 20);
+        
+        console.log('Respuesta dividida en', answerLines.length, 'lineas');
+
+        // Draw each line of the answer, checking space BEFORE each line
+        for (let i = 0; i < answerLines.length; i++) {
+          const line = answerLines[i];
+          console.log(`  Linea respuesta ${i + 1}/${answerLines.length}: "${line}" en y=${yPosition}`);
+          
+          if (yPosition < 180) {
+            console.log('  -> Creando nueva pagina (yPosition < 180)');
+            this.addFooter(currentPage, font, theme);
+            currentPage = pdfDoc.addPage([595, 842]);
+            this.addWatermark(currentPage, theme);
+            yPosition = height - 50;
+          }
+
+          currentPage.drawText(line, {
+            x: margin + 10,
+            y: yPosition,
+            size: 10,
+            font,
+            color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
+          });
+          yPosition -= 15;
+          console.log(`  -> yPosition despues de dibujar: ${yPosition}`);
+        }
+
+        yPosition -= 10; // Extra space between Q&A pairs
+        console.log('yPosition FINAL despues de Q&A:', yPosition);
+        console.log('=====================================');
       }
     }
+    
+    // Update page reference for remaining code
+    page = currentPage;
 
-    // Declaration
+    // Contenido de la plantilla personalizada del tenant
     if (yPosition < 200) {
       this.addFooter(page, font, theme);
       page = pdfDoc.addPage([595, 842]);
@@ -547,24 +663,71 @@ export class PdfService {
 
     yPosition -= 25;
 
-    const declaration = [
-      'Declaro que he sido informado(a) sobre el procedimiento/servicio mencionado,',
-      'sus beneficios, riesgos y alternativas. Autorizo voluntariamente la realización',
-      'del procedimiento/servicio descrito en este documento.',
-    ];
+    // Reemplazar variables en el contenido de la plantilla
+    const templateContent = this.replaceTemplateVariables(template.content, {
+      clientName: consent.clientName,
+      clientId: consent.clientId,
+      clientEmail: consent.clientEmail,
+      clientPhone: consent.clientPhone || 'N/A',
+      serviceName: consent.service.name,
+      branchName: consent.branch.name,
+      branchAddress: consent.branch.address || 'N/A',
+      branchPhone: consent.branch.phone || 'N/A',
+      branchEmail: consent.branch.email || 'N/A',
+      companyName: theme.companyName,
+      signDate: consent.signedAt ? consent.signedAt.toLocaleDateString('es-ES') : new Date().toLocaleDateString('es-ES'),
+      signTime: consent.signedAt ? consent.signedAt.toLocaleTimeString('es-ES') : new Date().toLocaleTimeString('es-ES'),
+      currentDate: new Date().toLocaleDateString('es-ES'),
+      currentYear: new Date().getFullYear().toString(),
+    });
 
-    for (const line of declaration) {
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: 10,
-        font,
-        color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
-      });
-      yPosition -= 15;
+    console.log('[PDF Service] Usando plantilla:', template.name);
+    console.log('[PDF Service] Contenido procesado (primeros 200 chars):', templateContent.substring(0, 200));
+
+    // Renderizar contenido de la plantilla
+    const contentLines = templateContent.split('\n');
+    for (const line of contentLines) {
+      if (!line.trim()) {
+        yPosition -= 10; // Espacio para líneas vacías
+        continue;
+      }
+
+      const wrappedLines = this.wrapText(line, font, 10, contentWidth);
+      for (const wrappedLine of wrappedLines) {
+        // Verificar espacio ANTES de dibujar cada línea
+        if (yPosition < 180) {
+          this.addFooter(page, font, theme);
+          page = pdfDoc.addPage([595, 842]);
+          this.addWatermark(page, theme);
+          yPosition = height - 50;
+        }
+        
+        page.drawText(wrappedLine, {
+          x: margin,
+          y: yPosition,
+          size: 10,
+          font,
+          color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
+        });
+        yPosition -= 15;
+      }
     }
 
     yPosition -= 20;
+
+    // Calcular espacio necesario para la firma dinámicamente
+    // Firma necesita: título (15px) + caja (100px) + fecha (15px) + margen (20px) = ~150px
+    const signatureSpaceNeeded = 150;
+    const footerSpace = 80; // Espacio reservado para el footer
+    const minSpaceForSignature = signatureSpaceNeeded + footerSpace;
+
+    // Verificar si hay espacio suficiente para la firma
+    if (yPosition < minSpaceForSignature) {
+      this.addFooter(page, font, theme);
+      page = pdfDoc.addPage([595, 842]);
+      this.addWatermark(page, theme);
+      yPosition = height - 50;
+    }
 
     // Signature
     await this.addSignatureSection(pdfDoc, page, consent, font, fontBold, margin, yPosition, theme);
@@ -579,6 +742,7 @@ export class PdfService {
     font: any,
     fontBold: any,
     theme: PdfTheme,
+    template: ConsentTemplate,
   ): Promise<void> {
     const page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
@@ -658,38 +822,70 @@ export class PdfService {
 
     yPosition = height - 120;
 
-    // Content
-    const content = [
-      'De acuerdo con la Ley Estatutaria 1581 de 2.012 de Protección de Datos y sus normas',
-      'reglamentarias, doy mi consentimiento, como Titular de los datos, para que éstos sean',
-      `incorporados en una base de datos responsabilidad de ${consent.branch.name}, para que sean`,
-      'tratados con arreglo a los siguientes criterios:',
-      '',
-      'La finalidad del tratamiento será la que se defina en cada caso concreto, respetando en',
-      'todo momento con los principios básicos que marca la Ley.',
-      '',
-      'La posibilidad de ejercitar los derechos de acceso, corrección, supresión, revocación o',
-      `reclamo por infracción sobre mis datos, con un escrito dirigido a ${consent.branch.name},`,
-      `a la dirección de correo electrónico ${consent.branch.email}, indicando en el asunto el`,
-      'derecho que desea ejercitar, o mediante correo ordinario remitido a',
-      `${consent.branch.address}.`,
-    ];
+    // Reemplazar variables en el contenido de la plantilla
+    const templateContent = this.replaceTemplateVariables(template.content, {
+      clientName: consent.clientName,
+      clientId: consent.clientId,
+      clientEmail: consent.clientEmail,
+      clientPhone: consent.clientPhone || 'N/A',
+      serviceName: consent.service.name,
+      branchName: consent.branch.name,
+      branchAddress: consent.branch.address || 'N/A',
+      branchPhone: consent.branch.phone || 'N/A',
+      branchEmail: consent.branch.email || 'N/A',
+      companyName: theme.companyName,
+      signDate: consent.signedAt ? consent.signedAt.toLocaleDateString('es-ES') : new Date().toLocaleDateString('es-ES'),
+      signTime: consent.signedAt ? consent.signedAt.toLocaleTimeString('es-ES') : new Date().toLocaleTimeString('es-ES'),
+      currentDate: new Date().toLocaleDateString('es-ES'),
+      currentYear: new Date().getFullYear().toString(),
+    });
 
-    for (const line of content) {
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: 10,
-        font,
-        color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
-      });
-      yPosition -= 15;
+    console.log('[PDF Service] Usando plantilla data_treatment:', template.name);
+
+    // Renderizar contenido de la plantilla
+    const contentLines = templateContent.split('\n');
+    const contentWidth = width - (margin * 2);
+    let currentPage = page;
+    
+    for (const line of contentLines) {
+      if (!line.trim()) {
+        yPosition -= 10;
+        continue;
+      }
+
+      const wrappedLines = this.wrapText(line, font, 10, contentWidth);
+      for (const wrappedLine of wrappedLines) {
+        // Verificar espacio ANTES de cada línea
+        if (yPosition < 180) {
+          this.addFooter(currentPage, font, theme);
+          currentPage = pdfDoc.addPage([595, 842]);
+          this.addWatermark(currentPage, theme);
+          yPosition = height - 50;
+        }
+
+        currentPage.drawText(wrappedLine, {
+          x: margin,
+          y: yPosition,
+          size: 10,
+          font,
+          color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
+        });
+        yPosition -= 15;
+      }
     }
 
     yPosition -= 20;
 
+    // Verificar espacio para el título de cliente
+    if (yPosition < 180) {
+      this.addFooter(currentPage, font, theme);
+      currentPage = pdfDoc.addPage([595, 842]);
+      this.addWatermark(currentPage, theme);
+      yPosition = height - 50;
+    }
+
     // Client info
-    page.drawText('TITULAR DE LOS DATOS', {
+    currentPage.drawText('TITULAR DE LOS DATOS', {
       x: margin,
       y: yPosition,
       size: 12,
@@ -706,14 +902,22 @@ export class PdfService {
     ];
 
     for (const info of clientInfo) {
-      page.drawText(info.label, {
+      // Verificar espacio antes de cada línea de info
+      if (yPosition < 180) {
+        this.addFooter(currentPage, font, theme);
+        currentPage = pdfDoc.addPage([595, 842]);
+        this.addWatermark(currentPage, theme);
+        yPosition = height - 50;
+      }
+
+      currentPage.drawText(info.label, {
         x: margin,
         y: yPosition,
         size: 10,
         font: fontBold,
         color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
       });
-      page.drawText(info.value, {
+      currentPage.drawText(info.value, {
         x: margin + 120,
         y: yPosition,
         size: 10,
@@ -725,11 +929,25 @@ export class PdfService {
 
     yPosition -= 10;
 
+    // Calcular espacio necesario para la firma dinámicamente
+    const signatureSpaceNeeded = 150;
+    const footerSpace = 80;
+    const minSpaceForSignature = signatureSpaceNeeded + footerSpace;
+
+    // Verificar si hay espacio suficiente para la firma
+    let signaturePage = currentPage;
+    if (yPosition < minSpaceForSignature) {
+      this.addFooter(currentPage, font, theme);
+      signaturePage = pdfDoc.addPage([595, 842]);
+      this.addWatermark(signaturePage, theme);
+      yPosition = height - 50;
+    }
+
     // Signature
-    await this.addSignatureSection(pdfDoc, page, consent, font, fontBold, margin, yPosition, theme);
+    await this.addSignatureSection(pdfDoc, signaturePage, consent, font, fontBold, margin, yPosition, theme);
 
     // Agregar footer
-    this.addFooter(page, font, theme);
+    this.addFooter(signaturePage, font, theme);
   }
 
   private async addImageRightsSection(
@@ -738,6 +956,7 @@ export class PdfService {
     font: any,
     fontBold: any,
     theme: PdfTheme,
+    template: ConsentTemplate,
   ): Promise<void> {
     const page = pdfDoc.addPage([595, 842]);
     const { width, height } = page.getSize();
@@ -817,41 +1036,70 @@ export class PdfService {
 
     yPosition = height - 120;
 
-    // Content
-    const content = [
-      'De acuerdo con la Ley Estatutaria 1581 de 2.012 de Protección de Datos y normas',
-      'reglamentarias, y a las demás normas concordantes, autorizo como titular de mis datos',
-      'biométricos relacionados con imágenes fotográficas, para que sean incorporadas en una',
-      `base de datos responsabilidad de ${consent.branch.name}, con la finalidad de:`,
-      '',
-      '• Actividades asociativas, culturales, recreativas, deportivas y sociales',
-      '• Capacitación y Educación',
-      '• Fines históricos, científicos o estadísticos',
-      '• Gestión de estadísticas internas',
-      '• Marketing, Publicidad y prospección comercial',
-      '',
-      'De igual modo, declaro haber sido informado de que puedo ejercitar mis derechos de',
-      'acceso, corrección, supresión, revocación o reclamo por infracción sobre mis datos,',
-      `mediante escrito dirigido a ${consent.branch.name}, a la dirección de correo electrónico`,
-      `${consent.branch.email}, indicando en el asunto el derecho que desea ejercitar, o`,
-      `mediante correo ordinario remitido a ${consent.branch.address}.`,
-    ];
+    // Reemplazar variables en el contenido de la plantilla
+    const templateContent = this.replaceTemplateVariables(template.content, {
+      clientName: consent.clientName,
+      clientId: consent.clientId,
+      clientEmail: consent.clientEmail,
+      clientPhone: consent.clientPhone || 'N/A',
+      serviceName: consent.service.name,
+      branchName: consent.branch.name,
+      branchAddress: consent.branch.address || 'N/A',
+      branchPhone: consent.branch.phone || 'N/A',
+      branchEmail: consent.branch.email || 'N/A',
+      companyName: theme.companyName,
+      signDate: consent.signedAt ? consent.signedAt.toLocaleDateString('es-ES') : new Date().toLocaleDateString('es-ES'),
+      signTime: consent.signedAt ? consent.signedAt.toLocaleTimeString('es-ES') : new Date().toLocaleTimeString('es-ES'),
+      currentDate: new Date().toLocaleDateString('es-ES'),
+      currentYear: new Date().getFullYear().toString(),
+    });
 
-    for (const line of content) {
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: 10,
-        font,
-        color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
-      });
-      yPosition -= 15;
+    console.log('[PDF Service] Usando plantilla image_rights:', template.name);
+
+    // Renderizar contenido de la plantilla
+    const contentLines = templateContent.split('\n');
+    const contentWidth = width - (margin * 2);
+    let currentPage = page;
+    
+    for (const line of contentLines) {
+      if (!line.trim()) {
+        yPosition -= 10;
+        continue;
+      }
+
+      const wrappedLines = this.wrapText(line, font, 10, contentWidth);
+      for (const wrappedLine of wrappedLines) {
+        // Verificar espacio ANTES de cada línea
+        if (yPosition < 180) {
+          this.addFooter(currentPage, font, theme);
+          currentPage = pdfDoc.addPage([595, 842]);
+          this.addWatermark(currentPage, theme);
+          yPosition = height - 50;
+        }
+
+        currentPage.drawText(wrappedLine, {
+          x: margin,
+          y: yPosition,
+          size: 10,
+          font,
+          color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
+        });
+        yPosition -= 15;
+      }
     }
 
     yPosition -= 20;
 
+    // Verificar espacio para el título de cliente
+    if (yPosition < 180) {
+      this.addFooter(currentPage, font, theme);
+      currentPage = pdfDoc.addPage([595, 842]);
+      this.addWatermark(currentPage, theme);
+      yPosition = height - 50;
+    }
+
     // Client info
-    page.drawText('TITULAR DE LOS DATOS', {
+    currentPage.drawText('TITULAR DE LOS DATOS', {
       x: margin,
       y: yPosition,
       size: 12,
@@ -868,14 +1116,22 @@ export class PdfService {
     ];
 
     for (const info of clientInfo) {
-      page.drawText(info.label, {
+      // Verificar espacio antes de cada línea de info
+      if (yPosition < 180) {
+        this.addFooter(currentPage, font, theme);
+        currentPage = pdfDoc.addPage([595, 842]);
+        this.addWatermark(currentPage, theme);
+        yPosition = height - 50;
+      }
+
+      currentPage.drawText(info.label, {
         x: margin,
         y: yPosition,
         size: 10,
         font: fontBold,
         color: rgb(theme.textColor.r, theme.textColor.g, theme.textColor.b),
       });
-      page.drawText(info.value, {
+      currentPage.drawText(info.value, {
         x: margin + 120,
         y: yPosition,
         size: 10,
@@ -887,11 +1143,25 @@ export class PdfService {
 
     yPosition -= 10;
 
+    // Calcular espacio necesario para la firma dinámicamente
+    const signatureSpaceNeeded = 150;
+    const footerSpace = 80;
+    const minSpaceForSignature = signatureSpaceNeeded + footerSpace;
+
+    // Verificar si hay espacio suficiente para la firma
+    let signaturePage = currentPage;
+    if (yPosition < minSpaceForSignature) {
+      this.addFooter(currentPage, font, theme);
+      signaturePage = pdfDoc.addPage([595, 842]);
+      this.addWatermark(signaturePage, theme);
+      yPosition = height - 50;
+    }
+
     // Signature
-    await this.addSignatureSection(pdfDoc, page, consent, font, fontBold, margin, yPosition, theme);
+    await this.addSignatureSection(pdfDoc, signaturePage, consent, font, fontBold, margin, yPosition, theme);
 
     // Agregar footer
-    this.addFooter(page, font, theme);
+    this.addFooter(signaturePage, font, theme);
   }
 
   private async addSignatureSection(
@@ -1074,27 +1344,55 @@ export class PdfService {
     fontSize: number,
     maxWidth: number,
   ): string[] {
-    const words = text.split(' ');
-    const lines: string[] = [];
-    let currentLine = '';
+    // Handle newlines first - split by \n and process each line separately
+    const paragraphs = text.split('\n');
+    const allLines: string[] = [];
 
-    for (const word of words) {
-      const testLine = currentLine + (currentLine ? ' ' : '') + word;
-      const width = font.widthOfTextAtSize(testLine, fontSize);
+    for (const paragraph of paragraphs) {
+      if (!paragraph.trim()) {
+        // Empty line - add a blank line
+        allLines.push('');
+        continue;
+      }
 
-      if (width > maxWidth && currentLine) {
-        lines.push(currentLine);
-        currentLine = word;
-      } else {
-        currentLine = testLine;
+      const words = paragraph.split(' ');
+      let currentLine = '';
+
+      for (const word of words) {
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const width = font.widthOfTextAtSize(testLine, fontSize);
+
+        if (width > maxWidth && currentLine) {
+          allLines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (currentLine) {
+        allLines.push(currentLine);
       }
     }
 
-    if (currentLine) {
-      lines.push(currentLine);
+    return allLines.length > 0 ? allLines : [''];
+  }
+
+  /**
+   * Reemplaza variables en el contenido de la plantilla
+   */
+  private replaceTemplateVariables(
+    content: string,
+    variables: Record<string, string>
+  ): string {
+    let result = content;
+    
+    for (const [key, value] of Object.entries(variables)) {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      result = result.replace(regex, value || '');
     }
 
-    return lines;
+    return result;
   }
 
   private async embedSignature(

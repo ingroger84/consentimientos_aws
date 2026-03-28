@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Contenido de Plantillas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .success-box h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            color: #2196F3;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #28a745;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #28a745;
+            font-size: 1.8em;
+        }
+        
+        .checklist {
+            list-style: none;
+        }
+        
+        .checklist li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .checklist li::before {
+            content: "✅";
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        }
+        
+        .btn-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            background: #2d2d2d;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Limpieza Completada</h1>
+            <p>Plantillas sin tenant eliminadas - Sistema limpio</p>
+        </div>
+        
+        <div class="content">
+            <div class="success-box">
+                <h3>✅ Limpieza Exitosa</h3>
+                <p>Se eliminaron 12 plantillas HC que no tenían tenant asignado. Todas las plantillas restantes tienen contenido válido.</p>
+            </div>
+            
+            <div class="section">
+                <h2>📊 Resumen de la Limpieza</h2>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Plantillas HC Eliminadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Plantillas CN Eliminadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">9</div>
+                        <div class="stat-label">Plantillas CN Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">22</div>
+                        <div class="stat-label">Plantillas HC Totales</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✅ Estado del Contenido</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Total</th>
+                            <th>Con Contenido</th>
+                            <th>Sin Tenant</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Plantillas CN</td>
+                            <td>9</td>
+                            <td>9 (100%)</td>
+                            <td>0</td>
+                            <td>✅ PERFECTO</td>
+                        </tr>
+                        <tr>
+                            <td>Plantillas HC</td>
+                            <td>22</td>
+                            <td>22 (100%)</td>
+                            <td>0</td>
+                            <td>✅ PERFECTO</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h2>🔍 ¿Por qué no veías el contenido?</h2>
+                
+                <div class="info-box">
+                    <h3>El problema NO era falta de contenido</h3>
+                    <p>Todas las plantillas SÍ tienen contenido. Las posibles causas del problema visual son:</p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li><strong>Cache del navegador:</strong> Necesitas hacer Hard Refresh</li>
+                        <li><strong>Plantillas sin tenant:</strong> Ya eliminadas (12 plantillas HC)</li>
+                        <li><strong>Vista colapsada:</strong> Necesitas expandir los tenants (click en ▶️)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🚀 Cómo Ver el Contenido</h2>
+                
+                <ul class="checklist">
+                    <li>Abre https://archivoenlinea.com</li>
+                    <li>Haz Hard Refresh: Ctrl+Shift+R (Windows) o Cmd+Shift+R (Mac)</li>
+                    <li>Inicia sesión como Super Admin</li>
+                    <li>Ve a "Plantillas CN" o "Plantillas HC"</li>
+                    <li>Click en la flecha ▶️ para EXPANDIR un tenant</li>
+                    <li>Verás las plantillas con su contenido</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>📋 Plantillas Eliminadas</h2>
+                
+                <div class="warning-box">
+                    <h3>12 Plantillas HC sin tenant eliminadas</h3>
+                    <p>Estas plantillas no tenían tenant asignado y fueron eliminadas (soft delete):</p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>4x Consentimiento Informado General HC</li>
+                        <li>4x Consentimiento para Procedimiento Médico</li>
+                        <li>4x Consentimiento para Tratamiento</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>✅ Verificación de Contenido</h2>
+                
+                <div class="success-box">
+                    <h3>Todas las plantillas tienen contenido válido</h3>
+                    <p><strong>Plantillas CN:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Longitud mínima: 261 caracteres</li>
+                        <li>Longitud máxima: 5,469 caracteres</li>
+                        <li>Promedio: ~1,200 caracteres</li>
+                        <li>Formato: HTML con variables</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Plantillas HC:</strong></p>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li>Todas tienen contenido</li>
+                        <li>Formato: Texto con variables</li>
+                        <li>Sin plantillas vacías</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>📞 Si Aún No Ves el Contenido</h2>
+                
+                <div class="info-box">
+                    <h3>Pasos de solución:</h3>
+                    <ol style="padding-left: 20px;">
+                        <li><strong>Verificar que expandiste el tenant</strong>
+                            <ul style="margin-top: 5px;">
+                                <li>Click en la flecha ▶️ para expandir</li>
+                                <li>Debe cambiar a ▼</li>
+                            </ul>
+                        </li>
+                        <li><strong>Limpiar cache completamente</strong>
+                            <ul style="margin-top: 5px;">
+                                <li>Ctrl+Shift+R (Windows/Linux)</li>
+                                <li>Cmd+Shift+R (Mac)</li>
+                                <li>O usar modo incógnito</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verificar consola del navegador</strong>
+                            <ul style="margin-top: 5px;">
+                                <li>Presiona F12</li>
+                                <li>Ve a la pestaña "Console"</li>
+                                <li>Busca errores en rojo</li>
+                            </ul>
+                        </li>
+                        <li><strong>Verificar versión</strong>
+                            <ul style="margin-top: 5px;">
+                                <li>Abre: https://archivoenlinea.com/version.json</li>
+                                <li>Debe mostrar: "version": "41.1.6"</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <a href="https://archivoenlinea.com" target="_blank" class="btn">
+                    🚀 Ir a archivoenlinea.com
+                </a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Limpieza completada el 2026-03-17 a las 01:30 UTC</strong></p>
+            <p style="margin-top: 10px;">✅ Sistema limpio y funcional</p>
+        </div>
+    </div>
+</body>
+</html>

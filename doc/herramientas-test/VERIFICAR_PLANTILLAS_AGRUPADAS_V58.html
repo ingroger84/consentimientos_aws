@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Plantillas Agrupadas V58</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 5px;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover { background: #5568d3; }
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .test-result.pass {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        .test-result.fail {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        .checklist li.done:before {
+            content: "☑ ";
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Verificación de Plantillas Agrupadas V58</h1>
+        <p>Herramienta de diagnóstico para verificar que los cambios están desplegados correctamente</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 Checklist de Verificación Manual</h2>
+        <ul class="checklist">
+            <li>Abrir DevTools (F12) en el navegador</li>
+            <li>Ir a la pestaña "Network"</li>
+            <li>Marcar la opción "Disable cache"</li>
+            <li>Hacer Hard Refresh (Ctrl+Shift+R o Cmd+Shift+R)</li>
+            <li>Iniciar sesión como Super Admin (usuario sin tenant)</li>
+            <li>Ir a "Plantillas CN" en el menú</li>
+            <li>Verificar que se muestra vista agrupada por tenant con icono de edificio</li>
+            <li>Ir a "Plantillas HC" en el menú</li>
+            <li>Verificar que se muestra vista agrupada por tenant</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔧 Pruebas Automáticas</h2>
+        <button onclick="runAllTests()">▶ Ejecutar Todas las Pruebas</button>
+        <button onclick="clearResults()">🗑️ Limpiar Resultados</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Información del Sistema</h2>
+        <div id="system-info">
+            <p><strong>User Agent:</strong> <span id="user-agent"></span></p>
+            <p><strong>Navegador:</strong> <span id="browser"></span></p>
+            <p><strong>Fecha/Hora:</strong> <span id="datetime"></span></p>
+            <p><strong>Cache Status:</strong> <span id="cache-status"></span></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🌐 Verificación de Endpoints</h2>
+        <button onclick="checkVersion()">Verificar Versión</button>
+        <button onclick="checkBackendHealth()">Verificar Backend</button>
+        <button onclick="checkGroupedEndpoints()">Verificar Endpoints Agrupados</button>
+        <div id="endpoint-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>💡 Soluciones Comunes</h2>
+        <div class="code">
+            <strong>Si no ves los cambios:</strong><br><br>
+            1. Hard Refresh: Ctrl+Shift+R (Windows/Linux) o Cmd+Shift+R (Mac)<br>
+            2. Borrar cache del navegador:<br>
+               - Chrome: Settings → Privacy → Clear browsing data<br>
+               - Firefox: Settings → Privacy → Clear Data<br>
+            3. Probar en modo incógnito/privado<br>
+            4. Verificar que estás usando usuario Super Admin (sin tenant)<br>
+            5. Verificar en Network tab que los archivos JS tienen código 200 (no 304)<br>
+            6. Verificar que version.json muestra 41.1.6
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📝 Características Implementadas</h2>
+        <ul>
+            <li><strong>Backend:</strong>
+                <ul>
+                    <li>✅ Endpoint GET /consent-templates/all/grouped</li>
+                    <li>✅ Endpoint GET /medical-record-consent-templates/all/grouped</li>
+                    <li>✅ Método getAllGroupedByTenant() en ambos servicios</li>
+                    <li>✅ Requiere permiso VIEW_GLOBAL_STATS (Super Admin)</li>
+                </ul>
+            </li>
+            <li><strong>Frontend:</strong>
+                <ul>
+                    <li>✅ Detección de Super Admin (user && !user.tenant)</li>
+                    <li>✅ Vista agrupada con secciones expandibles/colapsables</li>
+                    <li>✅ Iconos de edificio (Building2) y chevrones</li>
+                    <li>✅ Estadísticas por tenant (total, activas, inactivas, por tipo)</li>
+                    <li>✅ Implementado en ConsentTemplatesPage.tsx</li>
+                    <li>✅ Implementado en MRConsentTemplatesPage.tsx</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        // System Info
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('browser').textContent = getBrowserInfo();
+        document.getElementById('datetime').textContent = new Date().toLocaleString('es-CO');
+        
+        function getBrowserInfo() {
+            const ua = navigator.userAgent;
+            if (ua.includes('Chrome')) return 'Chrome';
+            if (ua.includes('Firefox')) return 'Firefox';
+            if (ua.includes('Safari')) return 'Safari';
+            if (ua.includes('Edge')) return 'Edge';
+            return 'Desconocido';
+        }
+
+        // Check cache status
+        if ('caches' in window) {
+            caches.keys().then(keys => {
+                document.getElementById('cache-status').innerHTML = 
+                    `<span class="status ${keys.length > 0 ? 'warning' : 'success'}">${keys.length} cache(s) activo(s)</span>`;
+            });
+        } else {
+            document.getElementById('cache-status').innerHTML = '<span class="status info">Cache API no disponible</span>';
+        }
+
+        function addTestResult(name, passed, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${name}</strong><br>
+                ${message}
+            `;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('endpoint-results').innerHTML = '';
+        }
+
+        async function checkVersion() {
+            const resultsDiv = document.getElementById('endpoint-results');
+            resultsDiv.innerHTML = '<p>Verificando versión...</p>';
+            
+            try {
+                const response = await fetch('http://18.191.132.175/version.json', {
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const isCorrectVersion = data.version === '41.1.6';
+                
+                resultsDiv.innerHTML = `
+                    <div class="test-result ${isCorrectVersion ? 'pass' : 'fail'}">
+                        <strong>${isCorrectVersion ? '✅' : '❌'} Versión del Frontend</strong><br>
+                        Versión actual: <strong>${data.version}</strong><br>
+                        Versión esperada: <strong>41.1.6</strong><br>
+                        Build Date: ${data.buildDate}<br>
+                        Build Hash: ${data.buildHash}<br>
+                        ${isCorrectVersion ? 'La versión es correcta' : '⚠️ La versión NO coincide - el frontend no está actualizado'}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="test-result fail">
+                        <strong>❌ Error al verificar versión</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function checkBackendHealth() {
+            const resultsDiv = document.getElementById('endpoint-results');
+            resultsDiv.innerHTML += '<p>Verificando backend...</p>';
+            
+            try {
+                const response = await fetch('http://18.191.132.175:3000/health', {
+                    cache: 'no-store'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-result pass">
+                        <strong>✅ Backend Disponible</strong><br>
+                        Status: ${data.status}<br>
+                        Database: ${data.database}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="test-result fail">
+                        <strong>❌ Backend No Disponible</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function checkGroupedEndpoints() {
+            const resultsDiv = document.getElementById('endpoint-results');
+            resultsDiv.innerHTML += '<p>Verificando endpoints agrupados...</p>';
+            
+            const token = prompt('Ingresa el token de autenticación del Super Admin:');
+            if (!token) {
+                resultsDiv.innerHTML += '<p class="status warning">Verificación cancelada - se requiere token</p>';
+                return;
+            }
+            
+            // Check CN templates
+            try {
+                const response = await fetch('http://18.191.132.175:3000/consent-templates/all/grouped', {
+                    cache: 'no-store',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.status === 401) {
+                    throw new Error('Token inválido o expirado');
+                }
+                
+                if (response.status === 403) {
+                    throw new Error('Sin permisos - verifica que seas Super Admin');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-result pass">
+                        <strong>✅ Endpoint CN Templates Agrupadas</strong><br>
+                        Tenants encontrados: ${data.length}<br>
+                        Total plantillas: ${data.reduce((sum, t) => sum + t.totalTemplates, 0)}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="test-result fail">
+                        <strong>❌ Endpoint CN Templates</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+            
+            // Check HC templates
+            try {
+                const response = await fetch('http://18.191.132.175:3000/medical-record-consent-templates/all/grouped', {
+                    cache: 'no-store',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.status === 401) {
+                    throw new Error('Token inválido o expirado');
+                }
+                
+                if (response.status === 403) {
+                    throw new Error('Sin permisos - verifica que seas Super Admin');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-result pass">
+                        <strong>✅ Endpoint HC Templates Agrupadas</strong><br>
+                        Tenants encontrados: ${data.length}<br>
+                        Total plantillas: ${data.reduce((sum, t) => sum + t.totalTemplates, 0)}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="test-result fail">
+                        <strong>❌ Endpoint HC Templates</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function runAllTests() {
+            clearResults();
+            
+            addTestResult(
+                'Navegador Compatible',
+                true,
+                `Navegador: ${getBrowserInfo()}`
+            );
+            
+            addTestResult(
+                'JavaScript Habilitado',
+                true,
+                'JavaScript está funcionando correctamente'
+            );
+            
+            addTestResult(
+                'Fetch API Disponible',
+                'fetch' in window,
+                'fetch' in window ? 'Fetch API disponible' : 'Fetch API no disponible'
+            );
+            
+            addTestResult(
+                'LocalStorage Disponible',
+                'localStorage' in window,
+                'localStorage' in window ? 'LocalStorage disponible' : 'LocalStorage no disponible'
+            );
+            
+            // Check version automatically
+            await checkVersion();
+        }
+    </script>
+</body>
+</html>

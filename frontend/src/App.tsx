@@ -14,8 +14,10 @@ import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import SuspendedAccountPage from './pages/SuspendedAccountPage';
+import PublicSuspendedPage from './pages/PublicSuspendedPage';
 import PublicLandingPage from './pages/PublicLandingPage';
 import SystemStatusPage from './pages/SystemStatusPageSimple';
+import SignupPaymentPage from './pages/SignupPaymentPage';
 
 // Lazy loading para páginas secundarias (mejor performance)
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -46,6 +48,9 @@ const SuperAdminMedicalRecordsPage = lazy(() => import('./pages/SuperAdminMedica
 const SuperAdminConsentsPage = lazy(() => import('./pages/SuperAdminConsentsPage'));
 const CreateMedicalRecordPage = lazy(() => import('./pages/CreateMedicalRecordPage'));
 const ViewMedicalRecordPage = lazy(() => import('./pages/ViewMedicalRecordPage'));
+const BackupsManagementPage = lazy(() => import('./pages/BackupsManagementPage'));
+const PaymentSuccessPage = lazy(() => import('./pages/PaymentSuccessPage'));
+const DocumentTypesPage = lazy(() => import('./pages/DocumentTypesPage'));
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -139,7 +144,14 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/suspended" element={<SuspendedAccountPage />} />
+            <Route path="/public-suspended" element={<PublicSuspendedPage />} />
             <Route path="/status" element={<SystemStatusPage />} />
+            
+            {/* Ruta pública para pago después del registro */}
+            <Route path="/signup-payment" element={<SignupPaymentPage />} />
+            
+            {/* Ruta pública para confirmación de pago (no requiere autenticación) */}
+            <Route path="/invoices/:invoiceId/payment-success" element={<PaymentSuccessPage />} />
             
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />
@@ -171,6 +183,8 @@ function App() {
               <Route path="/tax-config" element={<TaxConfigPage />} />
               <Route path="/billing" element={<BillingDashboardPage />} />
               <Route path="/billing/create-invoice" element={<CreateManualInvoicePage />} />
+              <Route path="/backups" element={<BackupsManagementPage />} />
+              <Route path="/document-types" element={<DocumentTypesPage />} />
             </Route>
           </Routes>
         </Suspense>

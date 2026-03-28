@@ -164,6 +164,16 @@ export default function LoginPage() {
       console.log('[LoginPage] Navegación completada');
     } catch (err: any) {
       console.error('[LoginPage] Error en login:', err);
+      console.error('[LoginPage] Error response:', err.response);
+      console.error('[LoginPage] Error data:', err.response?.data);
+      
+      // Detectar si el tenant está suspendido
+      if (err.response?.status === 403 && err.response?.data?.error === 'TENANT_SUSPENDED') {
+        console.log('[LoginPage] Tenant suspendido detectado, redirigiendo a /public-suspended');
+        navigate('/public-suspended');
+        return;
+      }
+      
       setError(err.response?.data?.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);

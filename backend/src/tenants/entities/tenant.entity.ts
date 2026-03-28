@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Branch } from '../../branches/entities/branch.entity';
@@ -14,6 +16,7 @@ import { Consent } from '../../consents/entities/consent.entity';
 import { Client } from '../../clients/entities/client.entity';
 import { MedicalRecord } from '../../medical-records/entities/medical-record.entity';
 import { MedicalRecordConsent } from '../../medical-records/entities/medical-record-consent.entity';
+import { DocumentType } from '../../document-types/entities/document-type.entity';
 
 export enum TenantStatus {
   ACTIVE = 'active',
@@ -58,6 +61,15 @@ export class Tenant {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'plan_price' })
   planPrice: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'custom_price_monthly' })
+  customPriceMonthly: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'custom_price_annual' })
+  customPriceAnnual: number;
+
+  @Column({ type: 'boolean', default: false, name: 'use_custom_price' })
+  useCustomPrice: boolean;
+
   @Column({ type: 'enum', enum: BillingCycle, default: BillingCycle.MONTHLY, name: 'billing_cycle' })
   billingCycle: BillingCycle;
 
@@ -94,6 +106,17 @@ export class Tenant {
 
   @Column({ nullable: true })
   contactPhone: string;
+
+  // Campos de identificación
+  @Column({ name: 'document_type_id', nullable: true })
+  documentTypeId: string;
+
+  @Column({ name: 'document_number', length: 50, nullable: true })
+  documentNumber: string;
+
+  @ManyToOne(() => DocumentType, { eager: true })
+  @JoinColumn({ name: 'document_type_id' })
+  documentType: DocumentType;
 
   // Límites de recursos
   @Column({ type: 'int', default: 2, name: 'max_users' })

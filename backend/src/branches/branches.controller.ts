@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
@@ -48,6 +49,17 @@ export class BranchesController {
     // Si es Super Admin (sin tenant), devuelve TODAS las sedes de TODOS los tenants
     // Si es Admin de tenant, devuelve solo las sedes de su tenant
     const tenantId = user.tenant?.id;
+    return this.branchesService.findAll(tenantId);
+  }
+
+  @Get('by-tenant/:tenantId')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_USERS)
+  findByTenant(@Param('tenantId') tenantId: string, @CurrentUser() user: User) {
+    // Solo Super Admin puede usar este endpoint para obtener sedes de un tenant específico
+    if (user.tenant) {
+      throw new ForbiddenException('Solo Super Admin puede acceder a este endpoint');
+    }
     return this.branchesService.findAll(tenantId);
   }
 

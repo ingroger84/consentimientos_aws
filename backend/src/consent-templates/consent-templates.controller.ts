@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConsentTemplatesService } from './consent-templates.service';
 import { CreateConsentTemplateDto } from './dto/create-consent-template.dto';
@@ -17,6 +18,7 @@ import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/permissions.decorator';
 import { PERMISSIONS } from '../auth/constants/permissions';
 import { TenantSlug } from '../common/decorators/tenant-slug.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { TemplateType } from './entities/consent-template.entity';
 
 @Controller('consent-templates')
@@ -50,11 +52,32 @@ export class ConsentTemplatesController {
     return this.templatesService.findAll(tenantId);
   }
 
+  @Get('all/grouped')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_GLOBAL_STATS)
+  getAllGrouped() {
+    return this.templatesService.getAllGroupedByTenant();
+  }
+
   @Get('stats/overview')
   @UseGuards(PermissionsGuard)
   @RequirePermissions(PERMISSIONS.VIEW_DASHBOARD)
-  getStats(@TenantSlug() tenantId: string) {
+  async getStats(@CurrentUser() user: any) {
+    const tenantId = user.tenant?.id;
+    if (!tenantId) {
+      throw new BadRequestException('Usuario no tiene tenant asignado');
+    }
     return this.templatesService.getStatistics(tenantId);
+  }
+
+  @Get('by-service/:serviceId')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions(PERMISSIONS.VIEW_TEMPLATES)
+  findByService(
+    @Param('serviceId') serviceId: string,
+    @TenantSlug() tenantId: string,
+  ) {
+    return this.templatesService.findByService(serviceId, tenantId);
   }
 
   @Get('by-type/:type')

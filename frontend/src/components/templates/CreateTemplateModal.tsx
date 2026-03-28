@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { X, Info } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Info, Tag } from 'lucide-react';
 import { templateService } from '../../services/template.service';
-import { CreateTemplateDto, TemplateType, TEMPLATE_TYPE_LABELS } from '../../types/template';
+import { serviceService } from '../../services/service.service';
+import { CreateTemplateDto, TemplateType, TEMPLATE_TYPE_LABELS, Service } from '../../types/template';
 import VariablesHelper from './VariablesHelper';
 
 interface Props {
@@ -16,11 +17,30 @@ export default function CreateTemplateModal({ onClose, onSuccess }: Props) {
     content: '',
     description: '',
     isActive: true,
-    isDefault: false,
+    serviceIds: [],
   });
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingServices, setLoadingServices] = useState(true);
   const [error, setError] = useState('');
   const [showVariables, setShowVariables] = useState(false);
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      setLoadingServices(true);
+      const data = await serviceService.getAll();
+      setServices(data.filter(s => s.isActive));
+    } catch (err) {
+      console.error('Error al cargar servicios:', err);
+      setError('Error al cargar la lista de servicios');
+    } finally {
+      setLoadingServices(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +48,11 @@ export default function CreateTemplateModal({ onClose, onSuccess }: Props) {
 
     if (!formData.name.trim() || !formData.content.trim()) {
       setError('El nombre y el contenido son obligatorios');
+      return;
+    }
+
+    if (formData.serviceIds.length === 0) {
+      setError('Debe seleccionar al menos un servicio');
       return;
     }
 
@@ -40,6 +65,15 @@ export default function CreateTemplateModal({ onClose, onSuccess }: Props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleService = (serviceId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      serviceIds: prev.serviceIds.includes(serviceId)
+        ? prev.serviceIds.filter(id => id !== serviceId)
+        : [...prev.serviceIds, serviceId]
+    }));
   };
 
   const insertVariable = (variable: string) => {
@@ -132,6 +166,48 @@ export default function CreateTemplateModal({ onClose, onSuccess }: Props) {
               />
             </div>
 
+            {/* Servicios */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Servicios Asociados *
+              </label>
+              {loadingServices ? (
+                <div className="text-sm text-gray-500 py-2">Cargando servicios...</div>
+              ) : services.length === 0 ? (
+                <div className="text-sm text-amber-600 py-2 bg-amber-50 px-3 rounded-lg border border-amber-200">
+                  No hay servicios disponibles. Crea servicios primero para poder asociarlos a plantillas.
+                </div>
+              ) : (
+                <div className="border border-gray-300 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                  {services.map(service => (
+                    <label
+                      key={service.id}
+                      className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.serviceIds.includes(service.id)}
+                        onChange={() => toggleService(service.id)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <div className="flex items-center gap-2 flex-1">
+                        <Tag className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-700">{service.name}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                Selecciona los servicios a los que aplica esta plantilla. Los clientes recibirán esta plantilla solo cuando contraten estos servicios.
+              </p>
+              {formData.serviceIds.length > 0 && (
+                <p className="text-xs text-blue-600 mt-1">
+                  {formData.serviceIds.length} servicio{formData.serviceIds.length !== 1 ? 's' : ''} seleccionado{formData.serviceIds.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+
             {/* Contenido */}
             <div>
               <div className="flex justify-between items-center mb-1">
@@ -176,16 +252,6 @@ export default function CreateTemplateModal({ onClose, onSuccess }: Props) {
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">Plantilla activa</span>
-              </label>
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.isDefault}
-                  onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-700">Marcar como predeterminada</span>
               </label>
             </div>
           </div>

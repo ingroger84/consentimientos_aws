@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  ManyToMany,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { Tenant } from '../../tenants/entities/tenant.entity';
+import { Service } from '../../services/entities/service.entity';
 
 export enum TemplateType {
   PROCEDURE = 'procedure',
@@ -47,6 +50,14 @@ export class ConsentTemplate {
 
   @Column('text', { nullable: true })
   description: string;
+
+  @ManyToMany(() => Service, { eager: true })
+  @JoinTable({
+    name: 'consent_template_services',
+    joinColumn: { name: 'consentTemplateId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'serviceId', referencedColumnName: 'id' },
+  })
+  services: Service[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoicesController } from './invoices.controller';
 import { InvoicesService } from './invoices.service';
@@ -11,12 +11,14 @@ import { Payment } from '../payments/entities/payment.entity';
 import { BillingHistory } from '../billing/entities/billing-history.entity';
 import { MailModule } from '../mail/mail.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Invoice, TaxConfig, Tenant, Payment, BillingHistory]),
     MailModule,
-    PaymentsModule,
+    forwardRef(() => PaymentsModule),
+    SettingsModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoicePdfService, TaxConfigService],

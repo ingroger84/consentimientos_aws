@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Between } from 'typeorm';
 import { MedicalRecord } from './entities/medical-record.entity';
 import { MedicalRecordAudit } from './entities/medical-record-audit.entity';
 import { MedicalRecordConsent } from './entities/medical-record-consent.entity';
@@ -1427,29 +1427,53 @@ export class MedicalRecordsService {
   /**
    * Valida que el tenant no haya excedido el límite de historias clínicas de su plan
    */
+  /**
+   * Valida que el tenant no haya excedido el límite mensual de historias clínicas
+   * Solo cuenta HC del mes actual (se reinicia cada mes)
+   */
   private async checkMedicalRecordsLimit(tenantId: string): Promise<void> {
     const tenant = await this.tenantsService.findOne(tenantId);
-    const plan = getPlanConfig(tenant.plan);
     
-    if (!plan) {
-      throw new BadRequestException('Plan no encontrado');
-    }
-
-    // Si el límite es -1, es ilimitado
-    if (plan.limits.medicalRecords === -1) {
-      return;
-    }
+    // Calcular inicio y fin del mes actual
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     
-    // Contar historias clínicas del tenant
-    const count = await this.medicalRecordsRepository.count({
-      where: { tenantId }
+    // Contar solo historias clínicas del mes actual
+    const currentMonthCount = await this.medicalRecordsRepository.count({
+      where: {
+        tenantId,
+        createdAt: Between(startOfMonth, endOfMonth),
+      }
     });
     
-    if (count >= plan.limits.medicalRecords) {
-      throw new BadRequestException(
-        `Has alcanzado el límite de ${plan.limits.medicalRecords} historias clínicas de tu plan ${plan.name}. Actualiza tu plan para crear más.`
-      );
+    const maxLimit = tenant.maxMedicalRecords;
+    
+    if (currentMonthCount >= maxLimit) {
+      const nextMonth = this.getNextMonthName();
+      throw new ForbiddenException({
+        message: `Has alcanzado el límite mensual de historias clínicas (${currentMonthCount}/${maxLimit}). ` +
+          `El límite se reiniciará el 1 de ${nextMonth}. ` +
+          `Para aumentar tu límite, actualiza tu plan.`,
+        error: 'MONTHLY_RESOURCE_LIMIT_REACHED',
+        resourceType: 'medical_records',
+        current: currentMonthCount,
+        max: maxLimit,
+        resetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
+      });
     }
+  }
+
+  /**
+   * Obtiene el nombre del próximo mes en español
+   */
+  private getNextMonthName(): string {
+    const months = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+    const nextMonth = new Date().getMonth() + 1;
+    return months[nextMonth % 12];
   }
 
   /**

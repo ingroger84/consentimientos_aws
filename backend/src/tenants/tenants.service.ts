@@ -1,16 +1,18 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Tenant, TenantStatus } from './entities/tenant.entity';
+import { Tenant, TenantStatus, BillingCycle } from './entities/tenant.entity';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { User } from '../users/entities/user.entity';
 import { Role, RoleType } from '../roles/entities/role.entity';
+import { Invoice, InvoiceStatus } from '../invoices/entities/invoice.entity';
 import { SettingsService } from '../settings/settings.service';
 import { MailService } from '../mail/mail.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { MRConsentTemplatesService } from '../medical-record-consent-templates/mr-consent-templates.service';
+import { InvoicesService } from '../invoices/invoices.service';
 import { applyPlanLimits } from './tenants-plan.helper';
 import { getPlanConfig } from './plans.config';
 
@@ -28,6 +30,7 @@ export class TenantsService {
     private mailService: MailService,
     private notificationsService: NotificationsService,
     private mrConsentTemplatesService: MRConsentTemplatesService,
+    private invoicesService: InvoicesService,
   ) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
@@ -185,7 +188,23 @@ export class TenantsService {
       }
       */
 
-      return savedTenant;
+      // GENERAR PRIMERA FACTURA Y LINK DE PAGO (solo para planes con precio > 0)
+      let firstInvoice = null;
+      if (createTenantDto.planPrice && createTenantDto.planPrice > 0) {
+        try {
+          firstInvoice = await this.generateFirstInvoice(savedTenant, createTenantDto);
+          console.log(`[TenantsService] Primera factura generada: ${firstInvoice.invoiceNumber}`);
+        } catch (invoiceError) {
+          // No fallar la creación del tenant si la factura falla
+          console.error('[TenantsService] Error al generar primera factura:', invoiceError.message);
+        }
+      }
+
+      // Retornar tenant con la factura si existe
+      return {
+        ...savedTenant,
+        firstInvoice,
+      } as any;
     } catch (error) {
       // Rollback en caso de error
       await queryRunner.rollbackTransaction();
@@ -279,6 +298,22 @@ export class TenantsService {
 
     return tenant;
   }
+
+  async getPendingInvoices(tenantId: string) {
+    const invoicesRepository = this.dataSource.getRepository(Invoice);
+    const invoices = await invoicesRepository.find({
+      where: {
+        tenantId,
+        status: In(['pending', 'overdue']),
+      },
+      order: {
+        dueDate: 'ASC',
+      },
+    });
+
+    return invoices;
+  }
+
 
   async update(id: string, updateTenantDto: UpdateTenantDto): Promise<Tenant> {
     const tenant = await this.findOne(id);
@@ -1222,5 +1257,75 @@ export function calculatePrice(planId: string, billingCycle: 'monthly' | 'annual
       console.error('Error al enviar solicitud de cambio de plan:', error);
       throw new BadRequestException('Error al enviar la solicitud de cambio de plan');
     }
+  }
+  /**
+   * Genera la primera factura del tenant al momento del registro
+   * Solo para planes con precio > 0
+   */
+  private async generateFirstInvoice(tenant: Tenant, createDto: CreateTenantDto): Promise<any> {
+    const { plan, planPrice, billingCycle } = createDto;
+
+    // Calcular fechas del período
+    const now = new Date();
+    const periodStart = new Date(now);
+    const periodEnd = new Date(now);
+
+    // Establecer período según el ciclo de facturación
+    if (billingCycle === BillingCycle.ANNUAL) {
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+    }
+
+    // Fecha de vencimiento: 5 días después de la creación
+    const dueDate = new Date(now);
+    dueDate.setDate(dueDate.getDate() + 5);
+
+    // Obtener configuración del plan
+    const planConfig = getPlanConfig(plan);
+    const planName = planConfig?.name || plan;
+    const billingCycleName = billingCycle === BillingCycle.ANNUAL ? 'Anual' : 'Mensual';
+
+    // Crear items de la factura
+    const items = [
+      {
+        description: `Suscripción Plan ${planName} - ${billingCycleName}`,
+        quantity: 1,
+        unitPrice: planPrice,
+        total: planPrice,
+      },
+    ];
+
+    // Crear la factura usando el servicio de invoices
+    const createInvoiceDto = {
+      tenantId: tenant.id,
+      amount: planPrice,
+      tax: 0,
+      total: planPrice,
+      currency: 'COP',
+      status: InvoiceStatus.PENDING,
+      dueDate: dueDate.toISOString(),
+      periodStart: periodStart.toISOString(),
+      periodEnd: periodEnd.toISOString(),
+      items,
+      notes: `Primera factura generada automáticamente al crear la cuenta. Plan: ${planName} (${billingCycleName})`,
+      taxExempt: true,
+      taxExemptReason: 'Primera factura de suscripción - Sin IVA',
+    };
+
+    const invoice = await this.invoicesService.create(createInvoiceDto as any);
+
+    // Generar link de pago de Bold
+    const paymentLink = await this.invoicesService.createPaymentLink(invoice.id);
+
+    console.log(`[TenantsService] Link de pago generado: ${paymentLink}`);
+
+    return {
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      total: invoice.total,
+      dueDate: invoice.dueDate,
+      paymentLink,
+    };
   }
 }

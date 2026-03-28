@@ -89,6 +89,11 @@ class MRConsentTemplateService {
     const response = await api.post(`${this.baseUrl}/initialize-defaults`);
     return response.data;
   }
+
+  async getAllGroupedByTenant(): Promise<any[]> {
+    const response = await api.get(`${this.baseUrl}/all/grouped`);
+    return response.data;
+  }
 }
 
 export const mrConsentTemplateService = new MRConsentTemplateService();

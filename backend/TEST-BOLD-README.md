@@ -4,20 +4,32 @@ Este directorio contiene scripts para verificar la conexión con Bold Payment Ga
 
 ## Scripts Disponibles
 
-### 1. `test-bold-connection.js`
-Script que usa las variables de entorno del proyecto (archivo `.env`).
+### 1. `test-bold-auth-formats.js` ⭐ NUEVO - DIAGNÓSTICO AUTOMÁTICO
+Script que prueba **12 formatos diferentes de autenticación** automáticamente para identificar el formato correcto que Bold espera.
 
-**Uso:**
+**Uso básico:**
 ```bash
 cd backend
-node test-bold-connection.js
+node test-bold-auth-formats.js
 ```
 
-**Requisitos:**
-- Archivo `.env` configurado con las credenciales de Bold
-- Dependencias del proyecto instaladas (`npm install`)
+**Uso con PowerShell (recomendado):**
+```powershell
+.\scripts\test-bold-auth-formats.ps1
+```
 
-### 2. `test-bold-standalone.js` ⭐ RECOMENDADO
+**Qué hace:**
+- Prueba 12 formatos de autenticación diferentes
+- Identifica automáticamente cuál funciona
+- Muestra la respuesta de Bold para cada intento
+- Genera un resumen con los formatos exitosos
+
+**Requisitos:**
+- Node.js y axios instalado
+
+---
+
+### 2. `test-bold-standalone.js` ⭐ PRUEBA BÁSICA
 Script standalone que puede ejecutarse sin configuración adicional. Usa las credenciales hardcodeadas o variables de entorno.
 
 **Uso básico:**
@@ -33,6 +45,21 @@ BOLD_API_KEY=tu_api_key BOLD_SECRET_KEY=tu_secret node test-bold-standalone.js
 
 **Requisitos:**
 - Solo Node.js y axios instalado
+
+---
+
+### 3. `test-bold-connection.js`
+Script que usa las variables de entorno del proyecto (archivo `.env`).
+
+**Uso:**
+```bash
+cd backend
+node test-bold-connection.js
+```
+
+**Requisitos:**
+- Archivo `.env` configurado con las credenciales de Bold
+- Dependencias del proyecto instaladas (`npm install`)
 
 ## Instalación de Dependencias
 

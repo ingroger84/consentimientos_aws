@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { AllowAnyTenant } from '../common/decorators/allow-any-tenant.decorator';
 import { RoleType } from '../roles/entities/role.entity';
 import { InvoiceStatus } from './entities/invoice.entity';
 
@@ -222,6 +223,7 @@ export class InvoicesController {
   }
 
   @Post(':id/resend-email')
+  @AllowAnyTenant()
   async resendEmail(@Request() req, @Param('id') id: string) {
     const invoice = await this.invoicesService.findOne(id);
 
@@ -241,6 +243,7 @@ export class InvoicesController {
    * Crear link de pago Bold para una factura
    */
   @Post(':id/create-payment-link')
+  @AllowAnyTenant()
   async createPaymentLink(@Request() req, @Param('id') id: string) {
     const invoice = await this.invoicesService.findOne(id);
 
@@ -262,8 +265,16 @@ export class InvoicesController {
   }
 
   @Get('tenant/:tenantId')
-  @Roles(RoleType.SUPER_ADMIN)
-  async findByTenant(@Param('tenantId') tenantId: string) {
+  @AllowAnyTenant()
+  async findByTenant(@Request() req, @Param('tenantId') tenantId: string) {
+    // Permitir acceso al super admin o al propio tenant
+    const isSuperAdmin = req.user.role?.type === RoleType.SUPER_ADMIN;
+    const userTenantId = req.user.tenant?.id;
+
+    if (!isSuperAdmin && userTenantId !== tenantId) {
+      throw new Error('No tienes permisos para ver las facturas de este tenant');
+    }
+
     return await this.invoicesService.findByTenant(tenantId);
   }
 
@@ -361,5 +372,52 @@ export class InvoicesController {
     res.setHeader('Content-Length', pdfBuffer.length);
 
     res.send(pdfBuffer);
+  }
+
+  /**
+   * Obtener facturas pendientes de un tenant (público, para página de suspensión)
+   */
+  @Public()
+  @Post('public/pending-by-slug')
+  async getPublicPendingInvoices(@Body('tenantSlug') tenantSlug: string) {
+    if (!tenantSlug) {
+      throw new Error('tenantSlug es requerido');
+    }
+
+    return await this.invoicesService.getPublicPendingInvoices(tenantSlug);
+  }
+
+  /**
+   * Crear link de pago público (sin autenticación)
+   */
+  @Public()
+  @Post('public/:id/create-payment-link')
+  async createPublicPaymentLink(@Param('id') id: string) {
+    const paymentLink = await this.invoicesService.createPaymentLink(id);
+
+    return {
+      success: true,
+      paymentLink,
+      message: 'Link de pago creado exitosamente',
+    };
+  }
+  /**
+   * Obtener información básica de factura (público, para página de confirmación)
+   */
+  @Public()
+  @Get('public/:id/info')
+  async getPublicInvoiceInfo(@Param('id') id: string) {
+    const invoice = await this.invoicesService.findOne(id);
+
+    // Retornar solo información básica (sin datos sensibles)
+    return {
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      total: invoice.total,
+      status: invoice.status,
+      tenant: {
+        name: invoice.tenant.name,
+      },
+    };
   }
 }

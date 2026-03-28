@@ -17,6 +17,7 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<any>(null);
   const [changingPasswordUser, setChangingPasswordUser] = useState<any>(null);
   const [selectedBranches, setSelectedBranches] = useState<string[]>([]);
+  const [tenantBranches, setTenantBranches] = useState<any[]>([]);
   const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set(['super-admin']));
   const [groupByTenant, setGroupByTenant] = useState(true);
   const queryClient = useQueryClient();
@@ -172,13 +173,27 @@ export default function UsersPage() {
   const canDelete = hasPermission('delete_users');
   const canChangePassword = hasPermission('change_passwords');
 
-  const handleEdit = (user: any) => {
+  const handleEdit = async (user: any) => {
     setEditingUser(user);
     setValue('name', user.name);
     setValue('email', user.email);
     setValue('roleId', user.role.id);
     setSelectedBranches(user.branches.map((b: any) => b.id));
     setValue('isActive', user.isActive);
+    
+    // Si el usuario tiene tenant, cargar las sedes de ese tenant
+    if (user.tenant?.id) {
+      try {
+        const tenantBranchesData = await branchService.getByTenant(user.tenant.id);
+        setTenantBranches(tenantBranchesData);
+      } catch (error) {
+        console.error('Error al cargar sedes del tenant:', error);
+        setTenantBranches([]);
+      }
+    } else {
+      setTenantBranches([]);
+    }
+    
     setIsModalOpen(true);
   };
 
@@ -635,26 +650,32 @@ export default function UsersPage() {
                   Sedes
                 </label>
                 <div className="border rounded-lg p-4 max-h-48 overflow-y-auto bg-gray-50">
-                  {branches && branches.length > 0 ? (
-                    <div className="space-y-2">
-                      {branches.map((branch) => (
-                        <label
-                          key={branch.id}
-                          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedBranches.includes(branch.id)}
-                            onChange={() => handleBranchToggle(branch.id)}
-                            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                          />
-                          <span className="text-sm text-gray-700">{branch.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">No hay sedes disponibles</p>
-                  )}
+                  {(() => {
+                    // Si estamos editando un usuario de un tenant, usar tenantBranches
+                    // Si estamos creando o editando un usuario sin tenant, usar branches
+                    const availableBranches = editingUser?.tenant ? tenantBranches : branches;
+                    
+                    return availableBranches && availableBranches.length > 0 ? (
+                      <div className="space-y-2">
+                        {availableBranches.map((branch) => (
+                          <label
+                            key={branch.id}
+                            className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBranches.includes(branch.id)}
+                              onChange={() => handleBranchToggle(branch.id)}
+                              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                            />
+                            <span className="text-sm text-gray-700">{branch.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No hay sedes disponibles</p>
+                    );
+                  })()}
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
                   {selectedBranches.length === 0 

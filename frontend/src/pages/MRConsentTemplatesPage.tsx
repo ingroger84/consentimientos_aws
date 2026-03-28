@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileText, Plus, Edit, Trash2, Star, Search, Filter } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, Star, Search, Filter, ChevronDown, ChevronRight, Building2 } from 'lucide-react';
 import {
   mrConsentTemplateService,
   MRConsentTemplate,
@@ -13,12 +13,17 @@ export default function MRConsentTemplatesPage() {
   const toast = useToast();
   const { user } = useAuthStore();
   const [templates, setTemplates] = useState<MRConsentTemplate[]>([]);
+  const [groupedTemplates, setGroupedTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<MRConsentTemplate | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [expandedTenants, setExpandedTenants] = useState<Set<string>>(new Set());
+
+  // Verificar si el usuario es Super Admin
+  const isSuperAdmin = user && !user.tenant;
 
   // Verificar permisos
   const canEdit = user?.role?.permissions?.includes('edit_mr_consent_templates') || false;
@@ -32,13 +37,32 @@ export default function MRConsentTemplatesPage() {
   const loadTemplates = async () => {
     try {
       setLoading(true);
-      const data = await mrConsentTemplateService.getAll();
-      setTemplates(data);
+      if (isSuperAdmin) {
+        // Super Admin: cargar plantillas agrupadas por tenant
+        const grouped = await mrConsentTemplateService.getAllGroupedByTenant();
+        setGroupedTemplates(grouped);
+      } else {
+        // Tenant: cargar solo sus plantillas
+        const data = await mrConsentTemplateService.getAll();
+        setTemplates(data);
+      }
     } catch (error: any) {
       toast.error('Error al cargar plantillas HC', error.response?.data?.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleTenant = (tenantId: string) => {
+    setExpandedTenants(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(tenantId)) {
+        newSet.delete(tenantId);
+      } else {
+        newSet.add(tenantId);
+      }
+      return newSet;
+    });
   };
 
   const handleDelete = async (template: MRConsentTemplate) => {
@@ -126,6 +150,78 @@ export default function MRConsentTemplatesPage() {
     );
   };
 
+  const renderTemplateCard = (template: any, showActions: boolean = true) => (
+    <div key={template.id} className="bg-white rounded-lg border hover:shadow-md transition-shadow">
+      <div className="p-6">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-lg font-semibold">{template.name}</h3>
+              {template.isDefault && (
+                <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+              )}
+              {!template.isActive && (
+                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                  Inactiva
+                </span>
+              )}
+            </div>
+            {template.description && (
+              <p className="text-gray-600 text-sm mb-2">
+                {template.description}
+              </p>
+            )}
+            <div className="flex items-center gap-3 text-sm text-gray-500">
+              {getCategoryBadge(template.category)}
+              <span>
+                Actualizado: {new Date(template.createdAt).toLocaleDateString('es-CO')}
+              </span>
+            </div>
+          </div>
+          {showActions && (
+            <div className="flex items-center gap-2">
+              {(isSuperAdmin || canEdit) && !template.isDefault && template.category && (
+                <button
+                  onClick={() => handleSetDefault(template)}
+                  className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors"
+                  title="Marcar como predeterminada"
+                >
+                  <Star className="w-5 h-5" />
+                </button>
+              )}
+              {(isSuperAdmin || canEdit) && (
+                <button
+                  onClick={() => setEditingTemplate(template)}
+                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  title="Editar"
+                >
+                  <Edit className="w-5 h-5" />
+                </button>
+              )}
+              {(isSuperAdmin || canDelete) && (
+                <button
+                  onClick={() => handleDelete(template)}
+                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Eliminar"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Preview */}
+        <div className="bg-gray-50 rounded-lg p-4 mt-4">
+          <p className="text-xs text-gray-500 mb-2 font-medium">Vista previa:</p>
+          <p className="text-sm text-gray-700 font-mono whitespace-pre-wrap line-clamp-3">
+            {template.content}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="p-6">
       {/* Header */}
@@ -136,11 +232,14 @@ export default function MRConsentTemplatesPage() {
             <div>
               <h1 className="text-2xl font-bold">Plantillas de Consentimiento HC</h1>
               <p className="text-gray-600">
-                Gestiona plantillas específicas para historias clínicas
+                {isSuperAdmin 
+                  ? 'Gestiona plantillas específicas para historias clínicas de todas las cuentas'
+                  : 'Gestiona plantillas específicas para historias clínicas'
+                }
               </p>
             </div>
           </div>
-          {canCreate && (
+          {(isSuperAdmin || canCreate) && (
             <button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -152,185 +251,166 @@ export default function MRConsentTemplatesPage() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg border p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar plantillas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+      {/* Filters (solo para tenants) */}
+      {!isSuperAdmin && (
+        <div className="bg-white rounded-lg border p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar plantillas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          {/* Category Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
-            >
-              <option value="all">Todas las categorías</option>
-              <option value="general">General</option>
-              <option value="procedure">Procedimiento</option>
-              <option value="treatment">Tratamiento</option>
-              <option value="anamnesis">Anamnesis</option>
-              {/* Mostrar categorías personalizadas */}
-              {Array.from(new Set(templates.map(t => t.category).filter(c => c && !['general', 'procedure', 'treatment', 'anamnesis'].includes(c)))).map(customCat => (
-                <option key={customCat} value={customCat}>{customCat}</option>
-              ))}
-            </select>
-          </div>
+            {/* Category Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+              >
+                <option value="all">Todas las categorías</option>
+                <option value="general">General</option>
+                <option value="procedure">Procedimiento</option>
+                <option value="treatment">Tratamiento</option>
+                <option value="anamnesis">Anamnesis</option>
+                {/* Mostrar categorías personalizadas */}
+                {Array.from(new Set(templates.map(t => t.category).filter(c => c && !['general', 'procedure', 'treatment', 'anamnesis'].includes(c)))).map(customCat => (
+                  <option key={customCat} value={customCat}>{customCat}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Status Filter */}
-          <div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="active">Activas</option>
-              <option value="inactive">Inactivas</option>
-            </select>
+            {/* Status Filter */}
+            <div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="active">Activas</option>
+                <option value="inactive">Inactivas</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Templates List */}
       {loading ? (
         <div className="bg-white rounded-lg border p-8 text-center">
           <p className="text-gray-500">Cargando plantillas HC...</p>
         </div>
-      ) : filteredTemplates.length === 0 ? (
-        <div className="bg-white rounded-lg border p-8 text-center">
-          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500 mb-2">No se encontraron plantillas HC</p>
-          {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' ? (
-            <p className="text-sm text-gray-400">
-              Intenta ajustar los filtros de búsqueda
-            </p>
+      ) : isSuperAdmin ? (
+        /* Vista agrupada por tenant para Super Admin */
+        <div className="space-y-4">
+          {groupedTemplates.length === 0 ? (
+            <div className="bg-white rounded-lg border p-8 text-center">
+              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-500 mb-2">No se encontraron plantillas HC</p>
+            </div>
           ) : (
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Crear la primera plantilla HC
-            </button>
+            groupedTemplates.map((group) => {
+              const isExpanded = expandedTenants.has(group.tenantId || 'no-tenant');
+              
+              return (
+                <div key={group.tenantId || 'no-tenant'} className="bg-white rounded-lg shadow overflow-hidden">
+                  <button
+                    onClick={() => toggleTenant(group.tenantId || 'no-tenant')}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {isExpanded ? (
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      )}
+                      <Building2 className="w-5 h-5 text-blue-600" />
+                      <div className="text-left">
+                        <h3 className="font-semibold text-gray-900">{group.tenantName}</h3>
+                        <p className="text-sm text-gray-500">
+                          {group.totalTemplates} plantilla{group.totalTemplates !== 1 ? 's' : ''} • 
+                          {' '}{group.activeTemplates} activa{group.activeTemplates !== 1 ? 's' : ''} • 
+                          {' '}{group.defaultTemplates} predeterminada{group.defaultTemplates !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                  
+                  {isExpanded && (
+                    <div className="border-t p-4">
+                      <div className="grid grid-cols-1 gap-4">
+                        {group.templates.map((template: any) => renderTemplateCard(template, true))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
-          {filteredTemplates.map((template) => (
-            <div
-              key={template.id}
-              className="bg-white rounded-lg border hover:shadow-md transition-shadow"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{template.name}</h3>
-                      {template.isDefault && (
-                        <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                      )}
-                      {!template.isActive && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                          Inactiva
-                        </span>
-                      )}
-                    </div>
-                    {template.description && (
-                      <p className="text-gray-600 text-sm mb-2">
-                        {template.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-3 text-sm text-gray-500">
-                      {getCategoryBadge(template.category)}
-                      <span>
-                        Actualizado: {new Date(template.updatedAt).toLocaleDateString('es-CO')}
-                      </span>
-                      {template.creator && (
-                        <span>Por: {template.creator.name}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {canEdit && !template.isDefault && template.category && (
-                      <button
-                        onClick={() => handleSetDefault(template)}
-                        className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 rounded-lg transition-colors"
-                        title="Marcar como predeterminada"
-                      >
-                        <Star className="w-5 h-5" />
-                      </button>
-                    )}
-                    {canEdit && (
-                      <button
-                        onClick={() => setEditingTemplate(template)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        <Edit className="w-5 h-5" />
-                      </button>
-                    )}
-                    {canDelete && (
-                      <button
-                        onClick={() => handleDelete(template)}
-                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Preview */}
-                <div className="bg-gray-50 rounded-lg p-4 mt-4">
-                  <p className="text-xs text-gray-500 mb-2 font-medium">Vista previa:</p>
-                  <p className="text-sm text-gray-700 font-mono whitespace-pre-wrap line-clamp-3">
-                    {template.content}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        /* Vista normal para tenants */
+        filteredTemplates.length === 0 ? (
+          <div className="bg-white rounded-lg border p-8 text-center">
+            <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-500 mb-2">No se encontraron plantillas HC</p>
+            {searchTerm || categoryFilter !== 'all' || statusFilter !== 'all' ? (
+              <p className="text-sm text-gray-400">
+                Intenta ajustar los filtros de búsqueda
+              </p>
+            ) : (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Crear la primera plantilla HC
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredTemplates.map((template) => renderTemplateCard(template))}
+          </div>
+        )
       )}
 
-      {/* Stats */}
-      <div className="mt-6 bg-white rounded-lg border p-4">
-        <div className="grid grid-cols-4 gap-4 text-center">
-          <div>
-            <p className="text-2xl font-bold text-blue-600">{templates.length}</p>
-            <p className="text-sm text-gray-600">Total</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-green-600">
-              {templates.filter((t) => t.isActive).length}
-            </p>
-            <p className="text-sm text-gray-600">Activas</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-yellow-600">
-              {templates.filter((t) => t.isDefault).length}
-            </p>
-            <p className="text-sm text-gray-600">Predeterminadas</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-purple-600">
-              {new Set(templates.map((t) => t.category).filter(Boolean)).size}
-            </p>
-            <p className="text-sm text-gray-600">Categorías</p>
+      {/* Stats (solo para tenants) */}
+      {!isSuperAdmin && (
+        <div className="mt-6 bg-white rounded-lg border p-4">
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold text-blue-600">{templates.length}</p>
+              <p className="text-sm text-gray-600">Total</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-green-600">
+                {templates.filter((t) => t.isActive).length}
+              </p>
+              <p className="text-sm text-gray-600">Activas</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-yellow-600">
+                {templates.filter((t) => t.isDefault).length}
+              </p>
+              <p className="text-sm text-gray-600">Predeterminadas</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-purple-600">
+                {new Set(templates.map((t) => t.category).filter(Boolean)).size}
+              </p>
+              <p className="text-sm text-gray-600">Categorías</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       {showCreateModal && (

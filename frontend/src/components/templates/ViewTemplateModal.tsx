@@ -48,14 +48,6 @@ export default function ViewTemplateModal({ template, onClose }: Props) {
               )}
             </div>
             <div>
-              <span className="font-medium">Predeterminada:</span>{' '}
-              {template.isDefault ? (
-                <span className="text-yellow-600">Sí</span>
-              ) : (
-                <span className="text-gray-500">No</span>
-              )}
-            </div>
-            <div>
               <span className="font-medium">Actualizada:</span>{' '}
               {new Date(template.updatedAt).toLocaleString('es-CO')}
             </div>
