@@ -238,6 +238,7 @@ backend/test-*.js
 *.rar
 *.7z
 dist_backup_*
+archive/
 
 # ============================================
 # CACHE

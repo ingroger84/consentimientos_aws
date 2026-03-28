@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 77.1.0
+## Versión Actual: 78.0.0
 **Fecha:** 2026-03-28
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,15 +18,20 @@
 
 ## Historial de Versiones
 
-### 77.1.0 - 2026-03-28 [MINOR]
-- Backend: 4 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
+### 78.0.0 - 2026-03-28 [MAJOR]
+- Backend: 1 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 50 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
 
-### 77.0.0 - 2026-03-28 [MAJOR]
-- Backend: 92 archivo(s) modificado(s)
-- Frontend: 32 archivo(s) modificado(s)
-- Documentación: 106 archivo(s) modificado(s)
-- Scripts: 40 archivo(s) modificado(s)
+### 77.2.0 - 2026-03-28 [MINOR]
+- Organización completa del proyecto
+- Estructura de carpetas optimizada
+- Archivos históricos movidos a /archive/
+- Base de datos organizada en /database/
+- Tests organizados en /tests/
+- Configuraciones nginx en /nginx/
+- README creados para cada carpeta
 
 ---
 

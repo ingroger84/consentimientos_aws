@@ -1,336 +1,230 @@
-# Archivo en Línea - Sistema de Consentimientos Multi-Tenant
+# Sistema de Consentimientos Digitales
 
-> Sistema completo de gestión de consentimientos informados con arquitectura multi-tenant basada en subdominios.
+**Versión:** 77.1.0  
+**Última actualización:** 2026-03-28
 
-[![Version](https://img.shields.io/badge/version-15.1.3-blue.svg)](VERSION.md)
-[![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D14.0-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/license-Private-red.svg)](#)
-[![Status](https://img.shields.io/badge/status-Production-success.svg)](https://archivoenlinea.com)
+Sistema multi-tenant para gestión de consentimientos informados y historias clínicas digitales con integración de pagos Bold.
 
----
+## 🚀 Características Principales
 
-## 📋 Tabla de Contenidos
+- ✅ Multi-tenant con aislamiento completo de datos
+- ✅ Gestión de consentimientos informados digitales
+- ✅ Historias clínicas electrónicas (cumplimiento normativo colombiano)
+- ✅ Sistema de facturación y pagos con Bold
+- ✅ Planes de suscripción flexibles
+- ✅ Backups automáticos a AWS S3
+- ✅ Plantillas personalizables por tenant
+- ✅ Firma digital de documentos
+- ✅ Generación de PDFs automática
+- ✅ Sistema de notificaciones y recordatorios
 
-- [Características Principales](#-características-principales)
-- [Inicio Rápido](#-inicio-rápido)
-- [Acceso al Sistema](#-acceso-al-sistema)
-- [Tecnologías](#️-tecnologías)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Documentación](#-documentación)
-- [Requisitos](#-requisitos)
-- [Seguridad](#-seguridad)
+## 📋 Requisitos
 
----
+- Node.js 18+
+- PostgreSQL 14+ (Supabase)
+- AWS S3 (almacenamiento)
+- Bold API (pagos)
+- PM2 (producción)
 
-## ✨ Características Principales
+## 🛠️ Instalación
 
-### 🌐 Landing Page SaaS
-- Landing page comercial completa con información del producto
-- Visualización de planes y precios con toggle mensual/anual
-- Registro de cuenta tenant desde la landing page
-- Envío automático de correo de bienvenida
-- Diseño responsive y moderno
-
-### 🏢 Multi-Tenant
-- Gestión de múltiples clientes (tenants) independientes
-- Acceso mediante subdominios únicos
-- Aislamiento completo de datos por tenant
-- Configuración personalizada por cliente
-
-### 💳 Sistema de Planes y Facturación
-- 5 planes configurables: Free, Basic, Professional, Enterprise, Custom
-- Límites por recurso: usuarios, sedes, servicios, consentimientos
-- Validación automática y bloqueo al alcanzar límites
-- Dashboard "Mi Plan" con visualización de uso en tiempo real
-- Alertas inteligentes al 80% y 100% de uso
-- Pricing flexible con ciclos mensuales y anuales
-- Integración con Bold Colombia (Wompi) para pagos online
-
-### 👥 Gestión de Usuarios
-- Sistema de roles y permisos granular
-- Super Admin para gestión global
-- Administradores por tenant
-- Usuarios operativos con permisos específicos
-- Impersonation seguro para acceso sin modificar contraseñas
-
-### 🏥 Gestión de Consentimientos
-- Creación de consentimientos personalizados
-- Firma digital de documentos
-- Generación de PDFs con marca de agua
-- Envío automático por email
-- Captura de foto del paciente
-- Almacenamiento en AWS S3
-
-### 🎨 Personalización
-- Logos personalizados (principal, footer, marca de agua, favicon)
-- Colores corporativos configurables
-- Textos y plantillas personalizables
-- Configuración independiente por tenant
-
-### 📊 Dashboard y Estadísticas
-- Métricas globales para Super Admin
-- Estadísticas por tenant
-- Reportes de uso y actividad
-- Gráficos y visualizaciones
-
-### 💰 Sistema de Impuestos
-- Configuración flexible de impuestos (IVA, otros)
-- Facturas con o sin impuestos
-- Tenants exentos de impuestos
-- Cálculos automáticos en facturación
-
----
-
-## 🚀 Inicio Rápido
-
-### Opción 1: Usando Terminales (Recomendado)
-
-**Terminal 1 - Backend:**
+### Backend
 ```bash
 cd backend
 npm install
-npm run start:dev
+cp .env.example .env
+# Configurar variables de entorno
+npm run build
+npm run start:prod
 ```
 
-**Terminal 2 - Frontend:**
+### Frontend
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run build
 ```
-
-### Opción 2: Script de PowerShell
-
-```powershell
-.\scripts\start.ps1
-```
-
-El sistema estará disponible en:
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:3000`
-- API Docs: `http://localhost:3000/api`
-
----
-
-## 🔐 Acceso al Sistema
-
-### Landing Page Pública
-
-```
-URL:      http://localhost:5173
-Función:  Información comercial y registro de nuevas cuentas
-```
-
-### Super Admin (Administrador del Sistema)
-
-```
-URL:      http://admin.localhost:5173
-Email:    Ver archivo CREDENCIALES.md
-Password: Ver archivo CREDENCIALES.md
-```
-
-### Tenant de Ejemplo
-
-```
-URL:      http://cliente-demo.localhost:5173
-Email:    Ver archivo CREDENCIALES.md
-Password: Ver archivo CREDENCIALES.md
-```
-
-> ⚠️ **Nota:** Las credenciales reales están en el archivo `CREDENCIALES.md` (no incluido en el repositorio por seguridad)
-
----
-
-## 🛠️ Tecnologías
-
-### Backend
-- **NestJS** - Framework Node.js moderno y escalable
-- **TypeORM** - ORM para PostgreSQL con soporte TypeScript
-- **PostgreSQL** - Base de datos relacional
-- **JWT** - Autenticación y autorización
-- **PDFKit** - Generación de PDFs personalizados
-- **Nodemailer** - Envío de correos electrónicos
-- **AWS SDK** - Integración con S3 para almacenamiento
-- **Bull** - Colas de trabajos para tareas asíncronas
-
-### Frontend
-- **React 18** - Librería UI moderna
-- **TypeScript** - Tipado estático para JavaScript
-- **Vite** - Build tool ultra rápido
-- **TailwindCSS** - Framework CSS utility-first
-- **React Router** - Navegación SPA
-- **Zustand** - Estado global ligero
-- **React Hook Form** - Manejo de formularios
-- **Axios** - Cliente HTTP
-- **Lucide React** - Iconos modernos
-
----
 
 ## 📁 Estructura del Proyecto
 
 ```
-datagree/
-├── backend/                    # API NestJS
+├── backend/              # API NestJS
 │   ├── src/
-│   │   ├── auth/              # Autenticación y autorización
-│   │   ├── users/             # Gestión de usuarios
-│   │   ├── tenants/           # Gestión de tenants
-│   │   ├── settings/          # Configuración personalizada
-│   │   ├── consents/          # Consentimientos informados
-│   │   ├── branches/          # Sedes/Sucursales
-│   │   ├── services/          # Servicios médicos
-│   │   ├── roles/             # Roles y permisos
-│   │   ├── invoices/          # Facturación
-│   │   ├── payments/          # Pagos (Bold/Wompi)
-│   │   ├── webhooks/          # Webhooks de pagos
-│   │   ├── mail/              # Servicio de correos
-│   │   └── common/            # Middleware, guards, decorators
-│   ├── uploads/               # Archivos subidos (local)
-│   └── dist/                  # Build de producción
+│   │   ├── auth/        # Autenticación y sesiones
+│   │   ├── tenants/     # Multi-tenancy
+│   │   ├── invoices/    # Facturación
+│   │   ├── payments/    # Pagos Bold
+│   │   ├── medical-records/  # Historias clínicas
+│   │   ├── consents/    # Consentimientos
+│   │   └── ...
+│   └── migrations/      # Migraciones de BD
 │
-├── frontend/                   # Aplicación React
+├── frontend/            # React + TypeScript
 │   ├── src/
-│   │   ├── components/        # Componentes reutilizables
-│   │   ├── pages/             # Páginas de la aplicación
-│   │   ├── services/          # Servicios API
-│   │   ├── store/             # Estado global (Zustand)
-│   │   ├── contexts/          # Contextos de React
-│   │   ├── hooks/             # Custom hooks
-│   │   ├── utils/             # Utilidades
-│   │   └── config/            # Configuración
-│   ├── public/                # Archivos estáticos
-│   └── dist/                  # Build de producción
+│   │   ├── pages/       # Páginas
+│   │   ├── components/  # Componentes
+│   │   ├── services/    # API clients
+│   │   └── stores/      # Estado global (Zustand)
+│   └── dist/            # Build de producción
 │
-├── doc/                        # Documentación completa
-│   ├── 01-inicio/             # Guías de inicio
-│   ├── 02-multitenant/        # Sistema multi-tenant
-│   ├── 03-permisos/           # Roles y permisos
-│   ├── 04-personalizacion/    # Personalización
-│   ├── 14-impuestos/          # Sistema de impuestos
-│   ├── 17-facturacion-manual/ # Facturación
-│   ├── 18-pago-facturas-tenant/ # Pagos
-│   ├── 19-aws-s3-storage/     # Almacenamiento S3
-│   ├── 22-integracion-bold/   # Integración Bold
-│   ├── 23-despliegue-aws/     # Despliegue en AWS
-│   └── README.md              # Índice completo
+├── doc/                 # Documentación actual
+│   ├── 76-pagos-registro/
+│   ├── 75-tipos-documento/
+│   ├── 74-integracion-bold/
+│   └── ...
 │
-├── scripts/                    # Scripts de utilidad
-│   ├── start.ps1              # Iniciar proyecto
-│   ├── stop.ps1               # Detener proyecto
-│   └── lightsail-helper.ps1   # Helper para AWS Lightsail
+├── database/            # Base de datos
+│   ├── migrations/      # Migraciones SQL
+│   ├── seeds/           # Seeds de datos
+│   └── queries/         # Queries de diagnóstico
 │
-├── .gitignore                  # Archivos ignorados por Git
-├── VERSION.md                  # Historial de versiones
-├── ESTRUCTURA_PROYECTO.md      # Estructura detallada
-└── README.md                   # Este archivo
+├── scripts/             # Scripts de despliegue
+│
+├── tests/               # Tests y diagnósticos
+│   ├── api/             # Tests de API
+│   ├── diagnostics/     # Scripts de diagnóstico
+│   └── integration/     # Tests de integración
+│
+├── nginx/               # Configuraciones nginx
+│
+├── config/              # Configuraciones
+│   ├── ecosystem/       # PM2 configs
+│   └── nginx/           # Nginx configs
+│
+└── archive/             # Archivos históricos
+    ├── builds/          # Builds antiguos
+    ├── old-docs/        # Documentación histórica
+    ├── old-scripts/     # Scripts antiguos
+    ├── logs/            # Logs históricos
+    └── temp-files/      # Archivos temporales
 ```
 
----
+## 🔧 Configuración
+
+### Variables de Entorno Críticas
+
+```env
+# Base de datos
+DB_HOST=db.witvuzaarlqxkiqfiljq.supabase.co
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_DATABASE=postgres
+DB_SSL=true
+
+# Bold Pagos
+BOLD_API_KEY=tu_api_key
+BOLD_SECRET_KEY=tu_secret_key
+BOLD_MERCHANT_ID=tu_merchant_id
+BOLD_API_URL=https://integrations.api.bold.co
+
+# AWS S3
+AWS_ACCESS_KEY_ID=tu_access_key
+AWS_SECRET_ACCESS_KEY=tu_secret_key
+AWS_S3_BUCKET=tu_bucket
+AWS_REGION=us-east-1
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=tu_email@gmail.com
+SMTP_PASSWORD=tu_app_password
+```
+
+## 🚀 Despliegue
+
+### Servidor AWS (100.28.198.249)
+
+```bash
+# Desplegar backend
+scp -i AWS-ISSABEL.pem -r backend/dist ubuntu@100.28.198.249:/home/ubuntu/consentimientos_aws/backend/
+
+# Desplegar frontend
+scp -i AWS-ISSABEL.pem -r frontend/dist ubuntu@100.28.198.249:/home/ubuntu/consentimientos_aws/frontend/
+
+# Reiniciar servicio
+ssh -i AWS-ISSABEL.pem ubuntu@100.28.198.249 "cd /home/ubuntu/consentimientos_aws && pm2 restart datagree"
+```
+
+## 📊 Optimizaciones Recientes (v77.0.0)
+
+- ✅ 34 índices nuevos en base de datos
+- ✅ Mejora de 40-70% en queries principales
+- ✅ Optimización de búsquedas por tenant
+- ✅ Índices compuestos para queries frecuentes
+
+Ver detalles en: `doc/OPTIMIZACION_BASE_DATOS_V77.0.md`
+
+## 🔐 Seguridad
+
+- Autenticación JWT con sesiones
+- Aislamiento de datos por tenant
+- Rate limiting
+- Validación de inputs
+- Sanitización de datos
+- CORS configurado
+- Helmet para headers de seguridad
+
+## 📈 Rendimiento
+
+### Métricas Actuales:
+- Query facturas por tenant: ~50ms
+- Login de usuario: ~80ms
+- Dashboard Super Admin: ~300ms
+- Generación de PDF: ~500ms
+
+### Capacidad:
+- 1000+ tenants simultáneos
+- 10,000+ consentimientos/día
+- 5,000+ historias clínicas activas
+
+## 🐛 Troubleshooting
+
+### Problema: Pago no se procesa automáticamente
+**Solución:** Los webhooks de Bold pueden tardar. El sistema tiene cron jobs que verifican pagos cada 2 y 10 minutos.
+
+### Problema: Sesiones expiradas
+**Solución:** Limpiar sesiones manualmente:
+```sql
+DELETE FROM user_sessions WHERE "expiresAt" < NOW();
+```
+
+### Problema: Caché del navegador
+**Solución:** El sistema usa cache busting automático con timestamps en archivos.
 
 ## 📚 Documentación
 
-> 📖 **[Ver Índice Completo de Documentación](doc/INDICE_COMPLETO.md)**
+- `doc/74-integracion-bold/` - Integración con Bold
+- `doc/76-pagos-registro/` - Pago en registro de tenants
+- `doc/OPTIMIZACION_BASE_DATOS_V77.0.md` - Optimizaciones de BD
+- `doc/ANALISIS_MEJORAS_SISTEMA_V77.0.md` - Mejoras futuras
 
-### 🚀 Guías de Inicio
-- [Inicio Rápido](doc/01-inicio/INICIO_RAPIDO.md) - Cómo ejecutar el proyecto
-- [Estado del Sistema](doc/01-inicio/ESTADO_ACTUAL_SISTEMA.md) - Resumen completo
-- [Acceso al Sistema](doc/01-inicio/ACCESO_SISTEMA.md) - Credenciales y acceso
+## 🤝 Soporte
 
-### 🏢 Multi-Tenant
-- [Sistema Multi-Tenant](doc/02-multitenant/SISTEMA_MULTITENANT.md) - Arquitectura
-- [Implementación Subdominios](doc/02-multitenant/IMPLEMENTACION_SUBDOMINIOS.md)
+- Email: info@innovasystems.com.co
+- Super Admin: rcaraballo@innovasystems.com.co
 
-### 👥 Permisos y Roles
-- [Sistema de Permisos](doc/03-permisos/SISTEMA_PERMISOS_ROLES.md)
-- [Roles y Permisos](doc/03-permisos/PERMISOS_ROLES.md)
+## 📝 Changelog
 
-### 🎨 Personalización
-- [Personalización del Sistema](doc/04-personalizacion/PERSONALIZACION_SISTEMA.md)
-- [Personalización de PDFs](doc/04-personalizacion/PERSONALIZACION_PDF_COMPLETA.md)
+### v77.1.0 (2026-03-28)
+- Optimización de base de datos (34 índices)
+- Análisis de mejoras del sistema
+- Documentación organizada
 
-### 🌐 Landing Page y Registro
-- [Landing Page SaaS](doc/27-landing-page-saas/README.md) - Landing comercial completa
-- [Inicio Rápido](doc/27-landing-page-saas/INICIO_RAPIDO.md) - Guía de inicio rápido
-- [Guía de Pruebas](doc/27-landing-page-saas/GUIA_PRUEBAS.md) - Checklist de pruebas
+### v76.3.1 (2026-03-28)
+- Fix: Confirmación de pago para usuarios no autenticados
+- Endpoint público para info de facturas
 
-### 💰 Facturación y Pagos
-- [Sistema de Impuestos](doc/14-impuestos/README.md)
-- [Facturación Manual](doc/17-facturacion-manual/README.md)
-- [Pago de Facturas](doc/18-pago-facturas-tenant/README.md)
-- [Integración Bold Colombia](doc/24-integracion-bold-completa/ANALISIS_BOLD_COLOMBIA_20260121.md)
+### v76.3.0 (2026-03-28)
+- Pago automático en registro de tenants
+- Generación de factura al crear cuenta
+- Página de pago antes de ingresar al sistema
 
-### ☁️ Infraestructura
-- [Almacenamiento AWS S3](doc/19-aws-s3-storage/README.md)
-- [Despliegue en AWS](doc/23-despliegue-aws/DESPLIEGUE_AWS_DATAGREE.md)
-
----
-
-## 📋 Requisitos
-
-### Software Requerido
-- **Node.js** v18 o superior
-- **PostgreSQL** v14 o superior
-- **npm** o **yarn**
-
-### Servicios Externos (Opcional)
-- **AWS S3** - Para almacenamiento de archivos
-- **Gmail/SMTP** - Para envío de correos
-- **Bold Colombia** - Para procesamiento de pagos
-
----
-
-## 🔒 Seguridad
-
-- ✅ Autenticación JWT con tokens seguros
-- ✅ Bcrypt para hash de contraseñas
-- ✅ Validación de subdominios por tenant
-- ✅ Aislamiento completo de datos por tenant
-- ✅ Guards y middleware de seguridad
-- ✅ Validación de permisos por rol
-- ✅ CORS configurado correctamente
-- ✅ Helmet para headers de seguridad HTTP
-- ✅ Variables de entorno para credenciales
-- ✅ .gitignore configurado para archivos sensibles
-
----
-
-## 📝 Versionamiento
-
-El sistema utiliza versionamiento automático mediante Git Hooks.
-
-**Versión Actual:** 15.1.3 - 2026-01-27
-
-Ver [VERSION.md](VERSION.md) para el historial completo de cambios.
-
----
-
-## 🌐 Despliegue en Producción
-
-El sistema está desplegado en:
-- **Dominio:** https://datagree.net
-- **Servidor:** AWS Lightsail (Ubuntu 24.04)
-- **Base de Datos:** PostgreSQL en AWS RDS
-- **Almacenamiento:** AWS S3
-
-Ver [Guía de Despliegue](doc/23-despliegue-aws/DESPLIEGUE_AWS_DATAGREE.md) para más detalles.
-
----
-
-## 👥 Soporte
-
-Para soporte técnico o consultas:
-- **Email:** soporte@datagree.net
-- **Documentación:** [doc/INDICE_COMPLETO.md](doc/INDICE_COMPLETO.md)
-
----
+### v76.2.0 (2026-03-27)
+- Solución permanente para webhooks Bold
+- Monitoreo automático de pagos (cron jobs)
+- Logging de webhooks
 
 ## 📄 Licencia
 
-Este proyecto es privado y confidencial.
-
-© 2026 Innova Systems - Todos los derechos reservados.
-
----
-
-**Desarrollado con ❤️ por Innova Systems**
+Propietario: Innova Systems  
+Uso privado - Todos los derechos reservados
