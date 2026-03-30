@@ -38,6 +38,7 @@ import { Answer } from './answers/entities/answer.entity';
 import { AppSettings } from './settings/entities/app-settings.entity';
 import { Tenant } from './tenants/entities/tenant.entity';
 import { Payment } from './payments/entities/payment.entity';
+import { PaymentAttempt } from './payments/entities/payment-attempt.entity';
 import { Invoice } from './invoices/entities/invoice.entity';
 import { TaxConfig } from './invoices/entities/tax-config.entity';
 import { PaymentReminder } from './billing/entities/payment-reminder.entity';
@@ -97,6 +98,7 @@ import { SessionGuard } from './auth/guards/session.guard';
             AppSettings,
             Tenant,
             Payment,
+            PaymentAttempt,
             Invoice,
             TaxConfig,
             PaymentReminder,
