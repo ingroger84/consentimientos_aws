@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
 import { invoicesService, InvoiceItem } from '@/services/invoices.service';
 import { taxConfigService, TaxConfig } from '@/services/tax-config.service';
+import { useToast } from '@/hooks/useToast';
 
 interface CreateInvoiceModalProps {
   tenantId: string;
@@ -29,7 +30,7 @@ export default function CreateInvoiceModal({
 }: CreateInvoiceModalProps) {
   const [taxConfigs, setTaxConfigs] = useState<TaxConfig[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const toast = useToast();
   const [formData, setFormData] = useState<FormData>({
     taxExempt: false,
     taxExemptReason: '',
@@ -145,28 +146,23 @@ export default function CreateInvoiceModal({
     });
   };
 
-  const showMessage = (msg: string) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(''), 5000);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validaciones
     if (formData.taxExempt && !formData.taxExemptReason.trim()) {
-      showMessage('Error: Debe proporcionar una razón para la exención de impuestos');
+      toast.error('Error de validación', 'Debe proporcionar una razón para la exención de impuestos');
       return;
     }
 
     // Solo requerir impuesto si NO es exenta Y hay impuestos disponibles
     if (!formData.taxExempt && taxConfigs.length > 0 && !formData.taxConfigId) {
-      showMessage('Error: Debe seleccionar un impuesto');
+      toast.error('Error de validación', 'Debe seleccionar un impuesto');
       return;
     }
 
     if (formData.items.some(item => !item.description.trim())) {
-      showMessage('Error: Todos los items deben tener descripción');
+      toast.error('Error de validación', 'Todos los items deben tener descripción');
       return;
     }
 
@@ -192,14 +188,16 @@ export default function CreateInvoiceModal({
         notes: formData.notes,
       });
 
-      showMessage('✅ Factura creada exitosamente');
+      toast.success('¡Factura creada!', 'La factura fue creada exitosamente');
+      
+      // Esperar un momento para que el usuario vea el toast
       setTimeout(() => {
         onSuccess();
         onClose();
-      }, 2000); // Aumentado a 2 segundos para que sea más visible
+      }, 1500);
     } catch (error: any) {
       console.error('Error creating invoice:', error);
-      showMessage(error.response?.data?.message || 'Error al crear la factura');
+      toast.error('Error al crear factura', error.response?.data?.message || 'Error al crear la factura');
     } finally {
       setLoading(false);
     }
@@ -225,18 +223,6 @@ export default function CreateInvoiceModal({
             <X className="w-6 h-6 text-gray-600" />
           </button>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className={`mx-6 mt-4 p-4 rounded-lg flex items-start shadow-lg animate-pulse ${
-            message.includes('Error') || message.includes('error')
-              ? 'bg-red-100 text-red-700 border-2 border-red-400'
-              : 'bg-green-100 text-green-700 border-2 border-green-400'
-          }`}>
-            <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-            <span className="font-semibold">{message}</span>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Tax Exempt Section */}
