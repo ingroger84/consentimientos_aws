@@ -104,7 +104,7 @@ export default function TenantInvoicesPage() {
       
       // Si la factura tiene intentos previos o el link está expirado/fallido, regenerar
       if (invoiceInfo && (
-        invoiceInfo.paymentAttemptsCount > 0 || 
+        (invoiceInfo.paymentAttemptsCount || 0) > 0 || 
         invoiceInfo.boldPaymentLinkStatus === 'failed' || 
         invoiceInfo.boldPaymentLinkStatus === 'expired'
       )) {
