@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { invoicesService, InvoiceItem } from '@/services/invoices.service';
 import { taxConfigService, TaxConfig } from '@/services/tax-config.service';
 import { useToast } from '@/hooks/useToast';
