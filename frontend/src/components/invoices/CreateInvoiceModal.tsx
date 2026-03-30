@@ -192,11 +192,11 @@ export default function CreateInvoiceModal({
         notes: formData.notes,
       });
 
-      showMessage('Factura creada exitosamente');
+      showMessage('✅ Factura creada exitosamente');
       setTimeout(() => {
         onSuccess();
         onClose();
-      }, 1000);
+      }, 2000); // Aumentado a 2 segundos para que sea más visible
     } catch (error: any) {
       console.error('Error creating invoice:', error);
       showMessage(error.response?.data?.message || 'Error al crear la factura');
@@ -228,13 +228,13 @@ export default function CreateInvoiceModal({
 
         {/* Message */}
         {message && (
-          <div className={`mx-6 mt-4 p-4 rounded-lg flex items-start ${
+          <div className={`mx-6 mt-4 p-4 rounded-lg flex items-start shadow-lg animate-pulse ${
             message.includes('Error') || message.includes('error')
-              ? 'bg-red-100 text-red-700 border border-red-400'
-              : 'bg-green-100 text-green-700 border border-green-400'
+              ? 'bg-red-100 text-red-700 border-2 border-red-400'
+              : 'bg-green-100 text-green-700 border-2 border-green-400'
           }`}>
             <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-            <span>{message}</span>
+            <span className="font-semibold">{message}</span>
           </div>
         )}
 
