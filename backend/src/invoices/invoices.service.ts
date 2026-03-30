@@ -675,15 +675,6 @@ export class InvoicesService {
     return updatedInvoice;
   }
 
-  private formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  }
-}
-
   /**
    * Obtener historial de intentos de pago de una factura
    */
@@ -770,3 +761,12 @@ export class InvoicesService {
 
     this.logger.log(`✅ Link de pago marcado como exitoso para factura ${invoice.invoiceNumber}`);
   }
+
+  private formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  }
+}

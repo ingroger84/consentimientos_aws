@@ -2248,7 +2248,6 @@ export class MailService {
       throw error;
     }
   }
-}
 
   /**
    * Enviar email cuando un pago falla
@@ -2398,3 +2397,4 @@ export class MailService {
       </html>
     `;
   }
+}
