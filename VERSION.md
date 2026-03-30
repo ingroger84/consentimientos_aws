@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 82.1.3
+## Versión Actual: 83.0.0
 **Fecha:** 2026-03-29
-**Tipo de Cambio:** PATCH
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,11 +18,13 @@
 
 ## Historial de Versiones
 
-### 82.1.3 - 2026-03-29 [PATCH]
-- Frontend: 1 archivo(s) modificado(s)
+### 83.0.0 - 2026-03-29 [MAJOR]
+- Backend: 2 archivo(s) modificado(s)
+- Frontend: 5 archivo(s) modificado(s)
+- Documentación: 1 archivo(s) modificado(s)
 
-### 82.1.2 - 2026-03-29 [PATCH]
-- Backend: 1 archivo(s) modificado(s)
+### 82.2.0 - 2026-03-29 [MINOR]
+- Mejoras y correcciones generales
 
 ---
 

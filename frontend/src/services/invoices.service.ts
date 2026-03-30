@@ -29,6 +29,9 @@ export interface Invoice {
   tenant?: any;
   payments?: any[];
   taxConfig?: any;
+  paymentAttemptsCount?: number;
+  boldPaymentLinkStatus?: string;
+  maxAttempts?: number;
 }
 
 export interface CreateInvoiceDto {

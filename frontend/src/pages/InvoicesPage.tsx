@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 import api from '@/services/api';
+import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/api-url';
 
 const InvoicesPage: React.FC = () => {
   const { user } = useAuthStore();
@@ -133,15 +135,58 @@ const InvoicesPage: React.FC = () => {
   const handlePayNow = async (invoiceId: string) => {
     try {
       setCreatingPaymentLink(invoiceId);
-      const response = await api.post(`/invoices/${invoiceId}/create-payment-link`);
       
-      if (response.data.success && response.data.paymentLink) {
-        window.open(response.data.paymentLink, '_blank');
-        toast.success('Link creado', 'El link de pago se abrió en una nueva ventana');
+      // Obtener información de la factura para verificar si tiene intentos previos
+      const invoiceInfo = invoices.find(inv => inv.id === invoiceId);
+      
+      // Si la factura tiene intentos previos o el link está expirado/fallido, regenerar
+      if (invoiceInfo && (
+        (invoiceInfo.paymentAttemptsCount || 0) > 0 || 
+        invoiceInfo.boldPaymentLinkStatus === 'failed' || 
+        invoiceInfo.boldPaymentLinkStatus === 'expired'
+      )) {
+        console.log('Regenerando link de pago (intentos previos o link expirado)...');
+        
+        // Usar endpoint público de regeneración
+        const apiUrl = getApiBaseUrl();
+        const response = await axios.post(
+          `${apiUrl}/api/invoices/public/${invoiceId}/regenerate-payment-link`,
+          {},
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        const { paymentLink, attemptNumber, maxAttempts } = response.data;
+        
+        console.log(`Nuevo link generado (Intento ${attemptNumber}/${maxAttempts})`);
+        
+        window.open(paymentLink, '_blank');
+        toast.success('Link regenerado', `Link de pago regenerado (Intento ${attemptNumber}/${maxAttempts}). Se abrió en una nueva ventana.`);
+        
+        // Recargar facturas
+        loadInvoices();
+      } else {
+        // Primera vez, crear link normal
+        console.log('Creando link de pago por primera vez...');
+        
+        const response = await api.post(`/invoices/${invoiceId}/create-payment-link`);
+        
+        if (response.data.success && response.data.paymentLink) {
+          window.open(response.data.paymentLink, '_blank');
+          toast.success('Link creado', 'El link de pago se abrió en una nueva ventana');
+          
+          // Recargar facturas
+          loadInvoices();
+        }
       }
     } catch (error: any) {
-      console.error('Error creating payment link:', error);
-      toast.error('Error', error.response?.data?.message || 'Error al crear el link de pago');
+      console.error('Error creating/regenerating payment link:', error);
+      
+      const errorMessage = error.response?.data?.message || 'Error al crear el link de pago';
+      toast.error('Error', errorMessage);
     } finally {
       setCreatingPaymentLink(null);
     }
@@ -594,11 +639,26 @@ const InvoicesPage: React.FC = () => {
                         onClick={() => handlePayNow(invoice.id)}
                         disabled={creatingPaymentLink === invoice.id}
                         className="flex items-center gap-2 px-4 py-2 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
-                        title="Pagar ahora con Bold"
+                        title={
+                          (invoice.paymentAttemptsCount || 0) > 0
+                            ? `Reintentar pago (Intento ${(invoice.paymentAttemptsCount || 0) + 1}/${invoice.maxAttempts || 6})`
+                            : 'Pagar ahora con Bold'
+                        }
                       >
                         <ExternalLink className="w-4 h-4" />
-                        {creatingPaymentLink === invoice.id ? 'Generando...' : 'Pagar Ahora'}
+                        {creatingPaymentLink === invoice.id
+                          ? 'Generando...'
+                          : (invoice.paymentAttemptsCount || 0) > 0
+                          ? `Reintentar (${(invoice.paymentAttemptsCount || 0) + 1}/${invoice.maxAttempts || 6})`
+                          : 'Pagar Ahora'}
                       </button>
+                    )}
+                    {(invoice.paymentAttemptsCount || 0) > 0 && invoice.status === 'pending' && (
+                      <div className="px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-xs text-yellow-800 font-medium">
+                          {invoice.paymentAttemptsCount} intento(s) realizado(s)
+                        </p>
+                      </div>
                     )}
                     <button
                       onClick={() => handlePreviewPdf(invoice.id)}
