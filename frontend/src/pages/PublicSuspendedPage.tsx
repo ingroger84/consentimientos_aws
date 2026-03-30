@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, CreditCard, Loader2, ExternalLink, ArrowLeft } from 'lucide-react';
+import { AlertCircle, CreditCard, Loader2, ExternalLink, ArrowLeft, XCircle } from 'lucide-react';
 import { getResourceUrl, getApiBaseUrl } from '@/utils/api-url';
 import { useTheme } from '@/contexts/ThemeContext';
 import axios from 'axios';
@@ -11,6 +11,9 @@ interface Invoice {
   total: number;
   dueDate: string;
   status: string;
+  paymentAttemptsCount?: number;
+  maxAttempts?: number;
+  boldPaymentLinkStatus?: string;
 }
 
 export default function PublicSuspendedPage() {
@@ -215,12 +218,28 @@ export default function PublicSuspendedPage() {
                               </span>
                             )}
                           </p>
+                          {invoice.paymentAttemptsCount !== undefined && invoice.paymentAttemptsCount > 0 && (
+                            <p>
+                              <span className="font-medium">Intentos de pago:</span>{' '}
+                              <span className="text-orange-600 font-semibold">
+                                {invoice.paymentAttemptsCount} de {invoice.maxAttempts || 6}
+                              </span>
+                              {invoice.paymentAttemptsCount >= (invoice.maxAttempts || 6) && (
+                                <span className="ml-2 text-red-600 font-medium">
+                                  (Límite alcanzado - Contacta a soporte)
+                                </span>
+                              )}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex-shrink-0">
                         <button
                           onClick={() => handlePayNow(invoice.id)}
-                          disabled={generatingPaymentLink === invoice.id}
+                          disabled={
+                            generatingPaymentLink === invoice.id || 
+                            (invoice.paymentAttemptsCount || 0) >= (invoice.maxAttempts || 6)
+                          }
                           className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                         >
                           {generatingPaymentLink === invoice.id ? (
@@ -228,10 +247,15 @@ export default function PublicSuspendedPage() {
                               <Loader2 className="w-5 h-5 animate-spin" />
                               Generando...
                             </>
+                          ) : (invoice.paymentAttemptsCount || 0) >= (invoice.maxAttempts || 6) ? (
+                            <>
+                              <XCircle className="w-5 h-5" />
+                              Límite Alcanzado
+                            </>
                           ) : (
                             <>
                               <CreditCard className="w-5 h-5" />
-                              Pagar Ahora
+                              {(invoice.paymentAttemptsCount || 0) > 0 ? 'Reintentar Pago' : 'Pagar Ahora'}
                               <ExternalLink className="w-4 h-4" />
                             </>
                           )}

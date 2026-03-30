@@ -401,6 +401,37 @@ export class InvoicesController {
       message: 'Link de pago creado exitosamente',
     };
   }
+
+  /**
+   * Regenerar link de pago (público, para reintentos)
+   */
+  @Public()
+  @Post('public/:id/regenerate-payment-link')
+  async regeneratePublicPaymentLink(@Param('id') id: string) {
+    const result = await this.invoicesService.regeneratePaymentLink(id);
+
+    return {
+      success: true,
+      ...result,
+      message: `Nuevo link de pago generado (Intento ${result.attemptNumber}/${result.maxAttempts})`,
+    };
+  }
+
+  /**
+   * Obtener historial de intentos de pago (público)
+   */
+  @Public()
+  @Get('public/:id/payment-attempts')
+  async getPublicPaymentAttempts(@Param('id') id: string) {
+    const attempts = await this.invoicesService.getPaymentAttempts(id);
+
+    return {
+      success: true,
+      attempts,
+      total: attempts.length,
+    };
+  }
+
   /**
    * Obtener información básica de factura (público, para página de confirmación)
    */
@@ -415,6 +446,9 @@ export class InvoicesController {
       invoiceNumber: invoice.invoiceNumber,
       total: invoice.total,
       status: invoice.status,
+      paymentAttemptsCount: invoice.paymentAttemptsCount || 0,
+      maxAttempts: 6,
+      boldPaymentLinkStatus: invoice.boldPaymentLinkStatus || 'active',
       tenant: {
         name: invoice.tenant.name,
       },

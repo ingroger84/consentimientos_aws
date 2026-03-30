@@ -233,46 +233,79 @@ export class TenantsService {
   }
 
   async findAll(): Promise<Tenant[]> {
-    try {
-      const tenants = await this.tenantsRepository.find({
-        relations: ['users', 'branches', 'services', 'consents', 'clients'],
-        order: { createdAt: 'DESC' },
-      });
+      try {
+        // OPTIMIZACIÓN: Simplificar la consulta para que sea más rápida
+        // 1. No cargar relaciones pesadas (clients, consents)
+        // 2. Hacer conteos en paralelo en lugar de secuencial
+        // 3. Usar subqueries para los conteos
 
-      // Para cada tenant, contar los registros médicos y consentimientos HC
-      for (const tenant of tenants) {
+        const tenants = await this.tenantsRepository
+          .createQueryBuilder('tenant')
+          .leftJoinAndSelect('tenant.users', 'user', 'user.deletedAt IS NULL')
+          .leftJoinAndSelect('tenant.branches', 'branch', 'branch.deletedAt IS NULL')
+          .leftJoinAndSelect('tenant.services', 'service', 'service.deletedAt IS NULL')
+          .loadRelationCountAndMap('tenant.consentsCount', 'tenant.consents', 'consent', qb => 
+            qb.where('consent.deletedAt IS NULL')
+          )
+          .loadRelationCountAndMap('tenant.clientsCount', 'tenant.clients', 'client', qb => 
+            qb.where('client.deletedAt IS NULL')
+          )
+          .orderBy('tenant.createdAt', 'DESC')
+          .getMany();
+
+        // Contar medical records y consents en paralelo para todos los tenants
+        const tenantIds = tenants.map(t => t.id);
+
+        if (tenantIds.length === 0) {
+          return tenants;
+        }
+
         try {
-          // Contar medical records usando el nombre correcto de la columna
+          // Obtener conteos de medical records para todos los tenants en una sola query
           const mrRepo = this.dataSource.getRepository('MedicalRecord');
-          const mrCount = await mrRepo
+          const mrCounts = await mrRepo
             .createQueryBuilder('mr')
-            .where('mr.tenant_id = :tenantId', { tenantId: tenant.id })
-            .getCount();
-          
-          (tenant as any).medicalRecordsCount = mrCount;
+            .select('mr.tenant_id', 'tenantId')
+            .addSelect('COUNT(*)', 'count')
+            .where('mr.tenant_id IN (:...tenantIds)', { tenantIds })
+            .groupBy('mr.tenant_id')
+            .getRawMany();
 
-          // Contar medical record consents
+          // Obtener conteos de medical record consents para todos los tenants en una sola query
           const mrConsentsRepo = this.dataSource.getRepository('MedicalRecordConsent');
-          const mrConsentsCount = await mrConsentsRepo
+          const mrConsentsCounts = await mrConsentsRepo
             .createQueryBuilder('consent')
             .innerJoin('consent.medicalRecord', 'mr')
-            .where('mr.tenant_id = :tenantId', { tenantId: tenant.id })
-            .getCount();
-          
-          (tenant as any).medicalRecordConsentsCount = mrConsentsCount;
-        } catch (error) {
-          console.error(`Error counting records for tenant ${tenant.id}:`, error.message);
-          (tenant as any).medicalRecordsCount = 0;
-          (tenant as any).medicalRecordConsentsCount = 0;
-        }
-      }
+            .select('mr.tenant_id', 'tenantId')
+            .addSelect('COUNT(DISTINCT consent.id)', 'count')
+            .where('mr.tenant_id IN (:...tenantIds)', { tenantIds })
+            .groupBy('mr.tenant_id')
+            .getRawMany();
 
-      return tenants;
-    } catch (error) {
-      console.error('Error in findAll tenants:', error);
-      throw error;
+          // Mapear los conteos a cada tenant
+          const mrCountMap = new Map(mrCounts.map(item => [item.tenantId, parseInt(item.count)]));
+          const mrConsentsCountMap = new Map(mrConsentsCounts.map(item => [item.tenantId, parseInt(item.count)]));
+
+          tenants.forEach(tenant => {
+            (tenant as any).medicalRecordsCount = mrCountMap.get(tenant.id) || 0;
+            (tenant as any).medicalRecordConsentsCount = mrConsentsCountMap.get(tenant.id) || 0;
+          });
+        } catch (error) {
+          console.error('Error counting medical records:', error.message);
+          // Si falla, establecer conteos en 0
+          tenants.forEach(tenant => {
+            (tenant as any).medicalRecordsCount = 0;
+            (tenant as any).medicalRecordConsentsCount = 0;
+          });
+        }
+
+        return tenants;
+      } catch (error) {
+        console.error('Error in findAll tenants:', error);
+        throw error;
+      }
     }
-  }
+
 
   async findOne(id: string): Promise<Tenant> {
     const tenant = await this.tenantsRepository.findOne({

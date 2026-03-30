@@ -2249,3 +2249,152 @@ export class MailService {
     }
   }
 }
+
+  /**
+   * Enviar email cuando un pago falla
+   */
+  async sendPaymentFailedEmail(tenant: any, invoice: any): Promise<void> {
+    try {
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: tenant.contactEmail,
+        subject: `Pago Rechazado - Factura ${invoice?.invoiceNumber || 'N/A'}`,
+        html: this.getPaymentFailedTemplate(tenant, invoice),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Payment failed email sent to ${tenant.contactEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending payment failed email to ${tenant.contactEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Template para email de pago fallido
+   */
+  private getPaymentFailedTemplate(tenant: any, invoice: any): string {
+    const tenantSlug = tenant.slug;
+    const retryPaymentUrl = `https://${tenantSlug}.archivoenlinea.com/suspended`;
+    const invoiceAmount = this.formatCurrency(invoice.total);
+    const dueDate = new Date(invoice.dueDate).toLocaleDateString('es-CO', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pago Rechazado</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td align="center" style="padding: 40px 0;">
+              <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                
+                <!-- Header -->
+                <tr>
+                  <td style="padding: 40px 40px 20px 40px; text-align: center; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); border-radius: 8px 8px 0 0;">
+                    <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
+                      ⚠️ Pago Rechazado
+                    </h1>
+                  </td>
+                </tr>
+
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px;">
+                    <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                      Hola <strong>${tenant.name}</strong>,
+                    </p>
+                    
+                    <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                      Lamentamos informarte que el pago de tu factura <strong>${invoice.invoiceNumber}</strong> no pudo ser procesado.
+                    </p>
+
+                    <!-- Invoice Details -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0; background-color: #fef2f2; border: 2px solid #fecaca; border-radius: 8px;">
+                      <tr>
+                        <td style="padding: 20px;">
+                          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Número de Factura:</td>
+                              <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${invoice.invoiceNumber}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Monto Total:</td>
+                              <td style="padding: 8px 0; color: #dc2626; font-size: 18px; font-weight: 700; text-align: right;">${invoiceAmount}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Fecha de Vencimiento:</td>
+                              <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${dueDate}</td>
+                            </tr>
+                            <tr>
+                              <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Intentos Realizados:</td>
+                              <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${invoice.paymentAttemptsCount || 1} de 6</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                      <strong>¿Qué puedes hacer?</strong>
+                    </p>
+
+                    <ul style="margin: 0 0 30px 0; padding-left: 20px; color: #374151; font-size: 15px; line-height: 1.8;">
+                      <li>Verifica que tu método de pago tenga fondos suficientes</li>
+                      <li>Asegúrate de que los datos de tu tarjeta sean correctos</li>
+                      <li>Intenta con otro método de pago (PSE, tarjeta de crédito/débito)</li>
+                      <li>Contacta a tu banco si el problema persiste</li>
+                    </ul>
+
+                    <!-- CTA Button -->
+                    <table role="presentation" style="width: 100%; border-collapse: collapse; margin: 30px 0;">
+                      <tr>
+                        <td align="center">
+                          <a href="${retryPaymentUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.3);">
+                            🔄 Reintentar Pago Ahora
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="margin: 30px 0; padding: 20px; background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px;">
+                      <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                        <strong>⚠️ Importante:</strong> Tienes hasta <strong>6 intentos</strong> para completar el pago. 
+                        Si no se recibe el pago antes de la fecha de vencimiento, tu cuenta podría ser suspendida temporalmente.
+                      </p>
+                    </div>
+
+                    <p style="margin: 20px 0 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                      Si necesitas ayuda o tienes preguntas, no dudes en contactarnos.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 8px 8px; text-align: center;">
+                    <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                      Este es un correo automático, por favor no respondas a este mensaje.
+                    </p>
+                    <p style="margin: 0; color: #9ca3af; font-size: 12px;">
+                      © ${new Date().getFullYear()} ${this.configService.get('SMTP_FROM_NAME')}. Todos los derechos reservados.
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+  }

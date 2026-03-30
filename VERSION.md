@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 79.1.0
+## Versión Actual: 81.0.0
 **Fecha:** 2026-03-29
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
+### 81.0.0 - 2026-03-29 [MAJOR]
+- Backend: 17 archivo(s) modificado(s)
+- Frontend: 5 archivo(s) modificado(s)
+- Documentación: 3 archivo(s) modificado(s)
+- Scripts: 3 archivo(s) modificado(s)
+
 ### 79.1.0 - 2026-03-29 [MINOR]
 - Mejoras y correcciones generales
-
-### 79.0.0 - 2026-03-28 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
 
 ---
 

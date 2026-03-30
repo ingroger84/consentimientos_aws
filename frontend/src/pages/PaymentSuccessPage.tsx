@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Clock, FileText, Home, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, FileText, Home, AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { invoicesService } from '@/services/invoices.service';
 import api from '@/services/api';
+import axios from 'axios';
+import { getApiBaseUrl } from '@/utils/api-url';
 
 interface Invoice {
   id: string;
   invoiceNumber: string;
   total: number;
   status: string;
+  paymentAttemptsCount: number;
+  maxAttempts: number;
+  boldPaymentLinkStatus: string;
   tenant: {
     name: string;
   };
@@ -23,6 +28,7 @@ export default function PaymentSuccessPage() {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(10);
+  const [retryingPayment, setRetryingPayment] = useState(false);
 
   // Obtener parámetros de Bold
   const boldOrderId = searchParams.get('bold-order-id');
@@ -97,6 +103,40 @@ export default function PaymentSuccessPage() {
 
   const handleGoToDashboard = () => {
     navigate('/dashboard');
+  };
+
+  const handleRetryPayment = async () => {
+    if (!invoiceId) return;
+
+    try {
+      setRetryingPayment(true);
+
+      // Regenerar link de pago usando endpoint público
+      const apiUrl = getApiBaseUrl();
+      const response = await axios.post(
+        `${apiUrl}/api/invoices/public/${invoiceId}/regenerate-payment-link`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const { paymentLink, attemptNumber, maxAttempts } = response.data;
+
+      console.log(`Nuevo link de pago generado (Intento ${attemptNumber}/${maxAttempts}):`, paymentLink);
+
+      // Redirigir al nuevo checkout de Bold
+      window.location.href = paymentLink;
+    } catch (error: any) {
+      console.error('Error al regenerar link de pago:', error);
+      
+      const errorMessage = error.response?.data?.message || 'Error al generar nuevo link de pago';
+      alert(errorMessage);
+      
+      setRetryingPayment(false);
+    }
   };
 
   // Estado de carga
@@ -275,9 +315,37 @@ export default function PaymentSuccessPage() {
                   <p className="font-medium text-red-900 mb-1">
                     Pago No Procesado
                   </p>
-                  <p className="text-sm text-red-800">
+                  <p className="text-sm text-red-800 mb-3">
                     No se pudo procesar tu pago. Por favor verifica tu información de pago e intenta nuevamente.
                   </p>
+                  {invoice && (
+                    <div className="bg-white rounded-lg p-3 border border-red-200 mb-3">
+                      <p className="text-xs text-gray-600 mb-1">Intentos de pago:</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {invoice.paymentAttemptsCount || 1} de {invoice.maxAttempts || 6} intentos realizados
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Te quedan {(invoice.maxAttempts || 6) - (invoice.paymentAttemptsCount || 1)} intentos disponibles
+                      </p>
+                    </div>
+                  )}
+                  <button
+                    onClick={handleRetryPayment}
+                    disabled={retryingPayment}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  >
+                    {retryingPayment ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Generando nuevo link...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-5 h-5" />
+                        Reintentar Pago con Otro Método
+                      </>
+                    )}
+                  </button>
                 </>
               )}
             </div>

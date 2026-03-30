@@ -8,6 +8,7 @@ import { Invoice } from './entities/invoice.entity';
 import { TaxConfig } from './entities/tax-config.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import { Payment } from '../payments/entities/payment.entity';
+import { PaymentAttempt } from '../payments/entities/payment-attempt.entity';
 import { BillingHistory } from '../billing/entities/billing-history.entity';
 import { MailModule } from '../mail/mail.module';
 import { PaymentsModule } from '../payments/payments.module';
@@ -15,7 +16,7 @@ import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice, TaxConfig, Tenant, Payment, BillingHistory]),
+    TypeOrmModule.forFeature([Invoice, TaxConfig, Tenant, Payment, PaymentAttempt, BillingHistory]),
     MailModule,
     forwardRef(() => PaymentsModule),
     SettingsModule,

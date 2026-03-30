@@ -10,6 +10,8 @@ import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { TaxConfigService } from './tax-config.service';
 import { MailService } from '../mail/mail.service';
 import { BoldService } from '../payments/bold.service';
+import { PaymentAttemptsService } from '../payments/payment-attempts.service';
+import { PaymentAttemptStatus } from '../payments/entities/payment-attempt.entity';
 import { getPlanConfig, calculatePrice } from '../tenants/plans.config';
 
 @Injectable()
@@ -28,6 +30,7 @@ export class InvoicesService {
     private taxConfigService: TaxConfigService,
     private mailService: MailService,
     private boldService: BoldService,
+    private paymentAttemptsService: PaymentAttemptsService,
     private configService: ConfigService,
     private dataSource: DataSource,
   ) {}
@@ -453,6 +456,7 @@ export class InvoicesService {
 
   /**
    * Crear link de pago Bold para una factura
+   * Con soporte para regeneración automática si el link anterior falló
    */
   async createPaymentLink(invoiceId: string): Promise<string> {
     const invoice = await this.findOne(invoiceId);
@@ -460,6 +464,20 @@ export class InvoicesService {
     // Verificar que la factura esté pendiente
     if (invoice.status !== InvoiceStatus.PENDING && invoice.status !== InvoiceStatus.OVERDUE) {
       throw new BadRequestException('Solo se pueden crear links de pago para facturas pendientes o vencidas');
+    }
+
+    // Verificar si se puede realizar un nuevo intento
+    const retryCheck = await this.paymentAttemptsService.canRetryPayment(invoiceId);
+    
+    if (!retryCheck.canRetry) {
+      this.logger.error(`❌ No se puede crear link de pago para factura ${invoice.invoiceNumber}`);
+      this.logger.error(`   Razón: ${retryCheck.reason}`);
+      this.logger.error(`   Intentos: ${retryCheck.attemptsCount}/${retryCheck.maxAttempts}`);
+      
+      throw new BadRequestException(
+        `No se puede generar un nuevo link de pago. ${retryCheck.reason}. ` +
+        `Intentos realizados: ${retryCheck.attemptsCount}/${retryCheck.maxAttempts}`
+      );
     }
 
     // Función para validar si un link de Bold es válido
@@ -482,20 +500,36 @@ export class InvoicesService {
       return true;
     };
 
-    // Verificar que no tenga ya un link de pago válido
-    if (invoice.boldPaymentLink && isValidBoldLink(invoice.boldPaymentLink)) {
+    // Verificar si hay un link activo y válido
+    const shouldRegenerateLink = 
+      !invoice.boldPaymentLink || 
+      !isValidBoldLink(invoice.boldPaymentLink) ||
+      invoice.boldPaymentLinkStatus === 'failed' ||
+      invoice.boldPaymentLinkStatus === 'expired';
+
+    if (!shouldRegenerateLink && invoice.boldPaymentLinkStatus === 'active') {
       this.logger.log(`✅ Factura ${invoice.invoiceNumber} ya tiene un link de pago válido: ${invoice.boldPaymentLink}`);
       return invoice.boldPaymentLink;
     }
 
-    // Si el link es inválido, regenerarlo
-    if (invoice.boldPaymentLink && !isValidBoldLink(invoice.boldPaymentLink)) {
-      this.logger.warn(`⚠️ Factura ${invoice.invoiceNumber} tiene un link inválido, regenerando...`);
-      this.logger.warn(`   Link anterior: ${invoice.boldPaymentLink}`);
+    // Si el link es inválido o falló, regenerarlo
+    if (shouldRegenerateLink) {
+      this.logger.log(`🔄 Regenerando link de pago para factura ${invoice.invoiceNumber}`);
+      this.logger.log(`   Razón: ${
+        !invoice.boldPaymentLink 
+          ? 'No existe link' 
+          : invoice.boldPaymentLinkStatus === 'failed'
+          ? 'Link anterior falló'
+          : invoice.boldPaymentLinkStatus === 'expired'
+          ? 'Link expirado'
+          : 'Link inválido'
+      }`);
+      this.logger.log(`   Intentos previos: ${invoice.paymentAttemptsCount || 0}/${retryCheck.maxAttempts}`);
     }
 
     // Generar referencia única para Bold
-    const reference = `INV-${invoice.invoiceNumber}-${Date.now()}`;
+    const attemptNumber = (invoice.paymentAttemptsCount || 0) + 1;
+    const reference = `INV-${invoice.invoiceNumber}-${Date.now()}-A${attemptNumber}`;
 
     // Generar URL de redirección usando el slug del tenant
     const baseUrl = this.configService.get('FRONTEND_BASE_URL') || 'https://archivoenlinea.com';
@@ -503,13 +537,14 @@ export class InvoicesService {
     const redirectUrl = `https://${tenantSlug}.archivoenlinea.com/invoices/${invoice.id}/payment-success`;
 
     this.logger.log(`🔗 Generando link de pago para tenant: ${tenantSlug}`);
+    this.logger.log(`   Intento: ${attemptNumber}/${retryCheck.maxAttempts}`);
     this.logger.log(`   Redirect URL: ${redirectUrl}`);
 
     // Crear link de pago en Bold
     const paymentLink = await this.boldService.createPaymentLink({
       amount: invoice.total,
       currency: invoice.currency,
-      description: `Factura ${invoice.invoiceNumber} - ${invoice.tenant.name}`,
+      description: `Factura ${invoice.invoiceNumber} - ${invoice.tenant.name} (Intento ${attemptNumber})`,
       reference,
       customerEmail: invoice.tenant.contactEmail,
       customerName: invoice.tenant.name,
@@ -520,20 +555,36 @@ export class InvoicesService {
     // Guardar el link y la referencia en la factura
     invoice.boldPaymentLink = paymentLink.url;
     invoice.boldPaymentReference = reference;
+    invoice.boldPaymentLinkStatus = 'active';
     await this.invoicesRepository.save(invoice);
 
-    this.logger.log(`✅ Link de pago creado para factura ${invoice.invoiceNumber}: ${paymentLink.url}`);
+    // Registrar el intento de pago
+    await this.paymentAttemptsService.createAttempt({
+      invoiceId: invoice.id,
+      boldPaymentLink: paymentLink.url,
+      boldPaymentReference: reference,
+      boldPaymentLinkId: paymentLink.id,
+      status: PaymentAttemptStatus.PENDING,
+      boldResponse: paymentLink,
+    });
+
+    this.logger.log(`✅ Link de pago creado para factura ${invoice.invoiceNumber}`);
+    this.logger.log(`   URL: ${paymentLink.url}`);
+    this.logger.log(`   Link ID: ${paymentLink.id}`);
+    this.logger.log(`   Intento: ${attemptNumber}/${retryCheck.maxAttempts}`);
 
     // Registrar en historial
     await this.billingHistoryRepository.save({
       tenantId: invoice.tenantId,
       action: BillingAction.PAYMENT_LINK_CREATED,
-      description: `Link de pago creado para factura ${invoice.invoiceNumber}`,
+      description: `Link de pago creado para factura ${invoice.invoiceNumber} (Intento ${attemptNumber})`,
       metadata: {
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
         paymentLink: paymentLink.url,
         reference,
+        attemptNumber,
+        maxAttempts: retryCheck.maxAttempts,
       },
     });
 
@@ -632,3 +683,90 @@ export class InvoicesService {
     }).format(amount);
   }
 }
+
+  /**
+   * Obtener historial de intentos de pago de una factura
+   */
+  async getPaymentAttempts(invoiceId: string): Promise<any[]> {
+    const attempts = await this.paymentAttemptsService.findByInvoice(invoiceId);
+    
+    return attempts.map(attempt => ({
+      id: attempt.id,
+      status: attempt.status,
+      failureReason: attempt.failureReason,
+      attemptedAt: attempt.attemptedAt,
+      boldPaymentLinkId: attempt.boldPaymentLinkId,
+    }));
+  }
+
+  /**
+   * Regenerar link de pago (endpoint público para reintentos)
+   */
+  async regeneratePaymentLink(invoiceId: string): Promise<{
+    paymentLink: string;
+    attemptNumber: number;
+    maxAttempts: number;
+  }> {
+    const invoice = await this.findOne(invoiceId);
+
+    // Verificar si se puede reintentar
+    const retryCheck = await this.paymentAttemptsService.canRetryPayment(invoiceId);
+    
+    if (!retryCheck.canRetry) {
+      throw new BadRequestException(retryCheck.reason);
+    }
+
+    // Marcar el link anterior como expirado
+    if (invoice.boldPaymentLink) {
+      invoice.boldPaymentLinkStatus = 'expired';
+      await this.invoicesRepository.save(invoice);
+      
+      this.logger.log(`🔄 Link anterior marcado como expirado para factura ${invoice.invoiceNumber}`);
+    }
+
+    // Generar nuevo link
+    const newPaymentLink = await this.createPaymentLink(invoiceId);
+
+    return {
+      paymentLink: newPaymentLink,
+      attemptNumber: retryCheck.attemptsCount + 1,
+      maxAttempts: retryCheck.maxAttempts,
+    };
+  }
+
+  /**
+   * Marcar link de pago como fallido
+   */
+  async markPaymentLinkAsFailed(invoiceId: string): Promise<void> {
+    const invoice = await this.invoicesRepository.findOne({
+      where: { id: invoiceId },
+    });
+
+    if (!invoice) {
+      throw new NotFoundException('Factura no encontrada');
+    }
+
+    invoice.boldPaymentLinkStatus = 'failed';
+    await this.invoicesRepository.save(invoice);
+
+    this.logger.log(`❌ Link de pago marcado como fallido para factura ${invoice.invoiceNumber}`);
+    this.logger.log(`   Intentos realizados: ${invoice.paymentAttemptsCount || 0}/6`);
+  }
+
+  /**
+   * Marcar link de pago como exitoso
+   */
+  async markPaymentLinkAsSucceeded(invoiceId: string): Promise<void> {
+    const invoice = await this.invoicesRepository.findOne({
+      where: { id: invoiceId },
+    });
+
+    if (!invoice) {
+      throw new NotFoundException('Factura no encontrada');
+    }
+
+    invoice.boldPaymentLinkStatus = 'succeeded';
+    await this.invoicesRepository.save(invoice);
+
+    this.logger.log(`✅ Link de pago marcado como exitoso para factura ${invoice.invoiceNumber}`);
+  }

@@ -40,6 +40,17 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('Usuario sin rol asignado');
     }
 
+    // SUPER ADMIN: Acceso total sin restricciones
+    // Si el usuario es Super Admin (sin tenant), permitir acceso a TODO
+    if (user.role.type === 'super_admin' && !user.tenant) {
+      if (process.env.NODE_ENV === 'development') {
+        this.logger.debug(
+          `Super Admin ${user.email} accedió sin verificación de permisos (acceso total)`
+        );
+      }
+      return true;
+    }
+
     const userPermissions = user.role.permissions || [];
 
     // Verificar si el usuario tiene al menos uno de los permisos requeridos

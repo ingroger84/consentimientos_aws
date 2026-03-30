@@ -102,6 +102,16 @@ export class Invoice {
   @Column({ nullable: true })
   boldPaymentReference: string;
 
+  // Campos para tracking de intentos de pago
+  @Column({ name: 'bold_payment_link_status', nullable: true, default: 'active' })
+  boldPaymentLinkStatus: string; // 'active', 'expired', 'failed', 'succeeded'
+
+  @Column({ name: 'payment_attempts_count', default: 0 })
+  paymentAttemptsCount: number;
+
+  @Column({ name: 'last_payment_attempt_at', type: 'timestamp', nullable: true })
+  lastPaymentAttemptAt: Date;
+
   @OneToMany(() => Payment, payment => payment.invoice)
   payments: Payment[];
 

@@ -16,6 +16,8 @@ import { Repository } from 'typeorm';
 import { BoldService, BoldWebhookPayload } from '../payments/bold.service';
 import { InvoicesService } from '../invoices/invoices.service';
 import { PaymentsService } from '../payments/payments.service';
+import { PaymentAttemptsService } from '../payments/payment-attempts.service';
+import { MailService } from '../mail/mail.service';
 import { WebhookLog, WebhookStatus, WebhookProvider } from './entities/webhook-log.entity';
 
 @Controller('webhooks')
@@ -26,6 +28,8 @@ export class WebhooksController {
     private readonly boldService: BoldService,
     private readonly invoicesService: InvoicesService,
     private readonly paymentsService: PaymentsService,
+    private readonly paymentAttemptsService: PaymentAttemptsService,
+    private readonly mailService: MailService,
     @InjectRepository(WebhookLog)
     private webhookLogsRepository: Repository<WebhookLog>,
   ) {}
@@ -169,6 +173,18 @@ export class WebhooksController {
         throw new BadRequestException('Amount mismatch');
       }
 
+      // Marcar el link de pago como exitoso
+      await this.invoicesService.markPaymentLinkAsSucceeded(invoice.id);
+
+      // Buscar el intento de pago correspondiente
+      const attempt = await this.paymentAttemptsService.findByBoldReference(webhookData.reference);
+      
+      if (attempt) {
+        // Marcar el intento como exitoso
+        await this.paymentAttemptsService.markAsSucceeded(attempt.id);
+        this.logger.log(`✅ Intento de pago ${attempt.id} marcado como exitoso`);
+      }
+
       // Mapear el método de pago de Bold a nuestro enum
       let paymentMethod = 'OTHER';
       const boldMethod = webhookData.paymentMethod.toLowerCase();
@@ -217,6 +233,7 @@ export class WebhooksController {
         invoiceNumber: invoice.invoiceNumber,
         tenantId: invoice.tenantId,
         amount: webhookData.amount,
+        attemptId: attempt?.id,
       };
     } catch (error) {
       this.logger.error(`❌ Error al procesar pago exitoso:`, error);
@@ -251,18 +268,41 @@ export class WebhooksController {
       webhookLog.tenantId = invoice.tenantId;
       await this.webhookLogsRepository.save(webhookLog);
 
-      // Registrar el intento fallido
-      this.logger.log(`Pago fallido para factura ${invoice.invoiceNumber}`);
+      // Marcar el link de pago como fallido
+      await this.invoicesService.markPaymentLinkAsFailed(invoice.id);
+
+      // Buscar el intento de pago correspondiente
+      const attempt = await this.paymentAttemptsService.findByBoldReference(webhookData.reference);
+      
+      if (attempt) {
+        // Marcar el intento como fallido
+        await this.paymentAttemptsService.markAsFailed(
+          attempt.id,
+          payload.transaction?.status || 'Payment rejected by Bold',
+          payload,
+        );
+        
+        this.logger.log(`✅ Intento de pago ${attempt.id} marcado como fallido`);
+      }
+
+      // Enviar email de notificación de pago fallido
+      try {
+        await this.mailService.sendPaymentFailedEmail(invoice.tenant, invoice);
+        this.logger.log(`✅ Email de pago fallido enviado a ${invoice.tenant.contactEmail}`);
+      } catch (emailError) {
+        this.logger.error(`❌ Error al enviar email de pago fallido:`, emailError);
+        // No lanzar error, continuar con el proceso
+      }
+
+      this.logger.log(`Pago fallido registrado para factura ${invoice.invoiceNumber}`);
 
       return {
         success: true,
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
         status: 'failed',
+        attemptId: attempt?.id,
       };
-
-      // Opcional: Enviar notificación al tenant
-      // await this.invoicesService.sendPaymentFailedNotification(invoice.id);
     } catch (error) {
       this.logger.error(`❌ Error al procesar pago fallido:`, error);
       throw error;
