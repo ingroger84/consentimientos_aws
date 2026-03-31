@@ -9,18 +9,14 @@ SELECT 'payment_attempts: ' || COUNT(*) || ' registros' FROM payment_attempts;
 
 SELECT 'invoices con links Bold: ' || COUNT(*) || ' registros' 
 FROM invoices 
-WHERE bold_payment_link IS NOT NULL 
-   OR bold_payment_link_id IS NOT NULL 
-   OR bold_payment_reference IS NOT NULL;
+WHERE "boldPaymentLink" IS NOT NULL 
+   OR "boldPaymentLinkId" IS NOT NULL 
+   OR "boldPaymentReference" IS NOT NULL;
 
 SELECT 'payments de Bold: ' || COUNT(*) || ' registros' 
 FROM payments 
-WHERE payment_method = 'bold' 
-   OR bold_order_id IS NOT NULL;
-
-SELECT 'webhook_logs de Bold: ' || COUNT(*) || ' registros' 
-FROM webhook_logs 
-WHERE source = 'bold';
+WHERE "paymentMethod" = 'bold' 
+   OR "boldOrderId" IS NOT NULL;
 
 \echo ''
 \echo '🧹 Iniciando limpieza de datos de prueba...'
@@ -34,29 +30,24 @@ DELETE FROM payment_attempts;
 \echo '2️⃣  Limpiando campos de Bold en facturas...'
 UPDATE invoices 
 SET 
-  bold_payment_link = NULL,
-  bold_payment_link_id = NULL,
-  bold_payment_reference = NULL,
-  bold_payment_link_status = NULL,
-  payment_attempts_count = 0,
-  last_payment_attempt_at = NULL
+  "boldPaymentLink" = NULL,
+  "boldPaymentLinkId" = NULL,
+  "boldPaymentReference" = NULL,
+  "boldPaymentLinkStatus" = NULL,
+  "paymentAttemptsCount" = 0,
+  "lastPaymentAttemptAt" = NULL
 WHERE 
-  bold_payment_link IS NOT NULL 
-  OR bold_payment_link_id IS NOT NULL 
-  OR bold_payment_reference IS NOT NULL
-  OR bold_payment_link_status IS NOT NULL
-  OR payment_attempts_count > 0;
+  "boldPaymentLink" IS NOT NULL 
+  OR "boldPaymentLinkId" IS NOT NULL 
+  OR "boldPaymentReference" IS NOT NULL
+  OR "boldPaymentLinkStatus" IS NOT NULL
+  OR "paymentAttemptsCount" > 0;
 
 -- 3. Eliminar pagos de Bold
 \echo '3️⃣  Eliminando pagos de Bold (payments)...'
 DELETE FROM payments 
-WHERE payment_method = 'bold' 
-   OR bold_order_id IS NOT NULL;
-
--- 4. Eliminar logs de webhooks de Bold
-\echo '4️⃣  Eliminando logs de webhooks de Bold...'
-DELETE FROM webhook_logs 
-WHERE source = 'bold';
+WHERE "paymentMethod" = 'bold' 
+   OR "boldOrderId" IS NOT NULL;
 
 \echo ''
 \echo '✅ Verificando limpieza...'
@@ -67,19 +58,15 @@ SELECT 'payment_attempts: ' || COUNT(*) || ' registros (debe ser 0)' FROM paymen
 
 SELECT 'invoices con datos Bold: ' || COUNT(*) || ' registros (debe ser 0)' 
 FROM invoices 
-WHERE bold_payment_link IS NOT NULL 
-   OR bold_payment_link_id IS NOT NULL 
-   OR bold_payment_reference IS NOT NULL
-   OR payment_attempts_count > 0;
+WHERE "boldPaymentLink" IS NOT NULL 
+   OR "boldPaymentLinkId" IS NOT NULL 
+   OR "boldPaymentReference" IS NOT NULL
+   OR "paymentAttemptsCount" > 0;
 
 SELECT 'payments de Bold: ' || COUNT(*) || ' registros (debe ser 0)' 
 FROM payments 
-WHERE payment_method = 'bold' 
-   OR bold_order_id IS NOT NULL;
-
-SELECT 'webhook_logs de Bold: ' || COUNT(*) || ' registros (debe ser 0)' 
-FROM webhook_logs 
-WHERE source = 'bold';
+WHERE "paymentMethod" = 'bold' 
+   OR "boldOrderId" IS NOT NULL;
 
 \echo ''
 \echo '🎉 Limpieza completada exitosamente!'
