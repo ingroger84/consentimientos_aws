@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 83.3.0
+## Versión Actual: 83.3.1
 **Fecha:** 2026-03-31
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,10 +18,10 @@
 
 ## Historial de Versiones
 
-### 83.3.0 - 2026-03-31 [MINOR]
-- Backend: 1 archivo(s) modificado(s)
+### 83.3.1 - 2026-03-31 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
-### 83.2.0 - 2026-03-31 [MINOR]
+### 83.3.0 - 2026-03-31 [MINOR]
 - Backend: 1 archivo(s) modificado(s)
 
 ---
