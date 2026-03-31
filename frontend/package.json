@@ -1,7 +1,7 @@
 {
   "name": "consentimientos-frontend",
   "private": true,
-  "version": "83.3.1",
+  "version": "83.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
