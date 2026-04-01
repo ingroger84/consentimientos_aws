@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 83.6.0
+## Versión Actual: 83.7.0
 **Fecha:** 2026-03-31
 **Tipo de Cambio:** MINOR
 
@@ -18,11 +18,11 @@
 
 ## Historial de Versiones
 
-### 83.6.0 - 2026-03-31 [MINOR]
+### 83.7.0 - 2026-03-31 [MINOR]
 - Backend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
-### 83.5.0 - 2026-03-31 [MINOR]
+### 83.6.0 - 2026-03-31 [MINOR]
 - Backend: 1 archivo(s) modificado(s)
 - Documentación: 1 archivo(s) modificado(s)
 
