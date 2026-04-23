@@ -27,6 +27,25 @@
     
     <title>Sistema de Consentimientos Digitales</title>
     
+    <!-- Script de forzar recarga con parámetro de versión (DEBE IR PRIMERO) -->
+    <script>
+      (function() {
+        const currentVersion = 'APP_VERSION_PLACEHOLDER';
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlVersion = urlParams.get('v');
+        
+        // Si no hay parámetro de versión o es diferente, recargar con versión actual
+        if (!urlVersion || urlVersion !== currentVersion) {
+          console.log('🔄 Forzando recarga con parámetro de versión:', currentVersion);
+          const newUrl = window.location.pathname + '?v=' + currentVersion + window.location.hash;
+          window.location.replace(newUrl);
+          return; // Detener ejecución
+        }
+        
+        console.log('✅ Versión correcta en URL:', urlVersion);
+      })();
+    </script>
+    
     <!-- Script de detección de caché antiguo -->
     <script>
       (function() {

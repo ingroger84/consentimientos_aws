@@ -132,6 +132,12 @@ export class CreateTenantDto {
   @IsOptional()
   @IsInt()
   @Min(1)
+  @Max(10000)
+  maxMRConsents?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
   @Max(1000)
   maxConsentTemplates?: number;
 

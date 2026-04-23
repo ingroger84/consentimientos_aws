@@ -7,9 +7,10 @@ export interface PlanConfig {
   limits: {
     users: number;
     branches: number;
-    consents: number;
-    medicalRecords: number;           // Límite de Historias Clínicas
+    consents: number;                 // Límite mensual de Consentimientos CN
+    medicalRecords: number;           // Límite total de Historias Clínicas
     mrConsentTemplates: number;       // Límite de Plantillas de HC
+    mrConsents: number;               // Límite mensual de Consentimientos de HC
     consentTemplates: number;         // Límite de Plantillas de CN
     services: number;
     questions: number;
@@ -41,6 +42,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "consents": 20,
       "medicalRecords": 5,
       "mrConsentTemplates": 2,
+      "mrConsents": 10,
       "consentTemplates": 3,
       "services": 3,
       "questions": 6,
@@ -69,6 +71,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "consents": 100,
       "medicalRecords": 30,
       "mrConsentTemplates": 5,
+      "mrConsents": 50,
       "consentTemplates": 10,
       "services": 5,
       "questions": 10,
@@ -97,6 +100,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "consents": 300,
       "medicalRecords": 100,
       "mrConsentTemplates": 10,
+      "mrConsents": 200,
       "consentTemplates": 20,
       "services": 15,
       "questions": 30,
@@ -126,6 +130,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "consents": 500,
       "medicalRecords": 300,
       "mrConsentTemplates": 20,
+      "mrConsents": 500,
       "consentTemplates": 30,
       "services": 30,
       "questions": 50,
@@ -154,6 +159,7 @@ export const PLANS: Record<string, PlanConfig> = {
       "consents": -1,
       "medicalRecords": -1,
       "mrConsentTemplates": -1,
+      "mrConsents": -1,
       "consentTemplates": -1,
       "services": -1,
       "questions": -1,

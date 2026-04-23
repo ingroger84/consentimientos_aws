@@ -13,6 +13,7 @@ import { BoldService } from '../payments/bold.service';
 import { PaymentAttemptsService } from '../payments/payment-attempts.service';
 import { PaymentAttemptStatus } from '../payments/entities/payment-attempt.entity';
 import { getPlanConfig, calculatePrice } from '../tenants/plans.config';
+import { DynamiaErpService, DynamiaErpInvoiceRequest } from '../dynamiaerp/dynamiaerp.service';
 
 @Injectable()
 export class InvoicesService {
@@ -33,6 +34,7 @@ export class InvoicesService {
     private paymentAttemptsService: PaymentAttemptsService,
     private configService: ConfigService,
     private dataSource: DataSource,
+    private dynamiaErpService: DynamiaErpService,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
@@ -179,9 +181,9 @@ export class InvoicesService {
       periodEnd.setMonth(periodEnd.getMonth() + 1);
     }
 
-    // Fecha de vencimiento (30 días después de la emisión)
+    // Fecha de vencimiento (3 días después de la emisión)
     const dueDate = new Date(now);
-    dueDate.setDate(dueDate.getDate() + 30);
+    dueDate.setDate(dueDate.getDate() + 3);
 
     // Crear líneas de factura
     const items = [
@@ -339,6 +341,15 @@ export class InvoicesService {
         paidAt: invoice.paidAt,
       },
     });
+
+    // 🔥 INTEGRACIÓN DYNAMIAERP: Enviar factura electrónica automáticamente
+    try {
+      await this.sendToDynamiaErp(invoice.id);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar factura a DynamiaERP: ${error.message}`);
+      // No lanzar error para no interrumpir el flujo de pago
+      // El error se guarda en la base de datos para revisión posterior
+    }
 
     return updatedInvoice;
   }
@@ -672,6 +683,15 @@ export class InvoicesService {
       },
     });
 
+    // 🔥 INTEGRACIÓN DYNAMIAERP: Enviar factura electrónica automáticamente
+    try {
+      await this.sendToDynamiaErp(invoice.id);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar factura a DynamiaERP: ${error.message}`);
+      // No lanzar error para no interrumpir el flujo de pago
+      // El error se guarda en la base de datos para revisión posterior
+    }
+
     return updatedInvoice;
   }
 
@@ -760,6 +780,218 @@ export class InvoicesService {
     await this.invoicesRepository.save(invoice);
 
     this.logger.log(`✅ Link de pago marcado como exitoso para factura ${invoice.invoiceNumber}`);
+  }
+
+  /**
+   * Enviar factura a DynamiaERP para generar factura electrónica
+   */
+  async sendToDynamiaErp(invoiceId: string): Promise<void> {
+    const invoice = await this.findOne(invoiceId);
+
+    // Verificar que la factura esté pagada
+    if (invoice.status !== InvoiceStatus.PAID) {
+      throw new BadRequestException('Solo se pueden enviar facturas pagadas a DynamiaERP');
+    }
+
+    // Verificar si ya fue enviada a DynamiaERP
+    if (invoice.dynamiaerpCufe) {
+      this.logger.warn(`⚠️ Factura ${invoice.invoiceNumber} ya fue enviada a DynamiaERP (CUFE: ${invoice.dynamiaerpCufe})`);
+      return;
+    }
+
+    this.logger.log(`📤 Enviando factura ${invoice.invoiceNumber} a DynamiaERP...`);
+
+    // Obtener el payment asociado a la factura para capturar el método de pago real
+    const payment = invoice.payments && invoice.payments.length > 0 
+      ? invoice.payments[invoice.payments.length - 1] 
+      : null;
+
+    // Obtener tenant con información completa
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: invoice.tenantId },
+      relations: ['documentType'],
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant no encontrado');
+    }
+
+    // Mapear tipo de documento a código DIAN
+    const tipoDocumentoMap = {
+      'CC': '13', // Cédula de Ciudadanía
+      'CE': '22', // Cédula de Extranjería
+      'NIT': '31', // NIT
+      'TI': '12', // Tarjeta de Identidad
+      'PP': '41', // Pasaporte
+      'RC': '11', // Registro Civil
+    };
+
+    const tipoId = tipoDocumentoMap[tenant.documentType?.code] || '31'; // Default: NIT
+
+    // Formatear fechas en formato "YYYY-MM-DD HH:mm:ss"
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    // Determinar si es NIT o Cédula para ajustar datos del cliente
+    const isNIT = tipoId === '31';
+    
+    // Mapear método de pago de Bold a códigos DynamiaERP
+    let formaPagoCode = 'EF'; // Efectivo por defecto
+    
+    if (payment) {
+      const boldMethod = (payment.boldPaymentMethod || payment.paymentMethod || '').toLowerCase();
+      
+      if (boldMethod.includes('pse')) {
+        formaPagoCode = 'PS'; // PSE
+        this.logger.log(`   Método de pago: PSE (${payment.boldPaymentMethod || payment.paymentMethod})`);
+      } else if (boldMethod.includes('card') || boldMethod.includes('tarjeta') || boldMethod.includes('credit') || boldMethod.includes('debit')) {
+        formaPagoCode = 'TC'; // Tarjeta de crédito
+        this.logger.log(`   Método de pago: Tarjeta (${payment.boldPaymentMethod || payment.paymentMethod})`);
+      } else if (boldMethod.includes('transfer') || boldMethod.includes('transferencia')) {
+        formaPagoCode = 'TR'; // Transferencia
+        this.logger.log(`   Método de pago: Transferencia (${payment.boldPaymentMethod || payment.paymentMethod})`);
+      } else {
+        this.logger.log(`   Método de pago: Efectivo (default) - Original: ${payment.boldPaymentMethod || payment.paymentMethod}`);
+      }
+    } else {
+      this.logger.warn(`   ⚠️ No se encontró payment asociado, usando Efectivo por defecto`);
+    }
+    
+    // Preparar datos de la factura para DynamiaERP
+    const dynamiaErpInvoice: DynamiaErpInvoiceRequest = {
+      tipo: 'REMISION', // Tipo correcto según ejemplo de soporte
+      tipoDoc: 'REMISION',
+      numero: invoice.invoiceNumber.replace('INV-', '001-'), // Cambiar INV- por 001-
+      consecutivo: invoice.invoiceNumber.split('-')[2] || '0001',
+      prefijo: '001',
+      llaveTecnica: this.configService.get('DYNAMIAERP_LLAVE_TECNICA') || 'b4118824f61b55466c29a0d87f4067299bd77aa7681891fae449aae32657edca',
+      fecha: formatDate(invoice.paidAt),
+      fechaEnvio: formatDate(invoice.paidAt),
+      fechaVencimiento: formatDate(invoice.dueDate),
+      pdf: 'none',
+      procesarPago: false,
+      sucursal: '001', // Hardcodeado como indicó soporte
+      observaciones: 'Servicios excluidos del impuesto a las ventas IVA (articulo 10 de la Ley de financiamiento 1943 de 2018)',
+      cliente: {
+        identificacion: tenant.documentNumber,
+        tipoId: tipoId,
+        nombre1: tenant.name.split(' ')[0] || 'CLIENTE',
+        nombre2: '',
+        apellido1: tenant.name.split(' ')[1] || 'EMPRESA',
+        apellido2: '',
+        razonSocial: isNIT ? tenant.name : '', // Solo para NIT, vacío para Cédula
+        email: tenant.contactEmail,
+        telefono: tenant.contactPhone || '3000000000',
+        celular: tenant.contactPhone || '',
+        direccion: 'Dirección no especificada',
+        ciudad: 'MEDELLIN',
+        codigoCiudad: '05001',
+        departamento: 'ANTIOQUIA',
+        codigoDepartamento: '05',
+        pais: 'Colombia',
+        codigoPais: 'CO',
+        barrio: 'MEDELLIN',
+        responsabilidades: ['O-13'],
+        esquemaImpuesto: 'IVA',
+      },
+      detalles: invoice.items.map((item, index) => ({
+        codigo: `PLAN-${tenant.plan.toUpperCase()}`,
+        nombre: 'LINK DE PAGO',
+        descripcion: item.description,
+        cantidad: item.quantity,
+        valorUnitario: item.unitPrice,
+        subtotal: item.total,
+        valorImpuesto: 0,
+        porcentajeImpuesto: 0,
+        baseImpuesto: item.total,
+        valorDescuento: 0,
+        porcentajeDescuento: 0,
+        total: item.total,
+        impuesto: 'IVA',
+        numero: String(index + 1),
+        excluido: true,
+        impuestoIncluido: true,
+        afectaInventario: false,
+      })),
+      totales: {
+        subtotal: invoice.amount,
+        totalImpuestos: 0,
+        totalDescuentos: 0,
+        total: invoice.total,
+        totalPagable: invoice.total,
+        totalIVA: 0,
+        totalBaseGravable: 0,
+      },
+      formasPagos: [{
+        codigo: formaPagoCode,
+        valor: invoice.total,
+      }],
+    };
+
+    // Enviar a DynamiaERP
+    const response = await this.dynamiaErpService.createElectronicInvoice(dynamiaErpInvoice);
+
+    // Actualizar factura con respuesta de DynamiaERP
+    invoice.dynamiaerpSentAt = new Date();
+    invoice.dynamiaerpResponse = response;
+
+    if (response.success) {
+      invoice.dynamiaerpCufe = response.cufe;
+      invoice.dynamiaerpInvoiceId = response.id;
+      invoice.dynamiaerpInvoiceNumber = response.numero;
+      invoice.dynamiaerpStatus = response.estado;
+      invoice.dynamiaerpSentToDian = response.enviada || false;
+      invoice.dynamiaerpError = null;
+
+      this.logger.log(`✅ Factura ${invoice.invoiceNumber} enviada exitosamente a DynamiaERP`);
+      this.logger.log(`   CUFE: ${response.cufe}`);
+      this.logger.log(`   Estado: ${response.estado}`);
+      this.logger.log(`   Enviada a DIAN: ${response.enviada ? 'Sí' : 'No'}`);
+
+      // Registrar en historial
+      await this.billingHistoryRepository.save({
+        tenantId: invoice.tenantId,
+        action: BillingAction.PAYMENT_RECEIVED,
+        description: `Factura electrónica generada en DynamiaERP - CUFE: ${response.cufe}`,
+        metadata: {
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          cufe: response.cufe,
+          dynamiaerpInvoiceId: response.id,
+          dynamiaerpStatus: response.estado,
+        },
+      });
+    } else {
+      invoice.dynamiaerpError = response.message || 'Error desconocido';
+      
+      this.logger.error(`❌ Error al enviar factura ${invoice.invoiceNumber} a DynamiaERP`);
+      this.logger.error(`   Error: ${response.message}`);
+      if (response.errores && response.errores.length > 0) {
+        this.logger.error(`   Detalles: ${response.errores.join(', ')}`);
+      }
+
+      // Registrar error en historial
+      await this.billingHistoryRepository.save({
+        tenantId: invoice.tenantId,
+        action: BillingAction.PAYMENT_RECEIVED,
+        description: `Error al generar factura electrónica en DynamiaERP: ${response.message}`,
+        metadata: {
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          error: response.message,
+          errores: response.errores,
+        },
+      });
+    }
+
+    await this.invoicesRepository.save(invoice);
   }
 
   private formatCurrency(amount: number): string {

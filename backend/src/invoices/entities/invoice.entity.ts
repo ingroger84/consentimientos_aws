@@ -112,6 +112,31 @@ export class Invoice {
   @Column({ name: 'last_payment_attempt_at', type: 'timestamp', nullable: true })
   lastPaymentAttemptAt: Date;
 
+  // Campos de integración con DynamiaERP
+  @Column({ nullable: true })
+  dynamiaerpCufe: string; // Código Único de Factura Electrónica
+
+  @Column({ nullable: true })
+  dynamiaerpInvoiceId: string; // ID de la factura en DynamiaERP
+
+  @Column({ nullable: true })
+  dynamiaerpInvoiceNumber: string; // Número de factura electrónica en DynamiaERP
+
+  @Column({ nullable: true })
+  dynamiaerpStatus: string; // Estado de la factura electrónica
+
+  @Column({ default: false })
+  dynamiaerpSentToDian: boolean; // Si fue enviada a la DIAN
+
+  @Column({ type: 'timestamp', nullable: true })
+  dynamiaerpSentAt: Date; // Fecha de envío a DynamiaERP
+
+  @Column({ type: 'text', nullable: true })
+  dynamiaerpError: string; // Mensaje de error si falló
+
+  @Column({ type: 'jsonb', nullable: true })
+  dynamiaerpResponse: any; // Respuesta completa de DynamiaERP
+
   @OneToMany(() => Payment, payment => payment.invoice)
   payments: Payment[];
 

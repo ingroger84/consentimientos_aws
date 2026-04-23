@@ -646,6 +646,9 @@ export class MedicalRecordsService {
       console.log('dto:', dto);
       console.log('tenantId:', tenantId);
 
+      // Validar límite mensual de consentimientos de HC
+      await this.checkMRConsentsLimit(tenantId);
+
       // 1. Verificar que la HC existe y pertenece al tenant
       const medicalRecord = await this.medicalRecordsRepository.findOne({
         where: { id: medicalRecordId, tenantId },
@@ -1428,10 +1431,39 @@ export class MedicalRecordsService {
    * Valida que el tenant no haya excedido el límite de historias clínicas de su plan
    */
   /**
-   * Valida que el tenant no haya excedido el límite mensual de historias clínicas
-   * Solo cuenta HC del mes actual (se reinicia cada mes)
+   * Valida que el tenant no haya excedido el límite TOTAL de historias clínicas
+   * IMPORTANTE: Este es un límite TOTAL (no mensual), no se reinicia automáticamente
+   * El cliente puede crear HC hasta alcanzar el límite del plan
    */
   private async checkMedicalRecordsLimit(tenantId: string): Promise<void> {
+    const tenant = await this.tenantsService.findOne(tenantId);
+    
+    // Contar TODAS las historias clínicas del tenant (no solo del mes actual)
+    const totalCount = await this.medicalRecordsRepository.count({
+      where: {
+        tenantId,
+      }
+    });
+    
+    const maxLimit = tenant.maxMedicalRecords;
+    
+    if (totalCount >= maxLimit) {
+      throw new ForbiddenException({
+        message: `Has alcanzado el límite total de historias clínicas (${totalCount}/${maxLimit}). ` +
+          `Para crear más historias clínicas, actualiza tu plan.`,
+        error: 'RESOURCE_LIMIT_REACHED',
+        resourceType: 'medical_records',
+        current: totalCount,
+        max: maxLimit,
+      });
+    }
+  }
+
+  /**
+   * Valida que el tenant no haya excedido el límite MENSUAL de consentimientos de HC
+   * Este límite se reinicia automáticamente el 1 de cada mes
+   */
+  private async checkMRConsentsLimit(tenantId: string): Promise<void> {
     const tenant = await this.tenantsService.findOne(tenantId);
     
     // Calcular inicio y fin del mes actual
@@ -1439,24 +1471,24 @@ export class MedicalRecordsService {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
     
-    // Contar solo historias clínicas del mes actual
-    const currentMonthCount = await this.medicalRecordsRepository.count({
+    // Contar solo consentimientos de HC del mes actual
+    const currentMonthCount = await this.medicalRecordConsentsRepository.count({
       where: {
-        tenantId,
+        medicalRecord: { tenantId },
         createdAt: Between(startOfMonth, endOfMonth),
-      }
+      },
+      relations: ['medicalRecord'],
     });
     
-    const maxLimit = tenant.maxMedicalRecords;
+    const maxLimit = tenant.maxMRConsents;
     
     if (currentMonthCount >= maxLimit) {
-      const nextMonth = this.getNextMonthName();
       throw new ForbiddenException({
-        message: `Has alcanzado el límite mensual de historias clínicas (${currentMonthCount}/${maxLimit}). ` +
-          `El límite se reiniciará el 1 de ${nextMonth}. ` +
+        message: `Has alcanzado el límite mensual de consentimientos de HC (${currentMonthCount}/${maxLimit}). ` +
+          `El límite se reiniciará el 1 de ${this.getNextMonthName()}. ` +
           `Para aumentar tu límite, actualiza tu plan.`,
         error: 'MONTHLY_RESOURCE_LIMIT_REACHED',
-        resourceType: 'medical_records',
+        resourceType: 'mr_consents',
         current: currentMonthCount,
         max: maxLimit,
         resetDate: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),

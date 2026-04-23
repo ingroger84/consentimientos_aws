@@ -149,16 +149,23 @@ export class PaymentMonitorService {
 
   /**
    * Verificar pagos que llevan mucho tiempo sin procesarse
-   * Se ejecuta cada 10 minutos
+   * Se ejecuta 1 vez al día a las 9:00 AM (hora Colombia UTC-5)
+   * Envía un solo correo consolidado con todos los pagos atascados
    */
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron('0 9 * * *', {
+    timeZone: 'America/Bogota',
+  })
   async checkStuckPayments(): Promise<void> {
     try {
-      this.logger.log('🔍 Verificando pagos atascados...');
+      this.logger.log('🔍 Verificación diaria de pagos atascados (9:00 AM Colombia)...');
 
-      // Buscar facturas con link de pago creado hace más de 10 minutos pero sin pagar
-      const tenMinutesAgo = new Date();
-      tenMinutesAgo.setMinutes(tenMinutesAgo.getMinutes() - 10);
+      // Buscar facturas con link de pago creado hace más de 1 hora pero sin pagar
+      // Solo las creadas en las últimas 7 días
+      const oneHourAgo = new Date();
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
       const stuckInvoices = await this.invoicesRepository
         .createQueryBuilder('invoice')
@@ -167,17 +174,36 @@ export class PaymentMonitorService {
           statuses: [InvoiceStatus.PENDING, InvoiceStatus.OVERDUE] 
         })
         .andWhere('invoice.boldPaymentLink IS NOT NULL')
-        .andWhere('invoice.createdAt <= :since', { since: tenMinutesAgo })
-        .andWhere('invoice.createdAt >= :oneDayAgo', { 
-          oneDayAgo: new Date(Date.now() - 24 * 60 * 60 * 1000) 
-        })
+        .andWhere('invoice.createdAt <= :oneHourAgo', { oneHourAgo })
+        .andWhere('invoice.createdAt >= :sevenDaysAgo', { sevenDaysAgo })
+        .orderBy('invoice.tenant.name', 'ASC')
+        .addOrderBy('invoice.createdAt', 'DESC')
         .getMany();
 
       if (stuckInvoices.length > 0) {
-        this.logger.warn(`⚠️ Encontradas ${stuckInvoices.length} facturas con pagos potencialmente atascados`);
+        this.logger.warn(`⚠️ Encontradas ${stuckInvoices.length} facturas con pagos atascados`);
         
-        // Enviar alerta al Super Admin
+        // Agrupar por tenant para mejor visualización
+        const byTenant = new Map<string, Invoice[]>();
+        for (const invoice of stuckInvoices) {
+          const tenantName = invoice.tenant?.name || 'Desconocido';
+          if (!byTenant.has(tenantName)) {
+            byTenant.set(tenantName, []);
+          }
+          byTenant.get(tenantName).push(invoice);
+        }
+
+        this.logger.log(`📊 Pagos atascados por tenant:`);
+        for (const [tenantName, invoices] of byTenant.entries()) {
+          this.logger.log(`   - ${tenantName}: ${invoices.length} factura(s)`);
+        }
+        
+        // Enviar UN SOLO correo consolidado al Super Admin
         await this.sendStuckPaymentsAlert(stuckInvoices);
+        
+        this.logger.log('✅ Correo de reporte diario enviado');
+      } else {
+        this.logger.log('✅ No hay pagos atascados - Todo en orden');
       }
 
     } catch (error) {

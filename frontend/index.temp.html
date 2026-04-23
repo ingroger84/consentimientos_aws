@@ -22,16 +22,35 @@
     <meta http-equiv="Expires" content="0" />
     
     <!-- Build Timestamp - Forzar recarga en cada build -->
-    <meta name="build-timestamp" content="1774829623031" />
-    <meta name="app-version" content="79.1.0" />
+    <meta name="build-timestamp" content="1776910978363" />
+    <meta name="app-version" content="91.3.2" />
     
     <title>Sistema de Consentimientos Digitales</title>
+    
+    <!-- Script de forzar recarga con parámetro de versión (DEBE IR PRIMERO) -->
+    <script>
+      (function() {
+        const currentVersion = '91.3.2';
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlVersion = urlParams.get('v');
+        
+        // Si no hay parámetro de versión o es diferente, recargar con versión actual
+        if (!urlVersion || urlVersion !== currentVersion) {
+          console.log('🔄 Forzando recarga con parámetro de versión:', currentVersion);
+          const newUrl = window.location.pathname + '?v=' + currentVersion + window.location.hash;
+          window.location.replace(newUrl);
+          return; // Detener ejecución
+        }
+        
+        console.log('✅ Versión correcta en URL:', urlVersion);
+      })();
+    </script>
     
     <!-- Script de detección de caché antiguo -->
     <script>
       (function() {
-        const currentVersion = '79.1.0';
-        const buildTimestamp = '1774829623031';
+        const currentVersion = '91.3.2';
+        const buildTimestamp = '1776910978363';
         const storedVersion = localStorage.getItem('app_version');
         const storedTimestamp = localStorage.getItem('build_timestamp');
         

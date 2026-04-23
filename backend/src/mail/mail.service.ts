@@ -2132,7 +2132,7 @@ export class MailService {
   }
 
   /**
-   * Enviar alerta de pagos atascados
+   * Enviar alerta de pagos atascados (Reporte Diario Consolidado)
    */
   async sendStuckPaymentsAlert(pendingLinks: Array<{
     invoiceNumber: string;
@@ -2144,20 +2144,53 @@ export class MailService {
     try {
       const superAdminEmail = this.configService.get('SUPER_ADMIN_EMAIL') || this.configService.get('SMTP_FROM');
 
-      const linksHtml = pendingLinks.map(link => `
-        <div class="info-item">
-          <strong>Factura:</strong> ${link.invoiceNumber}<br>
-          <strong>Tenant:</strong> ${link.tenantName}<br>
-          <strong>Monto:</strong> ${this.formatCurrency(link.amount)}<br>
-          <strong>Tiempo transcurrido:</strong> ${link.minutesSinceCreation} minutos<br>
-          <strong>Link:</strong> <a href="${link.boldPaymentLink}">${link.boldPaymentLink}</a>
-        </div>
-      `).join('');
+      // Agrupar por tenant
+      const byTenant = new Map<string, typeof pendingLinks>();
+      for (const link of pendingLinks) {
+        if (!byTenant.has(link.tenantName)) {
+          byTenant.set(link.tenantName, []);
+        }
+        byTenant.get(link.tenantName).push(link);
+      }
+
+      // Generar HTML agrupado por tenant
+      let tenantsHtml = '';
+      for (const [tenantName, links] of byTenant.entries()) {
+        const totalAmount = links.reduce((sum, link) => sum + link.amount, 0);
+        
+        const linksHtml = links.map(link => {
+          const hours = Math.floor(link.minutesSinceCreation / 60);
+          const minutes = link.minutesSinceCreation % 60;
+          const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+          
+          return `
+            <div style="margin: 10px 0; padding: 10px; background-color: #fef2f2; border-radius: 4px;">
+              <strong>📄 ${link.invoiceNumber}</strong> - ${this.formatCurrency(link.amount)}<br>
+              <span style="color: #666; font-size: 13px;">⏱️ Tiempo: ${timeStr}</span><br>
+              <a href="${link.boldPaymentLink}" style="color: #3b82f6; font-size: 13px;">Ver link de pago →</a>
+            </div>
+          `;
+        }).join('');
+
+        tenantsHtml += `
+          <div style="margin: 20px 0; padding: 15px; background-color: #f9fafb; border-radius: 6px; border-left: 4px solid #ef4444;">
+            <h3 style="margin: 0 0 10px 0; color: #1f2937;">
+              🏢 ${tenantName}
+              <span style="font-size: 14px; color: #6b7280; font-weight: normal;">
+                (${links.length} factura${links.length > 1 ? 's' : ''} - Total: ${this.formatCurrency(totalAmount)})
+              </span>
+            </h3>
+            ${linksHtml}
+          </div>
+        `;
+      }
+
+      const totalAmount = pendingLinks.reduce((sum, link) => sum + link.amount, 0);
 
       const mailOptions = {
         from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
         to: superAdminEmail,
-        subject: `🚨 Alerta: ${pendingLinks.length} Pago(s) Atascado(s)`,
+        subject: `📊 Reporte Diario: ${pendingLinks.length} Pago(s) Pendiente(s) - ${byTenant.size} Tenant(s)`,
         html: `
           <!DOCTYPE html>
           <html>
@@ -2168,9 +2201,10 @@ export class MailService {
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                 line-height: 1.6;
                 color: #333;
-                max-width: 600px;
+                max-width: 700px;
                 margin: 0 auto;
                 padding: 20px;
+                background-color: #f3f4f6;
               }
               .container {
                 background-color: #ffffff;
@@ -2179,7 +2213,7 @@ export class MailService {
                 overflow: hidden;
               }
               .header {
-                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
                 color: white;
                 padding: 30px 20px;
                 text-align: center;
@@ -2187,51 +2221,95 @@ export class MailService {
               .content {
                 padding: 30px;
               }
-              .alert-box {
-                background-color: #fee2e2;
-                border-left: 4px solid #ef4444;
-                padding: 15px;
+              .summary-box {
+                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                border-left: 4px solid #f59e0b;
+                padding: 20px;
                 margin: 20px 0;
-                border-radius: 4px;
+                border-radius: 6px;
               }
-              .info-item {
-                margin: 15px 0;
-                padding: 15px;
-                background-color: #f9fafb;
-                border-radius: 4px;
-                border-left: 3px solid #ef4444;
+              .summary-stats {
+                display: flex;
+                justify-content: space-around;
+                margin-top: 15px;
+              }
+              .stat {
+                text-align: center;
+              }
+              .stat-value {
+                font-size: 24px;
+                font-weight: bold;
+                color: #d97706;
+              }
+              .stat-label {
+                font-size: 12px;
+                color: #78716c;
+                text-transform: uppercase;
               }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
-                <h1>🚨 Pagos Atascados Detectados</h1>
-                <p style="margin: 10px 0 0 0; opacity: 0.9;">Requiere Atención Inmediata</p>
+                <h1>📊 Reporte Diario de Pagos</h1>
+                <p style="margin: 10px 0 0 0; opacity: 0.9;">Pagos Pendientes con Link de Bold</p>
+                <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">
+                  ${new Date().toLocaleDateString('es-CO', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: 'America/Bogota'
+                  })} - 9:00 AM
+                </p>
               </div>
 
               <div class="content">
                 <p>Hola Super Admin,</p>
 
-                <div class="alert-box">
-                  <strong>🚨 ALERTA:</strong> Se detectaron ${pendingLinks.length} pago(s) con links de Bold creados hace más de 10 minutos pero sin procesar.
+                <div class="summary-box">
+                  <p style="margin: 0 0 10px 0; font-size: 16px;">
+                    <strong>📋 Resumen del Día:</strong>
+                  </p>
+                  <div class="summary-stats">
+                    <div class="stat">
+                      <div class="stat-value">${pendingLinks.length}</div>
+                      <div class="stat-label">Facturas</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-value">${byTenant.size}</div>
+                      <div class="stat-label">Tenants</div>
+                    </div>
+                    <div class="stat">
+                      <div class="stat-value">${this.formatCurrency(totalAmount)}</div>
+                      <div class="stat-label">Total</div>
+                    </div>
+                  </div>
                 </div>
 
-                <p>Esto puede indicar que:</p>
-                <ul>
-                  <li>Los webhooks de Bold no están llegando</li>
-                  <li>Hay un problema con la configuración de Bold</li>
-                  <li>Los usuarios están teniendo problemas para completar el pago</li>
+                <p>Se detectaron <strong>${pendingLinks.length} factura(s)</strong> con links de pago de Bold creados hace más de 1 hora pero aún sin procesar.</p>
+
+                <p style="color: #6b7280; font-size: 14px;">
+                  <strong>Posibles causas:</strong>
+                </p>
+                <ul style="color: #6b7280; font-size: 14px;">
+                  <li>Los webhooks de Bold no están llegando correctamente</li>
+                  <li>Los clientes aún no han completado el pago</li>
+                  <li>Problemas técnicos con la pasarela de pago</li>
                 </ul>
 
-                <h3>Pagos Pendientes:</h3>
-                ${linksHtml}
+                <h3 style="color: #1f2937; margin-top: 30px;">📦 Detalle por Tenant:</h3>
+                ${tenantsHtml}
 
-                <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 6px; margin: 30px 0;">
                   <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                    <strong>Acción Recomendada:</strong> Verifica manualmente el estado de estos pagos en el dashboard de Bold y procesa los que estén completados.
+                    <strong>💡 Acción Recomendada:</strong> Verifica manualmente el estado de estos pagos en el dashboard de Bold. Si algún pago está completado, el sistema lo procesará automáticamente en la próxima verificación (cada 2 minutos).
                   </p>
                 </div>
+
+                <p style="color: #9ca3af; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                  <strong>Nota:</strong> Este es un reporte automático que se envía 1 vez al día a las 9:00 AM (hora Colombia). Solo recibirás este correo si hay pagos pendientes.
+                </p>
               </div>
 
               ${this.BRANDING_FOOTER}
@@ -2242,7 +2320,7 @@ export class MailService {
       };
 
       await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Stuck payments alert sent to ${superAdminEmail}`);
+      this.logger.log(`Daily stuck payments report sent to ${superAdminEmail} (${pendingLinks.length} invoices, ${byTenant.size} tenants)`);
     } catch (error) {
       this.logger.error('Error sending stuck payments alert:', error);
       throw error;

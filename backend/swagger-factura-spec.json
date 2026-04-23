@@ -1,0 +1,38 @@
+{
+  "tags": [
+    "FacturacionElectronica"
+  ],
+  "operationId": "enviarDocumento",
+  "parameters": [
+    {
+      "name": "headers",
+      "in": "header",
+      "required": true,
+      "schema": {
+        "$ref": "#/components/schemas/HttpHeaders"
+      }
+    }
+  ],
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "schema": {
+          "$ref": "#/components/schemas/DocumentoElectronico"
+        }
+      }
+    },
+    "required": true
+  },
+  "responses": {
+    "200": {
+      "description": "OK",
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "#/components/schemas/Respuesta"
+          }
+        }
+      }
+    }
+  }
+}

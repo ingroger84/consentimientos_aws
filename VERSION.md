@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 84.0.1
-**Fecha:** 2026-03-31
-**Tipo de Cambio:** PATCH
+## Versión Actual: 92.0.0
+**Fecha:** 2026-04-22
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,13 +18,14 @@
 
 ## Historial de Versiones
 
+### 92.0.0 - 2026-04-22 [MAJOR]
+- Backend: 35 archivo(s) modificado(s)
+- Frontend: 8 archivo(s) modificado(s)
+- Documentación: 70 archivo(s) modificado(s)
+- Scripts: 9 archivo(s) modificado(s)
+
 ### 84.0.1 - 2026-03-31 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 84.0.0 - 2026-03-31 [MAJOR]
-- Backend: 2 archivo(s) modificado(s)
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
 
 ---
 

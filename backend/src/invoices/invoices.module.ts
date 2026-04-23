@@ -13,6 +13,7 @@ import { BillingHistory } from '../billing/entities/billing-history.entity';
 import { MailModule } from '../mail/mail.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { SettingsModule } from '../settings/settings.module';
+import { DynamiaErpModule } from '../dynamiaerp/dynamiaerp.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SettingsModule } from '../settings/settings.module';
     MailModule,
     forwardRef(() => PaymentsModule),
     SettingsModule,
+    DynamiaErpModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoicePdfService, TaxConfigService],

@@ -72,6 +72,16 @@ Herramientas HTML de diagnóstico y verificación:
 - Verificadores de versión
 - Herramientas de testing
 
+### 🎓 Tutoriales de Pago
+Materiales educativos para el proceso de pago de facturas:
+- **Tutorial Interactivo HTML** (`tutorial-pago-interactivo.html`) - Guía paso a paso con navegación
+- **Presentación HTML** (`tutorial-pago-presentacion.html`) - 12 slides estilo PowerPoint
+- **Tutorial Markdown** (`TUTORIAL_PAGO_FACTURA.md`) - Guía completa en texto
+- **Guía PDF/Video** (`GUIA_CREACION_TUTORIAL_PDF_VIDEO.md`) - Instrucciones para crear PDF y video
+- **Guía PowerPoint** (`CONVERTIR_PRESENTACION_A_POWERPOINT.md`) - Cómo crear presentación PPT
+- **Resumen** (`RESUMEN_TUTORIALES_PAGO.md`) - Comparación y estado de todos los materiales
+- **Script de Apertura** (`abrir-tutoriales.ps1`) - Menú interactivo para abrir tutoriales
+
 ### 📄 Otros Documentos
 - `ANALISIS_FLUJO_HC_VS_NORMATIVA_COLOMBIANA.md` - Análisis de cumplimiento normativo
 - `SISTEMA_VERSIONAMIENTO_AUTOMATICO.md` - Sistema de versionamiento
@@ -109,6 +119,12 @@ Herramientas HTML de diagnóstico y verificación:
 ### Para Testing
 1. **Herramientas HTML:** Ver `/herramientas-html/` para herramientas de diagnóstico
 2. **Verificaciones:** Ver `/verificaciones/` para scripts de validación
+
+### Para Clientes y Capacitación
+1. **Tutorial de Pago:** Abrir `tutorial-pago-interactivo.html` en navegador
+2. **Presentación:** Usar `tutorial-pago-presentacion.html` para capacitaciones
+3. **Script de Apertura:** Ejecutar `abrir-tutoriales.ps1` para menú interactivo
+4. **Resumen:** Ver `RESUMEN_TUTORIALES_PAGO.md` para comparación de formatos
 
 ---
 

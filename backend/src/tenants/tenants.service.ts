@@ -18,6 +18,13 @@ import { getPlanConfig } from './plans.config';
 
 @Injectable()
 export class TenantsService {
+  // Caché para estadísticas globales (5 minutos de TTL)
+  private globalStatsCache: {
+    data: any;
+    timestamp: number;
+  } | null = null;
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutos en milisegundos
+
   constructor(
     @InjectRepository(Tenant)
     private tenantsRepository: Repository<Tenant>,
@@ -451,292 +458,6 @@ export class TenantsService {
     };
 
     return stats;
-  }
-
-  async getGlobalStats() {
-    try {
-      const tenants = await this.tenantsRepository.find({
-        relations: ['users', 'branches', 'services', 'consents'],
-      });
-
-      // Inicializar valores por defecto
-      let totalMedicalRecords = 0;
-      let activeMedicalRecords = 0;
-      let closedMedicalRecords = 0;
-      let totalClients = 0;
-      let newClientsThisMonth = 0;
-      let totalConsentTemplates = 0;
-      let activeConsentTemplates = 0;
-      let totalMRConsentTemplates = 0;
-      let activeMRConsentTemplates = 0;
-      let topTenantsByMedicalRecords = [];
-      let topTenantsByClients = [];
-
-      // Intentar obtener estadísticas de historias clínicas
-      try {
-        const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
-        totalMedicalRecords = await medicalRecordsRepo.count();
-        activeMedicalRecords = await medicalRecordsRepo.count({ where: { status: 'OPEN' } });
-        closedMedicalRecords = await medicalRecordsRepo.count({ where: { status: 'CLOSED' } });
-
-        // Top tenants por historias clínicas
-        const medicalRecordsByTenant = await medicalRecordsRepo
-          .createQueryBuilder('mr')
-          .select('mr.tenant_id', 'tenantId')
-          .addSelect('COUNT(*)', 'count')
-          .groupBy('mr.tenant_id')
-          .orderBy('count', 'DESC')
-          .limit(10)
-          .getRawMany();
-
-        topTenantsByMedicalRecords = medicalRecordsByTenant.map((item) => {
-          const tenant = tenants.find(t => t.id === item.tenantId);
-          return {
-            id: tenant?.id || '',
-            name: tenant?.name || 'Desconocido',
-            slug: tenant?.slug || '',
-            medicalRecordsCount: parseInt(item.count) || 0,
-            branchesCount: tenant?.branches?.filter(b => !b.deletedAt).length || 0,
-          };
-        });
-      } catch (error) {
-        console.error('Error loading medical records stats:', error);
-      }
-
-      // Intentar obtener estadísticas de clientes
-      try {
-        const clientsRepo = this.dataSource.getRepository('Client');
-        totalClients = await clientsRepo.count();
-
-        // Clientes nuevos este mes
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        newClientsThisMonth = await clientsRepo
-          .createQueryBuilder('client')
-          .where('client.created_at >= :startOfMonth', { startOfMonth })
-          .getCount();
-
-        // Top tenants por clientes
-        const clientsByTenant = await clientsRepo
-          .createQueryBuilder('client')
-          .select('client.tenantId', 'tenantId')
-          .addSelect('COUNT(*)', 'count')
-          .groupBy('client.tenantId')
-          .orderBy('count', 'DESC')
-          .limit(10)
-          .getRawMany();
-
-        topTenantsByClients = clientsByTenant.map((item) => {
-          const tenant = tenants.find(t => t.id === item.tenantId);
-          return {
-            id: tenant?.id || '',
-            name: tenant?.name || 'Desconocido',
-            slug: tenant?.slug || '',
-            clientsCount: parseInt(item.count) || 0,
-          };
-        });
-      } catch (error) {
-        console.error('Error loading clients stats:', error);
-      }
-
-      // Intentar obtener estadísticas de plantillas
-      try {
-        const consentTemplatesRepo = this.dataSource.getRepository('ConsentTemplate');
-        totalConsentTemplates = await consentTemplatesRepo.count();
-        activeConsentTemplates = await consentTemplatesRepo.count({ where: { isActive: true } });
-      } catch (error) {
-        console.error('Error loading consent templates stats:', error);
-      }
-
-      try {
-        const mrConsentTemplatesRepo = this.dataSource.getRepository('MRConsentTemplate');
-        totalMRConsentTemplates = await mrConsentTemplatesRepo.count();
-        activeMRConsentTemplates = await mrConsentTemplatesRepo.count({ where: { isActive: true } });
-      } catch (error) {
-        console.error('Error loading MR consent templates stats:', error);
-      }
-
-      // Calcular tenants cerca del límite y en el límite
-      let tenantsNearLimit = 0;
-      let tenantsAtLimit = 0;
-
-      tenants.forEach(tenant => {
-        const userCount = tenant.users?.filter(u => !u.deletedAt).length || 0;
-        const branchCount = tenant.branches?.filter(b => !b.deletedAt).length || 0;
-        const consentCount = tenant.consents?.filter(c => !c.deletedAt).length || 0;
-
-        const userPercentage = (userCount / tenant.maxUsers) * 100;
-        const branchPercentage = (branchCount / tenant.maxBranches) * 100;
-        const consentPercentage = (consentCount / tenant.maxConsents) * 100;
-
-        const maxPercentage = Math.max(userPercentage, branchPercentage, consentPercentage);
-
-        if (maxPercentage >= 100) {
-          tenantsAtLimit++;
-        } else if (maxPercentage >= 80) {
-          tenantsNearLimit++;
-        }
-      });
-
-      // Datos de crecimiento (últimos 6 meses)
-      const now = new Date();
-      const growthData = [];
-      
-      for (let i = 5; i >= 0; i--) {
-        const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59);
-        const monthName = monthStart.toLocaleDateString('es-ES', { month: 'short' });
-        
-        // Contar tenants creados EN ese mes específico
-        const tenantsInMonth = tenants.filter(t => {
-          const createdDate = new Date(t.createdAt);
-          return createdDate >= monthStart && createdDate <= monthEnd;
-        }).length;
-
-        // Contar consentimientos creados EN ese mes
-        let consentsInMonth = 0;
-        tenants.forEach(t => {
-          const consentsCount = t.consents?.filter(c => {
-            if (c.deletedAt) return false;
-            const consentDate = new Date(c.createdAt);
-            return consentDate >= monthStart && consentDate <= monthEnd;
-          }).length || 0;
-          consentsInMonth += consentsCount;
-        });
-
-        // Contar historias clínicas creadas EN ese mes
-        let medicalRecordsInMonth = 0;
-        try {
-          const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
-          medicalRecordsInMonth = await medicalRecordsRepo
-            .createQueryBuilder('mr')
-            .where('mr.created_at >= :monthStart', { monthStart })
-            .andWhere('mr.created_at <= :monthEnd', { monthEnd })
-            .getCount();
-        } catch (error) {
-          console.error('Error counting medical records for month:', error);
-        }
-
-        // Contar clientes creados EN ese mes
-        let clientsInMonth = 0;
-        try {
-          const clientsRepo = this.dataSource.getRepository('Client');
-          clientsInMonth = await clientsRepo
-            .createQueryBuilder('client')
-            .where('client.created_at >= :monthStart', { monthStart })
-            .andWhere('client.created_at <= :monthEnd', { monthEnd })
-            .getCount();
-        } catch (error) {
-          console.error('Error counting clients for month:', error);
-        }
-
-        growthData.push({
-          month: monthName,
-          tenants: tenantsInMonth,
-          users: Math.floor(tenantsInMonth * 3.5), // Promedio estimado
-          consents: consentsInMonth,
-          medicalRecords: medicalRecordsInMonth,
-          clients: clientsInMonth,
-        });
-      }
-
-      // Distribución por plan
-      const tenantsByPlan = [
-        { plan: 'Gratuito', count: tenants.filter(t => t.plan === 'free').length },
-        { plan: 'Básico', count: tenants.filter(t => t.plan === 'basic').length },
-        { plan: 'Emprendedor', count: tenants.filter(t => t.plan === 'professional').length },
-        { plan: 'Plus', count: tenants.filter(t => t.plan === 'enterprise').length },
-        { plan: 'Empresarial', count: tenants.filter(t => t.plan === 'custom').length },
-      ].filter(item => item.count > 0);
-
-      // Top tenants por actividad (consentimientos)
-      const topTenants = tenants
-        .map(tenant => ({
-          id: tenant.id,
-          name: tenant.name,
-          plan: tenant.plan,
-          consentsCount: tenant.consents?.filter(c => !c.deletedAt).length || 0,
-          usersCount: tenant.users?.filter(u => !u.deletedAt).length || 0,
-          lastActivity: tenant.updatedAt || tenant.createdAt,
-        }))
-        .sort((a, b) => b.consentsCount - a.consentsCount)
-        .slice(0, 10);
-
-      const stats = {
-        totalTenants: tenants.length,
-        activeTenants: tenants.filter(t => t.status === TenantStatus.ACTIVE).length,
-        suspendedTenants: tenants.filter(t => t.status === TenantStatus.SUSPENDED).length,
-        trialTenants: tenants.filter(t => t.status === TenantStatus.TRIAL).length,
-        expiredTenants: tenants.filter(t => t.status === TenantStatus.EXPIRED).length,
-        totalUsers: tenants.reduce((sum, t) => sum + (t.users?.filter(u => !u.deletedAt).length || 0), 0),
-        totalBranches: tenants.reduce((sum, t) => sum + (t.branches?.filter(b => !b.deletedAt).length || 0), 0),
-        totalServices: tenants.reduce((sum, t) => sum + (t.services?.filter(s => !s.deletedAt).length || 0), 0),
-        totalConsents: tenants.reduce((sum, t) => sum + (t.consents?.filter(c => !c.deletedAt).length || 0), 0),
-        // Nuevas métricas
-        totalMedicalRecords,
-        activeMedicalRecords,
-        closedMedicalRecords,
-        totalClients,
-        newClientsThisMonth,
-        totalConsentTemplates,
-        activeConsentTemplates,
-        totalMRConsentTemplates,
-        activeMRConsentTemplates,
-        planDistribution: {
-          free: tenants.filter(t => t.plan === 'free').length,
-          basic: tenants.filter(t => t.plan === 'basic').length,
-          professional: tenants.filter(t => t.plan === 'professional').length,
-          enterprise: tenants.filter(t => t.plan === 'enterprise').length,
-        },
-        // Campos adicionales para el dashboard del Super Admin
-        tenantsNearLimit,
-        tenantsAtLimit,
-        growthData,
-        tenantsByPlan,
-        topTenants,
-        topTenantsByMedicalRecords,
-        topTenantsByClients,
-      };
-
-      return stats;
-    } catch (error) {
-      console.error('Error in getGlobalStats:', error);
-      // Retornar estadísticas básicas en caso de error
-      return {
-        totalTenants: 0,
-        activeTenants: 0,
-        suspendedTenants: 0,
-        trialTenants: 0,
-        expiredTenants: 0,
-        totalUsers: 0,
-        totalBranches: 0,
-        totalServices: 0,
-        totalConsents: 0,
-        totalMedicalRecords: 0,
-        activeMedicalRecords: 0,
-        closedMedicalRecords: 0,
-        totalClients: 0,
-        newClientsThisMonth: 0,
-        totalConsentTemplates: 0,
-        activeConsentTemplates: 0,
-        totalMRConsentTemplates: 0,
-        activeMRConsentTemplates: 0,
-        tenantsNearLimit: 0,
-        tenantsAtLimit: 0,
-        planDistribution: {
-          free: 0,
-          basic: 0,
-          professional: 0,
-          enterprise: 0,
-        },
-        growthData: [],
-        tenantsByPlan: [],
-        topTenants: [],
-        topTenantsByMedicalRecords: [],
-        topTenantsByClients: [],
-      };
-    }
   }
 
   async getUsage(id: string) {
@@ -1359,6 +1080,507 @@ export function calculatePrice(planId: string, billingCycle: 'monthly' | 'annual
       total: invoice.total,
       dueDate: invoice.dueDate,
       paymentLink,
+    };
+  }
+
+  async getGlobalStats() {
+    try {
+      // Verificar si hay datos en caché válidos
+      if (this.globalStatsCache) {
+        const now = Date.now();
+        const cacheAge = now - this.globalStatsCache.timestamp;
+        
+        if (cacheAge < this.CACHE_TTL) {
+          console.log(`Returning cached stats (age: ${Math.round(cacheAge / 1000)}s)`);
+          return this.globalStatsCache.data;
+        }
+      }
+
+      console.log('Calculating fresh stats...');
+      const startTime = Date.now();
+
+      // Ejecutar consultas en paralelo para mejor performance
+      const [
+        tenantStats,
+        medicalRecordsStats,
+        clientsStats,
+        consentTemplatesStats,
+        mrConsentTemplatesStats,
+        topTenantsByMedicalRecords,
+        topTenantsByClients,
+        growthData,
+      ] = await Promise.all([
+        this.getTenantStats(),
+        this.getMedicalRecordsStats(),
+        this.getClientsStats(),
+        this.getConsentTemplatesStats(),
+        this.getMRConsentTemplatesStats(),
+        this.getTopTenantsByMedicalRecords(),
+        this.getTopTenantsByClients(),
+        this.getGrowthData(),
+      ]);
+
+      const stats = {
+        ...tenantStats,
+        ...medicalRecordsStats,
+        ...clientsStats,
+        ...consentTemplatesStats,
+        ...mrConsentTemplatesStats,
+        topTenantsByMedicalRecords,
+        topTenantsByClients,
+        growthData,
+      };
+
+      // Guardar en caché
+      this.globalStatsCache = {
+        data: stats,
+        timestamp: Date.now(),
+      };
+
+      const duration = Date.now() - startTime;
+      console.log(`Stats calculated in ${duration}ms`);
+
+      return stats;
+    } catch (error) {
+      console.error('Error in getGlobalStats:', error);
+      return this.getEmptyStats();
+    }
+  }
+
+  private async getTenantStats() {
+    // Consulta optimizada: obtener conteos por status y plan en una sola query
+    const tenantStatsRaw = await this.tenantsRepository
+      .createQueryBuilder('tenant')
+      .select('tenant.status', 'status')
+      .addSelect('tenant.plan', 'plan')
+      .addSelect('COUNT(*)', 'count')
+      .where('tenant.deleted_at IS NULL')
+      .groupBy('tenant.status')
+      .addGroupBy('tenant.plan')
+      .getRawMany();
+
+    // Procesar resultados
+    let totalTenants = 0;
+    const statusCounts = {
+      active: 0,
+      suspended: 0,
+      trial: 0,
+      expired: 0,
+    };
+    const planCounts = {
+      free: 0,
+      basic: 0,
+      professional: 0,
+      enterprise: 0,
+      custom: 0,
+    };
+
+    tenantStatsRaw.forEach(row => {
+      const count = parseInt(row.count);
+      totalTenants += count;
+      
+      if (statusCounts[row.status] !== undefined) {
+        statusCounts[row.status] += count;
+      }
+      
+      if (planCounts[row.plan] !== undefined) {
+        planCounts[row.plan] += count;
+      }
+    });
+
+    // Obtener conteos agregados de relaciones
+    const aggregatedCounts = await this.tenantsRepository
+      .createQueryBuilder('tenant')
+      .leftJoin('tenant.users', 'user', 'user.deleted_at IS NULL')
+      .leftJoin('tenant.branches', 'branch', 'branch.deleted_at IS NULL')
+      .leftJoin('tenant.services', 'service', 'service.deleted_at IS NULL')
+      .leftJoin('tenant.consents', 'consent', 'consent.deleted_at IS NULL')
+      .select('COUNT(DISTINCT user.id)', 'totalUsers')
+      .addSelect('COUNT(DISTINCT branch.id)', 'totalBranches')
+      .addSelect('COUNT(DISTINCT service.id)', 'totalServices')
+      .addSelect('COUNT(DISTINCT consent.id)', 'totalConsents')
+      .where('tenant.deleted_at IS NULL')
+      .getRawOne();
+
+    // Calcular tenants cerca del límite (consulta optimizada)
+    const limitsData = await this.tenantsRepository
+      .createQueryBuilder('tenant')
+      .leftJoin('tenant.users', 'user', 'user.deleted_at IS NULL')
+      .leftJoin('tenant.branches', 'branch', 'branch.deleted_at IS NULL')
+      .leftJoin('tenant.consents', 'consent', 'consent.deleted_at IS NULL')
+      .select('tenant.id', 'id')
+      .addSelect('tenant.max_users', 'maxUsers')
+      .addSelect('tenant.max_branches', 'maxBranches')
+      .addSelect('tenant.max_consents', 'maxConsents')
+      .addSelect('COUNT(DISTINCT user.id)', 'userCount')
+      .addSelect('COUNT(DISTINCT branch.id)', 'branchCount')
+      .addSelect('COUNT(DISTINCT consent.id)', 'consentCount')
+      .where('tenant.deleted_at IS NULL')
+      .groupBy('tenant.id')
+      .getRawMany();
+
+    let tenantsNearLimit = 0;
+    let tenantsAtLimit = 0;
+
+    limitsData.forEach(tenant => {
+      const userPercentage = (parseInt(tenant.userCount) / parseInt(tenant.maxUsers)) * 100;
+      const branchPercentage = (parseInt(tenant.branchCount) / parseInt(tenant.maxBranches)) * 100;
+      const consentPercentage = (parseInt(tenant.consentCount) / parseInt(tenant.maxConsents)) * 100;
+      const maxPercentage = Math.max(userPercentage, branchPercentage, consentPercentage);
+
+      if (maxPercentage >= 100) {
+        tenantsAtLimit++;
+      } else if (maxPercentage >= 80) {
+        tenantsNearLimit++;
+      }
+    });
+
+    // Top tenants por actividad (consentimientos)
+    const topTenantsRaw = await this.tenantsRepository
+      .createQueryBuilder('tenant')
+      .leftJoin('tenant.consents', 'consent', 'consent.deleted_at IS NULL')
+      .leftJoin('tenant.users', 'user', 'user.deleted_at IS NULL')
+      .select('tenant.id', 'id')
+      .addSelect('tenant.name', 'name')
+      .addSelect('tenant.plan', 'plan')
+      .addSelect('tenant.updated_at', 'updatedAt')
+      .addSelect('tenant.created_at', 'createdAt')
+      .addSelect('COUNT(DISTINCT consent.id)', 'consentsCount')
+      .addSelect('COUNT(DISTINCT user.id)', 'usersCount')
+      .where('tenant.deleted_at IS NULL')
+      .groupBy('tenant.id')
+      .orderBy('"consentsCount"', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    const topTenants = topTenantsRaw.map(t => ({
+      id: t.id,
+      name: t.name,
+      plan: t.plan,
+      consentsCount: parseInt(t.consentsCount) || 0,
+      usersCount: parseInt(t.usersCount) || 0,
+      lastActivity: t.updatedAt || t.createdAt,
+    }));
+
+    // Distribución por plan
+    const tenantsByPlan = [
+      { plan: 'Gratuito', count: planCounts.free },
+      { plan: 'Básico', count: planCounts.basic },
+      { plan: 'Emprendedor', count: planCounts.professional },
+      { plan: 'Plus', count: planCounts.enterprise },
+      { plan: 'Empresarial', count: planCounts.custom },
+    ].filter(item => item.count > 0);
+
+    return {
+      totalTenants,
+      activeTenants: statusCounts.active,
+      suspendedTenants: statusCounts.suspended,
+      trialTenants: statusCounts.trial,
+      expiredTenants: statusCounts.expired,
+      totalUsers: parseInt(aggregatedCounts.totalUsers) || 0,
+      totalBranches: parseInt(aggregatedCounts.totalBranches) || 0,
+      totalServices: parseInt(aggregatedCounts.totalServices) || 0,
+      totalConsents: parseInt(aggregatedCounts.totalConsents) || 0,
+      tenantsNearLimit,
+      tenantsAtLimit,
+      planDistribution: {
+        free: planCounts.free,
+        basic: planCounts.basic,
+        professional: planCounts.professional,
+        enterprise: planCounts.enterprise,
+      },
+      tenantsByPlan,
+      topTenants,
+    };
+  }
+
+  private async getMedicalRecordsStats() {
+    try {
+      const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
+      
+      const stats = await medicalRecordsRepo
+        .createQueryBuilder('mr')
+        .select('COUNT(*)', 'total')
+        .addSelect('SUM(CASE WHEN mr.status = :openStatus THEN 1 ELSE 0 END)', 'active')
+        .addSelect('SUM(CASE WHEN mr.status = :closedStatus THEN 1 ELSE 0 END)', 'closed')
+        .setParameter('openStatus', 'OPEN')
+        .setParameter('closedStatus', 'CLOSED')
+        .getRawOne();
+
+      return {
+        totalMedicalRecords: parseInt(stats.total) || 0,
+        activeMedicalRecords: parseInt(stats.active) || 0,
+        closedMedicalRecords: parseInt(stats.closed) || 0,
+      };
+    } catch (error) {
+      console.error('Error loading medical records stats:', error);
+      return {
+        totalMedicalRecords: 0,
+        activeMedicalRecords: 0,
+        closedMedicalRecords: 0,
+      };
+    }
+  }
+
+  private async getClientsStats() {
+    try {
+      const clientsRepo = this.dataSource.getRepository('Client');
+      
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const stats = await clientsRepo
+        .createQueryBuilder('client')
+        .select('COUNT(*)', 'total')
+        .addSelect(
+          'SUM(CASE WHEN "client"."created_at" >= :startOfMonth THEN 1 ELSE 0 END)',
+          'newThisMonth'
+        )
+        .setParameter('startOfMonth', startOfMonth)
+        .getRawOne();
+
+      return {
+        totalClients: parseInt(stats.total) || 0,
+        newClientsThisMonth: parseInt(stats.newThisMonth) || 0,
+      };
+    } catch (error) {
+      console.error('Error loading clients stats:', error);
+      return {
+        totalClients: 0,
+        newClientsThisMonth: 0,
+      };
+    }
+  }
+
+  private async getConsentTemplatesStats() {
+    try {
+      const consentTemplatesRepo = this.dataSource.getRepository('ConsentTemplate');
+      
+      const stats = await consentTemplatesRepo
+        .createQueryBuilder('ct')
+        .select('COUNT(*)', 'total')
+        .addSelect('SUM(CASE WHEN "ct"."isActive" = true THEN 1 ELSE 0 END)', 'active')
+        .getRawOne();
+
+      return {
+        totalConsentTemplates: parseInt(stats.total) || 0,
+        activeConsentTemplates: parseInt(stats.active) || 0,
+      };
+    } catch (error) {
+      console.error('Error loading consent templates stats:', error);
+      return {
+        totalConsentTemplates: 0,
+        activeConsentTemplates: 0,
+      };
+    }
+  }
+
+  private async getMRConsentTemplatesStats() {
+    try {
+      const mrConsentTemplatesRepo = this.dataSource.getRepository('MRConsentTemplate');
+      
+      const stats = await mrConsentTemplatesRepo
+        .createQueryBuilder('mrct')
+        .select('COUNT(*)', 'total')
+        .addSelect('SUM(CASE WHEN "mrct"."isActive" = true THEN 1 ELSE 0 END)', 'active')
+        .getRawOne();
+
+      return {
+        totalMRConsentTemplates: parseInt(stats.total) || 0,
+        activeMRConsentTemplates: parseInt(stats.active) || 0,
+      };
+    } catch (error) {
+      console.error('Error loading MR consent templates stats:', error);
+      return {
+        totalMRConsentTemplates: 0,
+        activeMRConsentTemplates: 0,
+      };
+    }
+  }
+
+  private async getTopTenantsByMedicalRecords() {
+    try {
+      const medicalRecordsRepo = this.dataSource.getRepository('MedicalRecord');
+      
+      const topTenantsRaw = await medicalRecordsRepo
+        .createQueryBuilder('mr')
+        .innerJoin('tenants', 'tenant', 'tenant.id = mr.tenant_id')
+        .select('mr.tenant_id', 'tenantId')
+        .addSelect('tenant.name', 'tenantName')
+        .addSelect('tenant.slug', 'tenantSlug')
+        .addSelect('COUNT(*)', 'count')
+        .where('tenant.deleted_at IS NULL')
+        .groupBy('mr.tenant_id')
+        .addGroupBy('tenant.name')
+        .addGroupBy('tenant.slug')
+        .orderBy('count', 'DESC')
+        .limit(10)
+        .getRawMany();
+
+      // Obtener conteo de branches para cada tenant
+      const tenantIds = topTenantsRaw.map(t => t.tenantId);
+      if (tenantIds.length === 0) return [];
+
+      const branchCounts = await this.dataSource
+        .getRepository('Branch')
+        .createQueryBuilder('branch')
+        .select('"branch"."tenantId"', 'tenantId')
+        .addSelect('COUNT(*)', 'count')
+        .where('"branch"."tenantId" IN (:...tenantIds)', { tenantIds })
+        .andWhere('"branch"."deleted_at" IS NULL')
+        .groupBy('"branch"."tenantId"')
+        .getRawMany();
+
+      const branchCountMap = new Map(
+        branchCounts.map(b => [b.tenantId, parseInt(b.count)])
+      );
+
+      return topTenantsRaw.map(item => ({
+        id: item.tenantId,
+        name: item.tenantName,
+        slug: item.tenantSlug,
+        medicalRecordsCount: parseInt(item.count) || 0,
+        branchesCount: branchCountMap.get(item.tenantId) || 0,
+      }));
+    } catch (error) {
+      console.error('Error loading top tenants by medical records:', error);
+      return [];
+    }
+  }
+
+  private async getTopTenantsByClients() {
+    try {
+      const clientsRepo = this.dataSource.getRepository('Client');
+      
+      const topTenantsRaw = await clientsRepo
+        .createQueryBuilder('client')
+        .innerJoin('tenants', 'tenant', 'tenant.id = client.tenant_id')
+        .select('client.tenant_id', 'tenantId')
+        .addSelect('tenant.name', 'tenantName')
+        .addSelect('tenant.slug', 'tenantSlug')
+        .addSelect('COUNT(*)', 'count')
+        .where('tenant.deleted_at IS NULL')
+        .groupBy('client.tenant_id')
+        .addGroupBy('tenant.name')
+        .addGroupBy('tenant.slug')
+        .orderBy('count', 'DESC')
+        .limit(10)
+        .getRawMany();
+
+      return topTenantsRaw.map(item => ({
+        id: item.tenantId,
+        name: item.tenantName,
+        slug: item.tenantSlug,
+        clientsCount: parseInt(item.count) || 0,
+      }));
+    } catch (error) {
+      console.error('Error loading top tenants by clients:', error);
+      return [];
+    }
+  }
+
+  private async getGrowthData() {
+    try {
+      const now = new Date();
+      const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      // Obtener todos los datos de crecimiento en consultas paralelas
+      const [tenantsGrowth, consentsGrowth, medicalRecordsGrowth, clientsGrowth] = await Promise.all([
+        this.getMonthlyGrowth('tenants', 'created_at', sixMonthsAgo, 'deleted_at IS NULL'),
+        this.getMonthlyGrowth('consents', 'created_at', sixMonthsAgo, 'deleted_at IS NULL'),
+        this.getMonthlyGrowth('medical_records', 'created_at', sixMonthsAgo),
+        this.getMonthlyGrowth('clients', 'created_at', sixMonthsAgo),
+      ]);
+
+      // Combinar datos por mes
+      const growthData = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthKey = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+        const monthName = monthDate.toLocaleDateString('es-ES', { month: 'short' });
+
+        growthData.push({
+          month: monthName,
+          tenants: tenantsGrowth[monthKey] || 0,
+          users: Math.floor((tenantsGrowth[monthKey] || 0) * 3.5), // Promedio estimado
+          consents: consentsGrowth[monthKey] || 0,
+          medicalRecords: medicalRecordsGrowth[monthKey] || 0,
+          clients: clientsGrowth[monthKey] || 0,
+        });
+      }
+
+      return growthData;
+    } catch (error) {
+      console.error('Error loading growth data:', error);
+      return [];
+    }
+  }
+
+  private async getMonthlyGrowth(
+    tableName: string,
+    dateColumn: string,
+    startDate: Date,
+    whereClause?: string
+  ): Promise<Record<string, number>> {
+    try {
+      const query = this.dataSource
+        .createQueryBuilder()
+        .select(`TO_CHAR(${dateColumn}, 'YYYY-MM')`, 'month')
+        .addSelect('COUNT(*)', 'count')
+        .from(tableName, tableName)
+        .where(`${dateColumn} >= :startDate`, { startDate })
+        .groupBy('month');
+
+      if (whereClause) {
+        query.andWhere(whereClause);
+      }
+
+      const results = await query.getRawMany();
+
+      return results.reduce((acc, row) => {
+        acc[row.month] = parseInt(row.count) || 0;
+        return acc;
+      }, {});
+    } catch (error) {
+      console.error(`Error loading monthly growth for ${tableName}:`, error);
+      return {};
+    }
+  }
+
+  private getEmptyStats() {
+    return {
+      totalTenants: 0,
+      activeTenants: 0,
+      suspendedTenants: 0,
+      trialTenants: 0,
+      expiredTenants: 0,
+      totalUsers: 0,
+      totalBranches: 0,
+      totalServices: 0,
+      totalConsents: 0,
+      totalMedicalRecords: 0,
+      activeMedicalRecords: 0,
+      closedMedicalRecords: 0,
+      totalClients: 0,
+      newClientsThisMonth: 0,
+      totalConsentTemplates: 0,
+      activeConsentTemplates: 0,
+      totalMRConsentTemplates: 0,
+      activeMRConsentTemplates: 0,
+      tenantsNearLimit: 0,
+      tenantsAtLimit: 0,
+      planDistribution: {
+        free: 0,
+        basic: 0,
+        professional: 0,
+        enterprise: 0,
+      },
+      growthData: [],
+      tenantsByPlan: [],
+      topTenants: [],
+      topTenantsByMedicalRecords: [],
+      topTenantsByClients: [],
     };
   }
 }

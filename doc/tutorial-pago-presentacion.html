@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial de Pago - Archivo en Línea</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide h2 {
+            font-size: 3em;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .slide h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .slide p {
+            font-size: 1.5em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .slide ul {
+            font-size: 1.5em;
+            line-height: 2;
+            list-style: none;
+            margin-left: 40px;
+        }
+
+        .slide ul li {
+            margin-bottom: 20px;
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .slide ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 1.2em;
+            opacity: 0.7;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .controls button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .screenshot-placeholder {
+            background: rgba(255,255,255,0.2);
+            border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 15px;
+            padding: 60px;
+            text-align: center;
+            font-size: 2em;
+            margin: 40px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .step-box {
+            background: rgba(255,255,255,0.15);
+            border-left: 5px solid white;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.15);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h4 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 1.2em;
+        }
+
+        .big-number {
+            font-size: 6em;
+            font-weight: bold;
+            text-align: center;
+            margin: 40px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .controls {
+                display: none;
+            }
+            .slide {
+                page-break-after: always;
+                display: flex !important;
+                position: relative;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Portada -->
+        <div class="slide active" data-slide="1">
+            <div class="center">
+                <div class="logo">📄💳</div>
+                <h1>Tutorial de Pago</h1>
+                <h3>Cómo Pagar tu Factura en Archivo en Línea</h3>
+                <p style="margin-top: 60px; font-size: 1.3em;">Guía Paso a Paso</p>
+            </div>
+            <div class="slide-number">1 / 12</div>
+        </div>
+
+        <!-- Slide 2: Agenda -->
+        <div class="slide" data-slide="2">
+            <h2>📋 Agenda</h2>
+            <ul>
+                <li>Acceder a tu cuenta</li>
+                <li>Navegar a facturas</li>
+                <li>Seleccionar factura a pagar</li>
+                <li>Generar link de pago</li>
+                <li>Completar pago en Bold</li>
+                <li>Confirmación y seguimiento</li>
+            </ul>
+            <div class="slide-number">2 / 12</div>
+        </div>
+
+        <!-- Slide 3: Paso 1 -->
+        <div class="slide" data-slide="3">
+            <div class="big-number">1</div>
+            <h2>Acceder a tu Cuenta</h2>
+            <div class="step-box">
+                <ul>
+                    <li>Visita: <strong>https://archivoenlinea.com</strong></li>
+                    <li>Haz clic en "Iniciar Sesión"</li>
+                    <li>Ingresa tu email y contraseña</li>
+                </ul>
+            </div>
+            <div class="screenshot-placeholder">
+                🔐 Pantalla de Login
+            </div>
+            <div class="slide-number">3 / 12</div>
+        </div>
+
+        <!-- Slide 4: Paso 2 -->
+        <div class="slide" data-slide="4">
+            <div class="big-number">2</div>
+            <h2>Navegar a Facturas</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>En el menú lateral:</h3>
+                    <ul>
+                        <li>Busca "GESTIÓN DOCUMENTOS"</li>
+                        <li>Haz clic en "Facturas"</li>
+                        <li>Verás la lista completa</li>
+                    </ul>
+                </div>
+                <div class="screenshot-placeholder">
+                    📋 Menú de Navegación
+                </div>
+            </div>
+            <div class="slide-number">4 / 12</div>
+        </div>
+
+        <!-- Slide 5: Estados de Facturas -->
+        <div class="slide" data-slide="5">
+            <h2>Estados de Facturas</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <h4>🟡</h4>
+                    <h4>PENDIENTE</h4>
+                    <p>Factura por pagar</p>
+                </div>
+                <div class="card">
+                    <h4>🟢</h4>
+                    <h4>PAGADA</h4>
+                    <p>Pago confirmado</p>
+                </div>
+                <div class="card">
+                    <h4>🔴</h4>
+                    <h4>VENCIDA</h4>
+                    <p>Pago atrasado</p>
+                </div>
+            </div>
+            <div class="slide-number">5 / 12</div>
+        </div>
+
+        <!-- Slide 6: Paso 3 -->
+        <div class="slide" data-slide="6">
+            <div class="big-number">3</div>
+            <h2>Seleccionar Factura</h2>
+            <div class="step-box">
+                <ul>
+                    <li>Identifica la factura PENDIENTE</li>
+                    <li>Revisa el monto y fecha de vencimiento</li>
+                    <li>Haz clic en "💳 Pagar Ahora"</li>
+                </ul>
+            </div>
+            <div class="screenshot-placeholder">
+                📄 Lista de Facturas
+            </div>
+            <div class="slide-number">6 / 12</div>
+        </div>
+
+        <!-- Slide 7: Paso 4 -->
+        <div class="slide" data-slide="7">
+            <div class="big-number">4</div>
+            <h2>Generación del Link</h2>
+            <div class="center">
+                <div class="screenshot-placeholder">
+                    ⏳ Generando link de pago seguro...
+                </div>
+                <div class="step-box">
+                    <p>El sistema crea automáticamente un link de pago seguro con Bold</p>
+                    <p>Se abrirá una nueva ventana en tu navegador</p>
+                </div>
+            </div>
+            <div class="slide-number">7 / 12</div>
+        </div>
+
+        <!-- Slide 8: Paso 5 - Métodos de Pago -->
+        <div class="slide" data-slide="8">
+            <div class="big-number">5</div>
+            <h2>Métodos de Pago en Bold</h2>
+            <div class="grid-3">
+                <div class="card">
+                    <h4>💳</h4>
+                    <h4>Tarjeta</h4>
+                    <p>Crédito o Débito</p>
+                    <p>Pago inmediato</p>
+                </div>
+                <div class="card">
+                    <h4>🏦</h4>
+                    <h4>PSE</h4>
+                    <p>Débito bancario</p>
+                    <p>5-15 minutos</p>
+                </div>
+                <div class="card">
+                    <h4>💵</h4>
+                    <h4>Efectivo</h4>
+                    <p>Efecty, Baloto</p>
+                    <p>24-48 horas</p>
+                </div>
+            </div>
+            <div class="slide-number">8 / 12</div>
+        </div>
+
+        <!-- Slide 9: Completar Pago -->
+        <div class="slide" data-slide="9">
+            <h2>Completar el Pago</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>Pasos:</h3>
+                    <ul>
+                        <li>Selecciona método de pago</li>
+                        <li>Ingresa tus datos</li>
+                        <li>Revisa la información</li>
+                        <li>Confirma el pago</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <h3>⚠️ Importante</h3>
+                    <p>No cierres la ventana mientras se procesa el pago</p>
+                </div>
+            </div>
+            <div class="slide-number">9 / 12</div>
+        </div>
+
+        <!-- Slide 10: Confirmación -->
+        <div class="slide" data-slide="10">
+            <div class="center">
+                <div class="logo">✅</div>
+                <h2>¡Pago Exitoso!</h2>
+                <div class="step-box">
+                    <ul>
+                        <li>Verás confirmación en pantalla</li>
+                        <li>Recibirás email de Bold</li>
+                        <li>Recibirás email de Archivo en Línea</li>
+                        <li>Puedes descargar el comprobante</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="slide-number">10 / 12</div>
+        </div>
+
+        <!-- Slide 11: Tiempos de Procesamiento -->
+        <div class="slide" data-slide="11">
+            <h2>⏱️ Tiempos de Procesamiento</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h4>Tarjeta</h4>
+                    <p style="font-size: 2em; margin: 20px 0;">1-2 min</p>
+                    <p>Inmediato</p>
+                </div>
+                <div class="card">
+                    <h4>PSE</h4>
+                    <p style="font-size: 2em; margin: 20px 0;">5-15 min</p>
+                    <p>Rápido</p>
+                </div>
+            </div>
+            <div class="card" style="margin-top: 30px;">
+                <h4>Efectivo</h4>
+                <p style="font-size: 2em; margin: 20px 0;">24-48 hrs</p>
+                <p>Después de realizar el pago</p>
+            </div>
+            <div class="slide-number">11 / 12</div>
+        </div>
+
+        <!-- Slide 12: Contacto -->
+        <div class="slide" data-slide="12">
+            <div class="center">
+                <h2>¿Necesitas Ayuda?</h2>
+                <div class="step-box" style="margin: 60px auto; max-width: 800px;">
+                    <h3 style="margin-bottom: 30px;">📞 Contacto</h3>
+                    <p><strong>Email:</strong> soporte@archivoenlinea.com</p>
+                    <p><strong>Horario:</strong> Lunes a Viernes</p>
+                    <p><strong>8:00 AM - 6:00 PM</strong></p>
+                </div>
+                <p style="margin-top: 60px; font-size: 1.8em;">¡Gracias por usar Archivo en Línea!</p>
+            </div>
+            <div class="slide-number">12 / 12</div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Anterior</button>
+        <button id="nextBtn" onclick="changeSlide(1)">Siguiente →</button>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 12;
+
+        function updateSlides() {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 1) currentSlide = 1;
+            if (currentSlide > totalSlides) currentSlide = totalSlides;
+            updateSlides();
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentSlide > 1) {
+                changeSlide(-1);
+            } else if (e.key === 'ArrowRight' && currentSlide < totalSlides) {
+                changeSlide(1);
+            } else if (e.key === 'Home') {
+                currentSlide = 1;
+                updateSlides();
+            } else if (e.key === 'End') {
+                currentSlide = totalSlides;
+                updateSlides();
+            }
+        });
+
+        // Inicializar
+        updateSlides();
+    </script>
+</body>
+</html>

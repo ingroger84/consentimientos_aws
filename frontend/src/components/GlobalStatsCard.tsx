@@ -1,7 +1,5 @@
 import { Building2, Users, MapPin, FileText, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { GlobalStats } from '../types/tenant';
-import { getPlanName } from '@/utils/plan-names';
-import { TenantPlan } from '@/types/tenant';
 
 interface GlobalStatsCardProps {
   stats: GlobalStats;
@@ -98,62 +96,39 @@ export default function GlobalStatsCard({ stats }: GlobalStatsCardProps) {
         <div className="card">
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Distribución de Planes</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.FREE)}</span>
-              <div className="flex items-center">
-                <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
-                  <div
-                    className="h-2 bg-gray-500 rounded-full"
-                    style={{ width: `${(stats.planDistribution.free / stats.totalTenants) * 100}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-900 w-8 text-right">
-                  {stats.planDistribution.free}
-                </span>
+            {stats.tenantsByPlan && stats.tenantsByPlan.length > 0 ? (
+              stats.tenantsByPlan.map((item, index) => {
+                const colors = [
+                  'bg-blue-500',
+                  'bg-purple-500',
+                  'bg-green-500',
+                  'bg-yellow-500',
+                  'bg-red-500',
+                ];
+                const color = colors[index % colors.length];
+                
+                return (
+                  <div key={item.plan} className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">{item.plan}</span>
+                    <div className="flex items-center">
+                      <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
+                        <div
+                          className={`h-2 ${color} rounded-full`}
+                          style={{ width: `${(item.count / stats.totalTenants) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 w-8 text-right">
+                        {item.count}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-sm text-gray-500 text-center py-4">
+                No hay datos de distribución de planes
               </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.BASIC)}</span>
-              <div className="flex items-center">
-                <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
-                  <div
-                    className="h-2 bg-blue-500 rounded-full"
-                    style={{ width: `${(stats.planDistribution.basic / stats.totalTenants) * 100}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-900 w-8 text-right">
-                  {stats.planDistribution.basic}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.PROFESSIONAL)}</span>
-              <div className="flex items-center">
-                <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
-                  <div
-                    className="h-2 bg-purple-500 rounded-full"
-                    style={{ width: `${(stats.planDistribution.professional / stats.totalTenants) * 100}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-900 w-8 text-right">
-                  {stats.planDistribution.professional}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{getPlanName(TenantPlan.ENTERPRISE)}</span>
-              <div className="flex items-center">
-                <div className="w-32 h-2 bg-gray-200 rounded-full mr-2">
-                  <div
-                    className="h-2 bg-yellow-500 rounded-full"
-                    style={{ width: `${(stats.planDistribution.enterprise / stats.totalTenants) * 100}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-900 w-8 text-right">
-                  {stats.planDistribution.enterprise}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

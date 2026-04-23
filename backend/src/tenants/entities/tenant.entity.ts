@@ -140,6 +140,9 @@ export class Tenant {
   @Column({ type: 'int', default: 2, name: 'max_mr_consent_templates' })
   maxMRConsentTemplates: number;
 
+  @Column({ type: 'int', default: 50, name: 'max_mr_consents' })
+  maxMRConsents: number;
+
   @Column({ type: 'int', default: 3, name: 'max_consent_templates' })
   maxConsentTemplates: number;
 
@@ -182,6 +185,13 @@ export class Tenant {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date;
+
+  // Campos de DynamiaERP
+  @Column({ name: 'dynamiaerp_branch_code', length: 3, nullable: true })
+  dynamiaerpBranchCode: string; // Código de sucursal en DynamiaERP (001, 002, 003, etc.)
+
+  @Column({ name: 'dynamiaerp_last_invoice_number', type: 'int', default: 0 })
+  dynamiaerpLastInvoiceNumber: number; // Último número consecutivo de factura enviado a DynamiaERP
 
   // Relaciones
   @OneToMany(() => User, (user) => user.tenant)

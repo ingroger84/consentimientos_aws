@@ -23,6 +23,7 @@ export function applyPlanLimits(dto: CreateTenantDto): CreateTenantDto {
   // Nuevos límites para HC
   dto.maxMedicalRecords = dto.maxMedicalRecords || planConfig.limits.medicalRecords;
   dto.maxMRConsentTemplates = dto.maxMRConsentTemplates || planConfig.limits.mrConsentTemplates;
+  dto.maxMRConsents = dto.maxMRConsents || planConfig.limits.mrConsents;
   dto.maxConsentTemplates = dto.maxConsentTemplates || planConfig.limits.consentTemplates;
 
   // Aplicar precio del plan

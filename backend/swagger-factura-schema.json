@@ -1,0 +1,210 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "numero": {
+      "type": "string"
+    },
+    "tipo": {
+      "type": "string"
+    },
+    "consecutivo": {
+      "type": "string"
+    },
+    "prefijo": {
+      "type": "string"
+    },
+    "cufe": {
+      "type": "string"
+    },
+    "fecha": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fechaEnvio": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "fechaVencimiento": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sucursal": {
+      "type": "string"
+    },
+    "centroCosto": {
+      "type": "string"
+    },
+    "cliente": {
+      "$ref": "#/components/schemas/ClienteDocElectronico"
+    },
+    "proveedor": {
+      "$ref": "#/components/schemas/ProveedorDocElectronico"
+    },
+    "vendedor": {
+      "$ref": "#/components/schemas/VendedorDocElectronico"
+    },
+    "detalles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/DetalleDocumentoElectronico"
+      }
+    },
+    "totales": {
+      "$ref": "#/components/schemas/Totales"
+    },
+    "documentoOrigen": {
+      "type": "string"
+    },
+    "observaciones": {
+      "type": "string"
+    },
+    "totalImpuestos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/TotalImpuesto"
+      }
+    },
+    "totalRetenciones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/TotalRetencion"
+      }
+    },
+    "tipoDoc": {
+      "type": "string",
+      "enum": [
+        "FACTURA",
+        "NOTA_CREDITO",
+        "NOTA_DEBITO",
+        "DOCUMENTO_SOPORTE",
+        "DOCUMENTO_EQUIVALENTE"
+      ]
+    },
+    "tipoNotaCredito": {
+      "type": "string",
+      "enum": [
+        "DEVOLUCION",
+        "ANULACION",
+        "REBAJA_TOTAL",
+        "DESCUENTO_TOTAL",
+        "RESCISION",
+        "OTROS"
+      ]
+    },
+    "tipoNotaDebito": {
+      "type": "string",
+      "enum": [
+        "DEVOLUCION",
+        "ANULACION",
+        "REBAJA_TOTAL",
+        "OTRO"
+      ]
+    },
+    "pdf": {
+      "type": "string"
+    },
+    "emailsAdicionales": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "llaveSerie": {
+      "type": "string"
+    },
+    "llaveTecnica": {
+      "type": "string"
+    },
+    "documentoRelacionados": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/DocumentoRelacionado"
+      }
+    },
+    "formasPagos": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/FormaPago"
+      }
+    },
+    "procesarPago": {
+      "type": "boolean"
+    },
+    "habilitacion": {
+      "type": "boolean"
+    },
+    "extra1": {
+      "type": "string"
+    },
+    "extra2": {
+      "type": "string"
+    },
+    "extra3": {
+      "type": "string"
+    },
+    "extra4": {
+      "type": "string"
+    },
+    "extra5": {
+      "type": "string"
+    },
+    "extra6": {
+      "type": "string"
+    },
+    "extra7": {
+      "type": "string"
+    },
+    "extra8": {
+      "type": "string"
+    },
+    "extra9": {
+      "type": "string"
+    },
+    "extra0": {
+      "type": "string"
+    },
+    "ordenCompraCliente": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "string"
+    },
+    "webhookURL": {
+      "type": "string"
+    },
+    "accountId": {
+      "type": "integer",
+      "format": "int64"
+    },
+    "revalidar": {
+      "type": "boolean"
+    },
+    "estado": {
+      "$ref": "#/components/schemas/EstadoDocumento"
+    },
+    "resolucion": {
+      "$ref": "#/components/schemas/ResolucionDocumento"
+    },
+    "descuentosGlobales": {
+      "type": "array",
+      "items": {
+        "$ref": "#/components/schemas/Descuento"
+      }
+    },
+    "periodoFacturacion": {
+      "$ref": "#/components/schemas/PeriodoFacturacion"
+    },
+    "moneda": {
+      "type": "string"
+    },
+    "imprimir": {
+      "type": "boolean"
+    },
+    "gatewayKey": {
+      "type": "string"
+    }
+  }
+}
