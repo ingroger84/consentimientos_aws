@@ -48,8 +48,8 @@ export class BillingSchedulerService {
     }
   }
 
-  // Suspender tenants morosos - Diario a las 23:00
-  @Cron('0 23 * * *')
+  // Suspender tenants morosos - Diario a las 01:00
+  @Cron('0 1 * * *')
   async handleSuspendOverdue() {
     this.logger.log('Ejecutando tarea: Suspender tenants morosos');
     

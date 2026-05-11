@@ -4,6 +4,7 @@ import { Repository, Between, LessThanOrEqual } from 'typeorm';
 import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
 import { Invoice, InvoiceStatus } from '../invoices/entities/invoice.entity';
 import { InvoicesService } from '../invoices/invoices.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class BillingService {
@@ -13,6 +14,7 @@ export class BillingService {
     @InjectRepository(Invoice)
     private invoicesRepository: Repository<Invoice>,
     private invoicesService: InvoicesService,
+    private mailService: MailService,
   ) {}
 
   // LOCK para prevenir ejecuciones concurrentes
@@ -92,11 +94,10 @@ export class BillingService {
           }
           periodEnd.setHours(0, 0, 0, 0);
 
-          // MEJORA: Usar transacción con lock para prevenir race conditions
           // Buscar cualquier factura (pending, paid, overdue) para este período exacto
+          // Sin lock pesimista para evitar error de transacción
           const existingInvoice = await this.invoicesRepository
             .createQueryBuilder('invoice')
-            .setLock('pessimistic_write') // Lock para prevenir race conditions
             .where('invoice.tenantId = :tenantId', { tenantId: tenant.id })
             .andWhere('invoice.periodStart = :periodStart', { periodStart })
             .andWhere('invoice.periodEnd = :periodEnd', { periodEnd })
@@ -132,20 +133,25 @@ export class BillingService {
     const now = new Date();
     let suspended = 0;
     const errors: string[] = [];
+    const suspendedList: any[] = [];
 
-    // Buscar facturas vencidas (más de 3 días después de dueDate)
-    const overdueDate = new Date(now);
-    overdueDate.setDate(overdueDate.getDate() - 3);
+    // NUEVA REGLA: Buscar facturas con más de 1 día después de creación
+    // Día 0: Factura generada
+    // Día 1: Día de gracia
+    // Día 2: Suspensión si no hay pago
+    const oneDayAgo = new Date(now);
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    oneDayAgo.setHours(0, 0, 0, 0); // Inicio del día de ayer
 
     const overdueInvoices = await this.invoicesRepository.find({
       where: {
         status: InvoiceStatus.PENDING,
-        dueDate: LessThanOrEqual(overdueDate),
+        createdAt: LessThanOrEqual(oneDayAgo),
       },
       relations: ['tenant'],
     });
 
-    console.log(`[BillingService] Encontradas ${overdueInvoices.length} facturas vencidas`);
+    console.log(`[BillingService] Encontradas ${overdueInvoices.length} facturas pendientes con más de 1 día de antigüedad`);
 
     for (const invoice of overdueInvoices) {
       try {
@@ -164,6 +170,23 @@ export class BillingService {
 
           suspended++;
           console.log(`[BillingService] Tenant ${tenant.name} suspendido por factura vencida (${invoice.invoiceNumber})`);
+
+          // 🔔 Enviar notificación al super admin
+          try {
+            const daysOverdue = Math.floor((now.getTime() - new Date(invoice.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+            await this.mailService.sendTenantSuspendedAlertToAdmin(tenant, invoice);
+            
+            // Agregar a la lista para el resumen diario
+            suspendedList.push({
+              tenantName: tenant.name,
+              invoiceNumber: invoice.invoiceNumber,
+              amount: invoice.total,
+              daysOverdue,
+            });
+          } catch (emailError) {
+            console.error(`[BillingService] Error al enviar notificación de suspensión al admin:`, emailError);
+            // No lanzar error para no interrumpir el proceso de suspensión
+          }
         }
       } catch (error) {
         const errorMsg = `Error al suspender tenant ${invoice.tenant.name}: ${error.message}`;
