@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 92.3.16
-**Fecha:** 2026-05-11
-**Tipo de Cambio:** PATCH
+## Versión Actual: 93.0.0
+**Fecha:** 2026-05-20
+**Tipo de Cambio:** MAJOR
 
 ---
 
@@ -18,16 +18,20 @@
 
 ## Historial de Versiones
 
-### 92.3.16 - 2026-05-11 [PATCH]
+### 93.0.0 - 2026-05-20 [MAJOR]
 - Backend: 2 archivo(s) modificado(s)
-- Frontend: 1 archivo(s) modificado(s)
-- Documentación: 1 archivo(s) modificado(s)
+- Frontend: 2 archivo(s) modificado(s)
+- Documentación: 4 archivo(s) modificado(s)
+- Scripts: 1 archivo(s) modificado(s)
 
-### 92.0.0 - 2026-04-22 [MAJOR]
-- Backend: 35 archivo(s) modificado(s)
-- Frontend: 8 archivo(s) modificado(s)
-- Documentación: 70 archivo(s) modificado(s)
-- Scripts: 9 archivo(s) modificado(s)
+### 92.3.19 - 2026-05-20 [PATCH]
+**Corrección: Mapeo de Métodos de Pago en Webhooks Bold**
+- Backend: 1 archivo(s) modificado(s) (webhooks.controller.ts)
+- Frontend: 1 archivo(s) modificado(s) (version.ts)
+- Documentación: 1 archivo(s) creado(s)
+- **Cambio:** Corregido mapeo de métodos de pago de mayúsculas a minúsculas
+- **Bug corregido:** Enum `payments_paymentmethod_enum` solo acepta 'transfer' y 'other'
+- **Impacto:** Webhooks de Bold ahora procesan pagos correctamente sin errores de enum
 
 ---
 

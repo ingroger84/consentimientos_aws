@@ -40,7 +40,7 @@ export class WebhooksController {
   @Post('bold')
   @HttpCode(HttpStatus.OK)
   async handleBoldWebhook(
-    @Body() payload: BoldWebhookPayload,
+    @Body() payload: any,
     @Headers('x-bold-signature') signature: string,
     @Headers() headers: any,
     @Req() request: Request,
@@ -49,15 +49,20 @@ export class WebhooksController {
     let webhookLog: WebhookLog;
 
     try {
+      // Bold envía "type" en lugar de "event"
+      const eventType = payload.type || payload.event;
+      const transactionId = payload.data?.payment_id || payload.transaction?.id;
+      const reference = payload.data?.metadata?.reference || payload.transaction?.reference;
+
       this.logger.log(`📥 Webhook recibido de Bold`);
-      this.logger.log(`   Event: ${payload.event}`);
-      this.logger.log(`   Transaction ID: ${payload.transaction?.id}`);
-      this.logger.log(`   Reference: ${payload.transaction?.reference}`);
+      this.logger.log(`   Type: ${eventType}`);
+      this.logger.log(`   Transaction ID: ${transactionId}`);
+      this.logger.log(`   Reference: ${reference}`);
 
       // Crear log inicial del webhook
       webhookLog = await this.webhookLogsRepository.save({
         provider: WebhookProvider.BOLD,
-        event: payload.event,
+        event: eventType,
         status: WebhookStatus.RECEIVED,
         payload,
         headers: {
@@ -67,7 +72,7 @@ export class WebhooksController {
         },
         signature,
         signatureValid: false,
-        transactionId: payload.transaction?.id,
+        transactionId: transactionId,
       });
 
       // Validar firma del webhook
@@ -90,9 +95,19 @@ export class WebhooksController {
       this.logger.log(`✅ Firma de webhook válida`);
 
       // Procesar el webhook según el evento
+      // Bold envía "type" con valores como "SALE_APPROVED", "SALE_REJECTED", etc.
       let processingResult: any;
       
-      switch (payload.event) {
+      // Mapear tipos de Bold a eventos internos
+      const eventMapping: Record<string, string> = {
+        'SALE_APPROVED': 'payment.succeeded',
+        'SALE_REJECTED': 'payment.failed',
+        'SALE_PENDING': 'payment.pending',
+      };
+
+      const mappedEvent = eventMapping[eventType] || eventType;
+      
+      switch (mappedEvent) {
         case 'payment.succeeded':
           processingResult = await this.handlePaymentSucceeded(payload, webhookLog);
           break;
@@ -106,7 +121,7 @@ export class WebhooksController {
           break;
 
         default:
-          this.logger.warn(`⚠️ Evento no manejado: ${payload.event}`);
+          this.logger.warn(`⚠️ Evento no manejado: ${eventType} (${mappedEvent})`);
           processingResult = { handled: false, reason: 'Event not handled' };
       }
 
@@ -142,20 +157,30 @@ export class WebhooksController {
    * Manejar pago exitoso
    */
   private async handlePaymentSucceeded(
-    payload: BoldWebhookPayload,
+    payload: any,
     webhookLog: WebhookLog,
   ): Promise<any> {
     try {
       this.logger.log(`💰 Procesando pago exitoso`);
 
-      const webhookData = await this.boldService.processWebhook(payload);
+      // Extraer datos del formato de Bold
+      const transactionId = payload.data?.payment_id || payload.transaction?.id;
+      const reference = payload.data?.metadata?.reference || payload.transaction?.reference;
+      const amount = payload.data?.amount?.total || payload.transaction?.amount;
+      const paymentMethod = payload.data?.payment_method || payload.transaction?.paymentMethod;
+      const payerEmail = payload.data?.payer_email || payload.customer?.email;
+
+      this.logger.log(`   Transaction ID: ${transactionId}`);
+      this.logger.log(`   Reference: ${reference}`);
+      this.logger.log(`   Amount: ${amount}`);
+      this.logger.log(`   Payment Method: ${paymentMethod}`);
 
       // Buscar la factura por referencia
-      const invoice = await this.invoicesService.findByReference(webhookData.reference);
+      const invoice = await this.invoicesService.findByReference(reference);
 
       if (!invoice) {
-        this.logger.error(`❌ Factura no encontrada: ${webhookData.reference}`);
-        throw new BadRequestException(`Invoice not found: ${webhookData.reference}`);
+        this.logger.error(`❌ Factura no encontrada: ${reference}`);
+        throw new BadRequestException(`Invoice not found: ${reference}`);
       }
 
       this.logger.log(`✅ Factura encontrada: ${invoice.invoiceNumber}`);
@@ -165,11 +190,11 @@ export class WebhooksController {
       webhookLog.tenantId = invoice.tenantId;
       await this.webhookLogsRepository.save(webhookLog);
 
-      // Verificar que el monto coincida
-      if (Math.abs(invoice.total - webhookData.amount) > 0.01) {
+      // Verificar que el monto coincida (Bold envía en pesos, no centavos)
+      if (Math.abs(invoice.total - amount) > 0.01) {
         this.logger.error(`❌ Monto no coincide`);
         this.logger.error(`   Esperado: ${invoice.total}`);
-        this.logger.error(`   Recibido: ${webhookData.amount}`);
+        this.logger.error(`   Recibido: ${amount}`);
         throw new BadRequestException('Amount mismatch');
       }
 
@@ -177,7 +202,7 @@ export class WebhooksController {
       await this.invoicesService.markPaymentLinkAsSucceeded(invoice.id);
 
       // Buscar el intento de pago correspondiente
-      const attempt = await this.paymentAttemptsService.findByBoldReference(webhookData.reference);
+      const attempt = await this.paymentAttemptsService.findByBoldReference(reference);
       
       if (attempt) {
         // Marcar el intento como exitoso
@@ -186,26 +211,26 @@ export class WebhooksController {
       }
 
       // Mapear el método de pago de Bold a nuestro enum
-      let paymentMethod = 'OTHER';
-      const boldMethod = webhookData.paymentMethod.toLowerCase();
-      if (boldMethod.includes('pse')) {
-        paymentMethod = 'PSE';
-      } else if (boldMethod.includes('card') || boldMethod.includes('tarjeta')) {
-        paymentMethod = 'CARD';
-      } else if (boldMethod.includes('transfer')) {
-        paymentMethod = 'TRANSFER';
+      // Enum payments_paymentmethod_enum solo acepta: 'transfer', 'other'
+      let mappedPaymentMethod = 'other';
+      const boldMethod = (paymentMethod || '').toLowerCase();
+      if (boldMethod.includes('transfer') || boldMethod.includes('transferencia')) {
+        mappedPaymentMethod = 'transfer';
+      } else {
+        // PSE, tarjetas, efectivo, etc. se mapean a 'other'
+        mappedPaymentMethod = 'other';
       }
 
       // Crear el registro de pago
       const payment = await this.paymentsService.create({
-        amount: webhookData.amount,
-        paymentMethod: paymentMethod as any,
+        amount: amount,
+        paymentMethod: mappedPaymentMethod as any,
         paymentDate: new Date().toISOString(),
         invoiceId: invoice.id,
         tenantId: invoice.tenantId,
-        notes: `Pago procesado automáticamente vía Bold - Transaction ID: ${webhookData.transactionId}`,
-        boldTransactionId: webhookData.transactionId,
-        boldPaymentMethod: webhookData.paymentMethod,
+        notes: `Pago procesado automáticamente vía Bold - Transaction ID: ${transactionId}`,
+        boldTransactionId: transactionId,
+        boldPaymentMethod: paymentMethod,
         boldPaymentData: payload,
       });
 
@@ -232,7 +257,7 @@ export class WebhooksController {
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
         tenantId: invoice.tenantId,
-        amount: webhookData.amount,
+        amount: amount,
         attemptId: attempt?.id,
       };
     } catch (error) {
