@@ -448,9 +448,19 @@ Declaro que he leído y comprendido esta autorización y la otorgo de manera lib
 
   /**
    * Valida que el tenant no haya excedido el límite de plantillas CN de su plan
+   * OPTIMIZADO: Solo carga los campos necesarios del tenant sin relaciones
    */
   private async checkTemplatesLimit(tenantId: string): Promise<void> {
-    const tenant = await this.tenantsService.findOne(tenantId);
+    // Consulta optimizada - solo obtener el plan sin cargar relaciones pesadas
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+      select: ['id', 'plan', 'maxConsentTemplates']
+    });
+    
+    if (!tenant) {
+      throw new BadRequestException('Tenant no encontrado');
+    }
+    
     const plan = getPlanConfig(tenant.plan);
     
     if (!plan) {

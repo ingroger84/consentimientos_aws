@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Forzar Recarga - Logins Personalizados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .steps {
+            margin: 30px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .step:hover {
+            transform: translateX(5px);
+            background: #e9ecef;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .step-content p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .warning p {
+            color: #856404;
+            margin: 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .success p {
+            color: #155724;
+            margin: 0;
+        }
+        
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .tenant-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+        
+        .tenant-list li {
+            padding: 10px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .tenant-list li strong {
+            color: #667eea;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🔄</div>
+            <h1>Actualización de Logins Personalizados</h1>
+            <p class="subtitle">Versión 92.3.2 - Corrección de Caché</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>📋 Problema Detectado</h3>
+            <p>Los logins personalizados no se están mostrando debido a que tu navegador está usando una versión antigua en caché.</p>
+            <p><strong>Síntoma:</strong> Todos los subdominios muestran "Sistema de Consentimientos" con logo genérico "S".</p>
+        </div>
+        
+        <div class="success">
+            <p><strong>✅ Buenas noticias:</strong> El backend está funcionando correctamente y devuelve la configuración personalizada de cada tenant.</p>
+        </div>
+        
+        <div class="warning">
+            <p><strong>⚠️ Importante:</strong> Debes limpiar el caché del navegador para ver los cambios.</p>
+        </div>
+        
+        <div class="steps">
+            <h3 style="margin-bottom: 20px; color: #333;">Pasos para Solucionar:</h3>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Limpiar Caché del Navegador</h4>
+                    <p><strong>Chrome/Edge:</strong> Ctrl + Shift + Delete → Seleccionar "Todo el tiempo" → Marcar "Imágenes y archivos en caché" → Borrar datos</p>
+                    <p><strong>Firefox:</strong> Ctrl + Shift + Delete → Seleccionar "Todo" → Marcar "Caché" → Limpiar ahora</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Forzar Recarga Sin Caché</h4>
+                    <p>Presiona <strong>Ctrl + Shift + R</strong> (Windows/Linux) o <strong>Cmd + Shift + R</strong> (Mac) en cada subdominio.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Verificar en Modo Incógnito</h4>
+                    <p>Abre una ventana de incógnito y accede a los subdominios. Si funciona aquí, confirma que el problema era el caché.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Verificar Logs de la Consola</h4>
+                    <p>Abre la consola del navegador (F12) y busca logs que empiecen con <code>[ThemeContext]</code> para ver qué está cargando.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>🎨 Tenants Verificados</h3>
+            <ul class="tenant-list">
+                <li>
+                    <strong>termaleses.archivoenlinea.com</strong><br>
+                    ✅ Configurado: Termales Espiritu Santo (Logo verde)
+                </li>
+                <li>
+                    <strong>aquiub.archivoenlinea.com</strong><br>
+                    ✅ Configurado: Aquiub Casa de Pestañas (Logo rosa)
+                </li>
+                <li>
+                    <strong>demo-medico.archivoenlinea.com</strong><br>
+                    ⚠️ Sin logo configurado (mostrará letra "S" por defecto)
+                </li>
+            </ul>
+        </div>
+        
+        <div class="info-box">
+            <h3>🔍 Logs Esperados en la Consola</h3>
+            <p>Después de limpiar el caché, deberías ver estos logs en la consola del navegador:</p>
+            <div class="code">
+[getTenantSlug] hostname: termaleses.archivoenlinea.com
+[getTenantSlug] Detectado tenant: termaleses
+[ThemeContext] ========== LOADING SETTINGS ==========
+[ThemeContext] Calling GET /settings/public...
+[publicSettingsApi] Enviando X-Tenant-Slug: termaleses
+[ThemeContext] ✓ Public settings loaded successfully
+[ThemeContext] Company Name: Termales Espiritu Santo
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <a href="/" class="btn btn-primary" onclick="clearCacheAndReload(); return false;">
+                🔄 Limpiar Caché y Recargar
+            </a>
+            <a href="/login" class="btn btn-secondary">
+                ← Volver al Login
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        function clearCacheAndReload() {
+            // Limpiar localStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Agregar timestamp para forzar recarga
+            const timestamp = new Date().getTime();
+            
+            // Mostrar mensaje
+            alert('Caché limpiado. La página se recargará sin caché.\n\nSi el problema persiste:\n1. Cierra todas las pestañas del sitio\n2. Limpia el caché del navegador manualmente\n3. Abre una ventana de incógnito para verificar');
+            
+            // Recargar sin caché
+            window.location.href = '/?t=' + timestamp;
+            window.location.reload(true);
+        }
+        
+        // Detectar tenant actual
+        window.addEventListener('DOMContentLoaded', function() {
+            const hostname = window.location.hostname;
+            const parts = hostname.split('.');
+            
+            if (parts.length >= 3) {
+                const tenant = parts[0];
+                console.log('🔍 Tenant detectado:', tenant);
+                console.log('📍 URL completa:', window.location.href);
+                console.log('🌐 Hostname:', hostname);
+            }
+        });
+    </script>
+</body>
+</html>

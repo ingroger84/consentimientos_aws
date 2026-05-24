@@ -9,6 +9,7 @@ import { Client, ClientDocumentType } from '@/types/client';
 import SignaturePad from '@/components/SignaturePad';
 import CameraCapture from '@/components/CameraCapture';
 import ClientSearchForm from '@/components/consents/ClientSearchForm';
+import ConsentPreview from '@/components/ConsentPreview';
 import { ArrowLeft, Camera, User } from 'lucide-react';
 import { useToast } from '@/hooks/useToast';
 
@@ -25,6 +26,7 @@ export default function CreateConsentPage() {
   const [showCamera, setShowCamera] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [clientDocumentType, setClientDocumentType] = useState<ClientDocumentType>(ClientDocumentType.CC);
+  const [serviceTemplate, setServiceTemplate] = useState<string>('');
 
   // Handlers para ClientSearchForm
   const handleClientSelected = (client: Client | null) => {
@@ -112,7 +114,7 @@ export default function CreateConsentPage() {
       if (!isEditMode) {
         setConsentId(data.id);
       }
-      setStep(3);
+      setStep(4); // Cambiar a paso 4 (firma) en lugar de 3
     },
     onError: (error: any) => {
       toast.error(
@@ -136,9 +138,51 @@ export default function CreateConsentPage() {
 
   // const serviceId = watch('serviceId'); // Not used currently
 
-  const handleServiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const service = services?.find((s) => s.id === e.target.value);
+  const handleServiceChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const serviceId = e.target.value;
+    const service = services?.find((s) => s.id === serviceId);
     setSelectedService(service || null);
+    
+    console.log('=== CARGANDO PLANTILLAS DEL SERVICIO ===');
+    console.log('Service ID:', serviceId);
+    console.log('Service:', service);
+    
+    // Cargar TODAS las plantillas del servicio
+    if (service && serviceId) {
+      try {
+        console.log('Llamando a API:', `/consent-templates/by-service/${serviceId}`);
+        const { data } = await api.get(`/consent-templates/by-service/${serviceId}`);
+        console.log('Plantillas recibidas:', data);
+        console.log('Cantidad de plantillas:', data?.length || 0);
+        
+        if (data && data.length > 0) {
+          // Filtrar solo plantillas activas
+          const activeTemplates = data.filter((t: any) => t.isActive);
+          console.log('Plantillas activas:', activeTemplates.length);
+          
+          // Concatenar el contenido de TODAS las plantillas activas
+          const allContent = activeTemplates
+            .map((t: any, index: number) => {
+              console.log(`Plantilla ${index + 1}:`, t.name, '- Contenido:', t.content?.substring(0, 100));
+              return `\n\n=== ${t.name.toUpperCase()} ===\n\n${t.content || ''}`;
+            })
+            .join('\n\n');
+          
+          console.log('Contenido total concatenado (primeros 300 chars):', allContent.substring(0, 300));
+          setServiceTemplate(allContent);
+        } else {
+          console.log('No se encontraron plantillas para este servicio');
+          setServiceTemplate('');
+        }
+      } catch (error) {
+        console.error('Error al cargar plantillas del servicio:', error);
+        setServiceTemplate('');
+      }
+    } else {
+      console.log('No hay servicio seleccionado');
+      setServiceTemplate('');
+    }
+    console.log('========================================');
   };
 
   const onSubmitStep1 = (data: any) => {
@@ -169,15 +213,17 @@ export default function CreateConsentPage() {
       answers,
     };
 
-    console.log('=== ENVIANDO CONSENTIMIENTO ===');
+    console.log('=== DATOS PARA VISTA PREVIA ===');
     console.log('Datos completos:', {
       ...completeData,
       clientPhoto: clientPhoto ? `[FOTO: ${clientPhoto.substring(0, 50)}... (${clientPhoto.length} caracteres)]` : 'SIN FOTO'
     });
-    console.log('Estado clientPhoto:', clientPhoto ? 'PRESENTE' : 'AUSENTE');
+    console.log('Contenido de plantilla (serviceTemplate):', serviceTemplate ? `${serviceTemplate.substring(0, 200)}...` : 'VACÍO');
     console.log('===============================');
     
-    createMutation.mutate(completeData);
+    // Guardar datos para la vista previa
+    setFormData({ ...formData, ...data, answers });
+    setStep(3); // Ir a vista previa
   };
 
   const handlePhotoCapture = (photoData: string) => {
@@ -189,6 +235,36 @@ export default function CreateConsentPage() {
   const handleRemovePhoto = () => {
     console.log('Foto removida');
     setClientPhoto(null);
+  };
+
+  const handleContinueFromPreview = () => {
+    // Crear el consentimiento con los datos guardados
+    const answers = selectedService?.questions?.map((q) => ({
+      questionId: q.id,
+      value: formData[`question_${q.id}`] || '',
+    })) || [];
+
+    const completeData = {
+      clientName: formData.clientName,
+      clientId: formData.clientId,
+      clientEmail: formData.clientEmail,
+      clientPhone: formData.clientPhone,
+      clientPhoto: clientPhoto || undefined,
+      serviceId: formData.serviceId,
+      branchId: formData.branchId,
+      documentType: clientDocumentType,
+      existingClientId: selectedClient?.id,
+      answers,
+    };
+
+    console.log('=== ENVIANDO CONSENTIMIENTO ===');
+    console.log('Datos completos:', {
+      ...completeData,
+      clientPhoto: clientPhoto ? `[FOTO: ${clientPhoto.substring(0, 50)}... (${clientPhoto.length} caracteres)]` : 'SIN FOTO'
+    });
+    console.log('===============================');
+    
+    createMutation.mutate(completeData);
   };
 
   const handleSignatureSave = (dataUrl: string) => {
@@ -216,7 +292,7 @@ export default function CreateConsentPage() {
               {isEditMode ? 'Editar Consentimiento' : 'Nuevo Consentimiento'}
             </h1>
             <div className="flex items-center gap-2 mt-4">
-              {[1, 2, 3].map((s) => (
+              {[1, 2, 3, 4].map((s) => (
                 <div
                   key={s}
                   className={`flex-1 h-2 rounded-full ${
@@ -226,7 +302,7 @@ export default function CreateConsentPage() {
               ))}
             </div>
             <div className="mt-2 text-sm text-gray-600">
-              Paso {step} de 3: {step === 1 ? 'Datos del Cliente' : step === 2 ? 'Preguntas' : 'Firma'}
+              Paso {step} de 4: {step === 1 ? 'Datos del Cliente' : step === 2 ? 'Preguntas' : step === 3 ? 'Vista Previa' : 'Firma'}
             </div>
           </div>
 
@@ -257,8 +333,10 @@ export default function CreateConsentPage() {
                       Servicio *
                     </label>
                     <select
-                      {...register('serviceId', { required: 'Debe seleccionar un servicio' })}
-                      onChange={handleServiceChange}
+                      {...register('serviceId', { 
+                        required: 'Debe seleccionar un servicio',
+                        onChange: handleServiceChange
+                      })}
                       className="input"
                       defaultValue={formData.serviceId || ''}
                     >
@@ -496,6 +574,24 @@ export default function CreateConsentPage() {
           )}
 
           {step === 3 && (
+            <ConsentPreview
+              title="Vista Previa del Consentimiento"
+              clientName={formData.clientName}
+              serviceName={selectedService?.name}
+              branchName={branches?.find(b => b.id === formData.branchId)?.name}
+              templateContent={serviceTemplate}
+              questions={selectedService?.questions?.map((q) => ({
+                questionText: q.questionText,
+                answer: formData[`question_${q.id}`] || '',
+                isCritical: q.isCritical,
+              })) || []}
+              onContinue={handleContinueFromPreview}
+              onBack={() => setStep(2)}
+              isLoading={createMutation.isPending}
+            />
+          )}
+
+          {step === 4 && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Firma del Cliente</h2>
               <p className="text-gray-600">

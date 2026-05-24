@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forzar Recarga - Consentimientos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn-danger {
+            background: #dc2626;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .info {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .steps {
+            margin: 20px 0;
+        }
+        .step {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔄 Forzar Recarga del Sistema</h1>
+        
+        <div class="info">
+            <strong>⚠️ Importante:</strong> Esta página te ayudará a limpiar el caché del navegador y cargar la versión más reciente de la aplicación.
+        </div>
+
+        <div class="steps">
+            <h3>Pasos a seguir:</h3>
+            <div class="step">
+                <strong>1.</strong> Click en "Limpiar Caché Completo" para eliminar todos los datos almacenados
+            </div>
+            <div class="step">
+                <strong>2.</strong> Espera a que se complete la limpieza
+            </div>
+            <div class="step">
+                <strong>3.</strong> Click en "Ir a la Aplicación" para cargar la versión actualizada
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-danger" onclick="clearAllCache()">
+                🗑️ Limpiar Caché Completo
+            </button>
+            <button class="btn" onclick="goToApp()">
+                🚀 Ir a la Aplicación
+            </button>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="info" style="margin-top: 30px;">
+            <strong>Versión Actual:</strong> 92.2.1<br>
+            <strong>Build Hash:</strong> monb27ll<br>
+            <strong>Fecha:</strong> 2026-05-01 14:28 COT
+        </div>
+    </div>
+
+    <script>
+        async function clearAllCache() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'info';
+            statusDiv.innerHTML = '⏳ Limpiando caché...';
+
+            try {
+                // Limpiar localStorage
+                localStorage.clear();
+                console.log('✅ localStorage limpiado');
+
+                // Limpiar sessionStorage
+                sessionStorage.clear();
+                console.log('✅ sessionStorage limpiado');
+
+                // Limpiar cookies
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                console.log('✅ Cookies limpiadas');
+
+                // Limpiar Cache API
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                    console.log('✅ Cache API limpiado');
+                }
+
+                // Limpiar Service Workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(
+                        registrations.map(registration => registration.unregister())
+                    );
+                    console.log('✅ Service Workers eliminados');
+                }
+
+                statusDiv.className = 'success';
+                statusDiv.innerHTML = `
+                    <strong>✅ Caché limpiado exitosamente</strong><br><br>
+                    Se han eliminado:<br>
+                    • localStorage<br>
+                    • sessionStorage<br>
+                    • Cookies<br>
+                    • Cache API<br>
+                    • Service Workers<br><br>
+                    <strong>Ahora puedes hacer click en "Ir a la Aplicación"</strong>
+                `;
+
+            } catch (error) {
+                console.error('Error al limpiar caché:', error);
+                statusDiv.className = 'info';
+                statusDiv.style.background = '#fee2e2';
+                statusDiv.style.borderColor = '#dc2626';
+                statusDiv.innerHTML = `
+                    <strong>⚠️ Error al limpiar caché</strong><br>
+                    ${error.message}<br><br>
+                    Intenta limpiar el caché manualmente:<br>
+                    • Chrome/Edge: Ctrl+Shift+Delete<br>
+                    • Firefox: Ctrl+Shift+Delete<br>
+                    • Safari: Cmd+Option+E
+                `;
+            }
+        }
+
+        function goToApp() {
+            // Agregar timestamp para forzar recarga
+            const timestamp = new Date().getTime();
+            window.location.href = `/?v=${timestamp}`;
+        }
+
+        // Mostrar información de debugging
+        console.log('=== INFORMACIÓN DE DEBUGGING ===');
+        console.log('Versión: 92.2.1');
+        console.log('Build Hash: monb27ll');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('User Agent:', navigator.userAgent);
+        console.log('================================');
+    </script>
+</body>
+</html>

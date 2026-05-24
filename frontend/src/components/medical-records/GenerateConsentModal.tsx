@@ -5,6 +5,7 @@ import { medicalRecordsService } from '@/services/medical-records.service';
 import { useToast } from '@/hooks/useToast';
 import SignaturePad from '@/components/SignaturePad';
 import CameraCapture from '@/components/CameraCapture';
+import ConsentPreview from '@/components/ConsentPreview';
 
 interface GenerateConsentModalProps {
   medicalRecordId: string;
@@ -40,6 +41,9 @@ export default function GenerateConsentModal({
   const [clientPhoto, setClientPhoto] = useState<string>('');
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [formDataPreview, setFormDataPreview] = useState<ConsentFormData | null>(null);
+  const [templatesContent, setTemplatesContent] = useState<Array<{name: string; content: string}>>([]);
   const {
     register,
     handleSubmit,
@@ -113,20 +117,35 @@ export default function GenerateConsentModal({
       return;
     }
 
-    if (!signatureData) {
-      toast.error('La firma del paciente es obligatoria');
+    if (!admissionId) {
+      toast.error('Debe seleccionar una admisión activa');
       return;
     }
 
-    if (!admissionId) {
-      toast.error('Debe seleccionar una admisión activa');
+    // Cargar el contenido de las plantillas seleccionadas
+    const selectedTemplatesData = templates.filter(t => selectedTemplates.includes(t.id));
+    setTemplatesContent(selectedTemplatesData.map(t => ({
+      name: t.name,
+      content: t.content || ''
+    })));
+
+    // Guardar datos y mostrar vista previa
+    setFormDataPreview(data);
+    setShowPreview(true);
+  };
+
+  const handleContinueFromPreview = async () => {
+    if (!formDataPreview) return;
+
+    if (!signatureData) {
+      toast.error('La firma del paciente es obligatoria');
       return;
     }
 
     try {
       setLoading(true);
       const result = await medicalRecordsService.createConsent(medicalRecordId, {
-        ...data,
+        ...formDataPreview,
         templateIds: selectedTemplates,
         signatureData,
         clientPhoto: clientPhoto || undefined,
@@ -159,6 +178,8 @@ export default function GenerateConsentModal({
     setSignatureData(dataUrl);
     setShowSignaturePad(false);
     toast.success('Firma capturada correctamente');
+    // Proceder a generar el consentimiento
+    handleContinueFromPreview();
   };
 
   const handlePhotoCapture = (dataUrl: string) => {
@@ -188,7 +209,8 @@ export default function GenerateConsentModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
+        {!showPreview ? (
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           {/* Info Box */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
             <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -391,7 +413,8 @@ export default function GenerateConsentModal({
           </div>
 
           {/* Firma Digital - OBLIGATORIA */}
-          <div className="border-t pt-6">
+          {!showPreview && (
+            <div className="border-t pt-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-900">
@@ -459,8 +482,10 @@ export default function GenerateConsentModal({
               </div>
             )}
           </div>
+          )}
 
           {/* Foto del Cliente - OPCIONAL */}
+          {!showPreview && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -532,8 +557,10 @@ export default function GenerateConsentModal({
               </div>
             )}
           </div>
+          )}
 
           {/* Información sobre el proceso */}
+          {!showPreview && (
           <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
             <p className="font-medium text-gray-900 mb-2">
               Próximos pasos:
@@ -547,8 +574,10 @@ export default function GenerateConsentModal({
               <li>El PDF estará disponible para descarga inmediata</li>
             </ol>
           </div>
+          )}
 
           {/* Botones */}
+          {!showPreview && (
           <div className="flex gap-3 justify-end pt-4 border-t">
             <button
               type="button"
@@ -563,10 +592,35 @@ export default function GenerateConsentModal({
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Generando...' : 'Generar Consentimiento'}
+              {loading ? 'Procesando...' : 'Ver Vista Previa'}
             </button>
           </div>
+          )}
         </form>
+        ) : (
+          <div className="p-6">
+            <ConsentPreview
+              title="Vista Previa del Consentimiento HC"
+              clientName={clientName}
+              consentType={formDataPreview?.consentType}
+              procedureName={formDataPreview?.procedureName}
+              notes={formDataPreview?.notes}
+              templates={templates.filter(t => selectedTemplates.includes(t.id)).map(t => ({
+                name: t.name,
+                description: t.description,
+                category: t.category,
+              }))}
+              templatesWithContent={templatesContent}
+              onContinue={() => {
+                // Mostrar el pad de firma
+                setShowPreview(false);
+                setShowSignaturePad(true);
+              }}
+              onBack={() => setShowPreview(false)}
+              isLoading={loading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

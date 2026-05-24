@@ -2475,4 +2475,505 @@ export class MailService {
       </html>
     `;
   }
+
+  /**
+   * ========================================================================
+   * NOTIFICACIONES AL SUPER ADMIN
+   * ========================================================================
+   */
+
+  /**
+   * Enviar resumen diario de facturación al super admin
+   */
+  async sendDailySummaryToAdmin(summary: {
+    date: Date;
+    invoicesGenerated: number;
+    paymentsReceived: number;
+    tenantsSuspended: number;
+    overdueInvoices: number;
+    totalRevenue: number;
+    invoicesList: any[];
+    paymentsList: any[];
+    suspendedList: any[];
+  }): Promise<void> {
+    const adminEmail = this.configService.get('SUPER_ADMIN_EMAIL');
+    if (!adminEmail) {
+      this.logger.warn('SUPER_ADMIN_EMAIL no configurado - omitiendo envío de resumen diario');
+      return;
+    }
+
+    try {
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: adminEmail,
+        subject: `📊 Resumen Diario de Facturación - ${summary.date.toLocaleDateString('es-CO')}`,
+        html: this.getDailySummaryTemplate(summary),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Daily summary email sent to admin: ${adminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending daily summary email to admin:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar alerta de tenant suspendido al super admin
+   */
+  async sendTenantSuspendedAlertToAdmin(tenant: any, invoice: any): Promise<void> {
+    const adminEmail = this.configService.get('SUPER_ADMIN_EMAIL');
+    if (!adminEmail) {
+      this.logger.warn('SUPER_ADMIN_EMAIL no configurado - omitiendo alerta de suspensión');
+      return;
+    }
+
+    try {
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: adminEmail,
+        subject: `🔴 ALERTA: Tenant Suspendido - ${tenant.name}`,
+        html: this.getTenantSuspendedAlertTemplate(tenant, invoice),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Tenant suspended alert sent to admin: ${adminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending tenant suspended alert to admin:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar notificación de pago recibido al super admin
+   */
+  async sendPaymentReceivedAlertToAdmin(tenant: any, payment: any, invoice: any): Promise<void> {
+    const adminEmail = this.configService.get('SUPER_ADMIN_EMAIL');
+    if (!adminEmail) {
+      this.logger.warn('SUPER_ADMIN_EMAIL no configurado - omitiendo notificación de pago');
+      return;
+    }
+
+    try {
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: adminEmail,
+        subject: `💰 Pago Recibido - ${tenant.name} - ${this.formatCurrency(payment?.amount || invoice.total)}`,
+        html: this.getPaymentReceivedAlertTemplate(tenant, payment, invoice),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Payment received alert sent to admin: ${adminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending payment received alert to admin:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Enviar alerta de error en facturación al super admin
+   */
+  async sendBillingErrorAlertToAdmin(error: {
+    type: string;
+    message: string;
+    tenantName?: string;
+    invoiceNumber?: string;
+    details?: any;
+  }): Promise<void> {
+    const adminEmail = this.configService.get('SUPER_ADMIN_EMAIL');
+    if (!adminEmail) {
+      this.logger.warn('SUPER_ADMIN_EMAIL no configurado - omitiendo alerta de error');
+      return;
+    }
+
+    try {
+      const mailOptions = {
+        from: `${this.configService.get('SMTP_FROM_NAME')} <${this.configService.get('SMTP_FROM')}>`,
+        to: adminEmail,
+        subject: `⚠️ ERROR en Sistema de Facturación - ${error.type}`,
+        html: this.getBillingErrorAlertTemplate(error),
+      };
+
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Billing error alert sent to admin: ${adminEmail}`);
+    } catch (error) {
+      this.logger.error(`Error sending billing error alert to admin:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Template de resumen diario para super admin
+   */
+  private getDailySummaryTemplate(summary: any): string {
+    const date = summary.date.toLocaleDateString('es-CO', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+          .container { max-width: 700px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+          .header h1 { margin: 0; font-size: 24px; }
+          .header p { margin: 10px 0 0 0; opacity: 0.9; }
+          .content { padding: 30px; }
+          .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
+          .stat-card { background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid #667eea; }
+          .stat-value { font-size: 32px; font-weight: bold; color: #667eea; margin: 10px 0; }
+          .stat-label { font-size: 14px; color: #6c757d; text-transform: uppercase; }
+          .section { margin: 30px 0; }
+          .section-title { font-size: 18px; font-weight: 600; color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+          .list-item { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 6px; border-left: 3px solid #667eea; }
+          .list-item strong { color: #667eea; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+          .alert { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+          .success { background: #d1f2eb; border-left: 4px solid #10b981; }
+          .danger { background: #f8d7da; border-left: 4px solid #dc3545; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📊 Resumen Diario de Facturación</h1>
+            <p>${date}</p>
+          </div>
+          
+          <div class="content">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Facturas Generadas</div>
+                <div class="stat-value">${summary.invoicesGenerated}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Pagos Recibidos</div>
+                <div class="stat-value">${summary.paymentsReceived}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Tenants Suspendidos</div>
+                <div class="stat-value" style="color: ${summary.tenantsSuspended > 0 ? '#dc3545' : '#10b981'};">${summary.tenantsSuspended}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Facturas Vencidas</div>
+                <div class="stat-value" style="color: ${summary.overdueInvoices > 0 ? '#ffc107' : '#10b981'};">${summary.overdueInvoices}</div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="grid-column: span 2; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+              <div class="stat-label" style="color: white; opacity: 0.9;">Ingresos del Día</div>
+              <div class="stat-value" style="color: white; font-size: 36px;">${this.formatCurrency(summary.totalRevenue)}</div>
+            </div>
+
+            ${summary.invoicesGenerated > 0 ? `
+              <div class="section">
+                <div class="section-title">📄 Facturas Generadas Hoy</div>
+                ${summary.invoicesList.map(inv => `
+                  <div class="list-item">
+                    <strong>${inv.tenantName}</strong><br>
+                    Factura: ${inv.invoiceNumber} | Monto: ${this.formatCurrency(inv.amount)} | Vence: ${new Date(inv.dueDate).toLocaleDateString('es-CO')}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            ${summary.paymentsReceived > 0 ? `
+              <div class="section">
+                <div class="section-title success">💰 Pagos Recibidos Hoy</div>
+                ${summary.paymentsList.map(pay => `
+                  <div class="list-item success">
+                    <strong>${pay.tenantName}</strong><br>
+                    Factura: ${pay.invoiceNumber} | Monto: ${this.formatCurrency(pay.amount)} | Método: ${pay.method || 'N/A'}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            ${summary.tenantsSuspended > 0 ? `
+              <div class="section">
+                <div class="section-title danger">🔴 Tenants Suspendidos Hoy</div>
+                ${summary.suspendedList.map(sus => `
+                  <div class="list-item danger">
+                    <strong>${sus.tenantName}</strong><br>
+                    Factura Vencida: ${sus.invoiceNumber} | Monto: ${this.formatCurrency(sus.amount)} | Días de Mora: ${sus.daysOverdue}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            ${summary.overdueInvoices > 0 ? `
+              <div class="alert">
+                <strong>⚠️ Atención:</strong> Hay ${summary.overdueInvoices} factura(s) vencida(s) que requieren seguimiento.
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="footer">
+            <p>Este es un resumen automático del sistema de facturación.</p>
+            <p>© ${new Date().getFullYear()} ${this.configService.get('SMTP_FROM_NAME')}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Template de alerta de tenant suspendido para super admin
+   */
+  private getTenantSuspendedAlertTemplate(tenant: any, invoice: any): string {
+    const daysOverdue = Math.floor((new Date().getTime() - new Date(invoice.dueDate).getTime()) / (1000 * 60 * 60 * 24));
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; }
+          .alert-box { background: #f8d7da; border-left: 4px solid #dc3545; padding: 20px; margin: 20px 0; border-radius: 4px; }
+          .info-grid { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #dee2e6; }
+          .info-row:last-child { border-bottom: none; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔴 Tenant Suspendido</h1>
+            <p>Alerta de Suspensión por Falta de Pago</p>
+          </div>
+          
+          <div class="content">
+            <div class="alert-box">
+              <strong>⚠️ ACCIÓN REQUERIDA</strong><br>
+              El tenant <strong>${tenant.name}</strong> ha sido suspendido automáticamente por falta de pago.
+            </div>
+
+            <div class="info-grid">
+              <div class="info-row">
+                <span><strong>Tenant:</strong></span>
+                <span>${tenant.name}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Slug:</strong></span>
+                <span>${tenant.slug}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Plan:</strong></span>
+                <span>${tenant.plan}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Email de Contacto:</strong></span>
+                <span>${tenant.contactEmail}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Factura Vencida:</strong></span>
+                <span>${invoice.invoiceNumber}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Monto Adeudado:</strong></span>
+                <span style="color: #dc3545; font-weight: bold;">${this.formatCurrency(invoice.total)}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Fecha de Vencimiento:</strong></span>
+                <span>${new Date(invoice.dueDate).toLocaleDateString('es-CO')}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Días de Mora:</strong></span>
+                <span style="color: #dc3545; font-weight: bold;">${daysOverdue} días</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Fecha de Suspensión:</strong></span>
+                <span>${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}</span>
+              </div>
+            </div>
+
+            <p><strong>Acciones Tomadas:</strong></p>
+            <ul>
+              <li>✅ Tenant suspendido automáticamente</li>
+              <li>✅ Email de notificación enviado al tenant</li>
+              <li>✅ Acceso al sistema bloqueado</li>
+            </ul>
+
+            <p><strong>Próximos Pasos:</strong></p>
+            <ul>
+              <li>El tenant debe realizar el pago de la factura vencida</li>
+              <li>El sistema reactivará la cuenta automáticamente al recibir el pago</li>
+              <li>Puedes hacer seguimiento desde el dashboard de super admin</li>
+            </ul>
+          </div>
+          
+          <div class="footer">
+            <p>Este es un correo automático del sistema de facturación.</p>
+            <p>© ${new Date().getFullYear()} ${this.configService.get('SMTP_FROM_NAME')}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Template de notificación de pago recibido para super admin
+   */
+  private getPaymentReceivedAlertTemplate(tenant: any, payment: any, invoice: any): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; }
+          .success-box { background: #d1f2eb; border-left: 4px solid #10b981; padding: 20px; margin: 20px 0; border-radius: 4px; }
+          .info-grid { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+          .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #dee2e6; }
+          .info-row:last-child { border-bottom: none; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>💰 Pago Recibido</h1>
+            <p>Notificación de Pago Exitoso</p>
+          </div>
+          
+          <div class="content">
+            <div class="success-box">
+              <strong>✅ PAGO CONFIRMADO</strong><br>
+              Se ha recibido un pago de <strong>${tenant.name}</strong>.
+            </div>
+
+            <div class="info-grid">
+              <div class="info-row">
+                <span><strong>Tenant:</strong></span>
+                <span>${tenant.name}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Slug:</strong></span>
+                <span>${tenant.slug}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Plan:</strong></span>
+                <span>${tenant.plan}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Factura Pagada:</strong></span>
+                <span>${invoice.invoiceNumber}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Monto Pagado:</strong></span>
+                <span style="color: #10b981; font-weight: bold; font-size: 18px;">${this.formatCurrency(payment?.amount || invoice.total)}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Método de Pago:</strong></span>
+                <span>${payment?.method || 'N/A'}</span>
+              </div>
+              <div class="info-row">
+                <span><strong>Fecha de Pago:</strong></span>
+                <span>${new Date().toLocaleDateString('es-CO')} ${new Date().toLocaleTimeString('es-CO')}</span>
+              </div>
+              ${payment?.transactionId ? `
+                <div class="info-row">
+                  <span><strong>ID de Transacción:</strong></span>
+                  <span>${payment.transactionId}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <p><strong>Acciones Realizadas:</strong></p>
+            <ul>
+              <li>✅ Factura marcada como pagada</li>
+              <li>✅ Email de confirmación enviado al tenant</li>
+              ${tenant.status === 'suspended' ? '<li>✅ Cuenta reactivada automáticamente</li>' : '<li>✅ Cuenta mantiene estado activo</li>'}
+            </ul>
+          </div>
+          
+          <div class="footer">
+            <p>Este es un correo automático del sistema de facturación.</p>
+            <p>© ${new Date().getFullYear()} ${this.configService.get('SMTP_FROM_NAME')}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Template de alerta de error en facturación para super admin
+   */
+  private getBillingErrorAlertTemplate(error: any): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+          .header { background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px; }
+          .error-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 4px; }
+          .code-block { background: #f8f9fa; padding: 15px; border-radius: 4px; font-family: monospace; font-size: 13px; overflow-x: auto; margin: 15px 0; }
+          .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #6c757d; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>⚠️ Error en Sistema de Facturación</h1>
+            <p>Alerta de Error Detectado</p>
+          </div>
+          
+          <div class="content">
+            <div class="error-box">
+              <strong>⚠️ ERROR DETECTADO</strong><br>
+              Se ha detectado un error en el sistema de facturación que requiere atención.
+            </div>
+
+            <p><strong>Tipo de Error:</strong> ${error.type}</p>
+            ${error.tenantName ? `<p><strong>Tenant Afectado:</strong> ${error.tenantName}</p>` : ''}
+            ${error.invoiceNumber ? `<p><strong>Factura:</strong> ${error.invoiceNumber}</p>` : ''}
+            
+            <p><strong>Mensaje de Error:</strong></p>
+            <div class="code-block">${error.message}</div>
+
+            ${error.details ? `
+              <p><strong>Detalles Adicionales:</strong></p>
+              <div class="code-block">${JSON.stringify(error.details, null, 2)}</div>
+            ` : ''}
+
+            <p><strong>Fecha y Hora:</strong> ${new Date().toLocaleString('es-CO')}</p>
+
+            <p><strong>Acciones Recomendadas:</strong></p>
+            <ul>
+              <li>Revisar los logs del servidor para más detalles</li>
+              <li>Verificar el estado del tenant afectado</li>
+              <li>Contactar al equipo de desarrollo si el error persiste</li>
+            </ul>
+          </div>
+          
+          <div class="footer">
+            <p>Este es un correo automático del sistema de monitoreo.</p>
+            <p>© ${new Date().getFullYear()} ${this.configService.get('SMTP_FROM_NAME')}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 }

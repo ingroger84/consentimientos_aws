@@ -3,30 +3,56 @@ import { useAuthStore } from '@/store/authStore';
 import { Calendar, X, Info } from 'lucide-react';
 import { Tenant } from '@/types/tenant';
 
+// Log para verificar que el módulo se carga
+console.log('📦 [BillingCycleReminderBanner] MÓDULO CARGADO');
+
 const BillingCycleReminderBanner: React.FC = () => {
   const { user } = useAuthStore();
   const [dismissed, setDismissed] = useState(false);
 
+  console.log('🚀 [BillingCycleReminderBanner] COMPONENTE RENDERIZADO');
+  console.log('🔍 [BillingCycleReminderBanner] User:', user ? 'Existe' : 'No existe');
+  console.log('🔍 [BillingCycleReminderBanner] Tenant:', user?.tenant ? 'Existe' : 'No existe');
+  console.log('🔍 [BillingCycleReminderBanner] Dismissed:', dismissed);
+
   if (!user?.tenant || dismissed) {
+    console.log('❌ [BillingCycleReminderBanner] No mostrar - Sin tenant o dismissed');
     return null;
   }
 
   // Cast tenant to full Tenant type (el backend devuelve el tenant completo)
   const tenant = user.tenant as unknown as Tenant;
 
+  console.log('🔍 [BillingCycleReminderBanner] Tenant data:', {
+    id: tenant.id,
+    name: tenant.name,
+    plan: tenant.plan,
+    billingDay: tenant.billingDay,
+    trialEndsAt: tenant.trialEndsAt,
+    status: tenant.status,
+  });
+
   // No mostrar para planes gratuitos
   if (tenant.plan === 'free') {
+    console.log('❌ [BillingCycleReminderBanner] No mostrar - Plan gratuito');
     return null;
   }
 
   // No mostrar si está en período de prueba
   if (tenant.trialEndsAt && new Date(tenant.trialEndsAt) > new Date()) {
+    console.log('❌ [BillingCycleReminderBanner] No mostrar - En período de prueba');
+    console.log('   Trial ends at:', tenant.trialEndsAt);
+    console.log('   Now:', new Date().toISOString());
     return null;
   }
 
   const billingDay = tenant.billingDay || 1;
   const now = new Date();
   const currentDay = now.getDate();
+
+  console.log('📅 [BillingCycleReminderBanner] Cálculo de días:');
+  console.log('   Billing day:', billingDay);
+  console.log('   Current day:', currentDay);
 
   // Calcular días hasta la fecha de corte
   let daysUntilBilling = billingDay - currentDay;
@@ -38,10 +64,17 @@ const BillingCycleReminderBanner: React.FC = () => {
     daysUntilBilling = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
+  console.log('   Days until billing:', daysUntilBilling);
+
   // Solo mostrar si faltan 5 días o menos para la fecha de corte
   if (daysUntilBilling > 5 || daysUntilBilling < 0) {
+    console.log('❌ [BillingCycleReminderBanner] No mostrar - Fuera del rango de 5 días');
+    console.log('   Days until billing:', daysUntilBilling);
     return null;
   }
+
+  console.log('✅ [BillingCycleReminderBanner] DEBE MOSTRAR BANNER');
+  console.log('   Days until billing:', daysUntilBilling);
 
   // Calcular la fecha de corte
   let billingDate: Date;

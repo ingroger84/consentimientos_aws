@@ -50,6 +50,8 @@ interface NavItem {
 }
 
 export default function Layout() {
+  console.log('🏠 [Layout] COMPONENTE RENDERIZADO');
+  
   const { user, logout, setUser } = useAuthStore();
   const { settings } = useTheme();
   const { hasPermission } = usePermissions();
@@ -384,6 +386,11 @@ export default function Layout() {
       items: section.items.filter(item => hasPermission(item.permission))
     }))
     .filter(section => section.items.length > 0);
+
+  // Logs de debugging
+  console.log('🏠 [Layout] Antes de renderizar');
+  console.log('🏠 [Layout] User:', user ? 'Existe' : 'No existe');
+  console.log('🏠 [Layout] Tenant:', user?.tenant ? 'Existe' : 'No existe');
 
   return (
     <div className="min-h-screen bg-gray-50">

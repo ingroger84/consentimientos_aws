@@ -188,7 +188,7 @@ export class InvoicesService {
     // Crear líneas de factura
     const items = [
       {
-        description: `Plan ${planConfig.name} - ${tenant.billingCycle === 'annual' ? 'Anual' : 'Mensual'}`,
+        description: `Suscripción Plan ${planConfig.name} - ${tenant.billingCycle === 'annual' ? 'Anual' : 'Mensual'}`,
         quantity: 1,
         unitPrice: amount,
         total: amount,
@@ -341,6 +341,17 @@ export class InvoicesService {
         paidAt: invoice.paidAt,
       },
     });
+
+    // 🔔 Enviar notificación al super admin sobre el pago recibido
+    try {
+      const payment = invoice.payments && invoice.payments.length > 0 
+        ? invoice.payments[invoice.payments.length - 1] 
+        : null;
+      await this.mailService.sendPaymentReceivedAlertToAdmin(invoice.tenant, payment, invoice);
+    } catch (emailError) {
+      this.logger.error(`Error al enviar notificación de pago al admin:`, emailError);
+      // No lanzar error para no interrumpir el flujo de pago
+    }
 
     // 🔥 INTEGRACIÓN DYNAMIAERP: Enviar factura electrónica automáticamente
     try {
@@ -631,6 +642,25 @@ export class InvoicesService {
           newStatus: TenantStatus.ACTIVE,
         },
       });
+
+      // 🔔 Enviar notificación al super admin sobre la reactivación
+      try {
+        // Buscar la última factura pagada para incluir en la notificación
+        const lastInvoice = await this.invoicesRepository.findOne({
+          where: { tenantId, status: InvoiceStatus.PAID },
+          order: { paidAt: 'DESC' },
+        });
+
+        if (lastInvoice) {
+          const payment = lastInvoice.payments && lastInvoice.payments.length > 0 
+            ? lastInvoice.payments[lastInvoice.payments.length - 1] 
+            : null;
+          await this.mailService.sendPaymentReceivedAlertToAdmin(tenant, payment, lastInvoice);
+        }
+      } catch (emailError) {
+        this.logger.error(`Error al enviar notificación de reactivación al admin:`, emailError);
+        // No lanzar error para no interrumpir el flujo de reactivación
+      }
     }
   }
 
@@ -682,6 +712,17 @@ export class InvoicesService {
         paymentId,
       },
     });
+
+    // 🔔 Enviar notificación al super admin sobre el pago recibido
+    try {
+      const payment = invoice.payments && invoice.payments.length > 0 
+        ? invoice.payments[invoice.payments.length - 1] 
+        : null;
+      await this.mailService.sendPaymentReceivedAlertToAdmin(invoice.tenant, payment, invoice);
+    } catch (emailError) {
+      this.logger.error(`Error al enviar notificación de pago al admin:`, emailError);
+      // No lanzar error para no interrumpir el flujo de pago
+    }
 
     // 🔥 INTEGRACIÓN DYNAMIAERP: Enviar factura electrónica automáticamente
     try {

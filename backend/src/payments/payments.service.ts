@@ -94,6 +94,14 @@ export class PaymentsService {
           paymentMethod: payment.paymentMethod,
         },
       });
+
+      // 🔔 Enviar notificación al super admin sobre el pago recibido
+      try {
+        await this.mailService.sendPaymentReceivedAlertToAdmin(tenant, payment, invoice);
+      } catch (emailError) {
+        console.error(`Error al enviar notificación de pago al admin:`, emailError);
+        // No lanzar error para no interrumpir el flujo de pago
+      }
     }
 
     // Si el tenant estaba suspendido, activarlo

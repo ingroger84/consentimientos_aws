@@ -6,33 +6,62 @@ import { Link } from 'react-router-dom';
 import api from '@/services/api';
 import BillingCycleReminderBanner from './BillingCycleReminderBanner';
 
+// Log para verificar que el módulo se carga
+console.log('📦 [PaymentReminderBanner] MÓDULO CARGADO');
+
+// Alert visible para debugging
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    console.log('🚨 [PaymentReminderBanner] WINDOW LOADED');
+  });
+}
+
 const PaymentReminderBanner: React.FC = () => {
+  // Alert inmediato
+  console.log('🚨🚨🚨 [PaymentReminderBanner] COMPONENTE EJECUTÁNDOSE 🚨🚨🚨');
+  
   const { user } = useAuthStore();
   const [pendingInvoices, setPendingInvoices] = useState<Invoice[]>([]);
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [creatingPaymentLink, setCreatingPaymentLink] = useState(false);
 
+  // Logs de debugging
+  console.log('🚀 [PaymentReminderBanner] COMPONENTE RENDERIZADO');
+  console.log('🔍 [PaymentReminderBanner] Loading:', loading);
+  console.log('🔍 [PaymentReminderBanner] User:', user ? 'Existe' : 'No existe');
+  console.log('🔍 [PaymentReminderBanner] Tenant:', user?.tenant ? 'Existe' : 'No existe');
+  console.log('🔍 [PaymentReminderBanner] Dismissed:', dismissed);
+  console.log('🔍 [PaymentReminderBanner] Pending Invoices:', pendingInvoices.length);
+
   useEffect(() => {
+    console.log('🔍 [PaymentReminderBanner] useEffect ejecutándose...');
     loadPendingInvoices();
   }, []);
 
   const loadPendingInvoices = async () => {
     try {
+      console.log('🔍 [PaymentReminderBanner] Cargando facturas pendientes...');
       const tenantId = user?.tenant?.id;
       if (!tenantId) {
+        console.log('❌ [PaymentReminderBanner] No hay tenant ID');
         setLoading(false);
         return;
       }
 
+      console.log('🔍 [PaymentReminderBanner] Tenant ID:', tenantId);
       const invoices = await invoicesService.getByTenant(tenantId);
+      console.log('🔍 [PaymentReminderBanner] Facturas obtenidas:', invoices.length);
+      
       const pending = invoices.filter(
         (inv) => inv.status === 'pending' || inv.status === 'overdue'
       );
+      console.log('🔍 [PaymentReminderBanner] Facturas pendientes:', pending.length);
       setPendingInvoices(pending);
     } catch (error) {
-      console.error('Error loading pending invoices:', error);
+      console.error('❌ [PaymentReminderBanner] Error loading pending invoices:', error);
     } finally {
+      console.log('✅ [PaymentReminderBanner] Carga completada');
       setLoading(false);
     }
   };
@@ -55,12 +84,18 @@ const PaymentReminderBanner: React.FC = () => {
   };
 
   if (loading || !user?.tenant || dismissed) {
+    console.log('❌ [PaymentReminderBanner] No mostrar - Loading:', loading, 'User:', !!user, 'Tenant:', !!user?.tenant, 'Dismissed:', dismissed);
+    // No renderizar nada durante el loading para evitar que BillingCycleReminderBanner se renderice sin datos
+    if (loading) {
+      return null;
+    }
     return <BillingCycleReminderBanner />;
   }
 
   // Mostrar banner rojo SIEMPRE que haya facturas pendientes (desde el día de generación)
   // Ya no importa si está vencida o no, el banner rojo aparece inmediatamente
   if (pendingInvoices.length > 0) {
+    console.log('🔴 [PaymentReminderBanner] Mostrando BANNER ROJO - Hay facturas pendientes');
     const invoice = pendingInvoices[0];
     const daysUntilDue = invoicesService.getDaysUntilDue(invoice.dueDate);
     const isOverdue = daysUntilDue < 0;
@@ -126,6 +161,7 @@ const PaymentReminderBanner: React.FC = () => {
   }
 
   // Si no hay facturas pendientes, mostrar banner de pre-aviso
+  console.log('🔵 [PaymentReminderBanner] Mostrando BANNER AZUL - No hay facturas pendientes');
   return <BillingCycleReminderBanner />;
 };
 
