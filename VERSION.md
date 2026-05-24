@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 93.2.1
+## Versión Actual: 93.2.2
 **Fecha:** 2026-05-23
 **Tipo de Cambio:** PATCH
 
@@ -18,12 +18,11 @@
 
 ## Historial de Versiones
 
-### 93.2.1 - 2026-05-23 [PATCH]
+### 93.2.2 - 2026-05-23 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
 
-### 93.2.0 - 2026-05-23 [MINOR]
-- Frontend: 2 archivo(s) modificado(s)
-- Documentación: 2 archivo(s) modificado(s)
+### 93.2.1 - 2026-05-23 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
 
 ---
 
