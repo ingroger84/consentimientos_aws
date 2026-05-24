@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 93.2.0
+## Versión Actual: 93.2.1
 **Fecha:** 2026-05-23
-**Tipo de Cambio:** MINOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,15 +18,12 @@
 
 ## Historial de Versiones
 
+### 93.2.1 - 2026-05-23 [PATCH]
+- Documentación: 1 archivo(s) modificado(s)
+
 ### 93.2.0 - 2026-05-23 [MINOR]
 - Frontend: 2 archivo(s) modificado(s)
 - Documentación: 2 archivo(s) modificado(s)
-
-### 93.1.0 - 2026-05-23 [MINOR]
-- Backend: 13 archivo(s) modificado(s)
-- Frontend: 10 archivo(s) modificado(s)
-- Documentación: 44 archivo(s) modificado(s)
-- Scripts: 5 archivo(s) modificado(s)
 
 ---
 
