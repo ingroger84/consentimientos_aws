@@ -50,6 +50,20 @@ export class ConsentsService {
       // Si se proporciona un cliente existente, usarlo
       if (createConsentDto.existingClientId) {
         clientId = createConsentDto.existingClientId;
+        
+        // Si se proporciona una nueva foto, actualizar el cliente
+        if (createConsentDto.clientPhoto) {
+          try {
+            await this.clientsService.update(clientId, {
+              photoUrl: createConsentDto.clientPhoto,
+              photoCapturedAt: new Date().toISOString(),
+            }, tenantId);
+            console.log('Foto actualizada para cliente seleccionado:', clientId);
+          } catch (error) {
+            console.error('Error al actualizar foto del cliente:', error);
+          }
+        }
+        
         // Actualizar estadísticas del cliente
         await this.clientsService.incrementConsentsCount(clientId);
       } else {
@@ -64,6 +78,20 @@ export class ConsentsService {
         if (existingClient) {
           // Cliente existe, vincularlo
           clientId = existingClient.id;
+          
+          // Si se proporciona una nueva foto, actualizar el cliente
+          if (createConsentDto.clientPhoto) {
+            try {
+              await this.clientsService.update(clientId, {
+                photoUrl: createConsentDto.clientPhoto,
+                photoCapturedAt: new Date().toISOString(),
+              }, tenantId);
+              console.log('Foto actualizada para cliente existente:', clientId);
+            } catch (error) {
+              console.error('Error al actualizar foto del cliente:', error);
+            }
+          }
+          
           await this.clientsService.incrementConsentsCount(clientId);
         } else {
           // Cliente no existe, crearlo
@@ -74,6 +102,8 @@ export class ConsentsService {
               documentNumber: createConsentDto.clientId,
               email: createConsentDto.clientEmail,
               phone: createConsentDto.clientPhone,
+              photoUrl: createConsentDto.clientPhoto,
+              photoCapturedAt: createConsentDto.clientPhoto ? new Date().toISOString() : undefined,
             }, tenantId);
             clientId = newClient.id;
             await this.clientsService.incrementConsentsCount(clientId);

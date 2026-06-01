@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThanOrEqual } from 'typeorm';
 import { Tenant, TenantStatus } from '../tenants/entities/tenant.entity';
 import { Invoice, InvoiceStatus } from '../invoices/entities/invoice.entity';
+import { BillingHistory as BillingHistoryEntity } from './entities/billing-history.entity';
 import { InvoicesService } from '../invoices/invoices.service';
 import { MailService } from '../mail/mail.service';
 
@@ -13,6 +14,8 @@ export class BillingService {
     private tenantsRepository: Repository<Tenant>,
     @InjectRepository(Invoice)
     private invoicesRepository: Repository<Invoice>,
+    @InjectRepository(BillingHistoryEntity)
+    private billingHistoryRepository: Repository<BillingHistoryEntity>,
     private invoicesService: InvoicesService,
     private mailService: MailService,
   ) {}
@@ -367,28 +370,31 @@ export class BillingService {
   }
 
   async getHistory(tenantId?: string, limit: number = 50): Promise<BillingHistory[]> {
-    const query = this.invoicesRepository
-      .createQueryBuilder('invoice')
-      .leftJoin('invoice.tenant', 'tenant')
-      .addSelect(['tenant.id', 'tenant.name'])
-      .orderBy('invoice.createdAt', 'DESC')
+    const query = this.billingHistoryRepository
+      .createQueryBuilder('history')
+      .leftJoinAndSelect('history.tenant', 'tenant')
+      .orderBy('history.createdAt', 'DESC')
       .take(limit);
 
     if (tenantId) {
-      query.where('invoice.tenantId = :tenantId', { tenantId });
+      query.where('history.tenantId = :tenantId', { tenantId });
     }
 
-    const invoices = await query.getMany();
+    const historyEntities = await query.getMany();
 
-    return invoices.map(invoice => ({
-      id: invoice.id,
-      tenantName: invoice.tenant?.name || 'N/A',
-      invoiceNumber: invoice.invoiceNumber,
-      amount: invoice.total,
-      status: invoice.status,
-      dueDate: invoice.dueDate,
-      paidAt: invoice.paidAt,
-      createdAt: invoice.createdAt,
+    // Mapear las entidades al formato esperado por el frontend
+    return historyEntities.map(entity => ({
+      id: entity.id,
+      tenantId: entity.tenantId,
+      tenant: entity.tenant ? {
+        id: entity.tenant.id,
+        name: entity.tenant.name,
+      } : undefined,
+      action: entity.action,
+      description: entity.description,
+      metadata: entity.metadata,
+      performedBy: entity.performedBy,
+      createdAt: entity.createdAt,
     }));
   }
 
@@ -432,11 +438,14 @@ export class BillingService {
 
 export interface BillingHistory {
   id: string;
-  tenantName: string;
-  invoiceNumber: string;
-  amount: number;
-  status: InvoiceStatus;
-  dueDate: Date;
-  paidAt: Date | null;
+  tenantId: string;
+  tenant?: {
+    id: string;
+    name: string;
+  };
+  action: string;
+  description: string;
+  metadata?: Record<string, any>;
+  performedBy?: string;
   createdAt: Date;
 }

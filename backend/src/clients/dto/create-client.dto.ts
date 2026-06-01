@@ -63,4 +63,12 @@ export class CreateClientDto {
   @IsString()
   @MaxLength(500)
   notes?: string;
+
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+
+  @IsOptional()
+  @IsDateString()
+  photoCapturedAt?: string;
 }
