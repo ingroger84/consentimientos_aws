@@ -249,7 +249,7 @@ export default function CreateConsentPage() {
       clientId: formData.clientId,
       clientEmail: formData.clientEmail,
       clientPhone: formData.clientPhone,
-      clientPhoto: clientPhoto || undefined,
+      clientPhoto: clientPhoto || undefined, // ✅ INCLUIR FOTO
       serviceId: formData.serviceId,
       branchId: formData.branchId,
       documentType: clientDocumentType,
@@ -257,11 +257,12 @@ export default function CreateConsentPage() {
       answers,
     };
 
-    console.log('=== ENVIANDO CONSENTIMIENTO ===');
+    console.log('=== ENVIANDO CONSENTIMIENTO DESDE VISTA PREVIA ===');
     console.log('Datos completos:', {
       ...completeData,
       clientPhoto: clientPhoto ? `[FOTO: ${clientPhoto.substring(0, 50)}... (${clientPhoto.length} caracteres)]` : 'SIN FOTO'
     });
+    console.log('Estado clientPhoto:', clientPhoto ? `Presente (${clientPhoto.length} caracteres)` : 'NO PRESENTE');
     console.log('===============================');
     
     createMutation.mutate(completeData);
@@ -553,6 +554,7 @@ export default function CreateConsentPage() {
                           clientId: formData.clientId,
                           clientEmail: formData.clientEmail,
                           clientPhone: formData.clientPhone,
+                          clientPhoto: clientPhoto || undefined, // ✅ INCLUIR FOTO
                           serviceId: formData.serviceId,
                           branchId: formData.branchId,
                           // Nuevos campos para gestión de clientes
@@ -560,6 +562,14 @@ export default function CreateConsentPage() {
                           existingClientId: selectedClient?.id,
                           answers: [],
                         };
+                        
+                        console.log('=== ENVIANDO CONSENTIMIENTO SIN PREGUNTAS ===');
+                        console.log('Datos completos:', {
+                          ...completeData,
+                          clientPhoto: clientPhoto ? `[FOTO: ${clientPhoto.substring(0, 50)}... (${clientPhoto.length} caracteres)]` : 'SIN FOTO'
+                        });
+                        console.log('===============================');
+                        
                         createMutation.mutate(completeData);
                       }}
                       className="flex-1 btn btn-primary"

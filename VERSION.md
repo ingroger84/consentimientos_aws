@@ -1,6 +1,6 @@
 # Versión del Sistema
 
-## Versión Actual: 94.0.2
+## Versión Actual: 94.0.3
 **Fecha:** 2026-06-01
 **Tipo de Cambio:** PATCH
 
@@ -18,11 +18,11 @@
 
 ## Historial de Versiones
 
+### 94.0.3 - 2026-06-01 [PATCH]
+- Frontend: 3 archivo(s) modificado(s)
+
 ### 94.0.2 - 2026-06-01 [PATCH]
 - Documentación: 1 archivo(s) modificado(s)
-
-### 94.0.1 - 2026-06-01 [PATCH]
-- Documentación: 2 archivo(s) modificado(s)
 
 ---
 
