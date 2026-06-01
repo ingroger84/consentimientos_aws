@@ -1,8 +1,8 @@
 # Versión del Sistema
 
-## Versión Actual: 94.0.0
+## Versión Actual: 94.0.1
 **Fecha:** 2026-06-01
-**Tipo de Cambio:** MAJOR
+**Tipo de Cambio:** PATCH
 
 ---
 
@@ -18,17 +18,13 @@
 
 ## Historial de Versiones
 
+### 94.0.1 - 2026-06-01 [PATCH]
+- Documentación: 2 archivo(s) modificado(s)
+
 ### 94.0.0 - 2026-06-01 [MAJOR]
 - Backend: 5 archivo(s) modificado(s)
 - Frontend: 4 archivo(s) modificado(s)
 - Documentación: 5 archivo(s) modificado(s)
-
-### 93.2.4 - 2026-06-01 [PATCH]
-- **CRÍTICO:** Corrección completa de fotos de clientes
-- Backend: Fotos ahora se guardan para clientes NUEVOS y EXISTENTES
-- Frontend: Despliegue completo con versión sincronizada
-- Agregados campos photoUrl y photoCapturedAt al DTO de clientes
-- Limpieza de caché de Nginx y verificación post-despliegue
 
 ---
 
